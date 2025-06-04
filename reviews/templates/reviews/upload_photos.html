@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Subir fotos a {{ cafe.name }}</h1>
+
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+          {{ message }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Guardar fotos</button>
+  </form>
+
+  <p>
+    <a href="{% url 'cafe_detail' cafe.id %}">Volver al detalle de la cafetería</a>
+  </p>
+{% endblock %}

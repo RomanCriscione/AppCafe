@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Detalle de la cafetería</h1>
+  <h2>{{ cafe.name }}</h2>
+  <p><strong>Dirección:</strong> {{ cafe.address }}</p>
+  <p><strong>Teléfono:</strong> {{ cafe.phone }}</p>
+  <p>
+    <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}" target="_blank">
+      Ver en Google Maps
+    </a>
+  </p>
+
+  {% if average_rating %}
+    <p><strong>Calificación promedio:</strong> {{ average_rating|floatformat:1 }} / 5</p>
+  {% else %}
+    <p><strong>Calificación promedio:</strong> Sin reseñas todavía.</p>
+  {% endif %}
+
+  {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
+    <h3>Fotos del lugar:</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      {% if cafe.photo1 %}
+        <img src="{{ cafe.photo1.url }}" alt="Foto 1 de {{ cafe.name }}" style="width: 200px;">
+      {% endif %}
+      {% if cafe.photo2 %}
+        <img src="{{ cafe.photo2.url }}" alt="Foto 2 de {{ cafe.name }}" style="width: 200px;">
+      {% endif %}
+      {% if cafe.photo3 %}
+        <img src="{{ cafe.photo3.url }}" alt="Foto 3 de {{ cafe.name }}" style="width: 200px;">
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <h3>Reseñas:</h3>
+  <ul>
+    {% for review in reviews %}
+      <li>
+        <strong>{{ review.user.username }}</strong> ({{ review.created_at|date:"d M Y" }})<br>
+        Calificación: {{ review.rating }} / 5<br>
+        {{ review.comment }}
+      </li>
+    {% empty %}
+      <li>Aún no hay reseñas.</li>
+    {% endfor %}
+  </ul>
+
+  {% if user.is_authenticated %}
+    <h3>{% if existing_review %}Editar tu reseña{% else %}Dejá tu reseña{% endif %}</h3>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.comment.label_tag }}<br>
+      {{ form.comment }}<br><br>
+
+      {{ form.rating.label_tag }}<br>
+      {{ form.rating }}<br><br>
+
+      <button type="submit">
+        {% if existing_review %}Actualizar{% else %}Enviar{% endif %}
+      </button>
+    </form>
+  {% else %}
+    <h3>Dejá tu reseña</h3>
+    <p>
+      Para dejar una reseña necesitás
+      <a href="{% url 'account_login' %}?next={{ request.path }}">iniciar sesión</a>.
+    </p>
+  {% endif %}
+{% endblock %}
+
+

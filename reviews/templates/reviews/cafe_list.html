@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Cafeterías</h1>
+
+  <form method="get">
+    <label for="zona">Filtrar por zona:</label>
+    <select name="zona" onchange="this.form.submit()">
+      <option value="">Todas</option>
+      {% for z in zonas_disponibles %}
+        <option value="{{ z }}" {% if z == zona_seleccionada %}selected{% endif %}>{{ z }}</option>
+      {% endfor %}
+    </select>
+  </form>
+
+  <ul>
+    {% for cafe in cafes %}
+  <li>
+    <strong><a href="{% url 'cafe_detail' cafe.id %}">{{ cafe.name }}</a></strong><br>
+
+    {% if cafe.photo1 %}
+      <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" width="150"><br>
+    {% endif %}
+
+    Promedio: {{ cafe.average_rating }}<br>
+    Dirección: {{ cafe.address }}<br>
+    Teléfono: {{ cafe.phone }}<br>
+    <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}" target="_blank">
+      Ver en Google Maps
+    
+    {% empty %}
+      <li>No hay cafeterías registradas aún.</li>
+      </a>
+  </li>
+    {% endfor %}
+  </ul>
+{% endblock %}
+

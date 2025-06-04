@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}App Café{% endblock %}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a, nav ul li strong {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.8em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'review_list' %}">Inicio</a></li>
+                <li><a href="{% url 'cafe_list' %}">Cafés</a></li>
+
+                {% if user.is_authenticated %}
+                    <li><strong>Hola, {{ user.username }}!</strong></li>
+                    <li><a href="{% url 'account_logout' %}">Cerrar sesión</a></li>
+                {% else %}
+                    <li><a href="{% url 'account_login' %}">Iniciar sesión</a></li>
+                    <li><a href="{% url 'account_signup' %}">Registrarse</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 App Café - Desarrollado por Roma</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Últimas reseñas</h1>
+
+  {% for review in reviews %}
+    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 15px;">
+      {% if review.cafe.photo1 %}
+        <img src="{{ review.cafe.photo1.url }}" alt="Foto de {{ review.cafe.name }}" style="width: 100px; height: auto; float: left; margin-right: 10px;">
+      {% endif %}
+      
+      <strong>{{ review.user.first_name }} dijo sobre <a href="{% url 'cafe_detail' review.cafe.id %}">{{ review.cafe.name }}</a>:</strong>
+      <p>Calificación: {{ review.rating }}</p>
+      <p>{{ review.comment }}</p>
+      <p><em>{{ review.created_at|date:"d/m/Y H:i" }}</em></p>
+      <div style="clear: both;"></div>
+    </div>
+  {% empty %}
+    <p>No hay reseñas aún.</p>
+  {% endfor %}
+{% endblock %}
