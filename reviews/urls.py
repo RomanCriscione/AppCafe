@@ -10,4 +10,7 @@ urlpatterns = [
     path('cafes/<int:cafe_id>/', views.cafe_detail, name='cafe_detail'),
     path('cafes/<int:cafe_id>/fotos/', views.upload_photos, name='upload_photos'),
     path('cafes/nueva/', CreateCafeView.as_view(), name='create_cafe'),
+    path('perfil/', views.owner_dashboard, name='owner_dashboard'),
+    path('cafes/<int:cafe_id>/editar/', views.edit_cafe, name='edit_cafe'),
+    path('cafes/<int:cafe_id>/eliminar/', views.delete_cafe, name='delete_cafe'),
 ]

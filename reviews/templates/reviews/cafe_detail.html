@@ -3,16 +3,30 @@
 {% block content %}
   <h1>Detalle de la cafetería</h1>
   <h2>{{ cafe.name }}</h2>
-  <p><strong>Dirección:</strong> {{ cafe.address }}</p>
-  <p><strong>Teléfono:</strong> {{ cafe.phone }}</p>
+  📍 Dirección: {{ cafe.address }}, {{ cafe.location }}<br>
+  ☎ Teléfono: {{ cafe.phone }}<br>
   <p>
-    <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}" target="_blank">
-      Ver en Google Maps
+    <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
+      target="_blank"
+      style="display: inline-block; background-color: #4285F4; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-weight: bold;">
+      📍 Ver en Google Maps
     </a>
-  </p>
 
   {% if average_rating %}
-    <p><strong>Calificación promedio:</strong> {{ average_rating|floatformat:1 }} / 5</p>
+    <p><strong>Calificación promedio:</strong>
+      {% for i in "12345" %}
+        {% if average_rating|floatformat:1 >= forloop.counter %}
+          <span style="opacity: 1.0">☕</span>
+        {% elif average_rating|floatformat:1 >= forloop.counter0|add:0.25 and average_rating|floatformat:1 < forloop.counter %}
+          <span style="opacity: 0.5">☕</span>
+        {% elif average_rating|floatformat:1 >= forloop.counter0|add:0.1 and average_rating|floatformat:1 < forloop.counter0|add:0.25 %}
+          <span style="opacity: 0.2">☕</span>
+        {% else %}
+          <span style="opacity: 0.1">☕</span>
+        {% endif %}
+      {% endfor %}
+      ({{ average_rating|floatformat:1 }}/5)
+    </p>
   {% else %}
     <p><strong>Calificación promedio:</strong> Sin reseñas todavía.</p>
   {% endif %}
@@ -37,7 +51,18 @@
     {% for review in reviews %}
       <li>
         <strong>{{ review.user.username }}</strong> ({{ review.created_at|date:"d M Y" }})<br>
-        Calificación: {{ review.rating }} / 5<br>
+        {% for i in "12345" %}
+          {% if review.rating >= forloop.counter %}
+            <span style="opacity: 1.0">☕</span>
+          {% elif review.rating >= forloop.counter0|add:0.25 and review.rating < forloop.counter %}
+            <span style="opacity: 0.5">☕</span>
+          {% elif review.rating >= forloop.counter0|add:0.1 and review.rating < forloop.counter0|add:0.25 %}
+            <span style="opacity: 0.2">☕</span>
+          {% else %}
+            <span style="opacity: 0.1">☕</span>
+          {% endif %}
+        {% endfor %}
+        <br>
         {{ review.comment }}
       </li>
     {% empty %}
@@ -47,6 +72,16 @@
 
   {% if user.is_authenticated %}
     <h3>{% if existing_review %}Editar tu reseña{% else %}Dejá tu reseña{% endif %}</h3>
+
+    {% if form.errors %}
+      <ul style="color: red;">
+        {% for field, errors in form.errors.items %}
+          {% for error in errors %}
+            <li>{{ field }}: {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    {% endif %}
 
     <form method="post">
       {% csrf_token %}
@@ -68,5 +103,3 @@
     </p>
   {% endif %}
 {% endblock %}
-
-

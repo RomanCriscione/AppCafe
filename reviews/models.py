@@ -13,6 +13,12 @@ class Cafe(models.Model):
     photo2 = models.ImageField(upload_to='cafes/', blank=True, null=True)
     photo3 = models.ImageField(upload_to='cafes/', blank=True, null=True)
 
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='cafes'
+    )
+
     def average_rating(self):
         result = self.reviews.aggregate(Avg('rating')) 
         return round(result['rating__avg'], 1) if result['rating__avg'] else 'Sin calificación'

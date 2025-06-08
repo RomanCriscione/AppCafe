@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Panel de dueño de cafeterías</h1>
+
+  <p><a href="{% url 'create_cafe' %}">➕ Agregar nueva cafetería</a></p>
+
+  {% if cafes %}
+    <ul>
+      {% for cafe in cafes %}
+        <li style="margin-bottom: 1.5rem;">
+          <strong>{{ cafe.name }}</strong> ({{ cafe.location }})<br>
+          📍 {{ cafe.address }}<br>
+          ⭐ Promedio: {{ cafe.average_rating|default:"Sin puntuar" }}<br>
+          🧾 Reseñas: {{ cafe.total_reviews }}<br>
+
+          <a href="{% url 'cafe_detail' cafe.id %}">🔍 Ver detalles</a> |
+          <a href="{% url 'edit_cafe' cafe.id %}">✏️ Editar</a> |
+          <form action="{% url 'delete_cafe' cafe.id %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" onclick="return confirm('¿Estás seguro de eliminar esta cafetería?')" style="background:none;border:none;color:blue;cursor:pointer;">🗑️ Eliminar</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No tenés cafeterías registradas todavía.</p>
+  {% endif %}
+{% endblock %}

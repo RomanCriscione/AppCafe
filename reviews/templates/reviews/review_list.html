@@ -2,6 +2,14 @@
 
 {% block content %}
   <h1>Últimas reseñas</h1>
+  {% if user.is_authenticated and user.is_owner %}
+    <p style="margin-bottom: 1rem;">
+      <a href="{% url 'create_cafe' %}" style="padding: 8px 16px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+        ➕ Agregar nueva cafetería
+      </a>
+    </p>
+  {% endif %}
+
 
   {% for review in reviews %}
     <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 15px;">
