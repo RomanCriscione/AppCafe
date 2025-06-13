@@ -20,3 +20,10 @@ class CustomSignupForm(SignupForm):
         user.first_name = self.cleaned_data['first_name']
         user.save()
         return user
+
+# Formulario para modificar el avatar del usuario
+
+class CustomUserChangeForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['avatar']

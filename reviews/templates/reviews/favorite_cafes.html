@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <h1>❤️ Mis Cafeterías Favoritas</h1>
+
+    {% if cafes %}
+        <ul class="cafe-list">
+            {% for cafe in cafes %}
+                <li class="cafe-item">
+                <strong>{{ cafe.name }}</strong> - {{ cafe.location }}<br>
+                📍 {{ cafe.address }}<br>
+                ☕ {{ cafe.average_rating|floatformat:1 }}<br>
+                <a href="{% url 'cafe_detail' cafe.id %}" class="btn">Ver detalles</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No marcaste ninguna cafetería como favorita todavía.</p>
+    {% endif %}
+{% endblock %}

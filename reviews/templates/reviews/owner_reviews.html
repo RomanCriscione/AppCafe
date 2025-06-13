@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h1>Reseñas de tus cafeterías</h1>
+
+{% if reseñas_por_cafe %}
+    {% for cafe, data in reseñas_por_cafe.items %}
+        <div class="cafe-section">
+            <div class="cafe-header">
+                {% if cafe.photo1 %}
+                    <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="cafe-thumb">
+                        {% endif %}
+
+                <div>
+                    <h2>{{ cafe.name }} <span class="location">({{ cafe.location }})</span></h2>
+                        <p class="meta-info">
+                            🧾 {{ data.reviews|length }} reseña{{ data.reviews|length|pluralize }}
+                            |
+                            ☕ {% if data.average_rating %}{{ data.average_rating|floatformat:1 }}{% else %}Sin calificación{% endif %}
+                            |
+                        <a href="{% url 'cafe_detail' cafe.id %}" class="public-link">🔎 Ver vista pública</a>
+                        </p>
+                </div>
+            </div>
+
+                <ul class="review-list">
+                    {% for review in data.reviews %}
+                        <li>
+                            <strong>{{ review.user.username }}</strong>
+                            <span class="review-date">({{ review.created_at|date:"d M Y" }})</span><br>
+                            ☕ {{ review.rating|floatformat:1 }}<br>
+                            <p>{{ review.comment }}</p>
+
+                            {% if review.owner_reply %}
+                                <p><strong>☕ Respuesta de {{ cafe.name }}:</strong> {{ review.owner_reply }}</p>
+                                <button onclick="toggleReplyForm('{{ review.id }}')" type="button" class="btn">✏️ Editar respuesta</button>
+                            {% else %}
+                                <button onclick="toggleReplyForm('{{ review.id }}')" type="button" class="btn">💬 Responder</button>
+                            {% endif %}
+
+                            <form method="post" action="{% url 'edit_owner_reply' review.id %}" id="reply-form-{{ review.id }}" style="display: none; margin-top: 0.5rem;">
+                                {% csrf_token %}
+                                <textarea name="reply" rows="2" style="width: 100%;">{{ review.owner_reply }}</textarea><br>
+                                <button type="submit" class="btn">Guardar respuesta</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+                {% endfor %}
+        {% else %}
+            <p>No hay reseñas todavía en tus cafeterías.</p>
+        {% endif %}
+
+    <script>
+        function toggleReplyForm(id) {
+            const form = document.getElementById('reply-form-' + id);
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
+
+<style>
+    .cafe-section {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background-color: #f5f5f5;
+        border-radius: 6px;
+    }
+
+    .cafe-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .cafe-thumb {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .location {
+        font-weight: normal;
+        color: #777;
+        font-size: 0.9em;
+    }
+
+    .meta-info {
+        font-size: 0.9em;
+        color: #555;
+        margin-top: 0.3rem;
+    }
+
+    .public-link {
+        color: #3f51b5;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .public-link:hover {
+        text-decoration: underline;
+    }
+
+    .review-list {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .review-list li {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background-color: #fff;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+
+    .review-date {
+        color: #888;
+        font-size: 0.9em;
+    }
+
+    .btn {
+        padding: 6px 12px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 0.5rem;
+    }
+
+    .btn:hover {
+        background-color: #388e3c;
+    }
+
+    @media (max-width: 600px) {
+        .cafe-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .cafe-thumb {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,47 +1,51 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block content %}
-  <h2>Dejar una reseña</h2>
+  <h2>Dejá tu reseña</h2>
 
   <form method="post">
     {% csrf_token %}
     {{ form.comment.label_tag }}<br>
     {{ form.comment }}<br><br>
 
-    <label for="rating">Calificación:</label>
-    <div class="star-rating">
-      {% for i in "12345" %}
+    {{ form.rating.label_tag }}<br>
+    <div class="rating-input" title="Seleccioná una puntuación del 1 al 5">
+      {% for i in "54321" %}
         <input type="radio" name="rating" value="{{ i }}" id="rating{{ i }}" {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
         <label for="rating{{ i }}">☕</label>
       {% endfor %}
     </div>
 
-    <br><br>
+    <br>
     <button type="submit">Enviar</button>
   </form>
 
   <p><a href="{% url 'review_list' %}">Volver al listado</a></p>
 
   <style>
-    .star-rating {
-      direction: rtl;
-      font-size: 2rem;
+    .rating-input {
       display: flex;
-      gap: 0.2rem;
+      flex-direction: row-reverse;
+      justify-content: flex-start;
+      gap: 0.3rem;
+      font-size: 2rem;
     }
-    .star-rating input[type="radio"] {
+
+    .rating-input input[type="radio"] {
       display: none;
     }
-    .star-rating label {
-      cursor: pointer;
+
+    .rating-input label {
       color: #ccc;
+      cursor: pointer;
       transition: color 0.2s;
     }
-    .star-rating input[type="radio"]:checked ~ label {
+
+    .rating-input input[type="radio"]:checked ~ label,
+    .rating-input label:hover,
+    .rating-input label:hover ~ label {
       color: #c47f00;
-    }
-    .star-rating label:hover,
-    .star-rating label:hover ~ label {
-      color: #ff9800;
     }
   </style>
 {% endblock %}

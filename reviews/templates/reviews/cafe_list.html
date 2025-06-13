@@ -1,19 +1,18 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
   <h1>Cafeterías</h1>
 
   {% if user.is_authenticated and user.is_owner %}
     <p style="margin-bottom: 1rem;">
-      <a href="{% url 'create_cafe' %}" style="padding: 8px 16px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
-        ➕ Agregar nueva cafetería
-      </a>
+      <a href="{% url 'create_cafe' %}" class="btn-agregar">➕ Agregar nueva cafetería</a>
     </p>
   {% endif %}
 
-  <form method="get" style="margin-bottom: 1rem;">
+  <form method="get" class="filtro-form">
     <label for="zona">Filtrar por zona:</label>
-    <select name="zona">
+    <select name="zona" id="zona">
       <option value="">Todas</option>
       {% for z in zonas_disponibles %}
         <option value="{{ z }}" {% if z == zona_seleccionada %}selected{% endif %}>{{ z }}</option>
@@ -21,7 +20,7 @@
     </select>
 
     <label for="orden">Ordenar por:</label>
-    <select name="orden">
+    <select name="orden" id="orden">
       <option value="">Nombre</option>
       <option value="rating" {% if orden_actual == 'rating' %}selected{% endif %}>Puntuación</option>
       <option value="reviews" {% if orden_actual == 'reviews' %}selected{% endif %}>Cantidad de reseñas</option>
@@ -30,47 +29,113 @@
     <button type="submit">Aplicar</button>
   </form>
 
-  <ul>
-    {% for cafe in cafes %}
-      <li>
-        <strong><a href="{% url 'cafe_detail' cafe.id %}">{{ cafe.name }}</a></strong><br>
+  <ul class="cafe-list">
+  {% for cafe in cafes %}
+    <li class="cafe-item">
+      <strong>
+        <a href="{% url 'cafe_detail' cafe.id %}">{{ cafe.name }}</a>
 
-        {% if cafe.photo1 %}
-          <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" width="150"><br>
+        {% if user.is_authenticated %}
+          <form method="post" action="{% url 'toggle_favorite' cafe.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="fav-btn">
+              {% if user in cafe.favorites.all %}
+                ❤️
+              {% else %}
+                🤍
+              {% endif %}
+            </button>
+          </form>
         {% endif %}
+      </strong><br>
 
-        {% if cafe.average_rating %}
-          <p>
-            ⭐ Promedio: {{ cafe.average_rating|floatformat:1 }}<br>
-            <span style="font-size: 1.2rem;">
-              {% with cafe.average_rating as rating %}
-                {% for i in "12345" %}
-                  {% if forloop.counter <= rating %}
-                    ☕
-                  {% elif forloop.counter == rating|add:"1"|floatformat:0 %}
-                    <span style="opacity: 0.5;">☕</span>
-                  {% else %}
-                    <span style="opacity: 0.2;">☕</span>
-                  {% endif %}
-                {% endfor %}
-              {% endwith %}
-            </span>
-          </p>
-        {% else %}
-          ⭐ Promedio: Sin puntuar<br>
-        {% endif %}
+      {% if cafe.photo1 %}
+        <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="miniatura-cafe"><br>
+      {% endif %}
 
-        🧾 Reseñas: {{ cafe.total_reviews }}<br>
-        📍 Dirección: {{ cafe.address }}, {{ cafe.location }}<br>
-        ☎ Teléfono: {{ cafe.phone }}<br>
-        <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
-           target="_blank"
-           style="display: inline-block; background-color: #4285F4; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-weight: bold;">
-           📍 Ver en Google Maps
-        </a>
-      </li>
-    {% empty %}
-      <li>No hay cafeterías registradas aún.</li>
-    {% endfor %}
-  </ul>
+      {% if cafe.average_rating %}
+        <p>☕ {{ cafe.average_rating|floatformat:1 }}</p>
+      {% else %}
+        <p>Sin puntuar</p>
+      {% endif %}
+
+      🧾 Reseñas: {{ cafe.total_reviews }}<br>
+      📍 Dirección: {{ cafe.address }}, {{ cafe.location }}<br>
+      ☎ Teléfono: {{ cafe.phone }}<br>
+      <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
+          target="_blank" class="btn-maps">
+          📍 Ver en Google Maps
+      </a>
+    </li>
+  {% empty %}
+    <li>No hay cafeterías registradas aún.</li>
+  {% endfor %}
+</ul>
+
+<style>
+  .btn-agregar {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+  }
+
+  .filtro-form {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .cafe-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .cafe-item {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 1rem;
+  }
+
+  .btn-maps {
+    display: inline-block;
+    background-color: #4285F4;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .miniatura-cafe {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    border-radius: 6px;
+  }
+
+  .fav-btn {
+    font-size: 1.2rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 5px;
+  }
+
+  @media (max-width: 600px) {
+    .filtro-form {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .cafe-item {
+      text-align: left;
+    }
+  }
+</style>
+
 {% endblock %}

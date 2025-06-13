@@ -1,9 +1,42 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block content %}
-  <h1>Editar {{ cafe.name }}</h1>
+  <h1>Editar cafetería: {{ cafe.name }}</h1>
+
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
+
+    <div>
+      {% if cafe.photo1 %}
+        <p>Foto 1 actual:</p>
+        <img src="{{ cafe.photo1.url }}" alt="Foto 1" class="miniatura-cafe">
+      {% endif %}
+    </div>
+
+    <div>
+      {% if cafe.photo2 %}
+        <p>Foto 2 actual:</p>
+        <img src="{{ cafe.photo2.url }}" alt="Foto 2" class="miniatura-cafe">
+      {% endif %}
+    </div>
+
+    <div>
+      {% if cafe.photo3 %}
+        <p>Foto 3 actual:</p>
+        <img src="{{ cafe.photo3.url }}" alt="Foto 3" class="miniatura-cafe">
+      {% endif %}
+    </div>
+
     <button type="submit">Guardar cambios</button>
   </form>
 {% endblock %}

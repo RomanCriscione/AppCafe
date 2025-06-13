@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
   <h1>Subir fotos a {{ cafe.name }}</h1>
@@ -13,14 +14,91 @@
     </ul>
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data" class="upload-form">
     {% csrf_token %}
-    {{ form.as_p }}
+    
+    <label for="id_photo1">Foto principal:</label><br>
+    {{ form.photo1 }}<br>
+    {% if cafe.photo1 %}
+      <img src="{{ cafe.photo1.url }}" alt="Foto 1" class="miniatura-cafe">
+    {% endif %}<br><br>
+
+    <label for="id_photo2">Foto adicional 1:</label><br>
+    {{ form.photo2 }}<br>
+    {% if cafe.photo2 %}
+      <img src="{{ cafe.photo2.url }}" alt="Foto 2" class="miniatura-cafe">
+    {% endif %}<br><br>
+
+    <label for="id_photo3">Foto adicional 2:</label><br>
+    {{ form.photo3 }}<br>
+    {% if cafe.photo3 %}
+      <img src="{{ cafe.photo3.url }}" alt="Foto 3" class="miniatura-cafe">
+    {% endif %}<br><br>
 
     <button type="submit">Guardar fotos</button>
   </form>
 
   <p>
-    <a href="{% url 'cafe_detail' cafe.id %}">Volver al detalle de la cafetería</a>
+    <a href="{% url 'cafe_detail' cafe.id %}" class="back-link">← Volver al detalle de la cafetería</a>
   </p>
+
+  <style>
+    .upload-form {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .upload-form label {
+      font-weight: bold;
+    }
+
+    .upload-form input[type="file"] {
+      margin-top: 5px;
+    }
+
+    .upload-form button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .miniatura-cafe {
+      width: 120px;
+      height: auto;
+      border-radius: 6px;
+      margin: 6px 0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 15px;
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .upload-form {
+        padding: 15px;
+      }
+
+      .miniatura-cafe {
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+  </style>
 {% endblock %}

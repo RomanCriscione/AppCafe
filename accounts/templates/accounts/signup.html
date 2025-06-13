@@ -1,11 +1,7 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Registrarse | Café Reviews</title>
-</head>
-<body>
+
+{% block content %}
     <h1>Crear cuenta</h1>
 
     <form method="POST" action="{% url 'account_signup' %}">
@@ -15,9 +11,7 @@
         <button type="submit">Registrarse</button>
     </form>
 
-    <p>
-        ¿Ya tenés cuenta?
+    <p>¿Ya tenés cuenta?
         <a href="{% url 'account_login' %}">Iniciá sesión</a>
     </p>
-</body>
-</html>
+{% endblock %}

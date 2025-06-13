@@ -1,0 +1,103 @@
+/* General */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 0;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+    body {
+        margin: 10px;
+    }
+
+    .cafe-list, .review-card, .cafe-photos {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .cafe-photos img {
+        width: 100% !important;
+    }
+
+    .rating-input {
+    font-size: 1.5rem;
+    gap: 0.2rem;
+    }
+}
+
+.cafe-photos {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.review-card {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+}
+
+/* Botones */
+button, .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+button:hover, .btn:hover {
+    background-color: #45a049;
+}
+
+.select-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+.fav-btn {
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 8px;
+}
+
+
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .miniatura-cafe {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+    }
+
+    main {
+        padding: 10px;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .rating-input {
+        font-size: 1.5rem;
+    }
+}

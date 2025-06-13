@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <h1>Contacto</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <label for="name">Nombre:</label><br>
+        <input type="text" name="name" required><br><br>
+
+        <label for="email">Email:</label><br>
+        <input type="email" name="email" required><br><br>
+
+        <label for="message">Mensaje:</label><br>
+        <textarea name="message" rows="5" required></textarea><br><br>
+
+        <button type="submit">Enviar</button>
+    </form>
+
+    <h3>También podés escribirnos a:</h3>
+    <p>📧 contacto@cafesba.com</p>
+    <p>📱 Instagram: <a href="https://instagram.com/cafes_ba">@cafes_ba</a></p>
+
+{% if success %}
+    <p style="color:green;">Gracias por tu mensaje, ¡te responderemos pronto!</p>
+{% endif %}
+{% endblock %}

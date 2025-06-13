@@ -1,29 +1,138 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
   <h1>Panel de dueño de cafeterías</h1>
 
-  <p><a href="{% url 'create_cafe' %}">➕ Agregar nueva cafetería</a></p>
+  <p><a href="{% url 'create_cafe' %}" class="btn-add-cafe">➕ Agregar nueva cafetería</a></p>
+  <p><a href="{% url 'owner_reviews' %}" class="btn-view-reviews">📋 Ver todas las reseñas</a></p>
 
   {% if cafes %}
-    <ul>
+    <ul class="cafe-list">
       {% for cafe in cafes %}
-        <li style="margin-bottom: 1.5rem;">
-          <strong>{{ cafe.name }}</strong> ({{ cafe.location }})<br>
-          📍 {{ cafe.address }}<br>
-          ⭐ Promedio: {{ cafe.average_rating|default:"Sin puntuar" }}<br>
-          🧾 Reseñas: {{ cafe.total_reviews }}<br>
+        <li class="cafe-item">
+          <div class="cafe-info">
+            <strong>{{ cafe.name }}</strong> ({{ cafe.location }})<br>
+            📍 {{ cafe.address }}<br>
 
-          <a href="{% url 'cafe_detail' cafe.id %}">🔍 Ver detalles</a> |
-          <a href="{% url 'edit_cafe' cafe.id %}">✏️ Editar</a> |
-          <form action="{% url 'delete_cafe' cafe.id %}" method="post" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" onclick="return confirm('¿Estás seguro de eliminar esta cafetería?')" style="background:none;border:none;color:blue;cursor:pointer;">🗑️ Eliminar</button>
-          </form>
+            {% if cafe.photo1 %}
+              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="miniatura-cafe">
+            {% endif %}
+
+            {% if cafe.average_rating %}
+              ☕ {{ cafe.average_rating|floatformat:1 }}
+            {% else %}
+              ☕ Sin puntuar
+            {% endif %}<br>
+
+            🧾 Reseñas: {{ cafe.total_reviews }}<br>
+
+            <div class="cafe-actions">
+              <a href="{% url 'cafe_detail' cafe.id %}" class="action-link">🔍 Ver detalles</a>
+              <a href="{% url 'edit_cafe' cafe.id %}" class="action-link">✏️ Editar</a>
+              <form action="{% url 'delete_cafe' cafe.id %}" method="post" class="delete-form">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('¿Estás seguro de eliminar esta cafetería?')" class="delete-button">🗑️ Eliminar</button>
+              </form>
+            </div>
+          </div>
         </li>
       {% endfor %}
     </ul>
   {% else %}
     <p>No tenés cafeterías registradas todavía.</p>
   {% endif %}
+
+  <style>
+    .btn-add-cafe {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+
+    .btn-view-reviews {
+      background-color: #007bff;
+      color: white;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+
+    .btn-view-reviews:hover {
+      background-color: #0056b3;
+    }
+
+    .cafe-list {
+      padding: 0;
+      list-style: none;
+    }
+
+    .cafe-item {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 1rem;
+      background-color: #f9f9f9;
+    }
+
+    .miniatura-cafe {
+      width: 120px;
+      height: auto;
+      border-radius: 6px;
+      margin: 6px 0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .cafe-actions {
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .action-link {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .action-link:hover {
+      text-decoration: underline;
+    }
+
+    .delete-form {
+      display: inline;
+    }
+
+    .delete-button {
+      background: none;
+      border: none;
+      color: red;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      .cafe-item {
+        font-size: 0.95em;
+      }
+
+      .miniatura-cafe {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .cafe-actions {
+        flex-direction: column;
+        gap: 5px;
+      }
+    }
+  </style>
+
 {% endblock %}

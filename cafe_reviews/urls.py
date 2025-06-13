@@ -6,17 +6,19 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # Django Allauth
+    # Login, logout, register (Django Allauth)
     path('accounts/', include('allauth.urls')),
 
-    # App core
+    # Custom user actions (registro, editar avatar)
+    path('users/', include('accounts.urls')),
+
+    # Core (inicio, contacto, about)
     path('', include('core.urls')),
 
-    # App reviews
+    # Cafeterías y reseñas
     path('reviews/', include('reviews.urls')),
 ]
 
-# Para servir archivos estáticos y multimedia en desarrollo
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

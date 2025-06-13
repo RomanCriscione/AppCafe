@@ -1,69 +1,89 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-  <h1>Detalle de la cafetería</h1>
-  <h2>{{ cafe.name }}</h2>
-  📍 Dirección: {{ cafe.address }}, {{ cafe.location }}<br>
-  ☎ Teléfono: {{ cafe.phone }}<br>
+  <h1>{{ cafe.name }}</h1>
+
   <p>
+    <strong>📍 Dirección:</strong> {{ cafe.address }}, {{ cafe.location }}<br>
+    <strong>☎ Teléfono:</strong> {{ cafe.phone }}<br>
     <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
       target="_blank"
-      style="display: inline-block; background-color: #4285F4; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-weight: bold;">
+      class="google-maps-link">
       📍 Ver en Google Maps
     </a>
+  </p>
 
   {% if average_rating %}
-    <p><strong>Calificación promedio:</strong>
-      {% for i in "12345" %}
-        {% if average_rating|floatformat:1 >= forloop.counter %}
-          <span style="opacity: 1.0">☕</span>
-        {% elif average_rating|floatformat:1 >= forloop.counter0|add:0.25 and average_rating|floatformat:1 < forloop.counter %}
-          <span style="opacity: 0.5">☕</span>
-        {% elif average_rating|floatformat:1 >= forloop.counter0|add:0.1 and average_rating|floatformat:1 < forloop.counter0|add:0.25 %}
-          <span style="opacity: 0.2">☕</span>
-        {% else %}
-          <span style="opacity: 0.1">☕</span>
-        {% endif %}
-      {% endfor %}
-      ({{ average_rating|floatformat:1 }}/5)
-    </p>
+    <p><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
   {% else %}
     <p><strong>Calificación promedio:</strong> Sin reseñas todavía.</p>
   {% endif %}
 
+  {% if user.is_authenticated %}
+    <form method="post" action="{% url 'toggle_favorite' cafe.id %}">
+      {% csrf_token %}
+      <button type="submit" class="btn">
+        {% if user in cafe.favorites.all %}
+          💔 Quitar de favoritos
+        {% else %}
+          ❤️ Agregar a favoritos
+        {% endif %}
+      </button>
+    </form>
+  {% endif %}
+
   {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
     <h3>Fotos del lugar:</h3>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <div class="cafe-photos">
       {% if cafe.photo1 %}
-        <img src="{{ cafe.photo1.url }}" alt="Foto 1 de {{ cafe.name }}" style="width: 200px;">
+        <img src="{{ cafe.photo1.url }}" alt="Foto 1 de {{ cafe.name }}">
       {% endif %}
       {% if cafe.photo2 %}
-        <img src="{{ cafe.photo2.url }}" alt="Foto 2 de {{ cafe.name }}" style="width: 200px;">
+        <img src="{{ cafe.photo2.url }}" alt="Foto 2 de {{ cafe.name }}">
       {% endif %}
       {% if cafe.photo3 %}
-        <img src="{{ cafe.photo3.url }}" alt="Foto 3 de {{ cafe.name }}" style="width: 200px;">
+        <img src="{{ cafe.photo3.url }}" alt="Foto 3 de {{ cafe.name }}">
       {% endif %}
     </div>
   {% endif %}
 
   <h3>Reseñas:</h3>
-  <ul>
+  <ul class="review-list">
     {% for review in reviews %}
       <li>
-        <strong>{{ review.user.username }}</strong> ({{ review.created_at|date:"d M Y" }})<br>
-        {% for i in "12345" %}
-          {% if review.rating >= forloop.counter %}
-            <span style="opacity: 1.0">☕</span>
-          {% elif review.rating >= forloop.counter0|add:0.25 and review.rating < forloop.counter %}
-            <span style="opacity: 0.5">☕</span>
-          {% elif review.rating >= forloop.counter0|add:0.1 and review.rating < forloop.counter0|add:0.25 %}
-            <span style="opacity: 0.2">☕</span>
-          {% else %}
-            <span style="opacity: 0.1">☕</span>
-          {% endif %}
-        {% endfor %}
-        <br>
-        {{ review.comment }}
+        <strong>{{ review.user.username }}</strong>
+        <span class="review-date">({{ review.created_at|date:"d M Y" }})</span><br>
+        ☕ {{ review.rating|floatformat:1 }}
+        <p>{{ review.comment }}</p>
+
+        {% if user.is_authenticated and user == cafe.owner %}
+          {% if review.owner_reply %}
+            <p style="margin-top: 0.5rem; color: #444;">
+              <strong>Respuesta de {{ cafe.name }}:</strong><br>
+              {{ review.owner_reply }}
+            </p>
+            <button onclick="toggleReplyForm('{{ review.id }}')" type="button">✏️ Editar respuesta</button>
+            <form method="post" action="{% url 'reply_review' review.id %}" id="reply-form-{{ review.id }}" style="display: none; margin-top: 1rem;">
+            {% csrf_token %}
+            <textarea name="reply" rows="2" style="width: 100%;">{{ review.owner_reply }}</textarea><br>
+            <button type="submit">Guardar respuesta</button>
+          </form>
+        {% else %}
+          <button onclick="toggleReplyForm('{{ review.id }}')" type="button">💬 Responder</button>
+          <form method="post" action="{% url 'reply_review' review.id %}" id="reply-form-{{ review.id }}" style="display: none; margin-top: 1rem;">
+            {% csrf_token %}
+            <textarea name="reply" rows="2" style="width: 100%;"></textarea><br>
+            <button type="submit">Guardar respuesta</button>
+          </form>
+        {% endif %}
+      {% elif review.owner_reply %}
+        <p style="margin-top: 0.5rem; color: #444;">
+          <strong>Respuesta de {{ cafe.name }}:</strong><br>
+          {{ review.owner_reply }}
+        </p>
+      {% endif %}
+
       </li>
     {% empty %}
       <li>Aún no hay reseñas.</li>
@@ -74,7 +94,7 @@
     <h3>{% if existing_review %}Editar tu reseña{% else %}Dejá tu reseña{% endif %}</h3>
 
     {% if form.errors %}
-      <ul style="color: red;">
+      <ul class="form-errors">
         {% for field, errors in form.errors.items %}
           {% for error in errors %}
             <li>{{ field }}: {{ error }}</li>
@@ -88,8 +108,14 @@
       {{ form.comment.label_tag }}<br>
       {{ form.comment }}<br><br>
 
-      {{ form.rating.label_tag }}<br>
-      {{ form.rating }}<br><br>
+      <label for="id_rating">☕ Calificación:</label><br>
+      <div class="rating-widget">
+        {% for i in "54321" %}
+          <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
+          <label for="star{{ i }}">☕</label>
+        {% endfor %}
+      </div>
+
 
       <button type="submit">
         {% if existing_review %}Actualizar{% else %}Enviar{% endif %}
@@ -102,4 +128,107 @@
       <a href="{% url 'account_login' %}?next={{ request.path }}">iniciar sesión</a>.
     </p>
   {% endif %}
+
+  <style>
+    .google-maps-link {
+      display: inline-block;
+      background-color: #4285F4;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .cafe-photos {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .cafe-photos img {
+      width: 100%;
+      max-width: 200px;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    .review-list {
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .review-list li {
+      margin-bottom: 1rem;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+    }
+
+    .review-date {
+      color: #888;
+      font-size: 0.9em;
+    }
+
+    .form-errors {
+      color: red;
+      list-style: none;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      background-color: #ff4081;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+
+    .btn:hover {
+      background-color: #e91e63;
+    }
+
+    .rating-widget {
+  direction: rtl;
+  font-size: 1.5rem;
+  display: inline-flex;
+  gap: 0.2rem;
+}
+
+.rating-widget input[type="radio"] {
+  display: none;
+}
+
+.rating-widget label {
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.rating-widget input[type="radio"]:checked ~ label,
+.rating-widget label:hover,
+.rating-widget label:hover ~ label {
+  opacity: 1;
+}
+
+    @media (max-width: 600px) {
+      .cafe-photos {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .review-list li {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+
+<script>
+  function toggleReplyForm(id) {
+    const form = document.getElementById('reply-form-' + id);
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  }
+</script>
+
 {% endblock %}
