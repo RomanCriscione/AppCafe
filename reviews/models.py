@@ -3,6 +3,15 @@ from django.db import models
 from django.db.models import Avg
 from django.contrib.auth import get_user_model
 User = get_user_model()
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Cafe(models.Model):
@@ -13,19 +22,57 @@ class Cafe(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     google_maps_url = models.URLField(blank=True, null=True)
     photo1 = models.ImageField(upload_to='cafes/', blank=True, null=True)
+    photo1_title = models.CharField(max_length=200, blank=True, null=True)
     photo2 = models.ImageField(upload_to='cafes/', blank=True, null=True)
+    photo2_title = models.CharField(max_length=200, blank=True, null=True)
     photo3 = models.ImageField(upload_to='cafes/', blank=True, null=True)
+    photo3_title = models.CharField(max_length=200, blank=True, null=True)
     is_vegan_friendly = models.BooleanField(default=False)
     is_pet_friendly = models.BooleanField(default=False)
     has_wifi = models.BooleanField(default=False)
     has_outdoor_seating = models.BooleanField(default=False)
     favorites = models.ManyToManyField(User, related_name='favorite_cafes', blank=True)
+    tags = models.ManyToManyField(Tag, related_name='cafes', blank=True)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+
+
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='cafes'
     )
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        def procesar_imagen(campo):
+            img_field = getattr(self, campo)
+            if img_field:
+                try:
+                    img = Image.open(img_field)
+                    if img.mode in ("RGBA", "P"):
+                        img = img.convert("RGB")
+
+                    max_width = 1000
+                    if img.width > max_width:
+                        ratio = max_width / float(img.width)
+                        height = int(float(img.height) * ratio)
+                        img = img.resize((max_width, height), Image.LANCZOS)
+
+                    buffer = BytesIO()
+                    img.save(buffer, format='JPEG', quality=70, optimize=True)
+                    file_object = ContentFile(buffer.getvalue())
+                    img_field.save(img_field.name, file_object, save=False)
+                except Exception as e:
+                    print(f"⚠️ Error procesando imagen '{campo}': {e}")
+
+        for campo in ['photo1', 'photo2', 'photo3']:
+            procesar_imagen(campo)
+
+        super().save(update_fields=['photo1', 'photo2', 'photo3'])
+
+    
 
     def average_rating(self):
         result = self.reviews.aggregate(Avg('rating')) 

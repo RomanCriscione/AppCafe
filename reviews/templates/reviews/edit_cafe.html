@@ -16,27 +16,75 @@
     {% csrf_token %}
     {{ form.as_p }}
 
-    <div>
-      {% if cafe.photo1 %}
-        <p>Foto 1 actual:</p>
-        <img src="{{ cafe.photo1.url }}" alt="Foto 1" class="miniatura-cafe">
-      {% endif %}
-    </div>
+    {% if cafe.photo1 %}
+      <p>Foto 1 actual:</p>
+      <img src="{{ cafe.photo1.url }}" class="miniatura-cafe">
+    {% endif %}
 
-    <div>
-      {% if cafe.photo2 %}
-        <p>Foto 2 actual:</p>
-        <img src="{{ cafe.photo2.url }}" alt="Foto 2" class="miniatura-cafe">
-      {% endif %}
-    </div>
+    {% if cafe.photo2 %}
+      <p>Foto 2 actual:</p>
+      <img src="{{ cafe.photo2.url }}" class="miniatura-cafe">
+    {% endif %}
 
-    <div>
-      {% if cafe.photo3 %}
-        <p>Foto 3 actual:</p>
-        <img src="{{ cafe.photo3.url }}" alt="Foto 3" class="miniatura-cafe">
-      {% endif %}
-    </div>
+    {% if cafe.photo3 %}
+      <p>Foto 3 actual:</p>
+      <img src="{{ cafe.photo3.url }}" class="miniatura-cafe">
+    {% endif %}
 
-    <button type="submit">Guardar cambios</button>
+    <div id="map" style="height: 400px; margin: 1rem 0; border-radius: 10px;"></div>
+
+    <button type="submit" class="btn">Guardar cambios</button>
   </form>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const latInput = document.getElementById("id_latitude");
+      const lonInput = document.getElementById("id_longitude");
+
+      const initialLat = parseFloat(latInput.value) || -34.6037;
+      const initialLon = parseFloat(lonInput.value) || -58.3816;
+
+      window.map = L.map("map").setView([initialLat, initialLon], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+
+      window.marker = L.marker([initialLat, initialLon], { draggable: true }).addTo(map);
+
+      marker.on("dragend", function (e) {
+        const position = marker.getLatLng();
+        latInput.value = position.lat.toFixed(6);
+        lonInput.value = position.lng.toFixed(6);
+      });
+
+      function obtenerCoordenadasDesdeDireccion() {
+        const address = document.querySelector("#id_address")?.value;
+        const location = document.querySelector("#id_location")?.value;
+
+        if (!address || !location) return;
+
+        const query = encodeURIComponent(address + ", " + location);
+        const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`;
+
+        fetch(url)
+          .then(res => res.json())
+          .then(data => {
+            if (data.length > 0) {
+              const result = data[0];
+              latInput.value = result.lat;
+              lonInput.value = result.lon;
+              map.setView([result.lat, result.lon], 15);
+              marker.setLatLng([result.lat, result.lon]);
+            } else {
+              alert("No se encontraron coordenadas.");
+            }
+          })
+          .catch(err => alert("Error buscando coordenadas."));
+      }
+
+      document.querySelector("#id_address")?.addEventListener("blur", obtenerCoordenadasDesdeDireccion);
+      document.querySelector("#id_location")?.addEventListener("blur", obtenerCoordenadasDesdeDireccion);
+    });
+  </script>
 {% endblock %}

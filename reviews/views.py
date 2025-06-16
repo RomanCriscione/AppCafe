@@ -10,6 +10,11 @@ from collections import defaultdict
 from .models import Review, Cafe
 from .forms import ReviewForm, CafeForm
 import os
+from django.core.paginator import Paginator
+from .models import Tag
+from django.http import JsonResponse
+from math import radians, cos, sin, asin, sqrt
+
 
 # Listar reseñas agrupadas por zona
 def review_list(request):
@@ -35,10 +40,27 @@ def cafe_list(request):
     zona = request.GET.get('zona')
     orden = request.GET.get('orden')
 
+    filtros = {
+        'is_vegan_friendly': request.GET.get('vegan') == 'on',
+        'is_pet_friendly': request.GET.get('pet') == 'on',
+        'has_wifi': request.GET.get('wifi') == 'on',
+        'has_outdoor_seating': request.GET.get('outdoor') == 'on',
+    }
+
+    todos_los_tags = Tag.objects.all()
+    tags_seleccionados = request.GET.getlist('tags')
+
+    if tags_seleccionados:
+        cafes = cafes.filter(tags__id__in=tags_seleccionados).distinct()
+
     cafes = Cafe.objects.all()
 
     if zona:
         cafes = cafes.filter(location=zona)
+
+    for key, value in filtros.items():
+        if value:
+            cafes = cafes.filter(**{key: True})
 
     cafes = cafes.annotate(
         average_rating=Avg('reviews__rating'),
@@ -59,7 +81,11 @@ def cafe_list(request):
         'zonas_disponibles': zonas_disponibles,
         'zona_seleccionada': zona,
         'orden_actual': orden,
-    })
+        'filtros_aplicados': filtros,
+        'tags': todos_los_tags,
+        'tags_seleccionados': [int(t) for t in tags_seleccionados],
+})
+
 
 # Detalle de cafetería + dejar o editar reseña
 def cafe_detail(request, cafe_id):
@@ -87,12 +113,15 @@ def cafe_detail(request, cafe_id):
     else:
         form = ReviewForm(instance=existing_review)
 
+    best_review = reviews.order_by('-rating', '-created_at').first()
+
     return render(request, 'reviews/cafe_detail.html', {
         'cafe': cafe,
         'reviews': reviews,
         'form': form,
         'existing_review': existing_review,
-        'average_rating': average_rating
+        'average_rating': average_rating,
+        'best_review': best_review,
     })
 
 # Responder a una reseña (dueño)
@@ -240,8 +269,45 @@ def toggle_favorite(request, cafe_id):
 
 @login_required
 def favorite_cafes(request):
+    orden = request.GET.get('orden')
+    zona = request.GET.get('zona')
+
     cafes = Cafe.objects.filter(favorites=request.user)
-    return render(request, 'reviews/favorite_cafes.html', {'cafes': cafes})
+
+    if zona:
+        cafes = cafes.filter(location=zona)
+
+    cafes = cafes.annotate(
+        average_rating=Avg('reviews__rating'),
+        total_reviews=Count('reviews')
+    ).prefetch_related('reviews')
+
+    if orden == 'rating':
+        cafes = cafes.order_by('-average_rating')
+    elif orden == 'reviews':
+        cafes = cafes.order_by('-total_reviews')
+    else:
+        cafes = cafes.order_by('name')
+
+    # Agregamos la última reseña a cada café
+    for cafe in cafes:
+        cafe.last_review = cafe.reviews.order_by('-created_at').first()
+
+    # Para dropdown de zonas
+    zonas_disponibles = Cafe.objects.filter(favorites=request.user).values_list('location', flat=True).distinct()
+
+    # 🔄 Paginación
+    paginator = Paginator(cafes, 6)  # 6 cafés por página
+    pagina = request.GET.get('page')
+    cafes_paginados = paginator.get_page(pagina)
+
+    return render(request, 'reviews/favorite_cafes.html', {
+        'cafes': cafes_paginados,
+        'orden_actual': orden,
+        'zona_actual': zona,
+        'zonas_disponibles': zonas_disponibles
+    })
+
 
 @login_required
 def toggle_favorite(request, cafe_id):
@@ -269,3 +335,41 @@ def edit_owner_reply(request, review_id):
         messages.success(request, "Respuesta del dueño actualizada correctamente.")
 
     return redirect('owner_reviews')
+
+def nearby_cafes(request):
+    try:
+        lat = float(request.GET.get('lat'))
+        lon = float(request.GET.get('lon'))
+    except (TypeError, ValueError):
+        return JsonResponse({'error': 'Coordenadas inválidas'}, status=400)
+
+    def haversine(lat1, lon1, lat2, lon2):
+        # Radio de la Tierra en km
+        R = 6371.0
+        dlat = radians(lat2 - lat1)
+        dlon = radians(lon2 - lon1)
+        a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+        c = 2 * asin(sqrt(a))
+        return R * c
+
+    cafes = Cafe.objects.exclude(latitude__isnull=True).exclude(longitude__isnull=True)
+    cafes_con_distancia = []
+
+    for cafe in cafes:
+        distancia = haversine(lat, lon, cafe.latitude, cafe.longitude)
+        cafes_con_distancia.append((cafe, distancia))
+
+    cafes_ordenados = sorted(cafes_con_distancia, key=lambda x: x[1])[:10]
+
+    data = [
+        {
+            'name': c.name,
+            'address': c.address,
+            'location': c.location,
+            'distance_km': round(dist, 2),
+            'url': reverse_lazy('cafe_detail', args=[c.id]),
+        }
+        for c, dist in cafes_ordenados
+    ]
+
+    return JsonResponse(data, safe=False)

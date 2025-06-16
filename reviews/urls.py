@@ -19,4 +19,6 @@ urlpatterns = [
     path('favoritos/', favorite_cafes, name='favorite_cafes'),
     path('cafes/<int:cafe_id>/toggle_favorite/', toggle_favorite, name='toggle_favorite'),
     path('owner/replies/<int:review_id>/', views.edit_owner_reply, name='edit_owner_reply'),
+    path('cafes/cercanos/', views.nearby_cafes, name='nearby_cafes'),
+
 ]

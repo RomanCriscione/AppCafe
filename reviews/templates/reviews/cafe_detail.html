@@ -8,14 +8,31 @@
     <strong>📍 Dirección:</strong> {{ cafe.address }}, {{ cafe.location }}<br>
     <strong>☎ Teléfono:</strong> {{ cafe.phone }}<br>
     <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
-      target="_blank"
-      class="google-maps-link">
-      📍 Ver en Google Maps
-    </a>
+      target="_blank" class="google-maps-link">📍 Ver en Google Maps</a>
   </p>
 
   {% if average_rating %}
     <p><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
+    
+    {% if best_review %}
+      <div class="mejor-review">
+        <p class="mejor-review-titulo">☕✨ <strong>Reseña destacada</strong></p>
+        <p class="mejor-review-meta">
+          {{ best_review.user.username }} ({{ best_review.created_at|date:"d M Y" }}) —
+          ☕ {{ best_review.rating|floatformat:1 }}
+        </p>
+        <p class="mejor-review-comentario">“{{ best_review.comment }}”</p>
+      </div>
+
+      <div class="compartir-cafe">
+        <p><strong>Compartir esta cafetería:</strong></p>
+        <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}" target="_blank" class="btn-share">📱 WhatsApp</a>
+        <a href="https://twitter.com/intent/tweet?text=Recomiendo esta cafetería: {{ cafe.name }}&url={{ request.build_absolute_uri }}" target="_blank" class="btn-share">🐦 X</a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="btn-share">📘 Facebook</a>
+        <button onclick="copiarEnlace()" class="btn-share">🔗 Copiar enlace</button>
+      </div>
+    {% endif %}
+
   {% else %}
     <p><strong>Calificación promedio:</strong> Sin reseñas todavía.</p>
   {% endif %}
@@ -34,59 +51,66 @@
   {% endif %}
 
   {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
-    <h3>Fotos del lugar:</h3>
-    <div class="cafe-photos">
-      {% if cafe.photo1 %}
-        <img src="{{ cafe.photo1.url }}" alt="Foto 1 de {{ cafe.name }}">
-      {% endif %}
-      {% if cafe.photo2 %}
-        <img src="{{ cafe.photo2.url }}" alt="Foto 2 de {{ cafe.name }}">
-      {% endif %}
-      {% if cafe.photo3 %}
-        <img src="{{ cafe.photo3.url }}" alt="Foto 3 de {{ cafe.name }}">
-      {% endif %}
+    <h3>📸 Fotos del lugar</h3>
+    <div class="swiper-container">
+      <div class="swiper-wrapper">
+        {% if cafe.photo1 %}
+          <div class="swiper-slide">
+            <img src="{{ cafe.photo1.url }}" alt="{{ cafe.photo1_title }}" class="cafe-photo-slide">
+          </div>
+        {% endif %}
+        {% if cafe.photo2 %}
+          <div class="swiper-slide">
+            <img src="{{ cafe.photo2.url }}" alt="{{ cafe.photo2_title }}" class="cafe-photo-slide">
+          </div>
+        {% endif %}
+        {% if cafe.photo3 %}
+          <div class="swiper-slide">
+            <img src="{{ cafe.photo3.url }}" alt="{{ cafe.photo3_title }}" class="cafe-photo-slide">
+          </div>
+        {% endif %}
+      </div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-pagination"></div>
     </div>
   {% endif %}
 
   <h3>Reseñas:</h3>
   <ul class="review-list">
     {% for review in reviews %}
-      <li>
-        <strong>{{ review.user.username }}</strong>
-        <span class="review-date">({{ review.created_at|date:"d M Y" }})</span><br>
-        ☕ {{ review.rating|floatformat:1 }}
-        <p>{{ review.comment }}</p>
+      <li class="review-card">
+        <div class="review-header">
+          <strong>{{ review.user.username }}</strong>
+          <span class="review-date">({{ review.created_at|date:"d M Y" }})</span>
+        </div>
+        <div class="review-body">
+          <p>☕ {{ review.rating|floatformat:1 }}</p>
+          <p>{{ review.comment }}</p>
+        </div>
+
+        {% if review.owner_reply %}
+          <div class="reply-block">
+            <strong>Respuesta del dueño:</strong>
+            <p>{{ review.owner_reply }}</p>
+          </div>
+        {% endif %}
 
         {% if user.is_authenticated and user == cafe.owner %}
           {% if review.owner_reply %}
-            <p style="margin-top: 0.5rem; color: #444;">
-              <strong>Respuesta de {{ cafe.name }}:</strong><br>
-              {{ review.owner_reply }}
-            </p>
-            <button onclick="toggleReplyForm('{{ review.id }}')" type="button">✏️ Editar respuesta</button>
-            <form method="post" action="{% url 'reply_review' review.id %}" id="reply-form-{{ review.id }}" style="display: none; margin-top: 1rem;">
-            {% csrf_token %}
-            <textarea name="reply" rows="2" style="width: 100%;">{{ review.owner_reply }}</textarea><br>
-            <button type="submit">Guardar respuesta</button>
-          </form>
-        {% else %}
-          <button onclick="toggleReplyForm('{{ review.id }}')" type="button">💬 Responder</button>
+            <button onclick="toggleReplyForm('{{ review.id }}')" type="button" class="btn-reply-edit">✏️ Editar respuesta</button>
+          {% else %}
+            <button onclick="toggleReplyForm('{{ review.id }}')" type="button" class="btn-reply-new">💬 Responder</button>
+          {% endif %}
           <form method="post" action="{% url 'reply_review' review.id %}" id="reply-form-{{ review.id }}" style="display: none; margin-top: 1rem;">
             {% csrf_token %}
-            <textarea name="reply" rows="2" style="width: 100%;"></textarea><br>
-            <button type="submit">Guardar respuesta</button>
+            <textarea name="reply" rows="2" style="width: 100%;">{{ review.owner_reply }}</textarea><br>
+            <button type="submit" class="btn">Guardar respuesta</button>
           </form>
         {% endif %}
-      {% elif review.owner_reply %}
-        <p style="margin-top: 0.5rem; color: #444;">
-          <strong>Respuesta de {{ cafe.name }}:</strong><br>
-          {{ review.owner_reply }}
-        </p>
-      {% endif %}
-
       </li>
     {% empty %}
-      <li>Aún no hay reseñas.</li>
+      <li>No hay reseñas aún.</li>
     {% endfor %}
   </ul>
 
@@ -116,7 +140,6 @@
         {% endfor %}
       </div>
 
-
       <button type="submit">
         {% if existing_review %}Actualizar{% else %}Enviar{% endif %}
       </button>
@@ -129,6 +152,19 @@
     </p>
   {% endif %}
 
+  <script>
+    function toggleReplyForm(id) {
+      const form = document.getElementById('reply-form-' + id);
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function copiarEnlace() {
+      navigator.clipboard.writeText(window.location.href)
+        .then(() => alert("📋 Enlace copiado al portapapeles"))
+        .catch(err => alert("No se pudo copiar el enlace"));
+    }
+  </script>
+
   <style>
     .google-maps-link {
       display: inline-block;
@@ -140,34 +176,67 @@
       font-weight: bold;
     }
 
-    .cafe-photos {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    .mejor-review {
+      background: #fff8e1;
+      border-left: 5px solid #ff9800;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 8px;
     }
 
-    .cafe-photos img {
-      width: 100%;
-      max-width: 200px;
-      height: auto;
-      border-radius: 6px;
+    .mejor-review-titulo {
+      font-weight: bold;
+      margin-bottom: 0.3rem;
+      font-size: 1.1rem;
     }
+
+    .mejor-review-meta {
+      color: #555;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .mejor-review-comentario {
+      font-style: italic;
+      font-size: 1rem;
+    }
+
+    .compartir-cafe {
+      margin-top: 1rem;
+    }
+
+    .btn-share {
+      margin-right: 0.5rem;
+      background-color: #eee;
+      padding: 5px 10px;
+      border-radius: 5px;
+      text-decoration: none;
+    }
+
+    .swiper-container {
+      width: 100%;
+      max-width: 700px;
+      margin: 20px auto;
+    }
+
+    .swiper-slide img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
 
     .review-list {
       padding-left: 0;
       list-style: none;
     }
 
-    .review-list li {
+    .review-card {
       margin-bottom: 1rem;
       padding: 10px;
       background-color: #f9f9f9;
       border-radius: 5px;
-    }
-
-    .review-date {
-      color: #888;
-      font-size: 0.9em;
     }
 
     .form-errors {
@@ -190,45 +259,32 @@
     }
 
     .rating-widget {
-  direction: rtl;
-  font-size: 1.5rem;
-  display: inline-flex;
-  gap: 0.2rem;
-}
+      direction: rtl;
+      font-size: 1.5rem;
+      display: inline-flex;
+      gap: 0.2rem;
+    }
 
-.rating-widget input[type="radio"] {
-  display: none;
-}
+    .rating-widget input[type="radio"] {
+      display: none;
+    }
 
-.rating-widget label {
-  cursor: pointer;
-  opacity: 0.4;
-  transition: opacity 0.2s;
-}
+    .rating-widget label {
+      cursor: pointer;
+      opacity: 0.4;
+      transition: opacity 0.2s;
+    }
 
-.rating-widget input[type="radio"]:checked ~ label,
-.rating-widget label:hover,
-.rating-widget label:hover ~ label {
-  opacity: 1;
-}
+    .rating-widget input[type="radio"]:checked ~ label,
+    .rating-widget label:hover,
+    .rating-widget label:hover ~ label {
+      opacity: 1;
+    }
 
     @media (max-width: 600px) {
-      .cafe-photos {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .review-list li {
-        font-size: 0.95rem;
+      .swiper-container {
+        max-width: 100%;
       }
     }
   </style>
-
-<script>
-  function toggleReplyForm(id) {
-    const form = document.getElementById('reply-form-' + id);
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
-  }
-</script>
-
 {% endblock %}

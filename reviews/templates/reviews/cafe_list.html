@@ -2,140 +2,259 @@
 {% load static %}
 
 {% block content %}
-  <h1>Cafeterías</h1>
+  <div class="cafes-container">
+    <!-- Panel lateral -->
+    <aside class="filtros">
+      <h2>🔍 Filtros</h2>
+      <form method="get">
+        <label for="zona">Zona:</label>
+        <select name="zona" id="zona">
+          <option value="">Todas</option>
+          {% for z in zonas_disponibles %}
+            <option value="{{ z }}" {% if zona_seleccionada == z %}selected{% endif %}>{{ z }}</option>
+          {% endfor %}
+        </select>
 
-  {% if user.is_authenticated and user.is_owner %}
-    <p style="margin-bottom: 1rem;">
-      <a href="{% url 'create_cafe' %}" class="btn-agregar">➕ Agregar nueva cafetería</a>
-    </p>
-  {% endif %}
+        <label for="orden">Orden:</label>
+        <select name="orden" id="orden">
+          <option value="">Nombre</option>
+          <option value="rating" {% if orden_actual == 'rating' %}selected{% endif %}>Puntuación</option>
+          <option value="reviews" {% if orden_actual == 'reviews' %}selected{% endif %}>Más reseñas</option>
+        </select>
 
-  <form method="get" class="filtro-form">
-    <label for="zona">Filtrar por zona:</label>
-    <select name="zona" id="zona">
-      <option value="">Todas</option>
-      {% for z in zonas_disponibles %}
-        <option value="{{ z }}" {% if z == zona_seleccionada %}selected{% endif %}>{{ z }}</option>
-      {% endfor %}
-    </select>
+        <fieldset>
+          <legend>Características:</legend>
+          <label><input type="checkbox" name="vegan" {% if filtros_aplicados.is_vegan_friendly %}checked{% endif %}> Vegano friendly</label><br>
+          <label><input type="checkbox" name="pet" {% if filtros_aplicados.is_pet_friendly %}checked{% endif %}> Pet friendly</label><br>
+          <label><input type="checkbox" name="wifi" {% if filtros_aplicados.has_wifi %}checked{% endif %}> WiFi</label><br>
+          <label><input type="checkbox" name="outdoor" {% if filtros_aplicados.has_outdoor_seating %}checked{% endif %}> Mesas afuera</label>
+        </fieldset>
 
-    <label for="orden">Ordenar por:</label>
-    <select name="orden" id="orden">
-      <option value="">Nombre</option>
-      <option value="rating" {% if orden_actual == 'rating' %}selected{% endif %}>Puntuación</option>
-      <option value="reviews" {% if orden_actual == 'reviews' %}selected{% endif %}>Cantidad de reseñas</option>
-    </select>
+        <fieldset style="margin-top: 1rem;">
+          <legend>Etiquetas:</legend>
+          {% for tag in tags %}
+            <label>
+              <input type="checkbox" name="tags" value="{{ tag.id }}" {% if tag.id in tags_seleccionados %}checked{% endif %}>
+              {{ tag.name }}
+            </label><br>
+          {% endfor %}
+        </fieldset>
 
-    <button type="submit">Aplicar</button>
-  </form>
+        <button type="submit" class="btn-filtrar">Aplicar filtros</button>
+      </form>
+    </aside>
 
-  <ul class="cafe-list">
-  {% for cafe in cafes %}
-    <li class="cafe-item">
-      <strong>
-        <a href="{% url 'cafe_detail' cafe.id %}">{{ cafe.name }}</a>
+    <!-- Lista de cafés -->
+    <section class="lista-cafes">
+      <h1>Cafeterías</h1>
 
-        {% if user.is_authenticated %}
-          <form method="post" action="{% url 'toggle_favorite' cafe.id %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="fav-btn">
-              {% if user in cafe.favorites.all %}
-                ❤️
-              {% else %}
-                🤍
+      <!-- Botón para cafés cercanos SIEMPRE visible -->
+      <button onclick="obtenerCafesCercanos()" class="btn">📍 Ver cafés cerca mío</button>
+      <ul id="cafes-cercanos" style="margin-top: 1rem;"></ul>
+
+      {% if user.is_authenticated and user.is_owner %}
+        <p>
+          <a href="{% url 'create_cafe' %}" class="btn-agregar">➕ Agregar nueva cafetería</a>
+        </p>
+      {% endif %}
+
+      <div class="cafe-list-grid">
+        {% for cafe in cafes %}
+          <div class="cafe-card">
+            {% if cafe.photo1 %}
+              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="cafe-thumbnail">
+            {% endif %}
+            <div class="cafe-info">
+              <h3>
+                <a href="{% url 'cafe_detail' cafe.id %}">{{ cafe.name }}</a>
+                {% if user.is_authenticated %}
+                  <form method="post" action="{% url 'toggle_favorite' cafe.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="fav-btn" title="Favorito">
+                      {% if user in cafe.favorites.all %}
+                        ❤️
+                      {% else %}
+                        🤍
+                      {% endif %}
+                    </button>
+                  </form>
+                {% endif %}
+              </h3>
+              <p>📍 {{ cafe.address }}, {{ cafe.location }}</p>
+              <p>☎ {{ cafe.phone }}</p>
+              <p>📝 {{ cafe.total_reviews }} reseñas</p>
+              <p>
+                {% if cafe.average_rating %}
+                  ☕ {{ cafe.average_rating|floatformat:1 }}
+                {% else %}
+                  Sin puntuar
+                {% endif %}
+              </p>
+
+              {% if cafe.tags.all %}
+                <p>
+                  🏷️ Etiquetas:
+                  {% for tag in cafe.tags.all %}
+                    <span class="tag-label">{{ tag.name }}</span>
+                  {% endfor %}
+                </p>
               {% endif %}
-            </button>
-          </form>
-        {% endif %}
-      </strong><br>
 
-      {% if cafe.photo1 %}
-        <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="miniatura-cafe"><br>
-      {% endif %}
+              <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
+                target="_blank" class="btn-maps">📍 Ver en Google Maps</a>
+            </div>
+          </div>
+        {% empty %}
+          <p>No hay cafeterías que coincidan con los filtros.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
 
-      {% if cafe.average_rating %}
-        <p>☕ {{ cafe.average_rating|floatformat:1 }}</p>
-      {% else %}
-        <p>Sin puntuar</p>
-      {% endif %}
+  <!-- Script para ubicación -->
+  <script>
+    function obtenerCafesCercanos() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
 
-      🧾 Reseñas: {{ cafe.total_reviews }}<br>
-      📍 Dirección: {{ cafe.address }}, {{ cafe.location }}<br>
-      ☎ Teléfono: {{ cafe.phone }}<br>
-      <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
-          target="_blank" class="btn-maps">
-          📍 Ver en Google Maps
-      </a>
-    </li>
-  {% empty %}
-    <li>No hay cafeterías registradas aún.</li>
-  {% endfor %}
-</ul>
+          fetch(`/reviews/cafes/cercanos/?lat=${lat}&lon=${lon}`)
+            .then(res => res.json())
+            .then(data => {
+              const lista = document.getElementById('cafes-cercanos');
+              lista.innerHTML = "";
+              if (data.length === 0) {
+                lista.innerHTML = "<li>No se encontraron cafés cercanos.</li>";
+              } else {
+                data.forEach(cafe => {
+                  const li = document.createElement("li");
+                  li.innerHTML = `<a href="${cafe.url}">${cafe.name}</a> – ${cafe.distance_km} km`;
+                  lista.appendChild(li);
+                });
+              }
+            });
+        }, () => {
+          alert("No se pudo obtener tu ubicación.");
+        });
+      } else {
+        alert("Tu navegador no soporta geolocalización.");
+      }
+    }
+  </script>
 
-<style>
-  .btn-agregar {
-    padding: 8px 16px;
-    background-color: #4CAF50;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-  }
+  <style>
+    .cafes-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
 
-  .filtro-form {
-    margin-bottom: 1rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-  }
+    .filtros {
+      flex: 1 1 250px;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 8px;
+      background: #f9f9f9;
+      min-width: 220px;
+    }
 
-  .cafe-list {
-    list-style: none;
-    padding: 0;
-  }
+    .lista-cafes {
+      flex: 3 1 600px;
+    }
 
-  .cafe-item {
-    margin-bottom: 2rem;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 1rem;
-  }
+    .btn-filtrar {
+      margin-top: 1rem;
+      padding: 6px 12px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
 
-  .btn-maps {
-    display: inline-block;
-    background-color: #4285F4;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: bold;
-  }
+    .cafe-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
 
-  .miniatura-cafe {
-    width: 100%;
-    max-width: 300px;
-    height: auto;
-    border-radius: 6px;
-  }
-
-  .fav-btn {
-    font-size: 1.2rem;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 5px;
-  }
-
-  @media (max-width: 600px) {
-    .filtro-form {
-      flex-direction: column;
+    .cafe-card {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #fff;
       align-items: flex-start;
     }
 
-    .cafe-item {
-      text-align: left;
+    .cafe-thumbnail {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
     }
-  }
-</style>
 
+    .cafe-info {
+      flex: 1;
+    }
+
+    .fav-btn {
+      font-size: 1.2rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 5px;
+    }
+
+    .btn-agregar {
+      background-color: #4CAF50;
+      color: white;
+      padding: 8px 12px;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .btn-maps {
+      background-color: #4285F4;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 0.5rem;
+    }
+
+    .tag-label {
+      display: inline-block;
+      background-color: #eee;
+      padding: 2px 6px;
+      margin: 2px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      .cafes-container {
+        flex-direction: column;
+      }
+
+      .filtros {
+        width: 100%;
+      }
+
+      .cafe-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .cafe-thumbnail {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+  </style>
 {% endblock %}

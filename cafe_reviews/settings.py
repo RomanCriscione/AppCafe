@@ -99,8 +99,8 @@ LOGIN_REDIRECT_URL = '/reviews/cafes/'
 ACCOUNT_LOGOUT_REDIRECT = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_LOGIN_METHODS = {'username', 'email'} 
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 
 AUTH_USER_MODEL = 'accounts.CustomUser'

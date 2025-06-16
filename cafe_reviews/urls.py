@@ -17,6 +17,8 @@ urlpatterns = [
 
     # Cafeterías y reseñas
     path('reviews/', include('reviews.urls')),
+
+
 ]
 
 if settings.DEBUG:

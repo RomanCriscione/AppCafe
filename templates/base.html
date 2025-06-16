@@ -2,140 +2,31 @@
 <html lang="es">
 {% load static %}
 <head>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}App Café{% endblock %}</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
-        }
-        nav ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        nav ul li {
-            display: inline;
-        }
-        nav ul li a, nav ul li strong {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        main {
-            padding: 20px;
-        }
-        footer {
-            text-align: center;
-            padding: 10px;
-            font-size: 0.8em;
-            color: #666;
-        }
-        .rating-icon {
-            width: 20px;
-            height: 20px;
-            display: inline-block;
-            background-image: url('/static/images/coffee-cup.svg');
-            background-size: contain;
-            background-repeat: no-repeat;
-            opacity: 0.2;
-        }
-        .rating-icon.full {
-            opacity: 1;
-        }
-        .rating-icon.half {
-            opacity: 0.5;
-        }
-        .rating-icon-container {
-            display: inline-flex;
-            gap: 2px;
-            vertical-align: middle;
-        }
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'lightbox/dist/css/lightbox.min.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
-        .cup {
-            width: 24px;
-            height: 24px;
-            margin-right: 2px;
-            filter: grayscale(100%) brightness(60%);
-            opacity: 0.3;
-        }
-        .cup.full {
-            filter: none;
-            opacity: 1;
-        }
-        .cup.half {
-            filter: brightness(1.2);
-            opacity: 0.7;
-        }
-
-        .miniatura-cafe {
-            width: 120px;
-            height: auto;
-            border-radius: 6px;
-            margin: 6px 0;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-        }
-
-        .avatar-mini {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid white;
-        }
-
-        @media (max-width: 768px) {
-            nav ul {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-
-            .miniatura-cafe {
-                width: 100%;
-                max-width: 100%;
-                height: auto;
-            }
-
-            main {
-                padding: 10px;
-            }
-
-            img {
-                max-width: 100%;
-                height: auto;
-            }
-
-            .rating-input {
-                font-size: 1.5rem;
-            }
-        }
-    </style>
 </head>
 <body>
     <header>
         <nav>
-            <ul>
+            <ul class="left">
                 <li><a href="{% url 'review_list' %}">Inicio</a></li>
                 <li><a href="{% url 'cafe_list' %}">Cafés</a></li>
                 <li><a href="{% url 'about' %}">Acerca de</a></li>
                 <li><a href="{% url 'contact' %}">Contacto</a></li>
+            </ul>
+            <ul class="right">
                 {% if user.is_authenticated %}
                     {% if user.is_owner %}
                         <li><a href="{% url 'owner_dashboard' %}">Mi panel</a></li>
                         <li><a href="{% url 'favorite_cafes' %}">❤️ Mis Favoritos</a></li>
+                        <li><a href="{% url 'create_cafe' %}">Agregar Cafetería</a></li>
                     {% endif %}
                     <li><strong>Hola, {{ user.username }}!</strong></li>
                     <li>
@@ -147,9 +38,6 @@
                             {% endif %}
                         </a>
                     </li>
-                    {% if user.is_owner %}
-                        <li><a href="{% url 'create_cafe' %}">Agregar Cafetería</a></li>
-                    {% endif %}
                     <li><a href="{% url 'account_logout' %}">Cerrar sesión</a></li>
                 {% else %}
                     <li><a href="{% url 'account_login' %}">Iniciar sesión</a></li>
@@ -161,11 +49,9 @@
 
     <main>
         {% if messages %}
-            <div style="margin: 1rem 0;">
+            <div class="messages">
                 {% for message in messages %}
-                    <div style="padding: 10px; border-radius: 5px; background-color: #e0ffe0; color: #006600; margin-bottom: 10px;">
-                        {{ message }}
-                    </div>
+                    <div class="message">{{ message }}</div>
                 {% endfor %}
             </div>
         {% endif %}
@@ -176,5 +62,35 @@
     <footer>
         <p>&copy; 2025 App Café - Desarrollado por Roma</p>
     </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'lightbox/dist/js/lightbox.min.js' %}"></script>
+    <script>
+        lightbox.option({
+            'resizeDuration': 200,
+            'fadeDuration': 200,
+            'imageFadeDuration': 200,
+            'wrapAround': true,
+            'albumLabel': "📷 Foto %1 de %2",
+            'disableScrolling': true
+        });
+    </script>
+        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+    const swiper = new Swiper('.swiper-container', {
+        loop: true,
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        spaceBetween: 20,
+        slidesPerView: 1,
+    });
+</script>
+
 </body>
 </html>
