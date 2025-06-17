@@ -12,79 +12,118 @@
     </ul>
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data" onsubmit="return validarDireccionAntesDeEnviar();">
     {% csrf_token %}
     {{ form.as_p }}
 
-    {% if cafe.photo1 %}
-      <p>Foto 1 actual:</p>
-      <img src="{{ cafe.photo1.url }}" class="miniatura-cafe">
-    {% endif %}
+    <div>
+      {% if cafe.photo1 %}
+        <p>Foto 1 actual:</p>
+        <img src="{{ cafe.photo1.url }}" alt="Foto 1" class="miniatura-cafe">
+      {% endif %}
+    </div>
 
-    {% if cafe.photo2 %}
-      <p>Foto 2 actual:</p>
-      <img src="{{ cafe.photo2.url }}" class="miniatura-cafe">
-    {% endif %}
+    <div>
+      {% if cafe.photo2 %}
+        <p>Foto 2 actual:</p>
+        <img src="{{ cafe.photo2.url }}" alt="Foto 2" class="miniatura-cafe">
+      {% endif %}
+    </div>
 
-    {% if cafe.photo3 %}
-      <p>Foto 3 actual:</p>
-      <img src="{{ cafe.photo3.url }}" class="miniatura-cafe">
-    {% endif %}
+    <div>
+      {% if cafe.photo3 %}
+        <p>Foto 3 actual:</p>
+        <img src="{{ cafe.photo3.url }}" alt="Foto 3" class="miniatura-cafe">
+      {% endif %}
+    </div>
 
-    <div id="map" style="height: 400px; margin: 1rem 0; border-radius: 10px;"></div>
+    <!-- Mapa -->
+    <div id="map" style="height: 400px; margin-top: 1rem;"></div>
+
+    <!-- Mensaje dinámico -->
+    <p id="location-status" style="margin-top: 0.5rem; font-style: italic; color: #555;"></p>
 
     <button type="submit" class="btn">Guardar cambios</button>
   </form>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const latInput = document.getElementById("id_latitude");
-      const lonInput = document.getElementById("id_longitude");
+    const latInput = document.getElementById("id_latitude");
+    const lonInput = document.getElementById("id_longitude");
+    const addressInput = document.getElementById("id_address");
+    const locationInput = document.getElementById("id_location");
+    const locationStatus = document.getElementById("location-status");
 
-      const initialLat = parseFloat(latInput.value) || -34.6037;
-      const initialLon = parseFloat(lonInput.value) || -58.3816;
+    const initialLat = parseFloat(latInput.value) || -34.6037;
+    const initialLon = parseFloat(lonInput.value) || -58.3816;
 
-      window.map = L.map("map").setView([initialLat, initialLon], 13);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    let direccionGeolocalizada = false;
 
-      window.marker = L.marker([initialLat, initialLon], { draggable: true }).addTo(map);
+    const map = L.map('map').setView([initialLat, initialLon], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-      marker.on("dragend", function (e) {
-        const position = marker.getLatLng();
-        latInput.value = position.lat.toFixed(6);
-        lonInput.value = position.lng.toFixed(6);
-      });
+    const marker = L.marker([initialLat, initialLon], { draggable: true }).addTo(map);
 
-      function obtenerCoordenadasDesdeDireccion() {
-        const address = document.querySelector("#id_address")?.value;
-        const location = document.querySelector("#id_location")?.value;
+    function actualizarInputs(lat, lon) {
+      latInput.value = lat.toFixed(6);
+      lonInput.value = lon.toFixed(6);
+    }
 
-        if (!address || !location) return;
+    function mostrarUbicacionTexto(lat, lon) {
+      locationStatus.textContent = `📍 Ubicación actualizada: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+    }
 
-        const query = encodeURIComponent(address + ", " + location);
-        const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`;
+    marker.on("dragend", function () {
+      const pos = marker.getLatLng();
+      actualizarInputs(pos.lat, pos.lng);
+      mostrarUbicacionTexto(pos.lat, pos.lng);
+      direccionGeolocalizada = true;
+    });
 
-        fetch(url)
+    addressInput.addEventListener("blur", function () {
+      const direccion = addressInput.value;
+      const localidad = locationInput ? locationInput.value : "";
+      const fullQuery = `${direccion}, ${localidad}, Buenos Aires`;
+
+      if (direccion.length > 5 && localidad.length > 1) {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}`)
           .then(res => res.json())
           .then(data => {
             if (data.length > 0) {
-              const result = data[0];
-              latInput.value = result.lat;
-              lonInput.value = result.lon;
-              map.setView([result.lat, result.lon], 15);
-              marker.setLatLng([result.lat, result.lon]);
+              const { lat, lon } = data[0];
+              map.setView([lat, lon], 16);
+              marker.setLatLng([lat, lon]);
+              actualizarInputs(lat, lon);
+              mostrarUbicacionTexto(parseFloat(lat), parseFloat(lon));
+              direccionGeolocalizada = true;
             } else {
-              alert("No se encontraron coordenadas.");
+              direccionGeolocalizada = false;
+              alert("❌ No se pudo encontrar la dirección ingresada.");
             }
-          })
-          .catch(err => alert("Error buscando coordenadas."));
+          });
       }
-
-      document.querySelector("#id_address")?.addEventListener("blur", obtenerCoordenadasDesdeDireccion);
-      document.querySelector("#id_location")?.addEventListener("blur", obtenerCoordenadasDesdeDireccion);
     });
+
+    locationInput.addEventListener("change", function () {
+      const event = new Event('blur');
+      addressInput.dispatchEvent(event);
+});
+
+
+    function validarDireccionAntesDeEnviar() {
+      const lat = parseFloat(latInput.value);
+      const lon = parseFloat(lonInput.value);
+      if (isNaN(lat) || isNaN(lon) || !direccionGeolocalizada) {
+        alert("⚠️ Por favor, asegurate de ingresar una dirección válida y que se haya ubicado correctamente en el mapa.");
+        return false;
+      }
+      return true;
+    }
   </script>
+
 {% endblock %}

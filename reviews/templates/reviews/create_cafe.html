@@ -12,63 +12,110 @@
     </ul>
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data" onsubmit="return validarDireccionAntesDeEnviar();">
     {% csrf_token %}
-    {{ form.as_p }}
-    <div id="map" style="height: 400px; margin: 1rem 0; border-radius: 10px;"></div>
+
+    {{ form.name.label_tag }} {{ form.name }}<br>
+    {{ form.address.label_tag }} {{ form.address }}<br>
+    {{ form.location.label_tag }} {{ form.location }}<br>
+    {{ form.description.label_tag }} {{ form.description }}<br>
+    {{ form.phone.label_tag }} {{ form.phone }}<br>
+    {{ form.google_maps_url.label_tag }} {{ form.google_maps_url }}<br>
+
+    <h3>Fotos</h3>
+    {{ form.photo1.label_tag }} {{ form.photo1 }} {{ form.photo1_title }}<br>
+    {{ form.photo2.label_tag }} {{ form.photo2 }} {{ form.photo2_title }}<br>
+    {{ form.photo3.label_tag }} {{ form.photo3 }} {{ form.photo3_title }}<br>
+
+    <h3>Opciones</h3>
+    {{ form.is_vegan_friendly }} Vegano friendly<br>
+    {{ form.is_pet_friendly }} Pet friendly<br>
+    {{ form.has_wifi }} WiFi<br>
+    {{ form.has_outdoor_seating }} Mesas al aire libre<br>
+
+    <h3>Etiquetas</h3>
+    {{ form.tags }}
+
+    <h3>Ubicación geográfica</h3>
+    {{ form.latitude.label_tag }} {{ form.latitude }}<br>
+    {{ form.longitude.label_tag }} {{ form.longitude }}<br>
+
+    <div id="map" style="height: 400px; margin-top: 1rem;"></div>
+    <p id="location-status" style="margin-top: 0.5rem; font-style: italic; color: #555;"></p>
+
     <button type="submit" class="btn">Guardar</button>
   </form>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const latInput = document.getElementById("id_latitude");
-      const lonInput = document.getElementById("id_longitude");
+    const map = L.map('map').setView([-34.6037, -58.3816], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-      const initialLat = parseFloat(latInput.value) || -34.6037;
-      const initialLon = parseFloat(lonInput.value) || -58.3816;
+    const marker = L.marker([-34.6037, -58.3816], { draggable: true }).addTo(map);
 
-      window.map = L.map("map").setView([initialLat, initialLon], 13);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    const latInput = document.getElementById("id_latitude");
+    const lonInput = document.getElementById("id_longitude");
+    const addressInput = document.getElementById("id_address");
+    const locationInput = document.getElementById("id_location");
+    const locationStatus = document.getElementById("location-status");
 
-      window.marker = L.marker([initialLat, initialLon], { draggable: true }).addTo(map);
+    let direccionGeolocalizada = false;
 
-      marker.on("dragend", function (e) {
-        const position = marker.getLatLng();
-        latInput.value = position.lat.toFixed(6);
-        lonInput.value = position.lng.toFixed(6);
-      });
+    function actualizarInputs(lat, lon) {
+      latInput.value = lat.toFixed(6);
+      lonInput.value = lon.toFixed(6);
+    }
 
-      function obtenerCoordenadasDesdeDireccion() {
-        const address = document.querySelector("#id_address")?.value;
-        const location = document.querySelector("#id_location")?.value;
+    function mostrarUbicacionTexto(lat, lon) {
+      locationStatus.textContent = `📍 Ubicación actualizada: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+    }
 
-        if (!address || !location) return;
+    marker.on("dragend", function () {
+      const pos = marker.getLatLng();
+      actualizarInputs(pos.lat, pos.lng);
+      mostrarUbicacionTexto(pos.lat, pos.lng);
+      direccionGeolocalizada = true;
+    });
 
-        const query = encodeURIComponent(address + ", " + location);
-        const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`;
-
-        fetch(url)
+    function geolocalizarDireccion() {
+      const query = addressInput.value;
+      const location = locationInput.value;
+      if (query.length > 5 && location.length > 0) {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', ' + location)}`)
           .then(res => res.json())
           .then(data => {
             if (data.length > 0) {
-              const result = data[0];
-              latInput.value = result.lat;
-              lonInput.value = result.lon;
-              map.setView([result.lat, result.lon], 15);
-              marker.setLatLng([result.lat, result.lon]);
+              const { lat, lon } = data[0];
+              map.setView([lat, lon], 16);
+              marker.setLatLng([lat, lon]);
+              actualizarInputs(lat, lon);
+              mostrarUbicacionTexto(parseFloat(lat), parseFloat(lon));
+              direccionGeolocalizada = true;
             } else {
-              alert("No se encontraron coordenadas.");
+              direccionGeolocalizada = false;
+              alert("❌ No se pudo encontrar la dirección ingresada.");
+              locationStatus.textContent = "❌ Dirección no reconocida.";
             }
-          })
-          .catch(err => alert("Error buscando coordenadas."));
+          });
       }
+    }
 
-      document.querySelector("#id_address")?.addEventListener("blur", obtenerCoordenadasDesdeDireccion);
-      document.querySelector("#id_location")?.addEventListener("blur", obtenerCoordenadasDesdeDireccion);
-    });
+    addressInput.addEventListener("blur", geolocalizarDireccion);
+    locationInput.addEventListener("change", geolocalizarDireccion);
+
+    function validarDireccionAntesDeEnviar() {
+      const lat = parseFloat(latInput.value);
+      const lon = parseFloat(lonInput.value);
+      if (isNaN(lat) || isNaN(lon) || !direccionGeolocalizada) {
+        alert("⚠️ Por favor, asegurate de ingresar una dirección válida y que se haya ubicado correctamente en el mapa.");
+        return false;
+      }
+      return true;
+    }
   </script>
 {% endblock %}
-

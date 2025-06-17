@@ -654,3 +654,24 @@ h1 {
     font-size: 1rem;
     }
 }
+
+@media (max-width: 768px) {
+    #map {
+        width: 100% !important;
+        height: 300px !important;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea,
+    select {
+        font-size: 1rem;
+        width: 100%;
+    }
+
+    .miniatura-cafe {
+        max-width: 100%;
+        height: auto;
+    }
+}
