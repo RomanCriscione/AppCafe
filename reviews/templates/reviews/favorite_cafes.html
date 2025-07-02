@@ -2,18 +2,19 @@
 {% load static %}
 
 {% block content %}
-  <h1>❤️ Mis Cafeterías Favoritas</h1>
+<div class="max-w-6xl mx-auto px-4">
+  <h1 class="text-2xl font-bold mb-6">❤️ Mis Cafeterías Favoritas</h1>
 
-  <form method="get" style="margin-bottom: 1rem;">
-    <label for="orden">Ordenar por:</label>
-    <select name="orden" id="orden" onchange="this.form.submit()">
+  <form method="get" class="flex flex-wrap items-center gap-4 mb-6">
+    <label for="orden" class="font-medium">Ordenar por:</label>
+    <select name="orden" id="orden" onchange="this.form.submit()" class="p-2 border rounded">
       <option value="">Nombre</option>
       <option value="rating" {% if orden_actual == "rating" %}selected{% endif %}>Mayor puntaje</option>
       <option value="reviews" {% if orden_actual == "reviews" %}selected{% endif %}>Más reseñas</option>
     </select>
 
-    <label for="zona" style="margin-left: 1rem;">Filtrar por zona:</label>
-    <select name="zona" id="zona" onchange="this.form.submit()">
+    <label for="zona" class="font-medium">Filtrar por zona:</label>
+    <select name="zona" id="zona" onchange="this.form.submit()" class="p-2 border rounded">
       <option value="">Todas</option>
       {% for z in zonas_disponibles %}
         <option value="{{ z }}" {% if zona_actual == z %}selected{% endif %}>{{ z }}</option>
@@ -22,48 +23,53 @@
   </form>
 
   {% if cafes %}
-    <div class="favorite-cafes-grid">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {% for cafe in cafes %}
-        <div class="favorito-card">
+        <div class="relative bg-white rounded-xl shadow p-4 hover:shadow-lg transition-all animate-fade-in">
           {% if cafe.photo1 %}
-            <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="favorito-thumbnail">
+            <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}"
+                 loading="lazy"
+                 class="w-full h-48 object-cover rounded-lg mb-4">
           {% endif %}
-          <div class="favorito-info">
-            <form action="{% url 'toggle_favorite' cafe.id %}" method="post" style="text-align: right;">
-              {% csrf_token %}
-              <button type="submit" class="favorite-btn" title="Quitar de favoritos">❤️</button>
-            </form>
 
-            <h3>{{ cafe.name }} <small>- {{ cafe.location }}</small></h3>
-            <p>📍 {{ cafe.address }}</p>
-            <p><span class="rating-icon">☕</span> {{ cafe.average_rating|floatformat:1 }}</p>
+          <form action="{% url 'toggle_favorite' cafe.id %}" method="post" class="absolute top-2 right-2 z-10">
+            {% csrf_token %}
+            <button type="submit" class="text-red-500 text-xl" title="Quitar de favoritos">❤️</button>
+          </form>
+
+          <div>
+            <h3 class="text-lg font-semibold">{{ cafe.name }} <small class="text-gray-500">- {{ cafe.location }}</small></h3>
+            <p class="text-sm text-gray-700">📍 {{ cafe.address }}</p>
+            <p class="text-sm">☕ {{ cafe.average_rating|floatformat:1 }}</p>
 
             {% if cafe.last_review %}
-              <p class="review-snippet">“{{ cafe.last_review.comment|truncatechars:80 }}”</p>
+              <p class="italic text-sm text-gray-600 mt-1">“{{ cafe.last_review.comment|truncatechars:80 }}”</p>
             {% endif %}
 
-            <div style="margin-top: 1rem;">
-              <a href="{% url 'cafe_detail' cafe.id %}" class="btn">Ver detalles</a>
-            </div>
+            <a href="{% url 'cafe_detail' cafe.id %}"
+               class="inline-block mt-3 bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition-all text-sm">Ver detalles</a>
           </div>
         </div>
-      {% empty %}
-        <p>No marcaste ninguna cafetería como favorita todavía.</p>
       {% endfor %}
     </div>
 
     {% if cafes.has_other_pages %}
-      <div class="pagination">
+      <div class="mt-6 flex justify-between items-center text-sm">
         {% if cafes.has_previous %}
-          <a href="?{% if orden_actual %}orden={{ orden_actual }}&{% endif %}{% if zona_actual %}zona={{ zona_actual }}&{% endif %}page={{ cafes.previous_page_number }}">« Anterior</a>
+          <a href="?{% if orden_actual %}orden={{ orden_actual }}&{% endif %}{% if zona_actual %}zona={{ zona_actual }}&{% endif %}page={{ cafes.previous_page_number }}"
+             class="text-blue-600 hover:underline">« Anterior</a>
         {% endif %}
 
         <span>Página {{ cafes.number }} de {{ cafes.paginator.num_pages }}</span>
 
         {% if cafes.has_next %}
-          <a href="?{% if orden_actual %}orden={{ orden_actual }}&{% endif %}{% if zona_actual %}zona={{ zona_actual }}&{% endif %}page={{ cafes.next_page_number }}">Siguiente »</a>
+          <a href="?{% if orden_actual %}orden={{ orden_actual }}&{% endif %}{% if zona_actual %}zona={{ zona_actual }}&{% endif %}page={{ cafes.next_page_number }}"
+             class="text-blue-600 hover:underline">Siguiente »</a>
         {% endif %}
       </div>
     {% endif %}
+  {% else %}
+    <p class="text-gray-500">No marcaste ninguna cafetería como favorita todavía.</p>
   {% endif %}
+</div>
 {% endblock %}

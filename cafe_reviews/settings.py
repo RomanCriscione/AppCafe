@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'core',
     'accounts',
     'reviews',
+    'widget_tweaks',
 ]
 
 AUTHENTICATION_BACKENDS = [

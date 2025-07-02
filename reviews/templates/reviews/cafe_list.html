@@ -1,260 +1,245 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block content %}
-  <div class="cafes-container">
-    <!-- Panel lateral -->
-    <aside class="filtros">
-      <h2>🔍 Filtros</h2>
-      <form method="get">
-        <label for="zona">Zona:</label>
-        <select name="zona" id="zona">
-          <option value="">Todas</option>
-          {% for z in zonas_disponibles %}
-            <option value="{{ z }}" {% if zona_seleccionada == z %}selected{% endif %}>{{ z }}</option>
-          {% endfor %}
-        </select>
+<div class="flex flex-col lg:flex-row gap-6 relative">
+    <!-- Botón de Filtros para Mobile -->
+  <button id="toggle-filtros" class="lg:hidden fixed bottom-4 right-4 z-50 bg-primary text-white p-3 rounded-full shadow-lg hover:bg-secondary transition">
+    🔍 Filtros
+  </button>
+    <!-- Overlay (fondo oscuro al abrir filtros en mobile) -->
+  <div id="filtros-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
 
-        <label for="orden">Orden:</label>
-        <select name="orden" id="orden">
-          <option value="">Nombre</option>
-          <option value="rating" {% if orden_actual == 'rating' %}selected{% endif %}>Puntuación</option>
-          <option value="reviews" {% if orden_actual == 'reviews' %}selected{% endif %}>Más reseñas</option>
-        </select>
-
-        <fieldset>
-          <legend>Características:</legend>
-          <label><input type="checkbox" name="vegan" {% if filtros_aplicados.is_vegan_friendly %}checked{% endif %}> Vegano friendly</label><br>
-          <label><input type="checkbox" name="pet" {% if filtros_aplicados.is_pet_friendly %}checked{% endif %}> Pet friendly</label><br>
-          <label><input type="checkbox" name="wifi" {% if filtros_aplicados.has_wifi %}checked{% endif %}> WiFi</label><br>
-          <label><input type="checkbox" name="outdoor" {% if filtros_aplicados.has_outdoor_seating %}checked{% endif %}> Mesas afuera</label>
-        </fieldset>
-
-        <fieldset style="margin-top: 1rem;">
-          <legend>Etiquetas:</legend>
-          {% for tag in tags %}
-            <label>
-              <input type="checkbox" name="tags" value="{{ tag.id }}" {% if tag.id in tags_seleccionados %}checked{% endif %}>
-              {{ tag.name }}
-            </label><br>
-          {% endfor %}
-        </fieldset>
-
-        <button type="submit" class="btn-filtrar">Aplicar filtros</button>
-      </form>
-    </aside>
-
-    <!-- Lista de cafés -->
-    <section class="lista-cafes">
-      <h1>Cafeterías</h1>
-
-      <!-- Botón para cafés cercanos SIEMPRE visible -->
-      <button onclick="obtenerCafesCercanos()" class="btn">📍 Ver cafés cerca mío</button>
-      <ul id="cafes-cercanos" style="margin-top: 1rem;"></ul>
-
-      {% if user.is_authenticated and user.is_owner %}
-        <p>
-          <a href="{% url 'create_cafe' %}" class="btn-agregar">➕ Agregar nueva cafetería</a>
-        </p>
-      {% endif %}
-
-      <div class="cafe-list-grid">
-        {% for cafe in cafes %}
-          <div class="cafe-card">
-            {% if cafe.photo1 %}
-              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="cafe-thumbnail">
-            {% endif %}
-            <div class="cafe-info">
-              <h3>
-                <a href="{% url 'cafe_detail' cafe.id %}">{{ cafe.name }}</a>
-                {% if user.is_authenticated %}
-                  <form method="post" action="{% url 'toggle_favorite' cafe.id %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="fav-btn" title="Favorito">
-                      {% if user in cafe.favorites.all %}
-                        ❤️
-                      {% else %}
-                        🤍
-                      {% endif %}
-                    </button>
-                  </form>
-                {% endif %}
-              </h3>
-              <p>📍 {{ cafe.address }}, {{ cafe.location }}</p>
-              <p>☎ {{ cafe.phone }}</p>
-              <p>📝 {{ cafe.total_reviews }} reseñas</p>
-              <p>
-                {% if cafe.average_rating %}
-                  ☕ {{ cafe.average_rating|floatformat:1 }}
-                {% else %}
-                  Sin puntuar
-                {% endif %}
-              </p>
-
-              {% if cafe.tags.all %}
-                <p>
-                  🏷️ Etiquetas:
-                  {% for tag in cafe.tags.all %}
-                    <span class="tag-label">{{ tag.name }}</span>
-                  {% endfor %}
-                </p>
-              {% endif %}
-
-              <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
-                target="_blank" class="btn-maps">📍 Ver en Google Maps</a>
-            </div>
-          </div>
-        {% empty %}
-          <p>No hay cafeterías que coincidan con los filtros.</p>
-        {% endfor %}
-      </div>
-    </section>
+  <!-- Filtros -->
+  <aside id="panel-filtros" class="lg:static fixed top-0 left-0 h-full w-4/5 max-w-xs bg-white p-4 rounded-lg shadow-lg z-50 transform -translate-x-full transition-transform lg:translate-x-0 lg:w-1/4 lg:h-auto lg:shadow-none animate-fade-in">
+  <!-- Encabezado para mobile -->
+  <div class="flex justify-between items-center lg:hidden mb-4">
+    <h2 class="text-xl font-semibold">🔍 Filtros</h2>
+    <button id="cerrar-filtros" class="text-gray-600 hover:text-black text-2xl">&times;</button>
   </div>
 
-  <!-- Script para ubicación -->
-  <script>
-    function obtenerCafesCercanos() {
+  <!-- Formulario de filtros -->
+  <form method="get" class="space-y-4">
+    <div>
+      <label for="zona" class="block font-medium">Zona:</label>
+      <select name="zona" id="zona" class="w-full mt-1 p-2 border rounded">
+        <option value="">Todas</option>
+        {% for z in zonas_disponibles %}
+          <option value="{{ z }}" {% if zona_seleccionada == z %}selected{% endif %}>{{ z }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label for="orden" class="block font-medium">Orden:</label>
+      <select name="orden" id="orden" class="w-full mt-1 p-2 border rounded">
+        <option value="algoritmo" {% if orden_actual == 'algoritmo' or not orden_actual %}selected{% endif %}>✨ Recomendadas</option>
+        <option value="rating" {% if orden_actual == 'rating' %}selected{% endif %}>Puntuación</option>
+        <option value="reviews" {% if orden_actual == 'reviews' %}selected{% endif %}>Más reseñas</option>
+        <option value="" {% if orden_actual == '' %}selected{% endif %}>Nombre</option>
+      </select>
+    </div>
+
+    <fieldset>
+      <legend class="font-medium">Características:</legend>
+      {% for key, label in caracteristicas %}
+        <label class="block"><input type="checkbox" name="{{ key }}" {% if filtros_aplicados|get_item:key %}checked{% endif %}> {{ label }}</label>
+      {% endfor %}
+    </fieldset>
+
+    <fieldset>
+      <legend class="font-medium">Etiquetas:</legend>
+      {% for tag in tags %}
+        <label class="block">
+          <input type="checkbox" name="tags" value="{{ tag.id }}" {% if tag.id in tags_seleccionados %}checked{% endif %}>
+          {{ tag.name }}
+        </label>
+      {% endfor %}
+    </fieldset>
+
+    <button type="submit" class="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition-colors">Aplicar filtros</button>
+  </form>
+</aside>
+
+  <!-- Lista de Cafés -->
+  <section class="lg:w-3/4">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold">Cafeterías</h1>
+      <div class="flex gap-3 items-center">
+        <form id="ubicacion-form" method="get" class="inline">
+          <input type="hidden" name="orden" value="algoritmo">
+          <input type="hidden" name="lat" id="lat">
+          <input type="hidden" name="lon" id="lon">
+          <button type="submit" class="bg-accent text-white px-3 py-2 rounded hover:bg-secondary transition-transform hover:scale-105">
+            📍 Cafés cerca mío
+          </button>
+        </form>
+
+        {% if mostrar_boton_reset %}
+          <a href="{% url 'cafe_list' %}" class="inline-block bg-gray-200 text-gray-800 px-3 py-2 rounded hover:bg-gray-300 transition-colors">
+            🔄 Ver todos los cafés
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div id="cafes-map" class="h-72 rounded mb-6"></div>
+
+    {% if cafes %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for cafe in cafes %}
+          <div class="relative bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full min-h-[400px]">
+            {% if cafe.id in favoritos_ids %}
+              <span class="absolute top-2 right-2 text-red-500 text-xl animate-fade-in z-10">❤️</span>
+            {% endif %}
+
+            {% if cafe.photo1 %}
+              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}"
+              class="w-full h-52 aspect-[4/3] object-cover rounded-lg mb-4 transition-transform duration-300 transform hover:scale-105 hover:shadow-lg hover:opacity-90">
+            {% else %}
+              <div class="w-full h-52 bg-gray-200 flex items-center justify-center rounded-lg mb-4 text-gray-500 text-3xl">
+                📷
+              </div>
+            {% endif %}
+
+            <div class="flex-grow flex flex-col justify-between">
+              <div>
+                <h2 class="text-xl font-semibold flex items-center">
+                  {{ cafe.name }}
+                  <span class="ml-2 text-sm text-gray-500">({{ cafe.location }})</span>
+                </h2>
+                <p class="text-sm text-gray-600 mb-1">📍 {{ cafe.address }}</p>
+                <p class="text-sm">☕ {{ cafe.average_rating|floatformat:1 }}</p>
+              </div>
+
+              <div class="mt-4">
+                <a href="{% url 'cafe_detail' cafe.id %}" class="inline-block text-blue-600 hover:underline text-sm font-medium">Ver detalles</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      </div>
+    {% else %}
+      <div class="text-center text-lg text-gray-600 mt-8 space-y-4">
+        <p>😕 No se encontraron cafeterías con los filtros seleccionados.</p>
+        <a href="{% url 'cafe_list' %}" class="inline-block bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition-colors">
+          Limpiar filtros
+        </a>
+      </div>
+    {% endif %}
+  </section>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const map = L.map('cafes-map').setView([-34.6037, -58.3816], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const cafes = JSON.parse(`{{ cafes_json|escapejs }}`);
+
+    cafes.forEach(cafe => {
+      if (cafe.latitude && cafe.longitude) {
+        const marker = L.marker([cafe.latitude, cafe.longitude]).addTo(map);
+        const popupContent = `
+          <strong>${cafe.name}</strong><br>
+          <a href="${cafe.url}">Ver detalle</a>
+        `;
+        marker.bindPopup(popupContent);
+      }
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const lat = urlParams.get("lat");
+    const lon = urlParams.get("lon");
+
+    if (lat && lon) {
+      const userLat = parseFloat(lat);
+      const userLon = parseFloat(lon); 
+
+      const cafesCercanos = cafes.filter(cafe =>
+        cafe.latitude && cafe.longitude &&
+        Math.sqrt(
+          Math.pow((cafe.latitude - userLat) * 111, 2) +
+          Math.pow((cafe.longitude - userLon) * 85, 2)
+        ) <= 3
+      );
+
+      const userMarker = L.marker([userLat, userLon], {
+        icon: L.icon({
+          iconUrl: "https://cdn-icons-png.flaticon.com/512/64/64113.png",
+          iconSize: [30, 30],
+          iconAnchor: [15, 30],
+          popupAnchor: [0, -30],
+          className: 'animated-bounce'
+        })
+      }).addTo(map);
+
+      userMarker.bindPopup(`📍 Estás aquí<br>${cafesCercanos.length} cafés cerca`).openPopup();
+
+      const circle = L.circle([userLat, userLon], {
+        radius: 3000,
+        color: cafesCercanos.length > 10 ? "#e76f51" : "#2a9d8f",
+        fillColor: cafesCercanos.length > 10 ? "#f4a261" : "#a8dadc",
+        fillOpacity: 0.3
+      }).addTo(map);
+
+      map.setView([userLat, userLon], 13);
+    }
+
+  });
+
+  const ubicacionForm = document.getElementById('ubicacion-form');
+  if (ubicacionForm) {
+    ubicacionForm.addEventListener('submit', function (e) {
+      e.preventDefault();
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(pos => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-
-          fetch(`/reviews/cafes/cercanos/?lat=${lat}&lon=${lon}`)
-            .then(res => res.json())
-            .then(data => {
-              const lista = document.getElementById('cafes-cercanos');
-              lista.innerHTML = "";
-              if (data.length === 0) {
-                lista.innerHTML = "<li>No se encontraron cafés cercanos.</li>";
-              } else {
-                data.forEach(cafe => {
-                  const li = document.createElement("li");
-                  li.innerHTML = `<a href="${cafe.url}">${cafe.name}</a> – ${cafe.distance_km} km`;
-                  lista.appendChild(li);
-                });
-              }
-            });
+          document.getElementById('lat').value = pos.coords.latitude;
+          document.getElementById('lon').value = pos.coords.longitude;
+          ubicacionForm.submit();
         }, () => {
           alert("No se pudo obtener tu ubicación.");
         });
       } else {
         alert("Tu navegador no soporta geolocalización.");
       }
-    }
-  </script>
+    });
+  }
 
-  <style>
-    .cafes-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
-    }
+  const panelFiltros = document.getElementById("panel-filtros");
+  const btnAbrir = document.getElementById("toggle-filtros");
+  const btnCerrar = document.getElementById("cerrar-filtros");
 
-    .filtros {
-      flex: 1 1 250px;
-      border: 1px solid #ccc;
-      padding: 1rem;
-      border-radius: 8px;
-      background: #f9f9f9;
-      min-width: 220px;
-    }
+  
+  if (btnCerrar) {
+    btnCerrar.addEventListener("click", () => {
+      panelFiltros.classList.add("-translate-x-full");
+    });
+  }
 
-    .lista-cafes {
-      flex: 3 1 600px;
-    }
+  const overlay = document.getElementById("filtros-overlay");
 
-    .btn-filtrar {
-      margin-top: 1rem;
-      padding: 6px 12px;
-      background: #333;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+if (btnAbrir && panelFiltros && overlay) {
+  btnAbrir.addEventListener("click", () => {
+    panelFiltros.classList.remove("-translate-x-full");
+    overlay.classList.remove("hidden");
+  });
 
-    .cafe-list-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-    }
+  btnCerrar.addEventListener("click", () => {
+    panelFiltros.classList.add("-translate-x-full");
+    overlay.classList.add("hidden");
+  });
 
-    .cafe-card {
-      display: flex;
-      gap: 1rem;
-      padding: 1rem;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      background-color: #fff;
-      align-items: flex-start;
-    }
+  overlay.addEventListener("click", () => {
+    panelFiltros.classList.add("-translate-x-full");
+    overlay.classList.add("hidden");
+  });
+}
 
-    .cafe-thumbnail {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    .cafe-info {
-      flex: 1;
-    }
-
-    .fav-btn {
-      font-size: 1.2rem;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      padding: 0;
-      margin-left: 5px;
-    }
-
-    .btn-agregar {
-      background-color: #4CAF50;
-      color: white;
-      padding: 8px 12px;
-      text-decoration: none;
-      border-radius: 5px;
-    }
-
-    .btn-maps {
-      background-color: #4285F4;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 4px;
-      text-decoration: none;
-      display: inline-block;
-      margin-top: 0.5rem;
-    }
-
-    .tag-label {
-      display: inline-block;
-      background-color: #eee;
-      padding: 2px 6px;
-      margin: 2px;
-      border-radius: 4px;
-      font-size: 0.85rem;
-    }
-
-    @media (max-width: 768px) {
-      .cafes-container {
-        flex-direction: column;
-      }
-
-      .filtros {
-        width: 100%;
-      }
-
-      .cafe-card {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-
-      .cafe-thumbnail {
-        width: 100%;
-        max-width: 300px;
-      }
-    }
-  </style>
+</script>
 {% endblock %}

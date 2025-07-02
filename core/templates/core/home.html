@@ -1,1 +1,203 @@
-<h1>Bienvenido a Cafe Reviews</h1>
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-cover bg-center py-20 text-center text-white" style="background-image: url('{% static 'images/coffee-hero.jpg' %}');">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="text-4xl md:text-5xl font-bold text-brown-900 mb-4">☕ Bienvenido a App Café</h1>
+    <p class="mb-6 text-lg">Descubrí, calificá y compartí tus cafeterías favoritas de Buenos Aires.</p>
+    <a class="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 inline-block" href="{% url 'cafe_list' %}">✨ Explorá Cafeterías</a>
+  </div>
+</section>
+
+<!-- Últimas Reseñas -->
+<section class="py-12 bg-orange-50 overflow-x-hidden">
+  <div class="max-w-6xl mx-auto px-4">
+    <h2 class="text-2xl font-semibold mb-6">📣 Últimas reseñas</h2>
+    {% if latest_reviews %}
+      <div class="swiper-container">
+        <div class="swiper-wrapper flex">
+          {% for review in latest_reviews %}
+            <div class="swiper-slide w-[300px] min-h-[180px] flex-shrink-0 bg-white rounded-lg shadow-md p-4 box-border">
+              <div class="flex gap-4 items-start h-full">
+                {% if review.cafe.photo1 %}
+                  <img alt="{{ review.cafe.name }}" class="w-20 h-20 object-cover rounded-md" loading="lazy" src="{{ review.cafe.photo1.url }}"/>
+                {% endif %}
+                <div class="flex flex-col justify-between">
+                  <p class="font-semibold leading-snug">
+                    {{ review.user.username }} reseñó 
+                    <a class="text-blue-600 hover:underline" href="{% url 'cafe_detail' review.cafe.id %}">{{ review.cafe.name }}</a>
+                  </p>
+                  <p class="text-sm">☕ {{ review.rating }}</p>
+                  <p class="text-sm text-gray-700">{{ review.comment|truncatewords:20 }}</p>
+                  <p class="text-xs text-gray-500">{{ review.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="swiper-button-next text-brown-900"></div>
+        <div class="swiper-button-prev text-brown-900"></div>
+        <div class="swiper-pagination"></div>
+      </div>
+    {% else %}
+      <p>No hay reseñas aún.</p>
+    {% endif %}
+  </div>
+</section>
+
+<!-- CTA: Dejá tu reseña -->
+<section class="py-12 bg-white text-center">
+  <div class="max-w-xl mx-auto">
+    <h3 class="text-xl font-semibold mb-4">✨ ¿Todavía no calificaste tu café favorito?</h3>
+    <p class="mb-6 text-gray-700">Animate a dejar tu primera reseña y ayudá a otros a descubrir buenos lugares.</p>
+    <a class="bg-primary hover:bg-secondary text-white py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105" href="{% url 'cafe_list' %}">
+      Dejar una reseña
+    </a>
+  </div>
+</section>
+
+<!-- Cafeterías destacadas -->
+<section class="py-12 bg-white">
+  <div class="max-w-6xl mx-auto px-4 text-center">
+    <h2 class="text-2xl font-semibold mb-6">🏆 Cafeterías destacadas</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {% for cafe in top_cafes %}
+        <div class="relative bg-gray-50 rounded-lg shadow hover:shadow-lg p-4 transition-transform transform hover:-translate-y-1">
+          <span class="absolute top-2 left-2 bg-yellow-400 text-xs font-bold px-2 py-1 rounded-full shadow text-white">TOP ⭐</span>
+          {% if cafe.photo1 %}
+            <img alt="{{ cafe.name }}" class="w-full h-40 object-cover rounded-md mb-3" loading="lazy" src="{{ cafe.photo1.url }}"/>
+          {% else %}
+            <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-2xl rounded-md mb-3">📷</div>
+          {% endif %}
+          <h3 class="text-lg font-semibold mb-1">
+            <a class="hover:underline text-primary" href="{% url 'cafe_detail' cafe.id %}">{{ cafe.name }}</a>
+          </h3>
+          <p class="text-sm text-gray-600">
+            ☕ <span class="font-bold text-yellow-600">{{ cafe.average_rating|floatformat:1 }}/5</span> · {{ cafe.location }}
+          </p>
+          {% if cafe.tags.all %}
+            <div class="mt-2 flex flex-wrap justify-center gap-2">
+              {% for tag in cafe.tags.all|slice:":3" %}
+                <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ tag.name }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <div class="mt-8">
+      <a class="inline-block bg-primary hover:bg-secondary text-white font-semibold px-6 py-3 rounded-full transition-colors duration-300 shadow" href="{% url 'cafe_list' %}">
+        Ver más cafeterías →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Mapa interactivo con todos los cafés -->
+<section class="py-12 bg-white">
+  <div class="max-w-6xl mx-auto px-4">
+    <h2 class="text-2xl font-semibold mb-6 text-center">🗺️ Mapa de Cafeterías</h2>
+    <div class="relative w-full rounded shadow overflow-hidden">
+      <div id="home-map" class="h-[400px] sm:h-[450px] md:h-[500px] lg:h-[600px] w-full z-0"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const map = L.map('home-map').setView([-34.6037, -58.3816], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const coffeeIcon = L.icon({
+      iconUrl: "{% static 'images/coffee-icon.png' %}",
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32],
+    });
+
+    const cafes = JSON.parse(`{{ cafes_json|escapejs }}`);
+
+    cafes.forEach(cafe => {
+      if (cafe.latitude && cafe.longitude) {
+        const marker = L.marker([cafe.latitude, cafe.longitude], { icon: coffeeIcon }).addTo(map);
+
+        const popupContent = `
+          <div style="min-width: 150px;">
+            <h3 style="font-size: 16px; font-weight: bold;">☕ ${cafe.name}</h3>
+            <a href="${cafe.url}" style="color: #4f46e5; text-decoration: underline;">Ver detalle</a>
+          </div>
+        `;
+        marker.bindPopup(popupContent);
+      }
+    });
+  });
+</script>
+
+<!-- Zona -->
+<section class="py-12 bg-orange-50 text-center">
+  <h2 class="text-2xl font-semibold mb-4">🗺️ Explorá por zona</h2>
+  <p class="text-gray-700 mb-6">Filtrá las mejores cafeterías por barrio o cercanía.</p>
+  <div class="flex flex-wrap justify-center gap-4">
+    <a class="px-4 py-2 bg-white border border-primary text-primary rounded hover:bg-primary hover:text-white transition" href="{% url 'cafe_list' %}?zona=Palermo">Palermo</a>
+    <a class="px-4 py-2 bg-white border border-primary text-primary rounded hover:bg-primary hover:text-white transition" href="{% url 'cafe_list' %}?zona=Recoleta">Recoleta</a>
+    <a class="px-4 py-2 bg-white border border-primary text-primary rounded hover:bg-primary hover:text-white transition" href="{% url 'cafe_list' %}?zona=Belgrano">Belgrano</a>
+    <a class="px-4 py-2 bg-white border border-primary text-primary rounded hover:bg-primary hover:text-white transition" href="{% url 'cafe_list' %}?zona=San Telmo">San Telmo</a>
+    <a class="px-4 py-2 bg-white border border-primary text-primary rounded hover:bg-primary hover:text-white transition" href="{% url 'cafe_list' %}?zona=Colegiales">Colegiales</a>
+    <a class="px-4 py-2 bg-white border border-primary text-primary rounded hover:bg-primary hover:text-white transition" href="{% url 'cafe_list' %}?zona=Villa Crespo">Villa Crespo</a>
+  </div>
+</section>
+
+<!-- Beneficios -->
+<section class="py-16 bg-white">
+  <div class="container mx-auto text-center px-4">
+    <h2 class="text-3xl font-bold mb-10 text-primary">☕ ¿Por qué elegir App Café?</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="p-6 bg-orange-50 rounded-xl shadow hover:shadow-lg transition">
+        <i class="fas fa-map-marker-alt text-4xl text-accent mb-4"></i>
+        <h3 class="text-xl font-semibold mb-2">Explorá Cafeterías</h3>
+        <p>Encontrá los mejores cafés de tu zona con reseñas reales y fotos.</p>
+      </div>
+      <div class="p-6 bg-orange-50 rounded-xl shadow hover:shadow-lg transition">
+        <i class="fas fa-heart text-4xl text-accent mb-4"></i>
+        <h3 class="text-xl font-semibold mb-2">Guardá tus Favoritos</h3>
+        <p>Marcá tus lugares preferidos y volvé cuando quieras.</p>
+      </div>
+      <div class="p-6 bg-orange-50 rounded-xl shadow hover:shadow-lg transition">
+        <i class="fas fa-star text-4xl text-accent mb-4"></i>
+        <h3 class="text-xl font-semibold mb-2">Dejá tu Opinión</h3>
+        <p>Compartí tu experiencia con la comunidad cafetera.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Cafés Vistos Recientemente -->
+{% if recently_viewed_cafes %}
+<section class="py-12 bg-orange-50">
+  <div class="max-w-6xl mx-auto px-4">
+    <h2 class="text-2xl font-semibold mb-6">👀 Cafés que visitaste recientemente</h2>
+    <div class="swiper-container">
+      <div class="swiper-wrapper flex">
+        {% for cafe in recently_viewed_cafes %}
+          <div class="swiper-slide w-[300px] min-h-[180px] flex-shrink-0 bg-white rounded-lg shadow-md p-4 box-border">
+            {% if cafe.photo1 %}
+              <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}" class="w-full h-40 object-cover rounded mb-2">
+            {% endif %}
+            <h3 class="font-bold text-lg"><a href="{% url 'cafe_detail' cafe.id %}" class="hover:underline text-primary">{{ cafe.name }}</a></h3>
+            <p class="text-sm text-gray-600">📍 {{ cafe.address }}</p>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="swiper-button-next text-brown-900"></div>
+      <div class="swiper-button-prev text-brown-900"></div>
+      <div class="swiper-pagination"></div>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

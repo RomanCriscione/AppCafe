@@ -1,12 +1,12 @@
 from django.urls import path
 from . import views
-from .views import ReviewListView, ReviewCreateView, CreateCafeView, favorite_cafes, toggle_favorite
+from .views import ReviewListView, ReviewCreateView, CreateCafeView, favorite_cafes, toggle_favorite, mapa_cafes, CafeListView
 
 
 urlpatterns = [
     path('', ReviewListView.as_view(), name='review_list'),
     path('nueva/', ReviewCreateView.as_view(), name='create_review'),
-    path('cafes/', views.cafe_list, name='cafe_list'),
+    path('cafes/', CafeListView.as_view(), name='cafe_list'),
     path('cafes/<int:cafe_id>/', views.cafe_detail, name='cafe_detail'),
     path('cafes/<int:cafe_id>/fotos/', views.upload_photos, name='upload_photos'),
     path('cafes/nueva/', CreateCafeView.as_view(), name='create_cafe'),
@@ -20,5 +20,9 @@ urlpatterns = [
     path('cafes/<int:cafe_id>/toggle_favorite/', toggle_favorite, name='toggle_favorite'),
     path('owner/replies/<int:review_id>/', views.edit_owner_reply, name='edit_owner_reply'),
     path('cafes/cercanos/', views.nearby_cafes, name='nearby_cafes'),
+    path('owner/cambiar_visibilidad/<int:cafe_id>/', views.cambiar_visibilidad, name='cambiar_visibilidad'),
+    path('planes/', views.planes_view, name='planes'),
+    path('mapa/', mapa_cafes, name='mapa_cafes'),
+
 
 ]

@@ -9,119 +9,234 @@ from django.core.exceptions import PermissionDenied
 from collections import defaultdict
 from .models import Review, Cafe
 from .forms import ReviewForm, CafeForm
-import os
+import os, json, math
 from django.core.paginator import Paginator
 from .models import Tag
 from django.http import JsonResponse
 from math import radians, cos, sin, asin, sqrt
+from django.core.serializers.json import DjangoJSONEncoder
+from django.http import HttpResponseForbidden
+from reviews.utils.geo import haversine_distance
 
 
 # Listar reseñas agrupadas por zona
-def review_list(request):
-    all_reviews = Review.objects.select_related('cafe', 'user').order_by('-created_at')
-    reseñas_por_zona = defaultdict(list)
-
-    for review in all_reviews:
-        zona = review.cafe.location or 'Sin zona'
-        reseñas_por_zona[zona].append(review)
-
-    return render(request, 'reviews/review_list.html', {
-        'reseñas_por_zona': dict(reseñas_por_zona)
-    })
-
-# Versión class-based no utilizada
 class ReviewListView(ListView):
     model = Review
     template_name = 'reviews/review_list.html'
     context_object_name = 'reviews'
+    ordering = ['-created_at']
 
-# Listar cafeterías con filtros
-def cafe_list(request):
-    zona = request.GET.get('zona')
-    orden = request.GET.get('orden')
+    def get_queryset(self):
+        return Review.objects.select_related('cafe', 'user')
 
-    filtros = {
-        'is_vegan_friendly': request.GET.get('vegan') == 'on',
-        'is_pet_friendly': request.GET.get('pet') == 'on',
-        'has_wifi': request.GET.get('wifi') == 'on',
-        'has_outdoor_seating': request.GET.get('outdoor') == 'on',
-    }
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        reseñas_por_zona = defaultdict(list)
 
-    todos_los_tags = Tag.objects.all()
-    tags_seleccionados = request.GET.getlist('tags')
+        for review in context['reviews']:
+            zona = review.cafe.location or 'Sin zona'
+            reseñas_por_zona[zona].append(review)
 
-    if tags_seleccionados:
-        cafes = cafes.filter(tags__id__in=tags_seleccionados).distinct()
+        context['reseñas_por_zona'] = dict(reseñas_por_zona)
+        return context
 
-    cafes = Cafe.objects.all()
 
-    if zona:
-        cafes = cafes.filter(location=zona)
+class CafeListView(ListView):
+    model = Cafe
+    template_name = 'reviews/cafe_list.html'
+    context_object_name = 'cafes'
 
-    for key, value in filtros.items():
-        if value:
-            cafes = cafes.filter(**{key: True})
+    def get_queryset(self):
+        request = self.request
+        zona = request.GET.get('zona')
+        orden = request.GET.get('orden')
+        lat = request.GET.get('lat')
+        lon = request.GET.get('lon')
 
-    cafes = cafes.annotate(
-        average_rating=Avg('reviews__rating'),
-        total_reviews=Count('reviews')
-    )
+        filtros = {
+            'is_vegan_friendly': request.GET.get('vegan') == 'on',
+            'is_pet_friendly': request.GET.get('pet') == 'on',
+            'has_wifi': request.GET.get('wifi') == 'on',
+            'has_outdoor_seating': request.GET.get('outdoor') == 'on',
+            'has_parking': request.GET.get('has_parking') == 'on',
+            'is_accessible': request.GET.get('is_accessible') == 'on',
+            'has_vegetarian_options': request.GET.get('has_vegetarian_options') == 'on',
+            'serves_breakfast': request.GET.get('serves_breakfast') == 'on',
+            'serves_alcohol': request.GET.get('serves_alcohol') == 'on',
+            'has_books_or_games': request.GET.get('has_books_or_games') == 'on',
+            'has_air_conditioning': request.GET.get('has_air_conditioning') == 'on',
+        }
 
-    if orden == 'rating':
-        cafes = cafes.order_by('-average_rating')
-    elif orden == 'reviews':
-        cafes = cafes.order_by('-total_reviews')
-    else:
-        cafes = cafes.order_by('name')
+        cafes = Cafe.objects.all()
 
-    zonas_disponibles = Cafe.objects.values_list('location', flat=True).distinct().order_by('location')
+        if zona:
+            cafes = cafes.filter(location=zona)
 
-    return render(request, 'reviews/cafe_list.html', {
-        'cafes': cafes,
-        'zonas_disponibles': zonas_disponibles,
-        'zona_seleccionada': zona,
-        'orden_actual': orden,
-        'filtros_aplicados': filtros,
-        'tags': todos_los_tags,
-        'tags_seleccionados': [int(t) for t in tags_seleccionados],
-})
+        for key, value in filtros.items():
+            if value:
+                cafes = cafes.filter(**{key: True})
+
+        tags_seleccionados = request.GET.getlist('tags')
+        if tags_seleccionados:
+            cafes = cafes.filter(tags__id__in=tags_seleccionados).distinct()
+
+        cafes = cafes.annotate(
+            average_rating=Avg('reviews__rating'),
+            total_reviews=Count('reviews')
+        ).prefetch_related('favorites')
+
+        if orden == 'rating':
+            cafes = cafes.order_by('-average_rating')
+        elif orden == 'reviews':
+            cafes = cafes.order_by('-total_reviews')
+        elif orden == 'algoritmo':
+            cafes = list(cafes)
+            for cafe in cafes:
+                rating = cafe.average_rating or 0
+                reviews = cafe.total_reviews or 0
+                fotos = sum(bool(getattr(cafe, f'photo{i}')) for i in range(1, 4))
+                favs = cafe.favorites.count()
+                caracteristicas_count = sum([
+                    cafe.is_vegan_friendly,
+                    cafe.is_pet_friendly,
+                    cafe.has_wifi,
+                    cafe.has_outdoor_seating,
+                    cafe.has_parking,
+                    cafe.is_accessible,
+                    cafe.has_vegetarian_options,
+                    cafe.serves_breakfast,
+                    cafe.serves_alcohol,
+                    cafe.has_books_or_games,
+                    cafe.has_air_conditioning
+                ])
+
+                score_base = (
+                    rating * 2 +
+                    reviews * 0.7 +
+                    fotos * 1 +
+                    favs * 0.6 +
+                    caracteristicas_count * 0.3
+                )
+
+                if cafe.visibility_level == 1:
+                    cafe.score = score_base * 1.10
+                elif cafe.visibility_level == 2:
+                    cafe.score = score_base * 1.20
+                else:
+                    cafe.score = score_base
+
+            cafes.sort(key=lambda c: c.score, reverse=True)
+        else:
+            cafes = cafes.order_by('name')
+
+        # Filtro por ubicación
+        if lat and lon:
+            try:
+                lat = float(lat)
+                lon = float(lon)
+                cafes = [
+                    cafe for cafe in cafes
+                    if cafe.latitude and cafe.longitude and
+                    haversine_distance(lat, lon, cafe.latitude, cafe.longitude) <= 3
+                ]
+            except ValueError:
+                pass
+
+        self._cafes_finales = cafes  # guardar para usar en context
+        return cafes
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        request = self.request
+
+        context['zonas_disponibles'] = Cafe.objects.values_list('location', flat=True).distinct().order_by('location')
+        context['zona_seleccionada'] = request.GET.get('zona')
+        context['orden_actual'] = request.GET.get('orden')
+        context['filtros_aplicados'] = {
+            'vegan': request.GET.get('vegan'),
+            'pet': request.GET.get('pet'),
+            'wifi': request.GET.get('wifi'),
+            'outdoor': request.GET.get('outdoor'),
+            'has_parking': request.GET.get('has_parking'),
+            'is_accessible': request.GET.get('is_accessible'),
+            'has_vegetarian_options': request.GET.get('has_vegetarian_options'),
+            'serves_breakfast': request.GET.get('serves_breakfast'),
+            'serves_alcohol': request.GET.get('serves_alcohol'),
+            'has_books_or_games': request.GET.get('has_books_or_games'),
+            'has_air_conditioning': request.GET.get('has_air_conditioning'),
+        }
+        context['caracteristicas'] = [
+            ('vegan', 'Vegano friendly'),
+            ('pet', 'Pet friendly'),
+            ('wifi', 'WiFi'),
+            ('outdoor', 'Mesas afuera'),
+            ('has_parking', 'Estacionamiento disponible'),
+            ('is_accessible', 'Accesible'),
+            ('has_vegetarian_options', 'Opciones vegetarianas'),
+            ('serves_breakfast', 'Sirve desayuno'),
+            ('serves_alcohol', 'Sirve alcohol'),
+            ('has_books_or_games', 'Libros o juegos disponibles'),
+            ('has_air_conditioning', 'Aire acondicionado'),
+        ]
+        context['tags'] = Tag.objects.all()
+        context['tags_seleccionados'] = [int(t) for t in self.request.GET.getlist('tags')]
+
+        context['cafes_json'] = json.dumps([
+            {
+                'id': cafe.id,
+                'name': cafe.name,
+                'latitude': cafe.latitude,
+                'longitude': cafe.longitude,
+                'address': cafe.address,
+                'url': reverse_lazy('cafe_detail', args=[cafe.id]),
+            } for cafe in self._cafes_finales if cafe.latitude and cafe.longitude
+        ], cls=DjangoJSONEncoder)
+
+        if request.user.is_authenticated:
+            context['favoritos_ids'] = list(request.user.favorite_cafes.values_list('id', flat=True))
+        else:
+            context['favoritos_ids'] = []
+
+        context['mostrar_boton_reset'] = bool(request.GET.get('lat')) and bool(request.GET.get('lon'))
+
+        return context
 
 
 # Detalle de cafetería + dejar o editar reseña
 def cafe_detail(request, cafe_id):
-    cafe = get_object_or_404(Cafe, pk=cafe_id)
-    reviews = Review.objects.filter(cafe=cafe).order_by('-created_at')
-    average_rating = reviews.aggregate(Avg('rating'))['rating__avg']
+    cafe = get_object_or_404(Cafe, id=cafe_id)
+    reviews = cafe.reviews.select_related("user").order_by("-created_at")
 
-    existing_review = None
-    if request.user.is_authenticated:
-        try:
-            existing_review = Review.objects.get(cafe=cafe, user=request.user)
-        except Review.DoesNotExist:
-            pass
+    # Calcular promedio y mejor reseña
+    ratings = [review.rating for review in reviews]
+    average_rating = round(mean(ratings), 1) if ratings else None
+    best_review = reviews[0] if reviews else None
 
-    if request.method == 'POST' and request.user.is_authenticated:
-        form = ReviewForm(request.POST, instance=existing_review)
+    # 👉 Guardar el café en sesión como "visto recientemente"
+    viewed = request.session.get("recently_viewed", [])
+    if cafe.id in viewed:
+        viewed.remove(cafe.id)
+    viewed.insert(0, cafe.id)
+    request.session["recently_viewed"] = viewed[:5]
+
+    # Manejo del formulario de reseña
+    if request.method == "POST":
+        form = ReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)
-            review.cafe = cafe
             review.user = request.user
-            review.location = cafe.location
+            review.cafe = cafe
             review.save()
-            messages.success(request, "¡Gracias por tu reseña!")
-            return redirect('cafe_detail', cafe_id=cafe.id)
+            return redirect("cafe_detail", cafe_id=cafe.id)
     else:
-        form = ReviewForm(instance=existing_review)
+        form = ReviewForm()
 
-    best_review = reviews.order_by('-rating', '-created_at').first()
-
-    return render(request, 'reviews/cafe_detail.html', {
-        'cafe': cafe,
-        'reviews': reviews,
-        'form': form,
-        'existing_review': existing_review,
-        'average_rating': average_rating,
-        'best_review': best_review,
+    return render(request, "reviews/cafe_detail.html", {
+        "cafe": cafe,
+        "reviews": reviews,
+        "average_rating": average_rating,
+        "best_review": best_review,
+        "form": form,
     })
 
 # Responder a una reseña (dueño)
@@ -174,7 +289,7 @@ def owner_reviews(request):
     reseñas_por_cafe = {}
 
     for cafe in cafes:
-        reviews = cafe.reviews.select_related('user').order_by('-created_at')
+        reviews = cafe.reviews.select_related('user').order_by('-rating', '-created_at')
         average_rating = reviews.aggregate(avg=Avg('rating'))['avg']
         reseñas_por_cafe[cafe] = {
             'reviews': reviews,
@@ -204,7 +319,10 @@ class CreateCafeView(LoginRequiredMixin, CreateView):
 # Editar cafetería
 @login_required
 def edit_cafe(request, cafe_id):
-    cafe = get_object_or_404(Cafe, id=cafe_id, owner=request.user)
+    cafe = get_object_or_404(Cafe, id=cafe_id)
+
+    if request.user != cafe.owner:
+        raise PermissionDenied("No tenés permiso para editar esta cafetería.")
 
     if request.method == 'POST':
         form = CafeForm(request.POST, request.FILES, instance=cafe)
@@ -373,3 +491,79 @@ def nearby_cafes(request):
     ]
 
     return JsonResponse(data, safe=False)
+
+# Función reutilizable para asignar plan de visibilidad
+def asignar_plan(cafe, nivel):
+    if nivel in [0, 1, 2]:
+        cafe.visibility_level = nivel
+        cafe.save()
+        return True
+    return False
+
+@login_required
+def cambiar_visibilidad(request, cafe_id):
+    cafe = get_object_or_404(Cafe, id=cafe_id)
+
+    if request.user != cafe.owner:
+        return HttpResponseForbidden("No tenés permiso para editar este café.")
+
+    if request.method == 'POST':
+        try:
+            nuevo_nivel = int(request.POST.get('visibility_level'))
+            if asignar_plan(cafe, nuevo_nivel):
+                messages.success(request, "Nivel de visibilidad actualizado.")
+            else:
+                messages.error(request, "Nivel inválido.")
+        except (ValueError, TypeError):
+            messages.error(request, "Nivel inválido.")
+
+    return redirect('owner_dashboard')
+
+
+@login_required
+def planes_view(request):
+    if not request.user.is_owner:
+        raise PermissionDenied("Solo los dueños pueden ver los planes.")
+
+    if request.method == 'POST':
+        cafe_id = request.POST.get('cafe_id')
+        nivel = request.POST.get('nivel')
+        cafe = get_object_or_404(Cafe, id=cafe_id, owner=request.user)
+
+        try:
+            nivel = int(nivel)
+            # TODO: Integrar con pasarela de pago aquí en el futuro
+            if asignar_plan(cafe, nivel):
+                nombres_planes = {
+                    0: "☕ Gratuito – nivel base",
+                    1: "☕ Plan Barista – intermedio",
+                    2: "☕☕ Plan Maestro – nivel superior"
+                }
+                messages.success(request, f"{cafe.name} actualizado al plan: {nombres_planes[nivel]}")
+            else:
+                messages.error(request, "Nivel inválido.")
+        except ValueError:
+            messages.error(request, "Nivel inválido.")
+
+        return redirect('planes')
+
+    cafes = Cafe.objects.filter(owner=request.user)
+    return render(request, 'reviews/planes.html', {'cafes': cafes})
+
+def mapa_cafes(request):
+    cafes = Cafe.objects.exclude(latitude__isnull=True, longitude__isnull=True)
+    cafes_data = [
+        {
+            'id': cafe.id,
+            'name': cafe.name,
+            'latitude': cafe.latitude,
+            'longitude': cafe.longitude,
+            'address': cafe.address,
+            'location': cafe.location,
+            'url': reverse_lazy('cafe_detail', args=[cafe.id]),
+        }
+        for cafe in cafes
+    ]
+    return render(request, 'reviews/mapa_cafes.html', {
+        'cafes_json': json.dumps(cafes_data, cls=DjangoJSONEncoder),
+    })

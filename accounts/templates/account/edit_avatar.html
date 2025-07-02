@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-10 bg-white shadow-md rounded-lg p-6">
+<h2 class="text-xl font-semibold mb-6 text-center">👤 Cambiar avatar</h2>
+<form class="space-y-4" enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+    <div class="space-y-2">
+      {{ form.as_p }}
+    </div>
+<button class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition" type="submit">
+      Guardar cambios
+    </button>
+</form>
+
+  {% if user.avatar %}
+    <div class="mt-6 text-center">
+<h3 class="text-lg font-medium mb-2">Avatar actual:</h3>
+<img alt="Avatar" class="w-32 h-32 rounded-full object-cover mx-auto shadow" loading="lazy" src="{{ user.avatar.url }}"/>
+</div>
+  {% endif %}
+</div>
+{% endblock %}

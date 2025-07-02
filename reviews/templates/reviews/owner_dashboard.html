@@ -2,137 +2,83 @@
 {% load static %}
 
 {% block content %}
-  <h1>Panel de dueño de cafeterías</h1>
+  <div class="max-w-4xl mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-6">Panel de dueño de cafeterías</h1>
 
-  <p><a href="{% url 'create_cafe' %}" class="btn-add-cafe">➕ Agregar nueva cafetería</a></p>
-  <p><a href="{% url 'owner_reviews' %}" class="btn-view-reviews">📋 Ver todas las reseñas</a></p>
+    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+      <a href="{% url 'create_cafe' %}" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-center">
+        ➕ Agregar nueva cafetería
+      </a>
+      <a href="{% url 'owner_reviews' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-center">
+        📋 Ver todas las reseñas
+      </a>
+      <a href="{% url 'planes' %}" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded text-center">
+        💼 Planes para crecer
+      </a>
+    </div>
 
-  {% if cafes %}
-    <ul class="cafe-list">
-      {% for cafe in cafes %}
-        <li class="cafe-item">
-          <div class="cafe-info">
-            <strong>{{ cafe.name }}</strong> ({{ cafe.location }})<br>
-            📍 {{ cafe.address }}<br>
+    {% if cafes %}
+      <ul class="space-y-6">
+        {% for cafe in cafes %}
+          <li class="border border-gray-300 rounded-lg p-4 bg-white shadow-sm">
+            <div class="flex flex-col gap-2">
+              <h3 class="text-lg font-semibold">
+                {{ cafe.name }} –
+                {% if cafe.visibility_level == 2 %}
+                  ☕☕ Plan Maestro
+                {% elif cafe.visibility_level == 1 %}
+                  ☕ Plan Barista
+                {% else %}
+                  ☕ Gratuito
+                {% endif %}
+              </h3>
 
-            {% if cafe.photo1 %}
-              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="miniatura-cafe">
-            {% endif %}
+              <p class="text-sm text-gray-600"><strong>{{ cafe.location }}</strong></p>
+              <p class="text-sm text-gray-600">📍 {{ cafe.address }}</p>
 
-            {% if cafe.average_rating %}
-              ☕ {{ cafe.average_rating|floatformat:1 }}
-            {% else %}
-              ☕ Sin puntuar
-            {% endif %}<br>
+              {% if cafe.photo1 %}
+                <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="w-32 h-auto rounded shadow" loading="lazy">
+              {% endif %}
 
-            🧾 Reseñas: {{ cafe.total_reviews }}<br>
+              <p>
+                {% if cafe.average_rating %}
+                  ☕ {{ cafe.average_rating|floatformat:1 }}
+                {% else %}
+                  ☕ Sin puntuar
+                {% endif %}
+              </p>
 
-            <div class="cafe-actions">
-              <a href="{% url 'cafe_detail' cafe.id %}" class="action-link">🔍 Ver detalles</a>
-              <a href="{% url 'edit_cafe' cafe.id %}" class="action-link">✏️ Editar</a>
-              <form action="{% url 'delete_cafe' cafe.id %}" method="post" class="delete-form">
+              <p>🧾 Reseñas: {{ cafe.total_reviews }}</p>
+
+              <form method="post" action="{% url 'cambiar_visibilidad' cafe.id %}" class="flex items-center gap-2 flex-wrap">
                 {% csrf_token %}
-                <button type="submit" onclick="return confirm('¿Estás seguro de eliminar esta cafetería?')" class="delete-button">🗑️ Eliminar</button>
+                <label for="visibility_{{ cafe.id }}" class="text-sm font-medium">Cambiar plan:</label>
+                <select name="visibility_level" id="visibility_{{ cafe.id }}" class="border border-gray-300 rounded px-2 py-1">
+                  <option value="0" {% if cafe.visibility_level == 0 %}selected{% endif %}>☕ Gratuito – nivel base</option>
+                  <option value="1" {% if cafe.visibility_level == 1 %}selected{% endif %}>☕ Plan Barista – intermedio</option>
+                  <option value="2" {% if cafe.visibility_level == 2 %}selected{% endif %}>☕☕ Plan Maestro – nivel superior</option>
+                </select>
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm">
+                  Aplicar
+                </button>
               </form>
+
+              <div class="flex gap-4 flex-wrap mt-3">
+                <a href="{% url 'cafe_detail' cafe.id %}" class="text-blue-600 hover:underline font-medium">🔍 Ver detalles</a>
+                <a href="{% url 'edit_cafe' cafe.id %}" class="text-yellow-600 hover:underline font-medium">✏️ Editar</a>
+                <form action="{% url 'delete_cafe' cafe.id %}" method="post" class="inline">
+                  {% csrf_token %}
+                  <button type="submit" onclick="return confirm('¿Estás seguro de eliminar esta cafetería?')" class="text-red-600 hover:underline font-medium">
+                    🗑️ Eliminar
+                  </button>
+                </form>
+              </div>
             </div>
-          </div>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No tenés cafeterías registradas todavía.</p>
-  {% endif %}
-
-  <style>
-    .btn-add-cafe {
-      padding: 8px 16px;
-      background-color: #4CAF50;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      display: inline-block;
-      margin-bottom: 1rem;
-    }
-
-    .btn-view-reviews {
-      background-color: #007bff;
-      color: white;
-      padding: 8px 16px;
-      text-decoration: none;
-      border-radius: 5px;
-      font-weight: bold;
-    }
-
-    .btn-view-reviews:hover {
-      background-color: #0056b3;
-    }
-
-    .cafe-list {
-      padding: 0;
-      list-style: none;
-    }
-
-    .cafe-item {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 1rem;
-      background-color: #f9f9f9;
-    }
-
-    .miniatura-cafe {
-      width: 120px;
-      height: auto;
-      border-radius: 6px;
-      margin: 6px 0;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    }
-
-    .cafe-actions {
-      margin-top: 0.5rem;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .action-link {
-      color: #007bff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .action-link:hover {
-      text-decoration: underline;
-    }
-
-    .delete-form {
-      display: inline;
-    }
-
-    .delete-button {
-      background: none;
-      border: none;
-      color: red;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    @media (max-width: 600px) {
-      .cafe-item {
-        font-size: 0.95em;
-      }
-
-      .miniatura-cafe {
-        width: 100%;
-        max-width: 100%;
-        height: auto;
-      }
-
-      .cafe-actions {
-        flex-direction: column;
-        gap: 5px;
-      }
-    }
-  </style>
-
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-gray-600">No tenés cafeterías registradas todavía.</p>
+    {% endif %}
+  </div>
 {% endblock %}

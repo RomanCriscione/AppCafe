@@ -2,50 +2,30 @@
 {% load static %}
 
 {% block content %}
-  <h2>Dejá tu reseña</h2>
+  <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
+<h2 class="text-2xl font-bold mb-4 text-center">📝 Dejá tu reseña</h2>
+<form class="space-y-4" method="post">
+      {% csrf_token %}
 
-  <form method="post">
-    {% csrf_token %}
-    {{ form.comment.label_tag }}<br>
-    {{ form.comment }}<br><br>
-
-    {{ form.rating.label_tag }}<br>
-    <div class="rating-input" title="Seleccioná una puntuación del 1 al 5">
-      {% for i in "54321" %}
-        <input type="radio" name="rating" value="{{ i }}" id="rating{{ i }}" {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
-        <label for="rating{{ i }}">☕</label>
-      {% endfor %}
-    </div>
-
-    <br>
-    <button type="submit">Enviar</button>
-  </form>
-
-  <p><a href="{% url 'review_list' %}">Volver al listado</a></p>
-
-  <style>
-    .rating-input {
-      display: flex;
-      flex-direction: row-reverse;
-      justify-content: flex-start;
-      gap: 0.3rem;
-      font-size: 2rem;
-    }
-
-    .rating-input input[type="radio"] {
-      display: none;
-    }
-
-    .rating-input label {
-      color: #ccc;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-
-    .rating-input input[type="radio"]:checked ~ label,
-    .rating-input label:hover,
-    .rating-input label:hover ~ label {
-      color: #c47f00;
-    }
-  </style>
+      <div>
+<label class="block font-medium">{{ form.comment.label }}</label>
+        {{ form.comment|add_class:"w-full mt-1 p-2 border rounded" }}
+      </div>
+<div>
+<label class="block font-medium">Puntuación:</label>
+<div class="flex flex-row-reverse justify-start gap-1 text-2xl">
+          {% for i in "54321" %}
+            <input %}="" %}checked{%="" class="hidden" endif="" form.rating.value|stringformat:"s"="i" id="rating{{ i }}" if="" name="rating" type="radio" value="{{ i }}" {%=""/>
+<label class="cursor-pointer text-gray-300 hover:text-amber-500 transition-all peer-checked:text-amber-500" for="rating{{ i }}">☕</label>
+          {% endfor %}
+        </div>
+</div>
+<button class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition" type="submit">
+        Enviar
+      </button>
+</form>
+<p class="mt-6 text-center">
+<a class="text-blue-600 hover:underline" href="{% url 'review_list' %}">← Volver al listado</a>
+</p>
+</div>
 {% endblock %}

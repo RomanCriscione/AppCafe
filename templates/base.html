@@ -2,95 +2,118 @@
 <html lang="es">
 {% load static %}
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}App Café{% endblock %}</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>{% block title %}App Café{% endblock %}</title>
+{% block meta %}{% endblock %}
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'lightbox/dist/css/lightbox.min.css' %}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Poppins', 'sans-serif'],
+                },
+                colors: {
+                    primary: '#2a9d8f',
+                    accent: '#e76f51',
+                    secondary: '#264653'
+                }
+            }
+        }
+    }
+</script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&amp;display=swap" rel="stylesheet"/>
+<!-- Estilos personalizados -->
+<link href="{% static 'css/custom.css' %}" rel="stylesheet"/>
+<!-- Font Awesome -->
+<link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<!-- Swiper & Leaflet CSS -->
+<link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" rel="stylesheet">
+<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
 </head>
-<body>
-    <header>
-        <nav>
-            <ul class="left">
-                <li><a href="{% url 'review_list' %}">Inicio</a></li>
-                <li><a href="{% url 'cafe_list' %}">Cafés</a></li>
-                <li><a href="{% url 'about' %}">Acerca de</a></li>
-                <li><a href="{% url 'contact' %}">Contacto</a></li>
-            </ul>
-            <ul class="right">
-                {% if user.is_authenticated %}
-                    {% if user.is_owner %}
-                        <li><a href="{% url 'owner_dashboard' %}">Mi panel</a></li>
-                        <li><a href="{% url 'favorite_cafes' %}">❤️ Mis Favoritos</a></li>
-                        <li><a href="{% url 'create_cafe' %}">Agregar Cafetería</a></li>
-                    {% endif %}
-                    <li><strong>Hola, {{ user.username }}!</strong></li>
-                    <li>
-                        <a href="{% url 'edit_avatar' %}">
-                            {% if user.avatar %}
-                                <img src="{{ user.avatar.url }}" alt="avatar" class="avatar-mini">
-                            {% else %}
-                                Editar avatar
-                            {% endif %}
-                        </a>
-                    </li>
-                    <li><a href="{% url 'account_logout' %}">Cerrar sesión</a></li>
-                {% else %}
-                    <li><a href="{% url 'account_login' %}">Iniciar sesión</a></li>
-                    <li><a href="{% url 'account_signup' %}">Registrarse</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-    </header>
+<body class="bg-gray-100 text-gray-800 font-sans">
 
-    <main>
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="message">{{ message }}</div>
-                {% endfor %}
-            </div>
+<!-- Header -->
+<header class="bg-white shadow">
+<nav class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+<ul class="flex flex-wrap gap-4">
+    <li><a class="text-primary hover:underline" href="{% url 'review_list' %}">Inicio</a></li>
+    <li><a class="text-primary hover:underline" href="{% url 'cafe_list' %}">Cafés</a></li>
+    <li><a class="text-primary hover:underline" href="{% url 'mapa_cafes' %}">🗺️ Ver en mapa</a></li>
+    <li><a class="text-primary hover:underline" href="{% url 'about' %}">Acerca de</a></li>
+    <li><a class="text-primary hover:underline" href="{% url 'contact' %}">Contacto</a></li>
+</ul>
+<ul class="flex flex-wrap gap-4 items-center">
+    {% if user.is_authenticated %}
+        {% if user.is_owner %}
+            <li><a class="text-primary hover:underline" href="{% url 'owner_dashboard' %}">Mi panel</a></li>
+            <li><a class="text-primary hover:underline" href="{% url 'favorite_cafes' %}">❤️ Favoritos</a></li>
+            <li><a class="text-primary hover:underline" href="{% url 'create_cafe' %}">Agregar Café</a></li>
         {% endif %}
+        <li class="font-semibold">Hola, {{ user.username }}</li>
+        <li>
+            <a class="hover:underline" href="{% url 'edit_avatar' %}">
+                {% if user.avatar %}
+                    <img alt="avatar" class="w-8 h-8 rounded-full object-cover" loading="lazy" src="{{ user.avatar.url }}"/>
+                {% else %}
+                    Editar avatar
+                {% endif %}
+            </a>
+        </li>
+        <li><a class="text-accent hover:underline" href="{% url 'account_logout' %}">Cerrar sesión</a></li>
+    {% else %}
+        <li><a class="text-primary hover:underline" href="{% url 'account_login' %}">Iniciar sesión</a></li>
+        <li><a class="text-primary hover:underline" href="{% url 'account_signup' %}">Registrarse</a></li>
+    {% endif %}
+</ul>
+</nav>
+</header>
 
-        {% block content %}{% endblock %}
-    </main>
+<!-- Main Content -->
+<main class="container mx-auto px-4 py-6">
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-2 rounded">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-    <footer>
-        <p>&copy; 2025 App Café - Desarrollado por Roma</p>
-    </footer>
+    {% block content %}{% endblock %}
+</main>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{% static 'lightbox/dist/js/lightbox.min.js' %}"></script>
-    <script>
-        lightbox.option({
-            'resizeDuration': 200,
-            'fadeDuration': 200,
-            'imageFadeDuration': 200,
-            'wrapAround': true,
-            'albumLabel': "📷 Foto %1 de %2",
-            'disableScrolling': true
+<!-- Footer -->
+<footer class="bg-white border-t py-4 text-center text-sm text-gray-500">
+    © 2025 App Café - Desarrollado por Roma
+</footer>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+{% block scripts %}{% endblock %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        new Swiper('.swiper-container', {
+            slidesPerView: 'auto',
+            spaceBetween: 16,
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
         });
-    </script>
-        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script>
-    const swiper = new Swiper('.swiper-container', {
-        loop: true,
-        pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-        },
-        navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-        },
-        spaceBetween: 20,
-        slidesPerView: 1,
     });
 </script>
-
 </body>
 </html>

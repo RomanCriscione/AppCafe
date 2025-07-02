@@ -2,103 +2,54 @@
 {% load static %}
 
 {% block content %}
-  <h1>Subir fotos a {{ cafe.name }}</h1>
+<div class="max-w-xl mx-auto mt-6 px-4 py-6 bg-gray-100 rounded-lg shadow">
+<h1 class="text-2xl font-semibold mb-4 text-center">📷 Subir fotos a {{ cafe.name }}</h1>
 
   {% if messages %}
-    <ul class="messages">
+    <ul class="mb-4 space-y-2">
       {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+        <li class="p-2 rounded {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-gray-200{% endif %}">
           {{ message }}
         </li>
       {% endfor %}
     </ul>
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data" class="upload-form">
+  <form class="space-y-6" enctype="multipart/form-data" method="post">
     {% csrf_token %}
-    
-    <label for="id_photo1">Foto principal:</label><br>
-    {{ form.photo1 }}<br>
-    {% if cafe.photo1 %}
-      <img src="{{ cafe.photo1.url }}" alt="Foto 1" class="miniatura-cafe">
-    {% endif %}<br><br>
 
-    <label for="id_photo2">Foto adicional 1:</label><br>
-    {{ form.photo2 }}<br>
-    {% if cafe.photo2 %}
-      <img src="{{ cafe.photo2.url }}" alt="Foto 2" class="miniatura-cafe">
-    {% endif %}<br><br>
-
-    <label for="id_photo3">Foto adicional 2:</label><br>
-    {{ form.photo3 }}<br>
-    {% if cafe.photo3 %}
-      <img src="{{ cafe.photo3.url }}" alt="Foto 3" class="miniatura-cafe">
-    {% endif %}<br><br>
-
-    <button type="submit">Guardar fotos</button>
-  </form>
-
-  <p>
-    <a href="{% url 'cafe_detail' cafe.id %}" class="back-link">← Volver al detalle de la cafetería</a>
-  </p>
-
-  <style>
-    .upload-form {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: #f9f9f9;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .upload-form label {
-      font-weight: bold;
-    }
-
-    .upload-form input[type="file"] {
-      margin-top: 5px;
-    }
-
-    .upload-form button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .miniatura-cafe {
-      width: 120px;
-      height: auto;
-      border-radius: 6px;
-      margin: 6px 0;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    }
-
-    .back-link {
-      display: inline-block;
-      margin-top: 15px;
-      color: #007bff;
-      text-decoration: none;
-    }
-
-    .back-link:hover {
-      text-decoration: underline;
-    }
-
-    @media (max-width: 600px) {
-      .upload-form {
-        padding: 15px;
-      }
-
-      .miniatura-cafe {
-        width: 100%;
-        max-width: 100%;
-      }
-    }
-  </style>
+    <!-- Foto 1 -->
+<div>
+<label class="block font-medium text-gray-700 mb-1" for="id_photo1">Foto principal:</label>
+      {{ form.photo1 }}
+      {% if cafe.photo1 %}
+        <img alt="Foto 1" class="w-32 mt-2 rounded shadow" loading="lazy" src="{{ cafe.photo1.url }}"/>
+      {% endif %}
+    </div>
+<!-- Foto 2 -->
+<div>
+<label class="block font-medium text-gray-700 mb-1" for="id_photo2">Foto adicional 1:</label>
+      {{ form.photo2 }}
+      {% if cafe.photo2 %}
+        <img alt="Foto 2" class="w-32 mt-2 rounded shadow" loading="lazy" src="{{ cafe.photo2.url }}"/>
+      {% endif %}
+    </div>
+<!-- Foto 3 -->
+<div>
+<label class="block font-medium text-gray-700 mb-1" for="id_photo3">Foto adicional 2:</label>
+      {{ form.photo3 }}
+      {% if cafe.photo3 %}
+        <img alt="Foto 3" class="w-32 mt-2 rounded shadow" loading="lazy" src="{{ cafe.photo3.url }}"/>
+      {% endif %}
+    </div>
+<button class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition font-semibold" type="submit">
+      Guardar fotos
+    </button>
+</form>
+<p class="mt-4 text-center">
+<a class="text-blue-600 hover:underline text-sm" href="{% url 'cafe_detail' cafe.id %}">
+      ← Volver al detalle de la cafetería
+    </a>
+</p>
+</div>
 {% endblock %}

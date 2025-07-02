@@ -1,46 +1,69 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block content %}
-  <h1>{{ cafe.name }}</h1>
+{% block meta %}
+  <!-- Open Graph y Twitter -->
+  <meta property="og:title" content="{{ cafe.name }} - Cafetería en {{ cafe.location }}" />
+  <meta property="og:description" content="Reseñas, fotos y ubicación de {{ cafe.name }}." />
+  {% if full_image_url %}
+    <meta property="og:image" content="{{ full_image_url }}" />
+  {% endif %}
+  <meta property="og:url" content="{{ full_page_url }}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{ cafe.name }} - Cafetería en {{ cafe.location }}" />
+  <meta name="twitter:description" content="Reseñas, fotos y ubicación de {{ cafe.name }}." />
+  {% if full_image_url %}
+    <meta name="twitter:image" content="{{ full_image_url }}" />
+  {% endif %}
+{% endblock %}
 
-  <p>
-    <strong>📍 Dirección:</strong> {{ cafe.address }}, {{ cafe.location }}<br>
-    <strong>☎ Teléfono:</strong> {{ cafe.phone }}<br>
-    <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
-      target="_blank" class="google-maps-link">📍 Ver en Google Maps</a>
+{% block content %}
+<div class="max-w-4xl mx-auto px-4">
+  <h1 class="text-3xl font-bold mb-4">{{ cafe.name }}</h1>
+
+  <div class="mb-4 text-gray-700 space-y-1">
+    <p>📍 <strong>Dirección:</strong> {{ cafe.address }}, {{ cafe.location }}</p>
+    <p>☎ <strong>Teléfono:</strong> {{ cafe.phone }}</p>
+    <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}" target="_blank" class="text-blue-600 hover:underline">📍 Ver en Google Maps</a>
+  </div>
+
+  <p class="mb-4">
+    🌟 <strong>Plan actual:</strong>
+    {% if cafe.visibility_level == 2 %}
+      <span class="text-yellow-600 font-bold">☕☕ Plan Maestro</span>
+    {% elif cafe.visibility_level == 1 %}
+      <span class="text-blue-500 font-bold">☕ Plan Barista</span>
+    {% else %}
+      <span class="text-gray-500 font-bold">☕ Gratuito</span>
+    {% endif %}
   </p>
 
-  {% if average_rating %}
-    <p><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
-    
-    {% if best_review %}
-      <div class="mejor-review">
-        <p class="mejor-review-titulo">☕✨ <strong>Reseña destacada</strong></p>
-        <p class="mejor-review-meta">
-          {{ best_review.user.username }} ({{ best_review.created_at|date:"d M Y" }}) —
-          ☕ {{ best_review.rating|floatformat:1 }}
-        </p>
-        <p class="mejor-review-comentario">“{{ best_review.comment }}”</p>
-      </div>
+  {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
+    <h3 class="text-xl font-semibold mb-2">📸 Fotos del lugar</h3>
+    <div class="flex flex-wrap gap-4 mb-6 justify-center sm:justify-start">
+      {% if cafe.photo1 %}<img src="{{ cafe.photo1.url }}" alt="{{ cafe.photo1_title }}" class="w-full sm:w-64 rounded shadow">{% endif %}
+      {% if cafe.photo2 %}<img src="{{ cafe.photo2.url }}" alt="{{ cafe.photo2_title }}" class="w-full sm:w-64 rounded shadow">{% endif %}
+      {% if cafe.photo3 %}<img src="{{ cafe.photo3.url }}" alt="{{ cafe.photo3_title }}" class="w-full sm:w-64 rounded shadow">{% endif %}
+    </div>
+  {% endif %}
 
-      <div class="compartir-cafe">
-        <p><strong>Compartir esta cafetería:</strong></p>
-        <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}" target="_blank" class="btn-share">📱 WhatsApp</a>
-        <a href="https://twitter.com/intent/tweet?text=Recomiendo esta cafetería: {{ cafe.name }}&url={{ request.build_absolute_uri }}" target="_blank" class="btn-share">🐦 X</a>
-        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="btn-share">📘 Facebook</a>
-        <button onclick="copiarEnlace()" class="btn-share">🔗 Copiar enlace</button>
+  {% if average_rating %}
+    <p class="mb-4"><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
+
+    {% if best_review %}
+      <div class="bg-yellow-100 p-4 rounded border-l-4 border-yellow-500 mb-6 animate-fade-in">
+        <p class="font-semibold">☕✨ Reseña destacada</p>
+        <p class="text-sm text-gray-600">{{ best_review.user.username }} ({{ best_review.created_at|date:"d M Y" }}) — ☕ {{ best_review.rating|floatformat:1 }}</p>
+        <p>“{{ best_review.comment }}”</p>
       </div>
     {% endif %}
-
   {% else %}
-    <p><strong>Calificación promedio:</strong> Sin reseñas todavía.</p>
+    <p class="mb-4"><strong>Calificación promedio:</strong> Sin reseñas todavía.</p>
   {% endif %}
 
   {% if user.is_authenticated %}
-    <form method="post" action="{% url 'toggle_favorite' cafe.id %}">
-      {% csrf_token %}
-      <button type="submit" class="btn">
+    <form method="post" action="{% url 'toggle_favorite' cafe.id %}" class="mb-4">{% csrf_token %}
+      <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-all">
         {% if user in cafe.favorites.all %}
           💔 Quitar de favoritos
         {% else %}
@@ -50,241 +73,140 @@
     </form>
   {% endif %}
 
-  {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
-    <h3>📸 Fotos del lugar</h3>
-    <div class="swiper-container">
-      <div class="swiper-wrapper">
-        {% if cafe.photo1 %}
-          <div class="swiper-slide">
-            <img src="{{ cafe.photo1.url }}" alt="{{ cafe.photo1_title }}" class="cafe-photo-slide">
-          </div>
-        {% endif %}
-        {% if cafe.photo2 %}
-          <div class="swiper-slide">
-            <img src="{{ cafe.photo2.url }}" alt="{{ cafe.photo2_title }}" class="cafe-photo-slide">
-          </div>
-        {% endif %}
-        {% if cafe.photo3 %}
-          <div class="swiper-slide">
-            <img src="{{ cafe.photo3.url }}" alt="{{ cafe.photo3_title }}" class="cafe-photo-slide">
-          </div>
-        {% endif %}
-      </div>
-      <div class="swiper-button-next"></div>
-      <div class="swiper-button-prev"></div>
-      <div class="swiper-pagination"></div>
-    </div>
-  {% endif %}
-
-  <h3>Reseñas:</h3>
-  <ul class="review-list">
+  <h3 class="text-xl font-semibold mt-6 mb-2">Reseñas:</h3>
+  <ul class="space-y-4">
     {% for review in reviews %}
-      <li class="review-card">
-        <div class="review-header">
+      <li class="bg-white p-4 rounded shadow animate-fade-in">
+        <div class="flex justify-between items-center mb-2">
           <strong>{{ review.user.username }}</strong>
-          <span class="review-date">({{ review.created_at|date:"d M Y" }})</span>
+          <span class="text-sm text-gray-500">{{ review.created_at|date:"d M Y" }}</span>
         </div>
-        <div class="review-body">
-          <p>☕ {{ review.rating|floatformat:1 }}</p>
-          <p>{{ review.comment }}</p>
-        </div>
+        <p class="mb-1">☕ {{ review.rating|floatformat:1 }}</p>
+        <p class="mb-2">{{ review.comment }}</p>
 
         {% if review.owner_reply %}
-          <div class="reply-block">
+          <div class="bg-gray-100 p-3 rounded">
             <strong>Respuesta del dueño:</strong>
             <p>{{ review.owner_reply }}</p>
           </div>
         {% endif %}
 
         {% if user.is_authenticated and user == cafe.owner %}
-          {% if review.owner_reply %}
-            <button onclick="toggleReplyForm('{{ review.id }}')" type="button" class="btn-reply-edit">✏️ Editar respuesta</button>
-          {% else %}
-            <button onclick="toggleReplyForm('{{ review.id }}')" type="button" class="btn-reply-new">💬 Responder</button>
-          {% endif %}
-          <form method="post" action="{% url 'reply_review' review.id %}" id="reply-form-{{ review.id }}" style="display: none; margin-top: 1rem;">
-            {% csrf_token %}
-            <textarea name="reply" rows="2" style="width: 100%;">{{ review.owner_reply }}</textarea><br>
-            <button type="submit" class="btn">Guardar respuesta</button>
+          <form method="post" action="{% url 'reply_review' review.id %}" class="mt-2">{% csrf_token %}
+            <textarea name="reply" rows="2" class="w-full p-2 border rounded">{{ review.owner_reply }}</textarea>
+            <button type="submit" class="mt-1 bg-primary text-white px-3 py-1 rounded">Guardar respuesta</button>
           </form>
         {% endif %}
       </li>
     {% empty %}
-      <li>No hay reseñas aún.</li>
+      <li class="text-gray-500">No hay reseñas aún.</li>
     {% endfor %}
   </ul>
 
   {% if user.is_authenticated %}
-    <h3>{% if existing_review %}Editar tu reseña{% else %}Dejá tu reseña{% endif %}</h3>
-
-    {% if form.errors %}
-      <ul class="form-errors">
-        {% for field, errors in form.errors.items %}
-          {% for error in errors %}
-            <li>{{ field }}: {{ error }}</li>
-          {% endfor %}
-        {% endfor %}
-      </ul>
-    {% endif %}
-
-    <form method="post">
-      {% csrf_token %}
-      {{ form.comment.label_tag }}<br>
-      {{ form.comment }}<br><br>
-
-      <label for="id_rating">☕ Calificación:</label><br>
-      <div class="rating-widget">
-        {% for i in "54321" %}
-          <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
-          <label for="star{{ i }}">☕</label>
-        {% endfor %}
-      </div>
-
-      <button type="submit">
-        {% if existing_review %}Actualizar{% else %}Enviar{% endif %}
-      </button>
-    </form>
+    <button onclick="document.getElementById('modal-review').style.display='flex'" class="mt-6 bg-secondary text-white px-4 py-2 rounded">Dejá tu reseña</button>
   {% else %}
-    <h3>Dejá tu reseña</h3>
-    <p>
-      Para dejar una reseña necesitás
-      <a href="{% url 'account_login' %}?next={{ request.path }}">iniciar sesión</a>.
-    </p>
+    <p class="mt-4">Para dejar una reseña necesitás <a href="{% url 'account_login' %}?next={{ request.path }}" class="text-blue-600 hover:underline">iniciar sesión</a>.</p>
   {% endif %}
 
-  <script>
-    function toggleReplyForm(id) {
-      const form = document.getElementById('reply-form-' + id);
-      form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    }
+  <!-- Modal -->
+  <div id="modal-review" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center hidden z-50">
+    <div class="bg-white p-6 rounded shadow-md w-full max-w-md relative animate-fade-in">
+      <span onclick="document.getElementById('modal-review').style.display='none'" class="absolute top-2 right-3 cursor-pointer text-xl text-gray-700">&times;</span>
+      <h3 class="text-xl font-semibold mb-2">Dejá tu reseña</h3>
+      <form method="post">{% csrf_token %}
+        {{ form.comment.label_tag }}<br>
+        {{ form.comment }}<br>
+        <label for="id_rating" class="block mt-2">☕ Calificación:</label>
+        <div class="flex gap-1 mt-1">
+          {% for i in "54321" %}
+            <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" class="hidden" {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
+            <label for="star{{ i }}" class="cursor-pointer text-xl">☕</label>
+          {% endfor %}
+        </div>
+        <button type="submit" class="mt-4 bg-primary text-white px-4 py-2 rounded">Enviar</button>
+      </form>
+    </div>
+  </div>
 
-    function copiarEnlace() {
-      navigator.clipboard.writeText(window.location.href)
-        .then(() => alert("📋 Enlace copiado al portapapeles"))
-        .catch(err => alert("No se pudo copiar el enlace"));
-    }
-  </script>
+  {% if cafe.latitude and cafe.longitude %}
+    <h3 class="text-xl font-semibold mt-10 mb-2">📍 Ubicación</h3>
+    <div id="map" class="h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] w-full rounded shadow-lg mb-10"></div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const lat = parseFloat("{{ cafe.latitude|escapejs }}");
+        const lon = parseFloat("{{ cafe.longitude|escapejs }}");
+        const map = L.map('map').setView([lat, lon], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        L.marker([lat, lon]).addTo(map)
+          .bindPopup("<strong>{{ cafe.name|escapejs }}</strong><br>{{ cafe.address|escapejs }}").openPopup();
+      });
+    </script>
+  {% endif %}
 
-  <style>
-    .google-maps-link {
-      display: inline-block;
-      background-color: #4285F4;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 4px;
-      text-decoration: none;
-      font-weight: bold;
-    }
+  <!-- Cafés vistos recientemente -->
+  <section class="pt-12 pb-6 bg-orange-50 overflow-x-hidden mt-10">
+    <h2 class="text-2xl font-semibold mb-6">👀 Cafés vistos recientemente</h2>
+    <div class="swiper-container" id="recently-viewed-container">
+      <div class="swiper-wrapper" id="recently-viewed-list"></div>
+      <div class="swiper-button-next text-brown-900"></div>
+      <div class="swiper-button-prev text-brown-900"></div>
+      <div class="swiper-pagination"></div>
+    </div>
+  </section>
+</div>
+{% endblock %}
 
-    .mejor-review {
-      background: #fff8e1;
-      border-left: 5px solid #ff9800;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 8px;
-    }
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const visitedCafe = {
+      id: {{ cafe.id }},
+      name: "{{ cafe.name|escapejs }}",
+      url: "{% url 'cafe_detail' cafe.id %}",
+      photo1: {% if cafe.photo1 %}"{{ cafe.photo1.url }}"{% else %}null{% endif %},
+      location: "{{ cafe.location|escapejs }}",
+      address: "{{ cafe.address|escapejs }}"
+    };
+    let history = JSON.parse(localStorage.getItem("recently_viewed_cafes") || "[]");
+    history = history.filter(c => c.id !== visitedCafe.id);
+    history.unshift(visitedCafe);
+    history = history.slice(0, 5);
+    localStorage.setItem("recently_viewed_cafes", JSON.stringify(history));
 
-    .mejor-review-titulo {
-      font-weight: bold;
-      margin-bottom: 0.3rem;
-      font-size: 1.1rem;
-    }
+    const container = document.getElementById("recently-viewed-list");
+    if (!container) return;
+    history.forEach(cafe => {
+      const card = document.createElement("div");
+      card.className = "swiper-slide w-[300px] bg-white rounded-lg shadow-md p-4 box-border";
+      card.innerHTML = `
+        <div class="flex gap-4 items-start">
+          ${cafe.photo1 ? `<img src="${cafe.photo1}" alt="${cafe.name}" class="w-20 h-20 object-cover rounded-md" loading="lazy">` : ""}
+          <div class="flex flex-col justify-between">
+            <p class="font-semibold leading-snug">
+              <a href="${cafe.url}" class="text-blue-600 hover:underline">${cafe.name}</a>
+            </p>
+            <p class="text-sm text-gray-700">${cafe.location}</p>
+            <p class="text-xs text-gray-500">${cafe.address}</p>
+          </div>
+        </div>`;
+      container.appendChild(card);
+    });
 
-    .mejor-review-meta {
-      color: #555;
-      font-size: 0.95rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .mejor-review-comentario {
-      font-style: italic;
-      font-size: 1rem;
-    }
-
-    .compartir-cafe {
-      margin-top: 1rem;
-    }
-
-    .btn-share {
-      margin-right: 0.5rem;
-      background-color: #eee;
-      padding: 5px 10px;
-      border-radius: 5px;
-      text-decoration: none;
-    }
-
-    .swiper-container {
-      width: 100%;
-      max-width: 700px;
-      margin: 20px auto;
-    }
-
-    .swiper-slide img {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-
-
-    .review-list {
-      padding-left: 0;
-      list-style: none;
-    }
-
-    .review-card {
-      margin-bottom: 1rem;
-      padding: 10px;
-      background-color: #f9f9f9;
-      border-radius: 5px;
-    }
-
-    .form-errors {
-      color: red;
-      list-style: none;
-    }
-
-    .btn {
-      padding: 8px 16px;
-      background-color: #ff4081;
-      border: none;
-      border-radius: 5px;
-      color: white;
-      cursor: pointer;
-      margin: 10px 0;
-    }
-
-    .btn:hover {
-      background-color: #e91e63;
-    }
-
-    .rating-widget {
-      direction: rtl;
-      font-size: 1.5rem;
-      display: inline-flex;
-      gap: 0.2rem;
-    }
-
-    .rating-widget input[type="radio"] {
-      display: none;
-    }
-
-    .rating-widget label {
-      cursor: pointer;
-      opacity: 0.4;
-      transition: opacity 0.2s;
-    }
-
-    .rating-widget input[type="radio"]:checked ~ label,
-    .rating-widget label:hover,
-    .rating-widget label:hover ~ label {
-      opacity: 1;
-    }
-
-    @media (max-width: 600px) {
-      .swiper-container {
-        max-width: 100%;
-      }
-    }
-  </style>
+    new Swiper("#recently-viewed-container", {
+      slidesPerView: 'auto',
+      spaceBetween: 16,
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true,
+      },
+    });
+  });
+</script>
 {% endblock %}

@@ -2,27 +2,33 @@
 {% load static %}
 
 {% block content %}
-    <h1>Contacto</h1>
-
-    <form method="post">
+    <div class="max-w-2xl mx-auto px-4 py-6 animate-fade-in">
+        <h1 class="text-3xl font-bold mb-6">Contacto</h1>
+        <form class="bg-white p-6 rounded-lg shadow space-y-4" method="post">
         {% csrf_token %}
-        <label for="name">Nombre:</label><br>
-        <input type="text" name="name" required><br><br>
+            <div>
+                <label class="block font-medium" for="name">Nombre:</label>
+                <input class="w-full p-2 border rounded" name="name" required="" type="text"/>
+            </div>
+            <div>
+                <label class="block font-medium" for="email">Email:</label>
+                <input class="w-full p-2 border rounded" name="email" required="" type="email"/>
+            </div>
+            <div>
+                <label class="block font-medium" for="message">Mensaje:</label>
+                <textarea class="w-full p-2 border rounded" name="message" required="" rows="5"></textarea>
+            </div>
+                <button class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition" type="submit">Enviar</button>
+                </form>
 
-        <label for="email">Email:</label><br>
-        <input type="email" name="email" required><br><br>
+        {% if success %}
+            <p class="mt-4 text-green-600 font-semibold">Gracias por tu mensaje, ¡te responderemos pronto!</p>
+        {% endif %}
 
-        <label for="message">Mensaje:</label><br>
-        <textarea name="message" rows="5" required></textarea><br><br>
-
-        <button type="submit">Enviar</button>
-    </form>
-
-    <h3>También podés escribirnos a:</h3>
-    <p>📧 contacto@cafesba.com</p>
-    <p>📱 Instagram: <a href="https://instagram.com/cafes_ba">@cafes_ba</a></p>
-
-{% if success %}
-    <p style="color:green;">Gracias por tu mensaje, ¡te responderemos pronto!</p>
-{% endif %}
+        <div class="mt-6">
+            <h3 class="text-xl font-semibold">También podés escribirnos a:</h3>
+            <p>📧 <a class="text-blue-600 hover:underline" href="mailto:contacto@cafesba.com">contacto@cafesba.com</a></p>
+            <p>📱 Instagram: <a class="text-blue-600 hover:underline" href="https://instagram.com/cafes_ba">@cafes_ba</a></p>
+        </div>
+    </div>
 {% endblock %}

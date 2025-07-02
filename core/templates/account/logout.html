@@ -1,8 +1,0 @@
-{% extends "base.html" %}
-{% block content %}
-  <h2>¿Seguro que querés cerrar sesión?</h2>
-  <form method="post" action="{% url 'account_logout' %}">
-    {% csrf_token %}
-    <button type="submit">Cerrar sesión</button>
-  </form>
-{% endblock %}
