@@ -30,6 +30,16 @@ class CafeForm(forms.ModelForm):
             'tags': forms.CheckboxSelectMultiple(),
         }
 
+    def clean_address(self):
+        address = self.cleaned_data.get('address')
+        if not address or len(address) < 5:
+            raise forms.ValidationError("La dirección debe tener al menos 5 caracteres.")
+        if not any(char.isdigit() for char in address):
+            raise forms.ValidationError("La dirección debe incluir un número.")
+        if not any(char.isalpha() for char in address):
+            raise forms.ValidationError("La dirección debe incluir un nombre de calle.")
+        return address
+
     def clean(self):
         cleaned_data = super().clean()
         max_size = 3 * 1024 * 1024  # 3MB

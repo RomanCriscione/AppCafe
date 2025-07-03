@@ -70,32 +70,38 @@ class Cafe(models.Model):
     )
 
     def save(self, *args, **kwargs):
+    # Guardado inicial para asegurar que los archivos de imagen estén disponibles
         super().save(*args, **kwargs)
 
         def procesar_imagen(campo):
             img_field = getattr(self, campo)
-            if img_field:
+            if img_field and hasattr(img_field, 'path'):
                 try:
-                    img = Image.open(img_field)
+                    img = Image.open(img_field.path)
                     if img.mode in ("RGBA", "P"):
                         img = img.convert("RGB")
-                    max_width = 1000
+
+                    max_width = 1280  # 📏 Máximo ancho permitido
                     if img.width > max_width:
                         ratio = max_width / float(img.width)
-                        height = int(float(img.height) * ratio)
-                        img = img.resize((max_width, height), Image.LANCZOS)
+                        new_height = int(float(img.height) * ratio)
+                        img = img.resize((max_width, new_height), Image.LANCZOS)
 
                     buffer = BytesIO()
-                    img.save(buffer, format='JPEG', quality=70, optimize=True)
-                    file_object = ContentFile(buffer.getvalue())
-                    img_field.save(img_field.name, file_object, save=False)
+                    img.save(buffer, format='JPEG', optimize=True, quality=75)
+                    file_content = ContentFile(buffer.getvalue())
+
+                    # Forzamos guardar nuevamente la imagen comprimida
+                    img_field.save(img_field.name, file_content, save=False)
                 except Exception as e:
-                    print(f"⚠️ Error procesando imagen '{campo}': {e}")
+                    print(f"⚠️ Error al procesar la imagen {campo}: {e}")
 
         for campo in ['photo1', 'photo2', 'photo3']:
             procesar_imagen(campo)
 
+        # Segundo guardado con las imágenes optimizadas
         super().save(update_fields=['photo1', 'photo2', 'photo3'])
+
 
     def average_rating(self):
         result = self.reviews.aggregate(Avg('rating'))

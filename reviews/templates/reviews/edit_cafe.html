@@ -3,186 +3,203 @@
 {% load widget_tweaks %}
 
 {% block content %}
-  <h1 class="text-2xl font-semibold mb-4">Editar cafetería: {{ cafe.name }}</h1>
+<h1 class="text-2xl font-semibold mb-4">Editar cafetería: {{ cafe.name }}</h1>
 
-  {% if messages %}
-    <ul class="mb-4">
-      {% for message in messages %}
-        <li class="{{ message.tags }} text-sm">{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
+{% if messages %}
+  <ul class="mb-4">
+    {% for message in messages %}
+      <li class="{{ message.tags }} text-sm">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
 
-  <form class="space-y-6" enctype="multipart/form-data" method="post" onsubmit="return validarDireccionAntesDeEnviar();">
-    {% csrf_token %}
+<form class="space-y-6" enctype="multipart/form-data" method="post" onsubmit="return validarDireccionAntesDeEnviar();">
+  {% csrf_token %}
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-<label class="block font-medium text-sm mb-1">{{ form.name.label }}</label>
-        {{ form.name|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
-      </div>
-<div>
-<label class="block font-medium text-sm mb-1">{{ form.address.label }}</label>
-        {{ form.address|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
-      </div>
-<div>
-<label class="block font-medium text-sm mb-1">{{ form.location.label }}</label>
-        {{ form.location|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
-      </div>
-<div class="md:col-span-2">
-<label class="block font-medium text-sm mb-1">{{ form.description.label }}</label>
-        {{ form.description|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
-      </div>
-<div>
-<label class="block font-medium text-sm mb-1">{{ form.phone.label }}</label>
-        {{ form.phone|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
-      </div>
-<div>
-<label class="block font-medium text-sm mb-1">{{ form.google_maps_url.label }}</label>
-        {{ form.google_maps_url|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
-      </div>
-</div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="block font-medium text-sm mb-1">{{ form.name.label }}</label>
+      {{ form.name|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
+    </div>
+    <div>
+      <label class="block font-medium text-sm mb-1">{{ form.address.label }}</label>
+      {{ form.address|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
+      {% if form.address.errors %}
+        <p class="text-red-600 text-sm mt-1">{{ form.address.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <div>
+      <label class="block font-medium text-sm mb-1">{{ form.location.label }}</label>
+      {{ form.location|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
+    </div>
+    <div class="md:col-span-2">
+      <label class="block font-medium text-sm mb-1">{{ form.description.label }}</label>
+      {{ form.description|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
+    </div>
+    <div>
+      <label class="block font-medium text-sm mb-1">{{ form.phone.label }}</label>
+      {{ form.phone|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
+    </div>
+    <div>
+      <label class="block font-medium text-sm mb-1">{{ form.google_maps_url.label }}</label>
+      {{ form.google_maps_url|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
+    </div>
+  </div>
+
+  <h3 class="text-lg font-semibold mt-6">Fotos</h3>
 <h3 class="text-lg font-semibold mt-6">Fotos</h3>
-    {% if cafe.photo1 %}
-      <div>
-<p>Foto 1 actual:</p>
-<img alt="Foto 1" class="w-32 rounded shadow" loading="lazy" src="{{ cafe.photo1.url }}"/>
-</div>
-    {% endif %}
-    <div>
-<label>{{ form.photo1.label }}</label>
-      {{ form.photo1|add_class:"block mt-1" }}
-      {{ form.photo1_title|add_class:"w-full mt-1" }}
-    </div>
 
-    {% if cafe.photo2 %}
-      <div>
-<p>Foto 2 actual:</p>
-<img alt="Foto 2" class="w-32 rounded shadow" loading="lazy" src="{{ cafe.photo2.url }}"/>
-</div>
-    {% endif %}
-    <div>
-<label>{{ form.photo2.label }}</label>
-      {{ form.photo2|add_class:"block mt-1" }}
-      {{ form.photo2_title|add_class:"w-full mt-1" }}
-    </div>
-
-    {% if cafe.photo3 %}
-      <div>
-<p>Foto 3 actual:</p>
-<img alt="Foto 3" class="w-32 rounded shadow" loading="lazy" src="{{ cafe.photo3.url }}"/>
-</div>
-    {% endif %}
-    <div>
-<label>{{ form.photo3.label }}</label>
-      {{ form.photo3|add_class:"block mt-1" }}
-      {{ form.photo3_title|add_class:"w-full mt-1" }}
-    </div>
-<h3 class="text-lg font-semibold mt-6">Opciones</h3>
-<div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-<label class="flex items-center">{{ form.is_vegan_friendly }} <span class="ml-2">Vegano friendly</span></label>
-<label class="flex items-center">{{ form.is_pet_friendly }} <span class="ml-2">Pet friendly</span></label>
-<label class="flex items-center">{{ form.has_wifi }} <span class="ml-2">WiFi</span></label>
-<label class="flex items-center">{{ form.has_outdoor_seating }} <span class="ml-2">Mesas al aire libre</span></label>
-<label class="flex items-center">{{ form.has_parking }} <span class="ml-2">Estacionamiento</span></label>
-<label class="flex items-center">{{ form.is_accessible }} <span class="ml-2">Accesible</span></label>
-<label class="flex items-center">{{ form.has_vegetarian_options }} <span class="ml-2">Opciones vegetarianas</span></label>
-<label class="flex items-center">{{ form.serves_breakfast }} <span class="ml-2">Sirve desayuno</span></label>
-<label class="flex items-center">{{ form.serves_alcohol }} <span class="ml-2">Sirve alcohol</span></label>
-<label class="flex items-center">{{ form.has_books_or_games }} <span class="ml-2">Libros/juegos</span></label>
-<label class="flex items-center">{{ form.has_air_conditioning }} <span class="ml-2">Aire acondicionado</span></label>
-</div>
-<h3 class="text-lg font-semibold mt-6">Etiquetas</h3>
-    {{ form.tags|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
-
-    <h3 class="text-lg font-semibold mt-6">Ubicación geográfica</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+{% if cafe.photo1 %}
+  <div>
+    <p>Foto 1 actual:</p>
+    <img alt="Foto 1" class="w-32 rounded shadow" loading="lazy" src="{{ cafe.photo1.url }}"/>
+  </div>
+{% endif %}
 <div>
-<label>{{ form.latitude.label }}</label>
-        {{ form.latitude|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
-      </div>
-<div>
-<label>{{ form.longitude.label }}</label>
-        {{ form.longitude|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
-      </div>
+  <label>{{ form.photo1.label }}</label>
+  {{ form.photo1|add_class:"block mt-1" }}
+  {{ form.photo1_title|add_class:"w-full mt-1" }}
 </div>
-<div class="h-80 mt-4" id="map"></div>
-<p class="text-sm italic text-gray-600 mt-1" id="location-status"></p>
-<button class="mt-6 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700" type="submit">Guardar cambios</button>
+
+{% if cafe.photo2 %}
+  <div>
+    <p>Foto 2 actual:</p>
+    <img alt="Foto 2" class="w-32 rounded shadow" loading="lazy" src="{{ cafe.photo2.url }}"/>
+  </div>
+{% endif %}
+<div>
+  <label>{{ form.photo2.label }}</label>
+  {{ form.photo2|add_class:"block mt-1" }}
+  {{ form.photo2_title|add_class:"w-full mt-1" }}
+</div>
+
+{% if cafe.photo3 %}
+  <div>
+    <p>Foto 3 actual:</p>
+    <img alt="Foto 3" class="w-32 rounded shadow" loading="lazy" src="{{ cafe.photo3.url }}"/>
+  </div>
+{% endif %}
+<div>
+  <label>{{ form.photo3.label }}</label>
+  {{ form.photo3|add_class:"block mt-1" }}
+  {{ form.photo3_title|add_class:"w-full mt-1" }}
+</div>
+
+  <h3 class="text-lg font-semibold mt-6">Opciones</h3>
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+    {% for field in form %}
+      {% if field.name|slice:":3" == "is_" or field.name|slice:":4" == "has_" or field.name|slice:":7" == "serves_" %}
+        <label class="flex items-center">{{ field }} <span class="ml-2">{{ field.label }}</span></label>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <h3 class="text-lg font-semibold mt-6">Etiquetas</h3>
+  {{ form.tags|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
+
+  <h3 class="text-lg font-semibold mt-6">Ubicación geográfica</h3>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label>{{ form.latitude.label }}</label>
+      {{ form.latitude|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
+    </div>
+    <div>
+      <label>{{ form.longitude.label }}</label>
+      {{ form.longitude|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
+    </div>
+  </div>
+
+  <button type="button" onclick="mostrarMapaMobile()" class="block md:hidden bg-primary text-white px-4 py-2 rounded mb-4">
+    📍 Mostrar mapa
+  </button>
+
+  <div class="h-80 mt-4 hidden md:block" id="map"></div>
+  <p class="text-sm italic text-gray-600 mt-1" id="location-status"></p>
+
+  <button class="mt-6 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700" type="submit">
+    Guardar cambios
+  </button>
 </form>
-<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
+
+<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const latInput = document.getElementById("id_latitude");
-      const lonInput = document.getElementById("id_longitude");
-      const addressInput = document.getElementById("id_address");
-      const locationInput = document.getElementById("id_location");
-      const locationStatus = document.getElementById("location-status");
+  document.addEventListener("DOMContentLoaded", function () {
+    const latInput = document.getElementById("id_latitude");
+    const lonInput = document.getElementById("id_longitude");
+    const addressInput = document.getElementById("id_address");
+    const locationInput = document.getElementById("id_location");
+    const locationStatus = document.getElementById("location-status");
 
-      const initialLat = parseFloat(latInput.value) || -34.6037;
-      const initialLon = parseFloat(lonInput.value) || -58.3816;
-      let direccionGeolocalizada = !isNaN(initialLat) && !isNaN(initialLon);
+    const initialLat = parseFloat(latInput.value) || -34.6037;
+    const initialLon = parseFloat(lonInput.value) || -58.3816;
+    let direccionGeolocalizada = !isNaN(initialLat) && !isNaN(initialLon);
 
-      const map = L.map('map').setView([initialLat, initialLon], 14);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
+    const map = L.map('map').setView([initialLat, initialLon], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-      const marker = L.marker([initialLat, initialLon], { draggable: true }).addTo(map);
+    const marker = L.marker([initialLat, initialLon], { draggable: true }).addTo(map);
 
-      function actualizarInputs(lat, lon) {
-        latInput.value = lat.toFixed(6);
-        lonInput.value = lon.toFixed(6);
-      }
+    function actualizarInputs(lat, lon) {
+      latInput.value = lat.toFixed(6);
+      lonInput.value = lon.toFixed(6);
+    }
 
-      function mostrarUbicacionTexto(lat, lon) {
-        locationStatus.textContent = `📍 Ubicación actualizada: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
-      }
+    function mostrarUbicacionTexto(lat, lon) {
+      locationStatus.textContent = `📍 Ubicación actualizada: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+    }
 
-      marker.on("dragend", function () {
-        const pos = marker.getLatLng();
-        actualizarInputs(pos.lat, pos.lng);
-        mostrarUbicacionTexto(pos.lat, pos.lng);
-        direccionGeolocalizada = true;
-      });
-
-      function geolocalizarDireccion() {
-        const direccion = addressInput?.value.trim();
-        const localidad = locationInput?.value.trim();
-        if (direccion.length > 5 && localidad.length > 1) {
-          const fullQuery = `${direccion}, ${localidad}, Buenos Aires`;
-          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}`)
-            .then(res => res.json())
-            .then(data => {
-              if (data.length > 0) {
-                const { lat, lon } = data[0];
-                map.setView([lat, lon], 16);
-                marker.setLatLng([lat, lon]);
-                actualizarInputs(parseFloat(lat), parseFloat(lon));
-                mostrarUbicacionTexto(parseFloat(lat), parseFloat(lon));
-                direccionGeolocalizada = true;
-              } else {
-                direccionGeolocalizada = false;
-                alert("❌ No se pudo encontrar la dirección ingresada.");
-                locationStatus.textContent = "❌ Dirección no reconocida.";
-              }
-            });
-        }
-      }
-
-      if (addressInput) addressInput.addEventListener("blur", geolocalizarDireccion);
-      if (locationInput) locationInput.addEventListener("change", geolocalizarDireccion);
-
-      window.validarDireccionAntesDeEnviar = function () {
-        const lat = parseFloat(latInput.value);
-        const lon = parseFloat(lonInput.value);
-        if (isNaN(lat) || isNaN(lon) || !direccionGeolocalizada) {
-          alert("⚠️ Por favor, asegurate de ingresar una dirección válida y que se haya ubicado correctamente en el mapa.");
-          return false;
-        }
-        return true;
-      };
+    marker.on("dragend", function () {
+      const pos = marker.getLatLng();
+      actualizarInputs(pos.lat, pos.lng);
+      mostrarUbicacionTexto(pos.lat, pos.lng);
+      direccionGeolocalizada = true;
     });
-  </script>
+
+    function geolocalizarDireccion() {
+      const direccion = addressInput?.value.trim();
+      const localidad = locationInput?.value.trim();
+      if (direccion.length > 5 && localidad.length > 1) {
+        const fullQuery = `${direccion}, ${localidad}, Buenos Aires`;
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.length > 0) {
+              const { lat, lon } = data[0];
+              map.setView([lat, lon], 16);
+              marker.setLatLng([lat, lon]);
+              actualizarInputs(parseFloat(lat), parseFloat(lon));
+              mostrarUbicacionTexto(parseFloat(lat), parseFloat(lon));
+              direccionGeolocalizada = true;
+            } else {
+              direccionGeolocalizada = false;
+              alert("❌ No se pudo encontrar la dirección ingresada.");
+              locationStatus.textContent = "❌ Dirección no reconocida.";
+            }
+          });
+      }
+    }
+
+    if (addressInput) addressInput.addEventListener("blur", geolocalizarDireccion);
+    if (locationInput) locationInput.addEventListener("change", geolocalizarDireccion);
+
+    window.validarDireccionAntesDeEnviar = function () {
+      const lat = parseFloat(latInput.value);
+      const lon = parseFloat(lonInput.value);
+      if (isNaN(lat) || isNaN(lon) || !direccionGeolocalizada) {
+        alert("⚠️ Por favor, asegurate de ingresar una dirección válida y que se haya ubicado correctamente en el mapa.");
+        return false;
+      }
+      return true;
+    };
+  });
+
+  function mostrarMapaMobile() {
+    document.getElementById("map").classList.remove("hidden");
+    document.getElementById("map").scrollIntoView({ behavior: "smooth" });
+  }
+</script>
 {% endblock %}
