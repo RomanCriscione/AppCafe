@@ -1,47 +1,39 @@
-# AppCafeProyect ☕️ - Reseñas de Cafeterías
+# ☕ Gota - Reseñas de Cafeterías
 
-Este es un proyecto web en Django para dejar reseñas de cafeterías en Buenos Aires. La app permite a usuarios registrados dejar puntuaciones, comentarios y ver reseñas de otras personas.
-
----
-
-## 📦 Tecnologías
-
-- Python 3.13
-- Django
-- Django REST Framework
-- django-allauth (autenticación)
+**Gota** es una aplicación web para descubrir, calificar y recomendar cafeterías en Buenos Aires. Los usuarios pueden dejar reseñas, puntuar con tazas, ver fotos y encontrar cafés por zona o características. Los dueños de cafeterías pueden registrar sus locales, responder reseñas y gestionar su visibilidad.
 
 ---
 
-## 🛠️ Instalación
+## 🚀 Funcionalidades principales
 
-### 1. Clonar el repositorio
+- ✅ Registro y login de usuarios
+- ✅ Búsqueda y filtrado de cafeterías por zona, servicios, etiquetas
+- ✅ Puntuación visual con íconos de tazas
+- ✅ Reseñas con comentarios, edición y respuesta del dueño
+- ✅ Fotos representativas de cada cafetería
+- ✅ Dashboard para dueños de cafés
+- ✅ Favoritos y mapa interactivo
+- ✅ Diseño responsive y moderno
 
-```bash
-git clone <url-del-repo>
-cd AppCafeProyect
+---
 
-Crear entorno virtual
-python -m venv env
+## 🖥️ Capturas
 
-Activar entorno (Windows)
-source env/Scripts/activate  # Git Bash
-# o
-.\env\Scripts\activate       # PowerShell o cmd
+> *(Agregá después imágenes si querés)*  
+> Ejemplo: home, vista de café, reseñas, dashboard, mapa...
 
-Instalar dependencias
-pip install django djangorestframework django-allauth
+---
 
-Crear proyecto y app Django
-django-admin startproject cafe_reviews .
-python manage.py startapp core
+## 🛠️ Tecnologías utilizadas
 
-Estructura del Proyecto
-AppCafeProyect/
-├── cafe_reviews/       # Proyecto principal
-│   ├── settings.py     # Configuraciones
-│   ├── urls.py         # Rutas generales
-├── core/               # App principal: usuarios, reseñas, cafeterías
-├── env/                # Entorno virtual
-├── manage.py
-└── README.md
+- Python + Django
+- SQLite (modo local)
+- HTML5, Tailwind CSS
+- JavaScript (Leaflet, Swiper, íconos)
+- Django Templates
+- Leaflet.js para mapas
+- Font Awesome / custom icons
+- Responsive design
+
+---
+

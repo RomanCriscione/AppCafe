@@ -5,14 +5,17 @@ from django.contrib.auth import get_user_model
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
+import os
 
 User = get_user_model()
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
+
 
 class Cafe(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -70,7 +73,7 @@ class Cafe(models.Model):
     )
 
     def save(self, *args, **kwargs):
-    # Guardado inicial para asegurar que los archivos de imagen estén disponibles
+        # Guardado inicial
         super().save(*args, **kwargs)
 
         def procesar_imagen(campo):
@@ -78,30 +81,36 @@ class Cafe(models.Model):
             if img_field and hasattr(img_field, 'path'):
                 try:
                     img = Image.open(img_field.path)
+                    formato_original = img.format or 'JPEG'
+
                     if img.mode in ("RGBA", "P"):
                         img = img.convert("RGB")
 
-                    max_width = 1280  # 📏 Máximo ancho permitido
+                    max_width = 1280
                     if img.width > max_width:
                         ratio = max_width / float(img.width)
                         new_height = int(float(img.height) * ratio)
                         img = img.resize((max_width, new_height), Image.LANCZOS)
 
                     buffer = BytesIO()
-                    img.save(buffer, format='JPEG', optimize=True, quality=75)
+                    img.save(
+                        buffer,
+                        format='JPEG' if formato_original not in ['JPEG', 'PNG'] else formato_original,
+                        optimize=True,
+                        quality=70
+                    )
+
                     file_content = ContentFile(buffer.getvalue())
-
-                    # Forzamos guardar nuevamente la imagen comprimida
-                    img_field.save(img_field.name, file_content, save=False)
+                    img_field.save(os.path.basename(img_field.name), file_content, save=False)
                 except Exception as e:
-                    print(f"⚠️ Error al procesar la imagen {campo}: {e}")
+                    print(f"⚠️ Error al procesar la imagen en {campo}: {e}")
 
+        # Procesar imágenes
         for campo in ['photo1', 'photo2', 'photo3']:
             procesar_imagen(campo)
 
-        # Segundo guardado con las imágenes optimizadas
+        # Guardar nuevamente con imágenes optimizadas
         super().save(update_fields=['photo1', 'photo2', 'photo3'])
-
 
     def average_rating(self):
         result = self.reviews.aggregate(Avg('rating'))
@@ -109,6 +118,7 @@ class Cafe(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Review(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

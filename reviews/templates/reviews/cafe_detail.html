@@ -38,129 +38,259 @@
     {% endif %}
   </p>
 
-  {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
-    <h3 class="text-xl font-semibold mb-2">📸 Fotos del lugar</h3>
-    <div class="flex flex-wrap gap-4 mb-6 justify-center sm:justify-start">
-      {% if cafe.photo1 %}<img src="{{ cafe.photo1.url }}" alt="{{ cafe.photo1_title }}" class="w-full sm:w-64 rounded shadow">{% endif %}
-      {% if cafe.photo2 %}<img src="{{ cafe.photo2.url }}" alt="{{ cafe.photo2_title }}" class="w-full sm:w-64 rounded shadow">{% endif %}
-      {% if cafe.photo3 %}<img src="{{ cafe.photo3.url }}" alt="{{ cafe.photo3_title }}" class="w-full sm:w-64 rounded shadow">{% endif %}
+<h3 class="text-xl font-semibold mb-2">🧩 Características</h3>
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-6 text-sm text-gray-800">
+  {% if cafe.has_wifi %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-wifi text-blue-500"></i> Wi-Fi
     </div>
   {% endif %}
+  {% if cafe.is_pet_friendly %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-paw text-pink-500"></i> Pet friendly
+    </div>
+  {% endif %}
+  {% if cafe.is_vegan_friendly %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-leaf text-green-500"></i> Opciones veganas
+    </div>
+  {% endif %}
+  {% if cafe.has_outdoor_seating %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-chair text-yellow-500"></i> Mesas afuera
+    </div>
+  {% endif %}
+  {% if cafe.has_parking %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-square-parking text-gray-600"></i> Estacionamiento
+    </div>
+  {% endif %}
+  {% if cafe.is_accessible %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-wheelchair text-indigo-500"></i> Accesible
+    </div>
+  {% endif %}
+  {% if cafe.has_vegetarian_options %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-carrot text-orange-500"></i> Vegetariano
+    </div>
+  {% endif %}
+  {% if cafe.serves_breakfast %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-mug-saucer text-yellow-600"></i> Desayuno
+    </div>
+  {% endif %}
+  {% if cafe.serves_alcohol %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-wine-glass text-purple-500"></i> Bebidas alcohólicas
+    </div>
+  {% endif %}
+  {% if cafe.has_books_or_games %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-book text-amber-700"></i> Libros o juegos
+    </div>
+  {% endif %}
+  {% if cafe.has_air_conditioning %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-snowflake text-cyan-500"></i> Aire acondicionado
+    </div>
+  {% endif %}
+</div>
 
-  {% if average_rating %}
-    <p class="mb-4"><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
-
-    {% if best_review %}
-      <div class="bg-yellow-100 p-4 rounded border-l-4 border-yellow-500 mb-6 animate-fade-in">
-        <p class="font-semibold">☕✨ Reseña destacada</p>
-        <p class="text-sm text-gray-600">{{ best_review.user.username }} ({{ best_review.created_at|date:"d M Y" }}) — ☕ {{ best_review.rating|floatformat:1 }}</p>
-        <p>“{{ best_review.comment }}”</p>
+{% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
+  <h3 class="text-xl font-semibold mb-2">📸 Fotos del lugar</h3>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+    {% if cafe.photo1 %}
+      <div class="aspect-w-4 aspect-h-3">
+        <img src="{{ cafe.photo1.url }}" alt="{{ cafe.photo1_title }}" class="object-cover w-full h-full rounded shadow">
       </div>
     {% endif %}
-  {% else %}
-    <p class="mb-4"><strong>Calificación promedio:</strong> Sin reseñas todavía.</p>
+    {% if cafe.photo2 %}
+      <div class="aspect-w-4 aspect-h-3">
+        <img src="{{ cafe.photo2.url }}" alt="{{ cafe.photo2_title }}" class="object-cover w-full h-full rounded shadow">
+      </div>
+    {% endif %}
+    {% if cafe.photo3 %}
+      <div class="aspect-w-4 aspect-h-3">
+        <img src="{{ cafe.photo3.url }}" alt="{{ cafe.photo3_title }}" class="object-cover w-full h-full rounded shadow">
+      </div>
+    {% endif %}
+  </div>
+{% endif %}
+
+{% if average_rating %}
+  <p class="mb-4"><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
+  {% if best_review %}
+    <div class="bg-yellow-100 p-4 rounded border-l-4 border-yellow-500 mb-6 animate-fade-in">
+      <p class="font-semibold">☕✨ Reseña destacada</p>
+      <p class="text-sm text-gray-600">{{ best_review.user.username }} ({{ best_review.created_at|date:"d M Y" }}) — ☕ {{ best_review.rating|floatformat:1 }}</p>
+      <p>“{{ best_review.comment }}”</p>
+    </div>
   {% endif %}
+{% else %}
+  <p class="mb-4"><strong>Calificación promedio:</strong> Sin reseñas todavía.</p>
+{% endif %}
 
-  {% if user.is_authenticated %}
-    <form method="post" action="{% url 'toggle_favorite' cafe.id %}" class="mb-4">{% csrf_token %}
-      <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-all">
-        {% if user in cafe.favorites.all %}
-          💔 Quitar de favoritos
-        {% else %}
-          ❤️ Agregar a favoritos
-        {% endif %}
-      </button>
-    </form>
-  {% endif %}
+{% if user.is_authenticated %}
+  <form method="post" action="{% url 'toggle_favorite' cafe.id %}" class="mb-4">{% csrf_token %}
+    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-all">
+      {% if user in cafe.favorites.all %}
+        💔 Quitar de favoritos
+      {% else %}
+        ❤️ Agregar a favoritos
+      {% endif %}
+    </button>
+  </form>
+{% endif %}
 
-  <h3 class="text-xl font-semibold mt-6 mb-2">Reseñas:</h3>
-  <ul class="space-y-4">
-    {% for review in reviews %}
-      <li class="bg-white p-4 rounded shadow animate-fade-in">
-        <div class="flex justify-between items-center mb-2">
-          <strong>{{ review.user.username }}</strong>
-          <span class="text-sm text-gray-500">{{ review.created_at|date:"d M Y" }}</span>
-        </div>
-        <p class="mb-1">☕ {{ review.rating|floatformat:1 }}</p>
-        <p class="mb-2">{{ review.comment }}</p>
+<h3 class="text-xl font-semibold mt-6 mb-4">Reseñas:</h3>
+<div class="space-y-4 divide-y divide-gray-100">
+  {% for review in reviews %}
+    {% include "reviews/_review_card.html" %}
+  {% empty %}
+    <p class="text-gray-500">No hay reseñas aún.</p>
+  {% endfor %}
+</div>
 
-        {% if review.owner_reply %}
-          <div class="bg-gray-100 p-3 rounded">
-            <strong>Respuesta del dueño:</strong>
-            <p>{{ review.owner_reply }}</p>
-          </div>
-        {% endif %}
+{% if user.is_authenticated %}
+  <button onclick="document.getElementById('modal-review').style.display='flex'" class="mt-6 bg-secondary text-white px-4 py-2 rounded">Dejá tu reseña</button>
+{% else %}
+  <p class="mt-4">Para dejar una reseña necesitás <a href="{% url 'account_login' %}?next={{ request.path }}" class="text-blue-600 hover:underline">iniciar sesión</a>.</p>
+{% endif %}
 
-        {% if user.is_authenticated and user == cafe.owner %}
-          <form method="post" action="{% url 'reply_review' review.id %}" class="mt-2">{% csrf_token %}
-            <textarea name="reply" rows="2" class="w-full p-2 border rounded">{{ review.owner_reply }}</textarea>
-            <button type="submit" class="mt-1 bg-primary text-white px-3 py-1 rounded">Guardar respuesta</button>
-          </form>
-        {% endif %}
-      </li>
-    {% empty %}
-      <li class="text-gray-500">No hay reseñas aún.</li>
-    {% endfor %}
-  </ul>
+<!-- Modal -->
+<div id="modal-review" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 relative animate-fade-in">
+    <button onclick="document.getElementById('modal-review').style.display='none'" class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
 
-  {% if user.is_authenticated %}
-    <button onclick="document.getElementById('modal-review').style.display='flex'" class="mt-6 bg-secondary text-white px-4 py-2 rounded">Dejá tu reseña</button>
-  {% else %}
-    <p class="mt-4">Para dejar una reseña necesitás <a href="{% url 'account_login' %}?next={{ request.path }}" class="text-blue-600 hover:underline">iniciar sesión</a>.</p>
-  {% endif %}
+    <h3 class="text-2xl font-bold text-center mb-4 text-brown-800">Dejá tu reseña</h3>
 
-  <!-- Modal -->
-  <div id="modal-review" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center hidden z-50">
-    <div class="bg-white p-6 rounded shadow-md w-full max-w-md relative animate-fade-in">
-      <span onclick="document.getElementById('modal-review').style.display='none'" class="absolute top-2 right-3 cursor-pointer text-xl text-gray-700">&times;</span>
-      <h3 class="text-xl font-semibold mb-2">Dejá tu reseña</h3>
-      <form method="post">{% csrf_token %}
-        {{ form.comment.label_tag }}<br>
-        {{ form.comment }}<br>
-        <label for="id_rating" class="block mt-2">☕ Calificación:</label>
-        <div class="flex gap-1 mt-1">
+    <form method="post" class="space-y-4">{% csrf_token %}
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1" for="comment">Tu comentario</label>
+        {{ form.comment }}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">☕ Calificación</label>
+        <div class="flex flex-row-reverse justify-end gap-1" id="rating-stars">
           {% for i in "54321" %}
-            <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" class="hidden" {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
-            <label for="star{{ i }}" class="cursor-pointer text-xl">☕</label>
+            <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" class="sr-only">
+            <label for="star{{ i }}" class="text-2xl cursor-pointer text-gray-300 hover:text-yellow-400 transition-all duration-150" data-value="{{ i }}">☕</label>
           {% endfor %}
         </div>
-        <button type="submit" class="mt-4 bg-primary text-white px-4 py-2 rounded">Enviar</button>
-      </form>
-    </div>
+        <p id="rating-label" class="text-sm text-center mt-1 text-gray-600"></p>
+      </div>
+
+      <div class="text-center pt-2">
+        <button type="submit" class="bg-primary hover:bg-brown-700 text-white font-semibold px-5 py-2 rounded-lg transition-all duration-150">Enviar</button>
+      </div>
+    </form>
   </div>
-
-  {% if cafe.latitude and cafe.longitude %}
-    <h3 class="text-xl font-semibold mt-10 mb-2">📍 Ubicación</h3>
-    <div id="map" class="h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] w-full rounded shadow-lg mb-10"></div>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const lat = parseFloat("{{ cafe.latitude|escapejs }}");
-        const lon = parseFloat("{{ cafe.longitude|escapejs }}");
-        const map = L.map('map').setView([lat, lon], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-        L.marker([lat, lon]).addTo(map)
-          .bindPopup("<strong>{{ cafe.name|escapejs }}</strong><br>{{ cafe.address|escapejs }}").openPopup();
-      });
-    </script>
-  {% endif %}
-
-  <!-- Cafés vistos recientemente -->
-  <section class="pt-12 pb-6 bg-orange-50 overflow-x-hidden mt-10">
-    <h2 class="text-2xl font-semibold mb-6">👀 Cafés vistos recientemente</h2>
-    <div class="swiper-container" id="recently-viewed-container">
-      <div class="swiper-wrapper" id="recently-viewed-list"></div>
-      <div class="swiper-button-next text-brown-900"></div>
-      <div class="swiper-button-prev text-brown-900"></div>
-      <div class="swiper-pagination"></div>
-    </div>
-  </section>
 </div>
+
+{% if cafe.latitude and cafe.longitude %}
+  <h3 class="text-xl font-semibold mt-10 mb-2">📍 Ubicación</h3>
+  <button onclick="toggleMap()" class="mb-4 text-sm text-blue-600 hover:underline focus:outline-none">Mostrar mapa</button>
+  <div id="map-container" class="hidden">
+    <div class="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] rounded-xl overflow-hidden shadow-lg mb-10" id="map"></div>
+  </div>
+  <script>
+    function toggleMap() {
+      const mapContainer = document.getElementById("map-container");
+      const button = event.target;
+      const isHidden = mapContainer.classList.contains("hidden");
+      if (isHidden) {
+        mapContainer.classList.remove("hidden");
+        button.textContent = "Ocultar mapa";
+        if (!mapContainer.dataset.mapLoaded) {
+          const lat = parseFloat("{{ cafe.latitude|escapejs }}");
+          const lon = parseFloat("{{ cafe.longitude|escapejs }}");
+          const map = L.map('map').setView([lat, lon], 15);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+          }).addTo(map);
+          L.marker([lat, lon]).addTo(map)
+            .bindPopup("<strong>{{ cafe.name|escapejs }}</strong><br>{{ cafe.address|escapejs }}").openPopup();
+          mapContainer.dataset.mapLoaded = true;
+        }
+      } else {
+        mapContainer.classList.add("hidden");
+        button.textContent = "Mostrar mapa";
+      }
+    }
+  </script>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // ⭐ Script para pintar las tazas y mostrar texto de calificación
+    const starsContainer = document.getElementById("rating-stars");
+    if (!starsContainer) return;
+
+    const stars = starsContainer.querySelectorAll("label");
+    const radios = starsContainer.querySelectorAll("input[type='radio']");
+    
+    // Crear contenedor de texto si no existe
+    let textLabel = document.getElementById("rating-label");
+    if (!textLabel) {
+      textLabel = document.createElement("p");
+      textLabel.id = "rating-label";
+      textLabel.className = "mt-2 text-sm font-medium text-center text-gray-700";
+      starsContainer.parentNode.insertBefore(textLabel, starsContainer.nextSibling);
+    }
+
+    const labels = {
+      5: "Excelente",
+      4: "Muy bueno",
+      3: "Bueno",
+      2: "Regular",
+      1: "Malo"
+    };
+
+    function updateStars(selected) {
+      stars.forEach(label => {
+        const value = parseInt(label.getAttribute("for").replace("star", ""));
+        if (value <= selected) {
+          label.classList.remove("text-gray-300");
+          label.classList.add("text-yellow-500");
+        } else {
+          label.classList.remove("text-yellow-500");
+          label.classList.add("text-gray-300");
+        }
+      });
+      textLabel.textContent = selected > 0 ? labels[selected] : "";
+    }
+
+    // Manejo de clics
+    radios.forEach(radio => {
+      radio.addEventListener("change", () => {
+        updateStars(parseInt(radio.value));
+      });
+    });
+
+    // Hover visual
+    stars.forEach(label => {
+      label.addEventListener("mouseenter", () => {
+        const hovered = parseInt(label.getAttribute("for").replace("star", ""));
+        updateStars(hovered);
+      });
+      label.addEventListener("mouseleave", () => {
+        const selected = starsContainer.querySelector("input:checked");
+        updateStars(selected ? parseInt(selected.value) : 0);
+      });
+    });
+
+    // Mostrar la selección al cargar
+    const checked = starsContainer.querySelector("input:checked");
+    if (checked) {
+      updateStars(parseInt(checked.value));
+    }
+  });
+
+  // 🧭 Script para cafés vistos recientemente (Swiper)
   document.addEventListener("DOMContentLoaded", function () {
     const visitedCafe = {
       id: {{ cafe.id }},
@@ -170,6 +300,7 @@
       location: "{{ cafe.location|escapejs }}",
       address: "{{ cafe.address|escapejs }}"
     };
+
     let history = JSON.parse(localStorage.getItem("recently_viewed_cafes") || "[]");
     history = history.filter(c => c.id !== visitedCafe.id);
     history.unshift(visitedCafe);
@@ -209,4 +340,5 @@
     });
   });
 </script>
+
 {% endblock %}

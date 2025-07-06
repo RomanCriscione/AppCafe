@@ -17,194 +17,207 @@
     {% csrf_token %}
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-<label class="block font-medium text-sm mb-1">{{ form.name.label }}</label>
+      <div>
+        <label class="block font-medium text-sm mb-1">{{ form.name.label }}</label>
         {{ form.name|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
       </div>
-<div>
-  <label class="block font-medium text-sm mb-1">{{ form.address.label }}</label>
-  {{ form.address|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
-  {% if form.address.errors %}
-    <p class="text-red-600 text-sm mt-1">{{ form.address.errors.0 }}</p>
-  {% endif %}
-</div>
-<div>
-<label class="block font-medium text-sm mb-1">{{ form.location.label }}</label>
+      <div>
+        <label class="block font-medium text-sm mb-1">{{ form.address.label }}</label>
+        {{ form.address|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
+        {% if form.address.errors %}
+          <p class="text-red-600 text-sm mt-1">{{ form.address.errors.0 }}</p>
+        {% endif %}
+      </div>
+      <div>
+        <label class="block font-medium text-sm mb-1">{{ form.location.label }}</label>
         {{ form.location|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
       </div>
-<div class="md:col-span-2">
-<label class="block font-medium text-sm mb-1">{{ form.description.label }}</label>
+      <div class="md:col-span-2">
+        <label class="block font-medium text-sm mb-1">{{ form.description.label }}</label>
         {{ form.description|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
       </div>
-<div>
-<label class="block font-medium text-sm mb-1">{{ form.phone.label }}</label>
+      <div>
+        <label class="block font-medium text-sm mb-1">{{ form.phone.label }}</label>
         {{ form.phone|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
+        {% if form.phone.errors %}
+          <p class="text-red-600 text-sm mt-1">{{ form.phone.errors.0 }}</p>
+        {% endif %}
       </div>
-<div>
-<label class="block font-medium text-sm mb-1">{{ form.google_maps_url.label }}</label>
+      <div>
+        <label class="block font-medium text-sm mb-1">{{ form.google_maps_url.label }}</label>
         {{ form.google_maps_url|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
       </div>
-</div>
-<h3 class="text-lg font-semibold mt-6">Fotos</h3>
-<div class="space-y-4">
-<div>
-<label>{{ form.photo1.label }}</label>
+    </div>
+
+    <h3 class="text-lg font-semibold mt-6">Fotos</h3>
+    <div class="space-y-4">
+      <div>
+        <label>{{ form.photo1.label }}</label>
         {{ form.photo1|add_class:"block mt-1" }}
         {{ form.photo1_title|add_class:"w-full mt-1" }}
       </div>
-<div>
-<label>{{ form.photo2.label }}</label>
+      <div>
+        <label>{{ form.photo2.label }}</label>
         {{ form.photo2|add_class:"block mt-1" }}
         {{ form.photo2_title|add_class:"w-full mt-1" }}
       </div>
-<div>
-<label>{{ form.photo3.label }}</label>
+      <div>
+        <label>{{ form.photo3.label }}</label>
         {{ form.photo3|add_class:"block mt-1" }}
         {{ form.photo3_title|add_class:"w-full mt-1" }}
       </div>
-</div>
-<h3 class="text-lg font-semibold mt-6">Opciones</h3>
-<div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-<label class="flex items-center">{{ form.is_vegan_friendly }} <span class="ml-2">Vegano friendly</span></label>
-<label class="flex items-center">{{ form.is_pet_friendly }} <span class="ml-2">Pet friendly</span></label>
-<label class="flex items-center">{{ form.has_wifi }} <span class="ml-2">WiFi</span></label>
-<label class="flex items-center">{{ form.has_outdoor_seating }} <span class="ml-2">Mesas al aire libre</span></label>
-<label class="flex items-center">{{ form.has_parking }} <span class="ml-2">Estacionamiento</span></label>
-<label class="flex items-center">{{ form.is_accessible }} <span class="ml-2">Accesible</span></label>
-<label class="flex items-center">{{ form.has_vegetarian_options }} <span class="ml-2">Opciones vegetarianas</span></label>
-<label class="flex items-center">{{ form.serves_breakfast }} <span class="ml-2">Sirve desayuno</span></label>
-<label class="flex items-center">{{ form.serves_alcohol }} <span class="ml-2">Sirve alcohol</span></label>
-<label class="flex items-center">{{ form.has_books_or_games }} <span class="ml-2">Libros/juegos</span></label>
-<label class="flex items-center">{{ form.has_air_conditioning }} <span class="ml-2">Aire acondicionado</span></label>
-</div>
-<h3 class="text-lg font-semibold mt-6">Etiquetas</h3>
+    </div>
+
+    <h3 class="text-lg font-semibold mt-6">Opciones</h3>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+      <label class="flex items-center">{{ form.is_vegan_friendly }} <span class="ml-2">Vegano friendly</span></label>
+      <label class="flex items-center">{{ form.is_pet_friendly }} <span class="ml-2">Pet friendly</span></label>
+      <label class="flex items-center">{{ form.has_wifi }} <span class="ml-2">WiFi</span></label>
+      <label class="flex items-center">{{ form.has_outdoor_seating }} <span class="ml-2">Mesas al aire libre</span></label>
+      <label class="flex items-center">{{ form.has_parking }} <span class="ml-2">Estacionamiento</span></label>
+      <label class="flex items-center">{{ form.is_accessible }} <span class="ml-2">Accesible</span></label>
+      <label class="flex items-center">{{ form.has_vegetarian_options }} <span class="ml-2">Opciones vegetarianas</span></label>
+      <label class="flex items-center">{{ form.serves_breakfast }} <span class="ml-2">Sirve desayuno</span></label>
+      <label class="flex items-center">{{ form.serves_alcohol }} <span class="ml-2">Sirve alcohol</span></label>
+      <label class="flex items-center">{{ form.has_books_or_games }} <span class="ml-2">Libros/juegos</span></label>
+      <label class="flex items-center">{{ form.has_air_conditioning }} <span class="ml-2">Aire acondicionado</span></label>
+    </div>
+
+    <h3 class="text-lg font-semibold mt-6">Etiquetas</h3>
     {{ form.tags|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
 
     <h3 class="text-lg font-semibold mt-6">Ubicación geográfica</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-<label>{{ form.latitude.label }}</label>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label>{{ form.latitude.label }}</label>
         {{ form.latitude|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
       </div>
-<div>
-<label>{{ form.longitude.label }}</label>
+      <div>
+        <label>{{ form.longitude.label }}</label>
         {{ form.longitude|add_class:"w-full rounded border-gray-300 focus:ring focus:ring-blue-200" }}
       </div>
-</div>
-<button type="button" onclick="mostrarMapaMobile()" class="block md:hidden bg-primary text-white px-4 py-2 rounded mb-4">
-  📍 Mostrar mapa
-</button>
-<div class="h-80 mt-4 hidden md:block" id="map"></div>
-<div class="mt-4 space-y-2" id="address-options"></div>
-<p class="text-sm italic text-gray-600 mt-1" id="location-status"></p>
-<button class="mt-6 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700" type="submit">Guardar</button>
-</form>
-<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const map = L.map('map').setView([-34.6037, -58.3816], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    </div>
 
-    const marker = L.marker([-34.6037, -58.3816], { draggable: true }).addTo(map);
-    const latInput = document.getElementById("id_latitude");
-    const lonInput = document.getElementById("id_longitude");
-    const addressInput = document.getElementById("id_address");
-    const locationInput = document.getElementById("id_location");
-    const locationStatus = document.getElementById("location-status");
-    const optionsContainer = document.getElementById("address-options");
+    <button type="button" onclick="mostrarMapaMobile()" class="block md:hidden bg-primary text-white px-4 py-2 rounded mb-4">
+      📍 Mostrar mapa
+    </button>
+    <div class="h-80 mt-4 hidden md:block" id="map"></div>
+    <div class="mt-4 space-y-2" id="address-options"></div>
+    <p class="text-sm italic text-gray-600 mt-1" id="location-status"></p>
+    <button class="mt-6 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700" type="submit">Guardar</button>
+  </form>
 
-    let direccionGeolocalizada = false;
+  <link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const map = L.map('map').setView([-34.6037, -58.3816], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
 
-    function actualizarInputs(lat, lon) {
-      latInput.value = lat.toFixed(6);
-      lonInput.value = lon.toFixed(6);
-    }
+      const marker = L.marker([-34.6037, -58.3816], { draggable: true }).addTo(map);
+      const latInput = document.getElementById("id_latitude");
+      const lonInput = document.getElementById("id_longitude");
+      const addressInput = document.getElementById("id_address");
+      const locationInput = document.getElementById("id_location");
+      const locationStatus = document.getElementById("location-status");
+      const optionsContainer = document.getElementById("address-options");
 
-    function mostrarUbicacionTexto(lat, lon) {
-      locationStatus.textContent = `📍 Ubicación actualizada: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
-    }
+      let direccionGeolocalizada = false;
 
-    function aplicarUbicacion(lat, lon, displayName = "") {
-      map.setView([lat, lon], 16);
-      marker.setLatLng([lat, lon]);
-      actualizarInputs(lat, lon);
-      mostrarUbicacionTexto(lat, lon);
-      direccionGeolocalizada = true;
-      if (displayName) {
-        locationStatus.textContent = `📍 Seleccionado: ${displayName}`;
+      function actualizarInputs(lat, lon) {
+        latInput.value = lat.toFixed(6);
+        lonInput.value = lon.toFixed(6);
       }
-    }
 
-    function geolocalizarDireccion() {
-      const direccion = addressInput?.value.trim();
-      const localidad = locationInput?.value.trim();
-      const fullQuery = `${direccion}, ${localidad}, Buenos Aires, Argentina`;
-
-      if (direccion.length > 5 && localidad.length > 1) {
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}`)
-          .then(res => res.json())
-          .then(data => {
-            optionsContainer.innerHTML = "";
-
-            if (data.length === 0) {
-              direccionGeolocalizada = false;
-              alert("❌ No se pudo encontrar la dirección ingresada.");
-              locationStatus.textContent = "❌ Dirección no reconocida.";
-              return;
-            }
-
-            if (data.length === 1) {
-              const { lat, lon, display_name } = data[0];
-              aplicarUbicacion(parseFloat(lat), parseFloat(lon), display_name);
-            } else {
-              const heading = document.createElement("p");
-              heading.textContent = "📌 Seleccioná la dirección correcta:";
-              optionsContainer.appendChild(heading);
-
-              data.slice(0, 5).forEach((place) => {
-                const btn = document.createElement("button");
-                btn.textContent = place.display_name;
-                btn.className = "block w-full text-left bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded";
-                btn.onclick = () => {
-                  aplicarUbicacion(parseFloat(place.lat), parseFloat(place.lon), place.display_name);
-                  optionsContainer.innerHTML = "";
-                };
-                optionsContainer.appendChild(btn);
-              });
-            }
-          });
+      function mostrarUbicacionTexto(lat, lon) {
+        locationStatus.textContent = `📍 Ubicación actualizada: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
       }
-    }
 
-    if (addressInput) addressInput.addEventListener("blur", geolocalizarDireccion);
-    if (locationInput) locationInput.addEventListener("change", geolocalizarDireccion);
+      function aplicarUbicacion(lat, lon, displayName = "") {
+        map.setView([lat, lon], 16);
+        marker.setLatLng([lat, lon]);
+        actualizarInputs(lat, lon);
+        mostrarUbicacionTexto(lat, lon);
+        direccionGeolocalizada = true;
+        if (displayName) {
+          locationStatus.textContent = `📍 Seleccionado: ${displayName}`;
+        }
+      }
 
-    marker.on("dragend", function () {
-      const pos = marker.getLatLng();
-      actualizarInputs(pos.lat, pos.lng);
-      mostrarUbicacionTexto(pos.lat, pos.lng);
-      direccionGeolocalizada = true;
+      function geolocalizarDireccion() {
+        const direccion = addressInput?.value.trim();
+        const localidad = locationInput?.value.trim();
+        const fullQuery = `${direccion}, ${localidad}, Buenos Aires, Argentina`;
+
+        if (direccion.length > 5 && localidad.length > 1) {
+          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}`)
+            .then(res => res.json())
+            .then(data => {
+              optionsContainer.innerHTML = "";
+
+              if (data.length === 0) {
+                direccionGeolocalizada = false;
+                alert("❌ No se pudo encontrar la dirección ingresada.");
+                locationStatus.textContent = "❌ Dirección no reconocida.";
+                return;
+              }
+
+              if (data.length === 1) {
+                const { lat, lon, display_name } = data[0];
+                aplicarUbicacion(parseFloat(lat), parseFloat(lon), display_name);
+              } else {
+                const heading = document.createElement("p");
+                heading.textContent = "📌 Seleccioná la dirección correcta:";
+                optionsContainer.appendChild(heading);
+
+                data.slice(0, 5).forEach((place) => {
+                  const calleYNro = place.display_name.split(',')[0];
+                  const btn = document.createElement("button");
+                  btn.textContent = `📍 ${place.display_name}`;
+                  btn.title = place.display_name;
+                  btn.className = "block w-full text-left bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded";
+                  btn.onclick = () => {
+                    aplicarUbicacion(parseFloat(place.lat), parseFloat(place.lon), place.display_name);
+                    optionsContainer.innerHTML = "";
+                  };
+                  optionsContainer.appendChild(btn);
+                });
+
+                const nota = document.createElement("p");
+                nota.className = "text-sm italic text-gray-600 mt-2";
+                nota.textContent = "🔧 Si la numeración no coincide exactamente, podés ajustar el marcador en el mapa manualmente.";
+                optionsContainer.appendChild(nota);
+              }
+            });
+        }
+      }
+
+      if (addressInput) addressInput.addEventListener("blur", geolocalizarDireccion);
+      if (locationInput) locationInput.addEventListener("change", geolocalizarDireccion);
+
+      marker.on("dragend", function () {
+        const pos = marker.getLatLng();
+        actualizarInputs(pos.lat, pos.lng);
+        mostrarUbicacionTexto(pos.lat, pos.lng);
+        direccionGeolocalizada = true;
+      });
+
+      window.validarDireccionAntesDeEnviar = function () {
+        const lat = parseFloat(latInput.value);
+        const lon = parseFloat(lonInput.value);
+        if (isNaN(lat) || isNaN(lon) || !direccionGeolocalizada) {
+          alert("⚠️ Por favor, asegurate de ingresar una dirección válida y que se haya ubicado correctamente en el mapa.");
+          return false;
+        }
+        return true;
+      };
     });
 
-    window.validarDireccionAntesDeEnviar = function () {
-      const lat = parseFloat(latInput.value);
-      const lon = parseFloat(lonInput.value);
-      if (isNaN(lat) || isNaN(lon) || !direccionGeolocalizada) {
-        alert("⚠️ Por favor, asegurate de ingresar una dirección válida y que se haya ubicado correctamente en el mapa.");
-        return false;
-      }
-      return true;
-    };
-  });
-
-  function mostrarMapaMobile() {
-  document.getElementById("map").classList.remove("hidden");
-  document.getElementById("map").scrollIntoView({ behavior: "smooth" });
-}
-
+    function mostrarMapaMobile() {
+      document.getElementById("map").classList.remove("hidden");
+      document.getElementById("map").scrollIntoView({ behavior: "smooth" });
+    }
   </script>
-
 {% endblock %}

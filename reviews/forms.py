@@ -1,5 +1,12 @@
 from django import forms
 from .models import Review, Cafe
+from django.core.exceptions import ValidationError
+import re
+
+# Validación externa por si se quiere también usar en el modelo
+def validar_phone(valor):
+    if valor and not re.match(r'^\+?\d{6,15}$', valor):
+        raise ValidationError("Número inválido. Usá solo números, con o sin +, de 6 a 15 dígitos.")
 
 class ReviewForm(forms.ModelForm):
     class Meta:
@@ -7,6 +14,13 @@ class ReviewForm(forms.ModelForm):
         fields = ['rating', 'comment']
 
 class CafeForm(forms.ModelForm):
+    phone = forms.CharField(
+        max_length=20,
+        required=False,
+        help_text='Ejemplo: +541155112233 o 01155556666',
+        widget=forms.TextInput(attrs={'placeholder': '+541155112233 o 01155556666'})
+    )
+
     class Meta:
         model = Cafe
         fields = [
@@ -39,6 +53,12 @@ class CafeForm(forms.ModelForm):
         if not any(char.isalpha() for char in address):
             raise forms.ValidationError("La dirección debe incluir un nombre de calle.")
         return address
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if phone and not re.match(r'^\+?\d{6,15}$', phone):
+            raise forms.ValidationError("Número inválido. Usá solo números, con o sin +, de 6 a 15 dígitos.")
+        return phone
 
     def clean(self):
         cleaned_data = super().clean()

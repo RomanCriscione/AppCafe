@@ -1,0 +1,61 @@
+/* static/css/custom.css */
+
+/* ✅ Botón de favorito */
+.btn-fav {
+  background-color: #f87171; /* rojo suave */
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.btn-fav:hover {
+    background-color: #dc2626;
+}
+
+.leaflet-marker-icon.animated-bounce {
+    animation: bounce 1s infinite;
+}
+
+/* ✅ Animación fade-in */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+/* ✅ Igualar altura y evitar solapamiento en slider de reseñas */
+.swiper-slide {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 220px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.swiper-wrapper {
+    padding-bottom: 2rem; 
+}
+
+.swiper-container {
+    padding-bottom: 2rem;
+}
+
+
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@media (max-width: 768px) {
+    input,
+    select,
+    textarea {
+        font-size: 1rem;
+    }
+}

@@ -17,6 +17,7 @@ from math import radians, cos, sin, asin, sqrt
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponseForbidden
 from reviews.utils.geo import haversine_distance
+from statistics import mean
 
 
 # Listar reseñas agrupadas por zona
@@ -223,13 +224,27 @@ def cafe_detail(request, cafe_id):
     if request.method == "POST":
         form = ReviewForm(request.POST)
         if form.is_valid():
-            review = form.save(commit=False)
-            review.user = request.user
-            review.cafe = cafe
-            review.save()
+            review, created = Review.objects.get_or_create(
+                user=request.user,
+                cafe=cafe,
+                defaults={
+                    "comment": form.cleaned_data["comment"],
+                    "rating": form.cleaned_data["rating"],
+                }
+            )
+            if not created:
+                review.comment = form.cleaned_data["comment"]
+                review.rating = form.cleaned_data["rating"]
+                review.save()
             return redirect("cafe_detail", cafe_id=cafe.id)
     else:
-        form = ReviewForm()
+        # Si ya hay reseña, mostrarla prellenada
+        try:
+            existing_review = Review.objects.get(user=request.user, cafe=cafe)
+            form = ReviewForm(instance=existing_review)
+        except Review.DoesNotExist:
+            form = ReviewForm()
+
 
     return render(request, "reviews/cafe_detail.html", {
         "cafe": cafe,

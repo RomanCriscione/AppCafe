@@ -4,63 +4,61 @@
 
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6 relative">
-    <!-- Botón de Filtros para Mobile -->
+  <!-- Botón de Filtros para Mobile -->
   <button id="toggle-filtros" class="lg:hidden fixed bottom-4 right-4 z-50 bg-primary text-white p-3 rounded-full shadow-lg hover:bg-secondary transition">
     🔍 Filtros
   </button>
-    <!-- Overlay (fondo oscuro al abrir filtros en mobile) -->
+  <!-- Overlay (fondo oscuro al abrir filtros en mobile) -->
   <div id="filtros-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
 
   <!-- Filtros -->
   <aside id="panel-filtros" class="lg:static fixed top-0 left-0 h-full w-4/5 max-w-xs bg-white p-4 rounded-lg shadow-lg z-50 transform -translate-x-full transition-transform lg:translate-x-0 lg:w-1/4 lg:h-auto lg:shadow-none animate-fade-in">
-  <!-- Encabezado para mobile -->
-  <div class="flex justify-between items-center lg:hidden mb-4">
-    <h2 class="text-xl font-semibold">🔍 Filtros</h2>
-    <button id="cerrar-filtros" class="text-gray-600 hover:text-black text-2xl">&times;</button>
-  </div>
+    <div class="flex justify-between items-center lg:hidden mb-4">
+      <h2 class="text-xl font-semibold">🔍 Filtros</h2>
+      <button id="cerrar-filtros" class="text-gray-600 hover:text-black text-2xl">&times;</button>
+    </div>
 
-  <!-- Formulario de filtros -->
-  <form method="get" class="space-y-4">
-    <div>
-      <label for="zona" class="block font-medium">Zona:</label>
-      <select name="zona" id="zona" class="w-full mt-1 p-2 border rounded">
-        <option value="">Todas</option>
-        {% for z in zonas_disponibles %}
-          <option value="{{ z }}" {% if zona_seleccionada == z %}selected{% endif %}>{{ z }}</option>
+    <form method="get" class="space-y-4">
+      <div>
+        <label for="zona" class="block font-medium">Zona:</label>
+        <select name="zona" id="zona" class="w-full mt-1 p-2 border rounded">
+          <option value="">Todas</option>
+          {% for z in zonas_disponibles %}
+            <option value="{{ z }}" {% if zona_seleccionada == z %}selected{% endif %}>{{ z }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label for="orden" class="block font-medium">Orden:</label>
+        <select name="orden" id="orden" class="w-full mt-1 p-2 border rounded">
+          <option value="algoritmo" {% if orden_actual == 'algoritmo' or not orden_actual %}selected{% endif %}>✨ Recomendadas</option>
+          <option value="rating" {% if orden_actual == 'rating' %}selected{% endif %}>Puntuación</option>
+          <option value="reviews" {% if orden_actual == 'reviews' %}selected{% endif %}>Más reseñas</option>
+          <option value="" {% if orden_actual == '' %}selected{% endif %}>Nombre</option>
+        </select>
+      </div>
+
+      <fieldset>
+        <legend class="font-medium">Características:</legend>
+        {% for key, label in caracteristicas %}
+          <label class="block"><input type="checkbox" name="{{ key }}" {% if filtros_aplicados|get_item:key %}checked{% endif %}> {{ label }}</label>
         {% endfor %}
-      </select>
-    </div>
+      </fieldset>
 
-    <div>
-      <label for="orden" class="block font-medium">Orden:</label>
-      <select name="orden" id="orden" class="w-full mt-1 p-2 border rounded">
-        <option value="algoritmo" {% if orden_actual == 'algoritmo' or not orden_actual %}selected{% endif %}>✨ Recomendadas</option>
-        <option value="rating" {% if orden_actual == 'rating' %}selected{% endif %}>Puntuación</option>
-        <option value="reviews" {% if orden_actual == 'reviews' %}selected{% endif %}>Más reseñas</option>
-        <option value="" {% if orden_actual == '' %}selected{% endif %}>Nombre</option>
-      </select>
-    </div>
+      <fieldset>
+        <legend class="font-medium">Etiquetas:</legend>
+        {% for tag in tags %}
+          <label class="block">
+            <input type="checkbox" name="tags" value="{{ tag.id }}" {% if tag.id in tags_seleccionados %}checked{% endif %}>
+            {{ tag.name }}
+          </label>
+        {% endfor %}
+      </fieldset>
 
-    <fieldset>
-      <legend class="font-medium">Características:</legend>
-      {% for key, label in caracteristicas %}
-        <label class="block"><input type="checkbox" name="{{ key }}" {% if filtros_aplicados|get_item:key %}checked{% endif %}> {{ label }}</label>
-      {% endfor %}
-    </fieldset>
-
-    <fieldset>
-      <legend class="font-medium">Etiquetas:</legend>
-      {% for tag in tags %}
-        <label class="block">
-          <input type="checkbox" name="tags" value="{{ tag.id }}" {% if tag.id in tags_seleccionados %}checked{% endif %}>
-          {{ tag.name }}
-        </label>
-      {% endfor %}
-    </fieldset>
-
-    <button type="submit" class="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition-colors">Aplicar filtros</button>
-  </form>
-</aside>
+      <button type="submit" class="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition-colors">Aplicar filtros</button>
+    </form>
+  </aside>
 
   <!-- Lista de Cafés -->
   <section class="lg:w-3/4">
@@ -89,38 +87,8 @@
     {% if cafes %}
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for cafe in cafes %}
-          <div class="relative bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full min-h-[400px]">
-            {% if cafe.id in favoritos_ids %}
-              <span class="absolute top-2 right-2 text-red-500 text-xl animate-fade-in z-10">❤️</span>
-            {% endif %}
-
-            {% if cafe.photo1 %}
-              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}"
-              class="w-full h-52 aspect-[4/3] object-cover rounded-lg mb-4 transition-transform duration-300 transform hover:scale-105 hover:shadow-lg hover:opacity-90">
-            {% else %}
-              <div class="w-full h-52 bg-gray-200 flex items-center justify-center rounded-lg mb-4 text-gray-500 text-3xl">
-                📷
-              </div>
-            {% endif %}
-
-            <div class="flex-grow flex flex-col justify-between">
-              <div>
-                <h2 class="text-xl font-semibold flex items-center">
-                  {{ cafe.name }}
-                  <span class="ml-2 text-sm text-gray-500">({{ cafe.location }})</span>
-                </h2>
-                <p class="text-sm text-gray-600 mb-1">📍 {{ cafe.address }}</p>
-                <p class="text-sm">☕ {{ cafe.average_rating|floatformat:1 }}</p>
-              </div>
-
-              <div class="mt-4">
-                <a href="{% url 'cafe_detail' cafe.id %}" class="inline-block text-blue-600 hover:underline text-sm font-medium">Ver detalles</a>
-              </div>
-            </div>
-          </div>
+          {% include "reviews/_cafe_card.html" %}
         {% endfor %}
-      </div>
-
       </div>
     {% else %}
       <div class="text-center text-lg text-gray-600 mt-8 space-y-4">
