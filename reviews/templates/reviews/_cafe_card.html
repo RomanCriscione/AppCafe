@@ -1,7 +1,17 @@
 {# reviews/templates/reviews/_cafe_card.html #}
 <div class="relative bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full min-h-[400px]">
-  {% if cafe.id in favoritos_ids %}
-    <span class="absolute top-2 right-2 text-red-500 text-xl animate-fade-in z-10">❤️</span>
+
+  {% if user.is_authenticated %}
+    <form method="POST" action="{% url 'toggle_favorite' cafe.id %}" class="absolute top-2 right-2 z-10">
+      {% csrf_token %}
+      <button type="submit" class="text-xl hover:scale-110 transition">
+        {% if cafe.id in favoritos_ids %}
+          ❤️
+        {% else %}
+          🤍
+        {% endif %}
+      </button>
+    </form>
   {% endif %}
 
   {% if cafe.photo1 %}

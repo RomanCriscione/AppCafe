@@ -3,16 +3,16 @@
 {% load custom_filters %}
 
 {% block content %}
-<div class="flex flex-col lg:flex-row gap-6 relative">
+<div class="flex flex-col lg:flex-row gap-6 relative px-4">
   <!-- Botón de Filtros para Mobile -->
   <button id="toggle-filtros" class="lg:hidden fixed bottom-4 right-4 z-50 bg-primary text-white p-3 rounded-full shadow-lg hover:bg-secondary transition">
     🔍 Filtros
   </button>
   <!-- Overlay (fondo oscuro al abrir filtros en mobile) -->
-  <div id="filtros-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+  <div id="filtros-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden opacity-0 transition-opacity duration-300 lg:hidden"></div>
 
   <!-- Filtros -->
-  <aside id="panel-filtros" class="lg:static fixed top-0 left-0 h-full w-4/5 max-w-xs bg-white p-4 rounded-lg shadow-lg z-50 transform -translate-x-full transition-transform lg:translate-x-0 lg:w-1/4 lg:h-auto lg:shadow-none animate-fade-in">
+  <aside id="panel-filtros" class="lg:static fixed top-0 left-0 h-full w-4/5 max-w-xs bg-white p-4 rounded-lg shadow-lg z-50 transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:w-1/4 lg:h-auto lg:shadow-none overflow-auto">
     <div class="flex justify-between items-center lg:hidden mb-4">
       <h2 class="text-xl font-semibold">🔍 Filtros</h2>
       <button id="cerrar-filtros" class="text-gray-600 hover:text-black text-2xl">&times;</button>
@@ -61,7 +61,7 @@
   </aside>
 
   <!-- Lista de Cafés -->
-  <section class="lg:w-3/4">
+  <section class="lg:w-3/4 max-w-6xl mx-auto">
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-bold">Cafeterías</h1>
       <div class="flex gap-3 items-center">
@@ -69,9 +69,10 @@
           <input type="hidden" name="orden" value="algoritmo">
           <input type="hidden" name="lat" id="lat">
           <input type="hidden" name="lon" id="lon">
-          <button type="submit" class="bg-accent text-white px-3 py-2 rounded hover:bg-secondary transition-transform hover:scale-105">
+          <button type="submit" class="bg-accent text-white px-3 py-2 rounded text-sm hover:bg-secondary transition-transform hover:scale-105">
             📍 Cafés cerca mío
           </button>
+
         </form>
 
         {% if mostrar_boton_reset %}
@@ -194,19 +195,23 @@
 
 if (btnAbrir && panelFiltros && overlay) {
   btnAbrir.addEventListener("click", () => {
-    panelFiltros.classList.remove("-translate-x-full");
-    overlay.classList.remove("hidden");
-  });
+  panelFiltros.classList.remove("-translate-x-full");
+  overlay.classList.remove("hidden");
+  setTimeout(() => overlay.classList.add("opacity-100"), 10);  // fade-in
+});
 
-  btnCerrar.addEventListener("click", () => {
-    panelFiltros.classList.add("-translate-x-full");
-    overlay.classList.add("hidden");
-  });
+btnCerrar.addEventListener("click", () => {
+  panelFiltros.classList.add("-translate-x-full");
+  overlay.classList.remove("opacity-100");
+  setTimeout(() => overlay.classList.add("hidden"), 300);  // fade-out delay
+});
 
-  overlay.addEventListener("click", () => {
-    panelFiltros.classList.add("-translate-x-full");
-    overlay.classList.add("hidden");
-  });
+overlay.addEventListener("click", () => {
+  panelFiltros.classList.add("-translate-x-full");
+  overlay.classList.remove("opacity-100");
+  setTimeout(() => overlay.classList.add("hidden"), 300);
+});
+
 }
 
 </script>

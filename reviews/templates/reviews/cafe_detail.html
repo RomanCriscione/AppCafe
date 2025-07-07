@@ -131,6 +131,28 @@
   <p class="mb-4"><strong>Calificación promedio:</strong> Sin reseñas todavía.</p>
 {% endif %}
 
+{% if recommended_cafes %}
+  <div class="mt-10">
+    <h2 class="text-xl font-semibold mb-4">☕ Cafés recomendados</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      {% for cafe in recommended_cafes %}
+        <a href="{% url 'cafe_detail' cafe.id %}" class="block bg-white rounded-lg shadow hover:shadow-md transition duration-200 overflow-hidden">
+          {% if cafe.photo1 %}
+            <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}" class="w-full h-40 object-cover">
+          {% else %}
+            <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500">Sin foto</div>
+          {% endif %}
+          <div class="p-3">
+            <h3 class="font-semibold text-base text-gray-800">{{ cafe.name }}</h3>
+            <p class="text-sm text-gray-600">{{ cafe.location }}</p>
+            <p class="text-yellow-500 text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
 {% if user.is_authenticated %}
   <form method="post" action="{% url 'toggle_favorite' cafe.id %}" class="mb-4">{% csrf_token %}
     <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-all">
@@ -146,7 +168,20 @@
 <h3 class="text-xl font-semibold mt-6 mb-4">Reseñas:</h3>
 <div class="space-y-4 divide-y divide-gray-100">
   {% for review in reviews %}
-    {% include "reviews/_review_card.html" %}
+    <div class="mb-6 p-4 border rounded-md shadow-sm bg-white">
+      <div class="flex justify-between items-center mb-2">
+        <strong>{{ review.user.username }}</strong>
+        <span class="text-yellow-600">☕ {{ review.rating }}</span>
+      </div>
+      <p>{{ review.comment }}</p>
+
+      {% if review.owner_reply %}
+        <div class="bg-gray-100 rounded-md p-3 mt-2 text-sm border-l-4 border-primary">
+          <strong class="text-primary">Respuesta del dueño:</strong><br>
+          {{ review.owner_reply }}
+        </div>
+      {% endif %}
+    </div>
   {% empty %}
     <p class="text-gray-500">No hay reseñas aún.</p>
   {% endfor %}
@@ -219,6 +254,7 @@
         button.textContent = "Mostrar mapa";
       }
     }
+
   </script>
 {% endif %}
 {% endblock %}

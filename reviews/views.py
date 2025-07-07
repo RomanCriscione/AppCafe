@@ -223,7 +223,7 @@ def cafe_detail(request, cafe_id):
     # Manejo del formulario de reseña
     if request.method == "POST":
         form = ReviewForm(request.POST)
-        if form.is_valid():
+        if form.is_valid() and request.user.is_authenticated:
             review, created = Review.objects.get_or_create(
                 user=request.user,
                 cafe=cafe,
@@ -236,15 +236,22 @@ def cafe_detail(request, cafe_id):
                 review.comment = form.cleaned_data["comment"]
                 review.rating = form.cleaned_data["rating"]
                 review.save()
+            messages.success(request, "¡Gracias por tu reseña!")
             return redirect("cafe_detail", cafe_id=cafe.id)
     else:
-        # Si ya hay reseña, mostrarla prellenada
-        try:
-            existing_review = Review.objects.get(user=request.user, cafe=cafe)
-            form = ReviewForm(instance=existing_review)
-        except Review.DoesNotExist:
+        if request.user.is_authenticated:
+            try:
+                existing_review = Review.objects.get(user=request.user, cafe=cafe)
+                form = ReviewForm(instance=existing_review)
+            except Review.DoesNotExist:
+                form = ReviewForm()
+        else:
             form = ReviewForm()
 
+    # Obtener cafés recomendados por calificación promedio
+    recommended_cafes = Cafe.objects.annotate(
+        average_rating=Avg('reviews__rating')
+    ).filter(average_rating__isnull=False).exclude(id=cafe.id).order_by('-average_rating')[:4]
 
     return render(request, "reviews/cafe_detail.html", {
         "cafe": cafe,
@@ -252,6 +259,7 @@ def cafe_detail(request, cafe_id):
         "average_rating": average_rating,
         "best_review": best_review,
         "form": form,
+        "recommended_cafes": recommended_cafes,
     })
 
 # Responder a una reseña (dueño)
@@ -386,19 +394,6 @@ def upload_photos(request, cafe_id):
         'cafe': cafe
     })
 
-
-@login_required
-def toggle_favorite(request, cafe_id):
-    cafe = get_object_or_404(Cafe, id=cafe_id)
-
-    if request.user in cafe.favorites.all():
-        cafe.favorites.remove(request.user)
-        messages.info(request, f'{cafe.name} eliminado de favoritos.')
-    else:
-        cafe.favorites.add(request.user)
-        messages.success(request, f'{cafe.name} agregado a favoritos.')
-
-    return redirect('cafe_detail', cafe_id=cafe.id)
 
 @login_required
 def favorite_cafes(request):

@@ -33,7 +33,26 @@ class CafeTestCase(TestCase):
             'name': 'Nueva Cafetería',
             'address': 'Av. Siempreviva 742',
             'location': 'Zona Norte',
-            'phone': '555-1234',
+            'description': 'Un lindo café de barrio.',
+            'phone': '+541155512345',
+            'google_maps_url': 'https://maps.google.com/?q=zona+norte',
+            'latitude': '-34.6037',
+            'longitude': '-58.3816',
+
+            'is_vegan_friendly': True,
+            'is_pet_friendly': True,
+            'has_wifi': True,
+            'has_outdoor_seating': False,
+            'has_parking': False,
+            'is_accessible': False,
+            'has_vegetarian_options': True,
+            'serves_breakfast': False,
+            'serves_alcohol': False,
+            'has_books_or_games': False,
+            'has_air_conditioning': False,
+            'has_gluten_free': False,
+            'has_specialty_coffee': False,
+            'has_artisanal_pastries': False,
         }
 
         response = self.client.post(reverse('create_cafe'), data)
@@ -51,14 +70,33 @@ class CafeTestCase(TestCase):
             'name': 'Café Editado',
             'address': 'Calle Nueva 456',
             'location': 'Zona Sur',
-            'phone': '999-8888',
+            'description': 'Descripción actualizada.',
+            'phone': '+541155599999',
+            'google_maps_url': 'https://maps.google.com/?q=zona+sur',
+            'latitude': '-34.6037',
+            'longitude': '-58.3816',
+
+            'is_vegan_friendly': False,
+            'is_pet_friendly': False,
+            'has_wifi': False,
+            'has_outdoor_seating': False,
+            'has_parking': False,
+            'is_accessible': False,
+            'has_vegetarian_options': False,
+            'serves_breakfast': False,
+            'serves_alcohol': False,
+            'has_books_or_games': False,
+            'has_air_conditioning': False,
+            'has_gluten_free': False,
+            'has_specialty_coffee': False,
+            'has_artisanal_pastries': False,
         }
 
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
-
         self.cafe.refresh_from_db()
         self.assertEqual(self.cafe.name, 'Café Editado')
+
 
     def test_cafe_list_view_status_code(self):
         response = self.client.get(reverse('cafe_list'))
@@ -151,3 +189,51 @@ class CafeTestCase(TestCase):
         response = self.client.post(reverse('cafe_detail', args=[self.cafe.id]), data)
         self.assertEqual(Review.objects.count(), 0)
         self.assertContains(response, "form")
+
+    def test_filter_by_wifi(self):
+        self.cafe.has_wifi = True
+        self.cafe.save()
+        response = self.client.get(reverse('cafe_list') + '?has_wifi=on')
+        self.assertContains(response, self.cafe.name)
+
+    def test_filter_by_pet_friendly(self):
+        self.cafe.is_pet_friendly = True
+        self.cafe.save()
+        response = self.client.get(reverse('cafe_list') + '?is_pet_friendly=on')
+        self.assertContains(response, self.cafe.name)
+
+    def test_sort_by_reviews_count(self):
+        # Creamos dos cafés, uno con más reseñas que otro
+        cafe2 = Cafe.objects.create(
+            name="Café Segundo",
+            address="Otra calle",
+            location="Zona Test",
+            phone="321321",
+            owner=self.owner
+        )
+        Review.objects.create(cafe=self.cafe, user=self.user, rating=4, comment='Bien')
+        Review.objects.create(cafe=self.cafe, user=self.other_user, rating=5, comment='Excelente')
+        Review.objects.create(cafe=cafe2, user=self.user, rating=3, comment='Ok')
+
+        response = self.client.get(reverse('cafe_list') + '?orden=reviews')
+        self.assertContains(response, self.cafe.name)
+        self.assertContains(response, cafe2.name)
+
+        # Asegurarse que el café con más reseñas está primero
+        content = response.content.decode()
+        self.assertLess(content.index("Café de prueba"), content.index("Café Segundo"))
+
+    def test_sort_by_algorithm_default(self):
+        response = self.client.get(reverse('cafe_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.cafe.name)
+
+    def test_location_filter_shows_nearby_cafes(self):
+        # Simular coordenadas del usuario cerca del café
+        self.cafe.latitude = -34.60
+        self.cafe.longitude = -58.38
+        self.cafe.save()
+
+        response = self.client.get(reverse('cafe_list') + '?lat=-34.60&lon=-58.38&orden=algoritmo')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.cafe.name)

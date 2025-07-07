@@ -177,21 +177,13 @@
 </section>
 
 <!-- Cafés Vistos Recientemente -->
-{% if recently_viewed_cafes %}
+<!-- Cafés vistos recientemente (dinámico con localStorage) -->
 <section class="py-12 bg-orange-50">
   <div class="max-w-6xl mx-auto px-4">
     <h2 class="text-2xl font-semibold mb-6">👀 Cafés que visitaste recientemente</h2>
-    <div class="swiper-container">
-      <div class="swiper-wrapper flex">
-        {% for cafe in recently_viewed_cafes %}
-          <div class="swiper-slide w-[300px] min-h-[180px] flex-shrink-0 bg-white rounded-lg shadow-md p-4 box-border">
-            {% if cafe.photo1 %}
-              <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}" class="w-full h-40 object-cover rounded mb-2">
-            {% endif %}
-            <h3 class="font-bold text-lg"><a href="{% url 'cafe_detail' cafe.id %}" class="hover:underline text-primary">{{ cafe.name }}</a></h3>
-            <p class="text-sm text-gray-600">📍 {{ cafe.address }}</p>
-          </div>
-        {% endfor %}
+    <div id="recently-viewed-container" class="swiper-container">
+      <div class="swiper-wrapper flex" id="recently-viewed-list">
+        <!-- JS insertará los cafés acá -->
       </div>
       <div class="swiper-button-next text-brown-900"></div>
       <div class="swiper-button-prev text-brown-900"></div>
@@ -199,5 +191,42 @@
     </div>
   </div>
 </section>
-{% endif %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const container = document.getElementById("recently-viewed-list");
+    if (!container) return;
+
+    let history = JSON.parse(localStorage.getItem("recently_viewed_cafes") || "[]");
+    history.forEach(cafe => {
+      const card = document.createElement("div");
+      card.className = "swiper-slide w-[300px] flex-shrink-0 bg-white rounded-lg shadow-md p-4 box-border";
+      card.innerHTML = `
+        <div class="flex gap-4 items-start">
+          ${cafe.photo1 ? `<img src="${cafe.photo1}" alt="${cafe.name}" class="w-20 h-20 object-cover rounded-md" loading="lazy">` : ""}
+          <div class="flex flex-col justify-between">
+            <p class="font-semibold leading-snug">
+              <a href="${cafe.url}" class="text-blue-600 hover:underline">${cafe.name}</a>
+            </p>
+            <p class="text-sm text-gray-700">${cafe.location}</p>
+            <p class="text-xs text-gray-500">${cafe.address}</p>
+          </div>
+        </div>`;
+      container.appendChild(card);
+    });
+
+    new Swiper("#recently-viewed-container", {
+      slidesPerView: 'auto',
+      spaceBetween: 16,
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true,
+      },
+    });
+  });
+</script>
 {% endblock %}
