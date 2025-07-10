@@ -18,6 +18,8 @@ urlpatterns = [
     # Cafeterías y reseñas
     path('reviews/', include('reviews.urls')),
 
+    path('accounts/', include('django.contrib.auth.urls')),
+
 
 ]
 

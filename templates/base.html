@@ -2,96 +2,118 @@
 <html lang="es">
 {% load static %}
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>{% block title %}App Café{% endblock %}</title>
-{% block meta %}{% endblock %}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}App Café{% endblock %}</title>
+  {% block meta %}{% endblock %}
 
-<!-- Tailwind CSS CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
     tailwind.config = {
-        theme: {
-            extend: {
-                fontFamily: {
-                    sans: ['Poppins', 'sans-serif'],
-                },
-                colors: {
-                    primary: '#2a9d8f',
-                    accent: '#e76f51',
-                    secondary: '#264653'
-                }
-            }
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Poppins', 'sans-serif'],
+          },
+          colors: {
+            primary: '#2a9d8f',
+            accent: '#e76f51',
+            secondary: '#264653'
+          }
         }
+      }
     }
-</script>
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&amp;display=swap" rel="stylesheet"/>
-<!-- Estilos personalizados -->
-<link href="{% static 'css/custom.css' %}" rel="stylesheet"/>
-<!-- Font Awesome -->
-<link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<!-- Swiper & Leaflet CSS -->
-<link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" rel="stylesheet">
-<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
+  </script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <!-- Custom styles -->
+  <link href="{% static 'css/custom.css' %}" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  <!-- Swiper & Leaflet CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <!-- Fix scroll horizontal -->
+  <style>
+    html, body {
+      overflow-x: hidden;
+    }
+  </style>
 </head>
+
+<body>
 <div class="min-h-screen flex flex-col">
 
-<!-- Header -->
-<header class="bg-white shadow">
-<nav class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-<ul class="flex flex-wrap gap-4">
-    <li><a class="text-primary hover:underline" href="{% url 'review_list' %}">Inicio</a></li>
-    <li><a class="text-primary hover:underline" href="{% url 'cafe_list' %}">Cafés</a></li>
-    <li><a class="text-primary hover:underline" href="{% url 'mapa_cafes' %}">🗺️ Ver en mapa</a></li>
-    <li><a class="text-primary hover:underline" href="{% url 'about' %}">Acerca de</a></li>
-    <li><a class="text-primary hover:underline" href="{% url 'contact' %}">Contacto</a></li>
-</ul>
-<ul class="flex flex-wrap gap-4 items-center">
-    {% if user.is_authenticated %}
-        {% if user.is_owner %}
-            <li><a class="text-primary hover:underline" href="{% url 'owner_dashboard' %}">Mi panel</a></li>
-            <li><a class="text-primary hover:underline" href="{% url 'favorite_cafes' %}">❤️ Favoritos</a></li>
-            <li><a class="text-primary hover:underline" href="{% url 'create_cafe' %}">Agregar Café</a></li>
-        {% endif %}
-        <li class="font-semibold">Hola, {{ user.username }}</li>
-        <li>
-            <a class="hover:underline" href="{% url 'edit_avatar' %}">
-                {% if user.avatar %}
-                    <img alt="avatar" class="w-8 h-8 rounded-full object-cover" loading="lazy" src="{{ user.avatar.url }}"/>
-                {% else %}
-                    Editar avatar
-                {% endif %}
-            </a>
-        </li>
-        <li><a class="text-accent hover:underline" href="{% url 'account_logout' %}">Cerrar sesión</a></li>
-    {% else %}
-        <li><a class="text-primary hover:underline" href="{% url 'account_login' %}">Iniciar sesión</a></li>
-        <li><a class="text-primary hover:underline" href="{% url 'account_signup' %}">Registrarse</a></li>
-    {% endif %}
-</ul>
-</nav>
-</header>
+  <!-- Navbar -->
+  <header class="bg-white shadow-md fixed w-full z-50">
+    <div class="w-full max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      <!-- Logo -->
+      <a href="{% url 'home' %}" class="text-xl font-bold text-primary">App Café</a>
 
-<!-- Main Content -->
-<main class="container mx-auto px-4 py-6">
+      <!-- Botón hamburguesa -->
+      <button id="menu-toggle" class="lg:hidden text-primary focus:outline-none text-2xl">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <!-- Menú -->
+      <nav id="navbar-menu" class="hidden lg:flex lg:items-center lg:gap-6 absolute lg:static top-full left-0 right-0 z-40 bg-white lg:bg-transparent px-6 py-4 lg:p-0 shadow-md lg:shadow-none">
+        <a href="{% url 'home' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Inicio</a>
+        <a href="{% url 'cafe_list' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Cafés</a>
+        <a href="{% url 'mapa_cafes' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">📍 Ver en mapa</a>
+        <a href="{% url 'about' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Acerca de</a>
+        <a href="{% url 'contact' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Contacto</a>
+
+        {% if user.is_authenticated %}
+          <div class="flex items-center gap-3 mt-4 lg:mt-0 lg:ml-6">
+            <span class="font-semibold text-gray-800">Hola, {{ user.username }}</span>
+            {% if user.avatar %}
+              <img src="{{ user.avatar.url }}" alt="Avatar" class="w-8 h-8 rounded-full border object-cover" />
+            {% endif %}
+            <a href="{% url 'account_logout' %}" class="text-red-500 hover:underline text-sm">Cerrar sesión</a>
+          </div>
+        {% else %}
+          <div class="mt-4 lg:mt-0 lg:ml-6">
+            <a href="{% url 'account_login' %}" class="text-primary hover:underline">Iniciar sesión</a>
+          </div>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <!-- JavaScript para el menú hamburguesa -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const menuToggle = document.getElementById("menu-toggle");
+      const navbarMenu = document.getElementById("navbar-menu");
+      menuToggle.addEventListener("click", function () {
+        navbarMenu.classList.toggle("hidden");
+      });
+    });
+  </script>
+
+  <!-- Contenido principal -->
+  <main class="container mx-auto px-4 py-6 pt-24">
     {% if messages %}
-        <div class="mb-4">
-            {% for message in messages %}
-                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-2 rounded">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
+      <div class="mb-4">
+        {% for message in messages %}
+          <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-2 rounded">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
     {% endif %}
 
     {% block content %}{% endblock %}
-</main>
+  </main>
 
-<!-- Footer -->
-<footer class="bg-white border-t py-4 text-center text-sm text-gray-500">
+  <!-- Footer -->
+  <footer class="bg-white border-t py-4 text-center text-sm text-gray-500">
     © 2025 App Café - Desarrollado por Roma
-</footer>
+  </footer>
+</div>
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -99,21 +121,23 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 {% block scripts %}{% endblock %}
 
+<!-- Swiper config -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        new Swiper('.swiper-container', {
-            slidesPerView: 'auto',
-            spaceBetween: 16,
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            pagination: {
-                el: '.swiper-pagination',
-                clickable: true,
-            },
-        });
+  document.addEventListener('DOMContentLoaded', function () {
+    new Swiper('.swiper-container', {
+      slidesPerView: 'auto',
+      spaceBetween: 16,
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
     });
+  });
 </script>
+
 </body>
 </html>

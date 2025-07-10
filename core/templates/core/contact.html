@@ -2,33 +2,50 @@
 {% load static %}
 
 {% block content %}
-    <div class="max-w-2xl mx-auto px-4 py-6 animate-fade-in">
-        <h1 class="text-3xl font-bold mb-6">Contacto</h1>
-        <form class="bg-white p-6 rounded-lg shadow space-y-4" method="post">
-        {% csrf_token %}
-            <div>
-                <label class="block font-medium" for="name">Nombre:</label>
-                <input class="w-full p-2 border rounded" name="name" required="" type="text"/>
-            </div>
-            <div>
-                <label class="block font-medium" for="email">Email:</label>
-                <input class="w-full p-2 border rounded" name="email" required="" type="email"/>
-            </div>
-            <div>
-                <label class="block font-medium" for="message">Mensaje:</label>
-                <textarea class="w-full p-2 border rounded" name="message" required="" rows="5"></textarea>
-            </div>
-                <button class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition" type="submit">Enviar</button>
-                </form>
+<div class="max-w-3xl mx-auto px-4 py-10 animate-fade-in">
+  <h1 class="text-4xl font-bold text-center mb-10 text-primary">📬 Contactanos</h1>
 
-        {% if success %}
-            <p class="mt-4 text-green-600 font-semibold">Gracias por tu mensaje, ¡te responderemos pronto!</p>
-        {% endif %}
-
-        <div class="mt-6">
-            <h3 class="text-xl font-semibold">También podés escribirnos a:</h3>
-            <p>📧 <a class="text-blue-600 hover:underline" href="mailto:contacto@cafesba.com">contacto@cafesba.com</a></p>
-            <p>📱 Instagram: <a class="text-blue-600 hover:underline" href="https://instagram.com/cafes_ba">@cafes_ba</a></p>
-        </div>
+  <!-- Formulario -->
+  <form method="post" class="bg-white shadow-lg rounded-lg p-8 space-y-6">
+    {% csrf_token %}
+    <div>
+      <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+      <input type="text" name="name" id="name" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
     </div>
+
+    <div>
+      <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+      <input type="email" name="email" id="email" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+    </div>
+
+    <div>
+      <label for="message" class="block text-sm font-medium text-gray-700">Mensaje</label>
+      <textarea name="message" id="message" rows="5" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"></textarea>
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="bg-primary hover:bg-secondary text-white font-semibold py-2 px-6 rounded-md transition-colors shadow-md">Enviar</button>
+    </div>
+  </form>
+
+  <!-- Mensaje de éxito -->
+  {% if success %}
+    <div class="mt-6 text-green-600 font-semibold text-center">
+      Gracias por tu mensaje, ¡te responderemos pronto! 🌟
+    </div>
+  {% endif %}
+
+  <!-- Otros medios de contacto -->
+  <div class="mt-10 text-center">
+    <h2 class="text-xl font-semibold mb-4">📱 También podés escribirnos a:</h2>
+    <p class="mb-2">
+      <i class="fas fa-envelope text-accent mr-2"></i>
+      <a href="mailto:contacto@cafesba.com" class="text-blue-600 hover:underline">contacto@cafesba.com</a>
+    </p>
+    <p>
+      <i class="fab fa-instagram text-accent mr-2"></i>
+      <a href="https://instagram.com/cafes_ba" class="text-blue-600 hover:underline">@cafes_ba</a>
+    </p>
+  </div>
+</div>
 {% endblock %}

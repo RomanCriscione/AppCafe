@@ -2,32 +2,33 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 py-6">
-  <h1 class="text-3xl font-bold mb-6">📊 Panel del dueño</h1>
+<div class="max-w-6xl mx-auto px-4 py-8 animate-fade-in">
+  <h1 class="text-3xl font-bold mb-8 text-center">📊 Panel del dueño</h1>
 
-  <div class="flex flex-col sm:flex-row gap-4 mb-8">
-    <a href="{% url 'create_cafe' %}" class="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg shadow transition duration-200 text-center w-full sm:w-auto">
+  <!-- Acciones -->
+  <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-4 mb-10">
+    <a href="{% url 'create_cafe' %}" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg shadow transition">
       ➕ Agregar nueva cafetería
     </a>
-    <a href="{% url 'owner_reviews' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow transition duration-200 text-center w-full sm:w-auto">
+    <a href="{% url 'owner_reviews' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow transition">
       📋 Ver todas las reseñas
     </a>
-    <a href="{% url 'planes' %}" class="bg-orange-500 hover:bg-orange-600 text-white font-medium px-4 py-2 rounded-lg shadow transition duration-200 text-center w-full sm:w-auto">
+    <a href="{% url 'planes' %}" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2 rounded-lg shadow transition">
       💼 Planes para crecer
     </a>
   </div>
 
   {% if cafes %}
-    <ul class="space-y-6">
+    <ul class="space-y-8">
       {% for cafe in cafes %}
-        <li class="bg-white border border-gray-200 rounded-xl shadow p-5 transition hover:shadow-md">
+        <li class="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg p-6 transition">
           <div class="flex flex-col md:flex-row gap-6 items-start">
             {% if cafe.photo1 %}
-              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="w-32 h-32 object-cover rounded-lg shadow-md">
+              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="w-32 h-32 object-cover rounded-lg shadow">
             {% endif %}
 
-            <div class="flex-1 space-y-2">
-              <h2 class="text-xl font-semibold text-brown-800">
+            <div class="flex-1 space-y-3">
+              <h2 class="text-xl font-bold text-brown-800">
                 {{ cafe.name }} –
                 {% if cafe.visibility_level == 2 %}
                   ☕☕ <span class="text-yellow-600 font-medium">Plan Maestro</span>
@@ -69,7 +70,7 @@
       {% endfor %}
     </ul>
   {% else %}
-    <p class="text-gray-600 mt-6">No tenés cafeterías registradas todavía.</p>
+    <p class="text-center text-gray-600 mt-10">No tenés cafeterías registradas todavía.</p>
   {% endif %}
 </div>
 {% endblock %}

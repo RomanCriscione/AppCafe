@@ -133,4 +133,4 @@ class Review(models.Model):
         unique_together = ('user', 'cafe')
 
     def __str__(self):
-        return f"{self.cafe.name} - {self.user.username}"
+        return f'Reseña de {self.user} en {self.cafe}'

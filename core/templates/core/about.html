@@ -2,16 +2,36 @@
 {% load static %}
 
 {% block content %}
-  <div class="max-w-3xl mx-auto px-4 py-6 animate-fade-in">
-    <h1 class="text-3xl font-bold mb-4">Acerca de este sitio</h1>
-    <p class="mb-6 text-gray-700">Este sitio fue creado por <strong>Román Criscione</strong> para que los usuarios puedan encontrar y calificar cafeterías en Buenos Aires.</p>
-    <h2 class="text-xl font-semibold mb-2">¿Quién soy?</h2>
-    <p class="mb-6 text-gray-700">Soy escritor, programador y amante del café. Me interesa combinar la tecnología con la cultura cafetera local para promover los mejores espacios independientes.</p>
-    <h2 class="text-xl font-semibold mb-2">Contacto</h2>
-    <ul class="text-gray-700">
-    <li>📧 Email: <a class="text-blue-600 hover:underline" href="mailto:criscioner@gmail.com">criscioner@gmail.com</a></li>
-    <li>📷 Instagram: <a class="text-blue-600 hover:underline" href="https://instagram.com/tucuenta" target="_blank">@tucuenta</a></li>
-    <li>💻 GitHub: <a class="text-blue-600 hover:underline" href="https://github.com/RomanCriscione" target="_blank">github.com/RomanCriscione</a></li>
+<div class="max-w-3xl mx-auto px-6 py-10 animate-fade-in">
+  <h1 class="text-4xl font-bold mb-6 text-primary text-center">☕ Sobre este proyecto</h1>
+
+  <p class="mb-6 text-gray-700 text-lg text-center">
+    Esta app fue creada por <strong>Román Criscione</strong> para ayudar a descubrir, compartir y disfrutar las mejores cafeterías de Buenos Aires.
+  </p>
+
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <h2 class="text-2xl font-semibold mb-4 text-secondary">👤 ¿Quién soy?</h2>
+    <p class="text-gray-700 leading-relaxed">
+      Soy escritor, programador y amante del café. Me apasiona la cultura cafetera independiente y busco combinar la tecnología con experiencias reales para impulsar los espacios locales que valen la pena.
+    </p>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-2xl font-semibold mb-4 text-secondary">📬 Contacto</h2>
+    <ul class="text-gray-700 space-y-2">
+      <li>
+        <i class="fas fa-envelope text-accent mr-2"></i>
+        <a href="mailto:criscioner@gmail.com" class="text-blue-600 hover:underline">criscioner@gmail.com</a>
+      </li>
+      <li>
+        <i class="fab fa-instagram text-accent mr-2"></i>
+        <a href="https://instagram.com/tucuenta" class="text-blue-600 hover:underline" target="_blank">@tucuenta</a>
+      </li>
+      <li>
+        <i class="fab fa-github text-accent mr-2"></i>
+        <a href="https://github.com/RomanCriscione" class="text-blue-600 hover:underline" target="_blank">github.com/RomanCriscione</a>
+      </li>
     </ul>
   </div>
+</div>
 {% endblock %}

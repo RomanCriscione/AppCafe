@@ -42,7 +42,16 @@ class CafeForm(forms.ModelForm):
             'photo2_title': forms.TextInput(attrs={'placeholder': 'Título de la foto 2'}),
             'photo3_title': forms.TextInput(attrs={'placeholder': 'Título de la foto 3'}),
             'tags': forms.CheckboxSelectMultiple(),
+            'photo1': forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png'}),
+            'photo2': forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png'}),
+            'photo3': forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png'}),
         }
+        help_texts = {
+            'photo1': 'Máximo 3MB. Formatos aceptados: JPG o PNG.',
+            'photo2': 'Máximo 3MB. Formatos aceptados: JPG o PNG.',
+            'photo3': 'Máximo 3MB. Formatos aceptados: JPG o PNG.',
+        }
+
 
     def clean_address(self):
         address = self.cleaned_data.get('address')

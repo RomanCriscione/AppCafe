@@ -26,4 +26,4 @@ class CustomSignupForm(SignupForm):
 class CustomUserChangeForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ['avatar']
+        fields = ['username', 'email', 'first_name', 'last_name', 'avatar']

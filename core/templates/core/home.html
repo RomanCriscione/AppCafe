@@ -16,11 +16,11 @@
   <div class="max-w-6xl mx-auto px-4">
     <h2 class="text-2xl font-semibold mb-6">📣 Últimas reseñas</h2>
     {% if latest_reviews %}
-      <div class="swiper-container">
-        <div class="swiper-wrapper flex">
+      <div class="swiper-container w-full">
+        <div class="swiper-wrapper">
           {% for review in latest_reviews %}
-            <div class="swiper-slide w-[300px] min-h-[180px] flex-shrink-0 bg-white rounded-lg shadow-md p-4 box-border">
-              <div class="flex gap-4 items-start h-full">
+            <div class="swiper-slide w-[280px] sm:w-[300px] bg-white rounded-lg shadow-md p-4 box-border">
+              <div class="flex gap-4 items-start">
                 {% if review.cafe.photo1 %}
                   <img alt="{{ review.cafe.name }}" class="w-20 h-20 object-cover rounded-md" loading="lazy" src="{{ review.cafe.photo1.url }}"/>
                 {% endif %}
@@ -46,6 +46,8 @@
     {% endif %}
   </div>
 </section>
+
+
 
 <!-- CTA: Dejá tu reseña -->
 <section class="py-12 bg-white text-center">
@@ -197,21 +199,25 @@
     const container = document.getElementById("recently-viewed-list");
     if (!container) return;
 
-    let history = JSON.parse(localStorage.getItem("recently_viewed_cafes") || "[]");
+    const history = JSON.parse(localStorage.getItem("recently_viewed_cafes") || "[]");
+
     history.forEach(cafe => {
       const card = document.createElement("div");
-      card.className = "swiper-slide w-[300px] flex-shrink-0 bg-white rounded-lg shadow-md p-4 box-border";
+      card.className = "swiper-slide w-[300px] min-h-[180px] flex-shrink-0 bg-white rounded-lg shadow-md p-4 box-border";
+
       card.innerHTML = `
-        <div class="flex gap-4 items-start">
+        <div class="flex gap-4 items-start h-full">
           ${cafe.photo1 ? `<img src="${cafe.photo1}" alt="${cafe.name}" class="w-20 h-20 object-cover rounded-md" loading="lazy">` : ""}
           <div class="flex flex-col justify-between">
             <p class="font-semibold leading-snug">
               <a href="${cafe.url}" class="text-blue-600 hover:underline">${cafe.name}</a>
             </p>
-            <p class="text-sm text-gray-700">${cafe.location}</p>
-            <p class="text-xs text-gray-500">${cafe.address}</p>
+            ${cafe.location ? `<p class="text-sm text-gray-700">${cafe.location}</p>` : ""}
+            ${cafe.address ? `<p class="text-xs text-gray-500">${cafe.address}</p>` : ""}
           </div>
-        </div>`;
+        </div>
+      `;
+
       container.appendChild(card);
     });
 
@@ -229,4 +235,5 @@
     });
   });
 </script>
+
 {% endblock %}
