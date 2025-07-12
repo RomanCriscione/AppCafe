@@ -510,6 +510,7 @@ def asignar_plan(cafe, nivel):
         return True
     return False
 
+
 @login_required
 def cambiar_visibilidad(request, cafe_id):
     cafe = get_object_or_404(Cafe, id=cafe_id)

@@ -22,6 +22,5 @@ urlpatterns = [
     path('owner/cambiar_visibilidad/<int:cafe_id>/', views.cambiar_visibilidad, name='cambiar_visibilidad'),
     path('planes/', views.planes_view, name='planes'),
     path('mapa/', mapa_cafes, name='mapa_cafes'),
-
-
+    
 ]

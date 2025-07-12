@@ -224,39 +224,8 @@
   </div>
 </div>
 
-{% if cafe.latitude and cafe.longitude %}
-  <h3 class="text-xl font-semibold mt-10 mb-2">📍 Ubicación</h3>
-  <button onclick="toggleMap()" class="mb-4 text-sm text-blue-600 hover:underline focus:outline-none">Mostrar mapa</button>
-  <div id="map-container" class="hidden">
-    <div class="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] rounded-xl overflow-hidden shadow-lg mb-10" id="map"></div>
-  </div>
-  <script>
-    function toggleMap() {
-      const mapContainer = document.getElementById("map-container");
-      const button = event.target;
-      const isHidden = mapContainer.classList.contains("hidden");
-      if (isHidden) {
-        mapContainer.classList.remove("hidden");
-        button.textContent = "Ocultar mapa";
-        if (!mapContainer.dataset.mapLoaded) {
-          const lat = parseFloat("{{ cafe.latitude|escapejs }}");
-          const lon = parseFloat("{{ cafe.longitude|escapejs }}");
-          const map = L.map('map').setView([lat, lon], 15);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-          }).addTo(map);
-          L.marker([lat, lon]).addTo(map)
-            .bindPopup("<strong>{{ cafe.name|escapejs }}</strong><br>{{ cafe.address|escapejs }}").openPopup();
-          mapContainer.dataset.mapLoaded = true;
-        }
-      } else {
-        mapContainer.classList.add("hidden");
-        button.textContent = "Mostrar mapa";
-      }
-    }
+{% include "reviews/includes/mapa_cafe_detail.html" %}
 
-  </script>
-{% endif %}
 {% endblock %}
 
 {% block scripts %}

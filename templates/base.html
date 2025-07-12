@@ -63,6 +63,12 @@
         <a href="{% url 'home' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Inicio</a>
         <a href="{% url 'cafe_list' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Cafés</a>
         <a href="{% url 'mapa_cafes' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">📍 Ver en mapa</a>
+        {% if user.is_authenticated and user.is_owner %}
+          <a href="{% url 'create_cafe' %}" class="text-sm hover:underline">➕ Agregar Café</a>
+        {% endif %}
+        {% if user.is_authenticated and user.is_owner %}
+          <a href="{% url 'owner_dashboard' %}" class="hover:underline">Mis Cafés</a>
+        {% endif %}
         <a href="{% url 'about' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Acerca de</a>
         <a href="{% url 'contact' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Contacto</a>
 

@@ -1,0 +1,122 @@
+        <div class="h-80 mt-4 hidden md:block" id="map"></div>
+        <div class="mt-4 space-y-2" id="address-options"></div>
+        <p class="text-sm italic text-gray-600 mt-1" id="location-status"></p>
+        <button class="mt-6 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700" type="submit">Guardar</button>
+    </form>
+
+    <link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const map = L.map('map').setView([-34.6037, -58.3816], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        const marker = L.marker([-34.6037, -58.3816], { draggable: true }).addTo(map);
+        const latInput = document.getElementById("id_latitude");
+        const lonInput = document.getElementById("id_longitude");
+        const addressInput = document.getElementById("id_address");
+        const locationInput = document.getElementById("id_location");
+        const locationStatus = document.getElementById("location-status");
+        const optionsContainer = document.getElementById("address-options");
+
+        let direccionGeolocalizada = false;
+
+        function actualizarInputs(lat, lon) {
+            latInput.value = lat.toFixed(6);
+            lonInput.value = lon.toFixed(6);
+        }
+
+        function mostrarUbicacionTexto(lat, lon) {
+            locationStatus.textContent = `📍 Ubicación actualizada: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+        }
+
+        function aplicarUbicacion(lat, lon, displayName = "") {
+            map.setView([lat, lon], 16);
+            marker.setLatLng([lat, lon]);
+            actualizarInputs(lat, lon);
+            mostrarUbicacionTexto(lat, lon);
+            direccionGeolocalizada = true;
+            if (displayName) {
+            locationStatus.textContent = `📍 Seleccionado: ${displayName}`;
+            }
+        }
+
+        function geolocalizarDireccion() {
+            const direccion = addressInput?.value.trim();
+            const localidad = locationInput?.value.trim();
+            const fullQuery = `${direccion}, ${localidad}, Buenos Aires, Argentina`;
+
+            if (direccion.length > 5 && localidad.length > 1) {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}`)
+                .then(res => res.json())
+                .then(data => {
+                optionsContainer.innerHTML = "";
+
+                if (data.length === 0) {
+                    direccionGeolocalizada = false;
+                    alert("❌ No se pudo encontrar la dirección ingresada.");
+                    locationStatus.textContent = "❌ Dirección no reconocida.";
+                    return;
+                }
+
+                if (data.length === 1) {
+                    const { lat, lon, display_name } = data[0];
+                    aplicarUbicacion(parseFloat(lat), parseFloat(lon), display_name);
+                } else {
+                    const heading = document.createElement("p");
+                    heading.textContent = "📌 Seleccioná la dirección correcta:";
+                    optionsContainer.appendChild(heading);
+
+                    data.slice(0, 5).forEach((place) => {
+                    const calleYNro = place.display_name.split(',')[0];
+                    const btn = document.createElement("button");
+                    btn.textContent = `📍 ${place.display_name}`;
+                    btn.title = place.display_name;
+                    btn.className = "block w-full text-left bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded";
+                    btn.onclick = () => {
+                        aplicarUbicacion(parseFloat(place.lat), parseFloat(place.lon), place.display_name);
+                        optionsContainer.innerHTML = "";
+                    };
+                    optionsContainer.appendChild(btn);
+                    });
+
+                    const nota = document.createElement("p");
+                    nota.className = "text-sm italic text-gray-600 mt-2";
+                    nota.textContent = "🔧 Si la numeración no coincide exactamente, podés ajustar el marcador en el mapa manualmente.";
+                    optionsContainer.appendChild(nota);
+                }
+                });
+            }
+        }
+
+        if (addressInput) addressInput.addEventListener("blur", geolocalizarDireccion);
+        if (locationInput) locationInput.addEventListener("change", geolocalizarDireccion);
+
+        marker.on("dragend", function () {
+            const pos = marker.getLatLng();
+            actualizarInputs(pos.lat, pos.lng);
+            mostrarUbicacionTexto(pos.lat, pos.lng);
+            direccionGeolocalizada = true;
+        });
+
+        window.validarDireccionAntesDeEnviar = function () {
+            const lat = parseFloat(latInput.value);
+            const lon = parseFloat(lonInput.value);
+            if (isNaN(lat) || isNaN(lon) || !direccionGeolocalizada) {
+            alert("⚠️ Por favor, asegurate de ingresar una dirección válida y que se haya ubicado correctamente en el mapa.");
+            return false;
+            }
+            return true;
+        };
+        });
+
+        function mostrarMapaMobile() {
+        document.getElementById("map").classList.remove("hidden");
+        document.getElementById("map").scrollIntoView({ behavior: "smooth" });
+        }
+
+        reviews/includes/mapa_create_edit_cafe.html
+        
+    </script>

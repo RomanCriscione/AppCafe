@@ -1,0 +1,56 @@
+{% if cafe.latitude and cafe.longitude %}
+  <h3 class="text-xl font-semibold mt-10 mb-2">📍 Ubicación</h3>
+
+  <!-- Botón para mostrar mapa -->
+  <button onclick="toggleMap()" class="mb-4 text-sm text-blue-600 hover:underline focus:outline-none">Mostrar mapa</button>
+
+  <!-- Filtros visuales -->
+  <div class="flex flex-wrap gap-2 mb-4">
+    <span class="filter-badge"><i class="fa-solid fa-wifi text-blue-500"></i> Wi-Fi</span>
+    <span class="filter-badge"><i class="fa-solid fa-paw text-pink-500"></i> Pet friendly</span>
+    <span class="filter-badge"><i class="fa-solid fa-leaf text-green-500"></i> Vegano</span>
+    <span class="filter-badge"><i class="fa-solid fa-chair text-yellow-500"></i> Exterior</span>
+  </div>
+
+  <!-- Mapa oculto -->
+  <div id="map-container" class="hidden">
+    <div id="map" class="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] rounded-xl overflow-hidden shadow-lg mb-10"></div>
+  </div>
+
+  <style>
+    .filter-badge {
+      @apply bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200 text-sm flex items-center gap-2;
+    }
+  </style>
+
+  <script>
+    function toggleMap() {
+      const mapContainer = document.getElementById("map-container");
+      const button = event.target;
+      const isHidden = mapContainer.classList.contains("hidden");
+
+      if (isHidden) {
+        mapContainer.classList.remove("hidden");
+        button.textContent = "Ocultar mapa";
+
+        if (!mapContainer.dataset.mapLoaded) {
+          const lat = parseFloat("{{ cafe.latitude|escapejs }}");
+          const lon = parseFloat("{{ cafe.longitude|escapejs }}");
+
+          const map = L.map('map').setView([lat, lon], 15);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+          }).addTo(map);
+
+          L.marker([lat, lon]).addTo(map)
+            .bindPopup(`<strong>{{ cafe.name|escapejs }}</strong><br>{{ cafe.address|escapejs }}`).openPopup();
+
+          mapContainer.dataset.mapLoaded = true;
+        }
+      } else {
+        mapContainer.classList.add("hidden");
+        button.textContent = "Mostrar mapa";
+      }
+    }
+  </script>
+{% endif %}

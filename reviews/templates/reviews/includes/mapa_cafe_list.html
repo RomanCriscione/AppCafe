@@ -1,0 +1,140 @@
+<!-- Mapa -->
+<div id="cafes-map" class="h-72 rounded mb-6"></div>
+
+<!-- Formulario de búsqueda por dirección -->
+<form id="direccion-form" method="get" class="mb-4 flex gap-2 max-w-md">
+  <input type="text" id="direccion" name="direccion" placeholder="Buscar cafés cerca de una dirección"
+         class="flex-1 px-3 py-2 border rounded w-full text-sm" required>
+  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition">
+    Buscar
+  </button>
+</form>
+<div id="error-direccion" class="text-red-600 text-sm mb-4 hidden">❗ Dirección no encontrada</div>
+
+<!-- Lista de cafés -->
+{% if cafes %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for cafe in cafes %}
+      {% include "reviews/_cafe_card.html" %}
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center text-lg text-gray-600 mt-8 space-y-4">
+    <p>😕 No se encontraron cafeterías con los filtros seleccionados.</p>
+    <a href="{% url 'cafe_list' %}" class="inline-block bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition-colors">
+      Limpiar filtros
+    </a>
+  </div>
+{% endif %}
+
+<!-- Scripts del mapa -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const map = L.map('cafes-map').setView([-34.6037, -58.3816], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  const cafes = JSON.parse(`{{ cafes_json|escapejs }}`);
+
+  cafes.forEach(cafe => {
+    if (cafe.latitude && cafe.longitude) {
+      const marker = L.marker([cafe.latitude, cafe.longitude]).addTo(map);
+      const popupContent = `
+        <strong>${cafe.name}</strong><br>
+        <a href="${cafe.url}">Ver detalle</a>
+      `;
+      marker.bindPopup(popupContent);
+    }
+  });
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const lat = urlParams.get("lat");
+  const lon = urlParams.get("lon");
+
+  if (lat && lon) {
+    const userLat = parseFloat(lat);
+    const userLon = parseFloat(lon); 
+
+    const cafesCercanos = cafes.filter(cafe =>
+      cafe.latitude && cafe.longitude &&
+      Math.sqrt(
+        Math.pow((cafe.latitude - userLat) * 111, 2) +
+        Math.pow((cafe.longitude - userLon) * 85, 2)
+      ) <= 3
+    );
+
+
+    const circle = L.circle([userLat, userLon], {
+      radius: 3000,
+      color: cafesCercanos.length > 10 ? "#e76f51" : "#2a9d8f",
+      fillColor: cafesCercanos.length > 10 ? "#f4a261" : "#a8dadc",
+      fillOpacity: 0.3
+    }).addTo(map);
+
+    map.setView([userLat, userLon], 13);
+  }
+
+  // Buscar por dirección (usando Nominatim)
+  document.getElementById("direccion-form")?.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const direccion = document.getElementById("direccion").value;
+    const errorDiv = document.getElementById("error-direccion");
+    errorDiv.classList.add("hidden");
+
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.length > 0) {
+        const lat = data[0].lat;
+        const lon = data[0].lon;
+
+        const form = document.createElement("form");
+        form.method = "GET";
+        form.action = window.location.pathname;
+
+        const latInput = document.createElement("input");
+        latInput.type = "hidden";
+        latInput.name = "lat";
+        latInput.value = lat;
+        form.appendChild(latInput);
+
+        const lonInput = document.createElement("input");
+        lonInput.type = "hidden";
+        lonInput.name = "lon";
+        lonInput.value = lon;
+        form.appendChild(lonInput);
+
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        errorDiv.classList.remove("hidden");
+      }
+    } catch (error) {
+      console.error("Error al buscar la dirección:", error);
+      errorDiv.classList.remove("hidden");
+    }
+  });
+
+  // Script para "📍 Cafés cerca mío"
+  const ubicacionForm = document.getElementById("ubicacion-form");
+  if (ubicacionForm) {
+    ubicacionForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+          document.getElementById("lat").value = position.coords.latitude;
+          document.getElementById("lon").value = position.coords.longitude;
+          ubicacionForm.submit();
+        }, function () {
+          alert("No se pudo obtener tu ubicación. Asegúrate de habilitar la geolocalización.");
+        });
+      } else {
+        alert("Tu navegador no soporta geolocalización.");
+      }
+    });
+  }
+});
+</script>

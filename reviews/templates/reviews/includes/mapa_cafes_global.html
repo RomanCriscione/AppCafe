@@ -1,0 +1,176 @@
+<div class="max-w-7xl mx-auto px-4">
+  <h1 class="text-2xl font-bold mb-4">🗺️ Cafés en el mapa</h1>
+
+  <!-- Búsqueda -->
+  <form id="form-direccion" class="max-w-md mb-4 flex gap-2">
+    <input type="text" id="direccion" name="direccion" placeholder="Buscar cafés cerca de una dirección"
+           class="flex-1 px-3 py-2 border rounded w-full text-sm" required>
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition">
+      Buscar
+    </button>
+  </form>
+  <div id="error-direccion" class="text-red-600 text-sm mb-4 hidden">❗ Dirección no encontrada</div>
+
+  <!-- Botones -->
+  <div class="flex flex-wrap gap-4 mb-4">
+    <button id="btn-cerca-mio" class="px-4 py-2 bg-primary text-white rounded hover:bg-secondary transition">
+      📍 Ver cafés cerca mío (3km)
+    </button>
+    <button onclick="verTodosLosCafes()" class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">
+      🔄 Ver todos los cafés
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="mb-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-sm">
+    <label><input type="checkbox" class="filtro-mapa" value="is_pet_friendly"> 🐶 Pet Friendly</label>
+    <label><input type="checkbox" class="filtro-mapa" value="has_wifi"> 📶 Wi-Fi</label>
+    <label><input type="checkbox" class="filtro-mapa" value="has_outdoor_seating"> 🪑 Mesas afuera</label>
+    <label><input type="checkbox" class="filtro-mapa" value="is_vegan_friendly"> 🌱 Vegano</label>
+    <label><input type="checkbox" class="filtro-mapa" value="has_parking"> 🅿️ Estacionamiento</label>
+    <label><input type="checkbox" class="filtro-mapa" value="is_accessible"> ♿ Accesible</label>
+    <label><input type="checkbox" class="filtro-mapa" value="has_vegetarian_options"> 🥗 Opción vegetariana</label>
+    <label><input type="checkbox" class="filtro-mapa" value="serves_breakfast"> 🍳 Desayuno</label>
+    <label><input type="checkbox" class="filtro-mapa" value="serves_alcohol"> 🍷 Alcohol</label>
+    <label><input type="checkbox" class="filtro-mapa" value="has_books_or_games"> 📚 Juegos o libros</label>
+    <label><input type="checkbox" class="filtro-mapa" value="has_air_conditioning"> ❄️ Aire acondicionado</label>
+  </div>
+
+  <!-- Vista dividida -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <!-- Lista de cafés -->
+    <div id="lista-cafes" class="space-y-4 overflow-y-auto max-h-[600px] p-2 border rounded">
+      <!-- Se llena con JS -->
+    </div>
+
+    <!-- Mapa -->
+    <div id="map" class="w-full h-[600px] rounded shadow-lg"></div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const cafes = JSON.parse('{{ cafes_json|escapejs }}');
+    const map = L.map('map').setView([-34.6037, -58.3816], 12);
+    let markers = [];
+    let circle = null;
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    function agregarMarcadores(lista) {
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+
+      const filtrados = aplicarFiltros(lista);
+      document.getElementById("lista-cafes").innerHTML = '';
+
+      filtrados.forEach(cafe => {
+        if (cafe.latitude && cafe.longitude) {
+          const popup = `<strong>${cafe.name}</strong><br>${cafe.address}<br><a href="/reviews/${cafe.id}/" class="text-blue-500 underline">Ver más</a>`;
+          const marker = L.marker([cafe.latitude, cafe.longitude]).bindPopup(popup).addTo(map);
+          markers.push(marker);
+
+          // Mostrar en la lista
+          const card = `
+            <div class="border rounded p-3 shadow hover:shadow-lg transition">
+              <h3 class="text-lg font-semibold mb-1">${cafe.name}</h3>
+              <p class="text-sm text-gray-600 mb-1">${cafe.address}</p>
+              <a href="/reviews/${cafe.id}/" class="text-blue-600 text-sm underline">Ver más</a>
+            </div>`;
+          document.getElementById("lista-cafes").innerHTML += card;
+        }
+      });
+    }
+
+    function calcularDistancia(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    function filtrarCafesCercanos(lat, lon) {
+      if (circle) map.removeLayer(circle);
+      circle = L.circle([lat, lon], {
+        radius: 3000,
+        color: "#2a9d8f",
+        fillColor: "#a8dadc",
+        fillOpacity: 0.3
+      }).addTo(map);
+
+      const cercanos = cafes.filter(c => {
+        if (!c.latitude || !c.longitude) return false;
+        return calcularDistancia(lat, lon, c.latitude, c.longitude) <= 3;
+      });
+
+      map.setView([lat, lon], 14);
+      agregarMarcadores(cercanos);
+    }
+
+    document.getElementById("btn-cerca-mio")?.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        alert("Tu navegador no soporta geolocalización.");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        filtrarCafesCercanos(lat, lon);
+      }, () => {
+        alert("No se pudo obtener tu ubicación.");
+      });
+    });
+
+    document.getElementById("form-direccion")?.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const direccion = document.getElementById("direccion").value;
+      const error = document.getElementById("error-direccion");
+      error.classList.add("hidden");
+
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}`;
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length > 0) {
+            const lat = parseFloat(data[0].lat);
+            const lon = parseFloat(data[0].lon);
+            filtrarCafesCercanos(lat, lon);
+          } else {
+            error.classList.remove("hidden");
+          }
+        })
+        .catch(err => {
+          console.error("Error al buscar dirección:", err);
+          error.classList.remove("hidden");
+        });
+    });
+
+    function verTodosLosCafes() {
+      if (circle) map.removeLayer(circle);
+      circle = null;
+      map.setView([-34.6037, -58.3816], 12);
+      agregarMarcadores(cafes);
+    }
+
+    function cumpleFiltros(cafe) {
+      const filtrosActivos = Array.from(document.querySelectorAll(".filtro-mapa:checked")).map(el => el.value);
+      return filtrosActivos.every(f => cafe[f]);
+    }
+
+    function aplicarFiltros(lista) {
+      return lista.filter(c => cumpleFiltros(c));
+    }
+
+    document.querySelectorAll(".filtro-mapa").forEach(cb => {
+      cb.addEventListener("change", () => agregarMarcadores(cafes));
+    });
+
+    agregarMarcadores(cafes);
+  });
+</script>
