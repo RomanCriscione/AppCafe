@@ -9,9 +9,17 @@ import os
 
 User = get_user_model()
 
-
 class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    CATEGORY_CHOICES = [
+        ("sensorial", "☕ Experiencia sensorial"),
+        ("ambiente", "💬 Ambiente humano"),
+        ("hacer", "✍️ Para hacer cosas"),
+        ("estetica", "🌿 Estética y atmósfera"),
+        ("emocional", "🧠 Estados mentales"),
+    ]
+
+    name = models.CharField(max_length=100, unique=True)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
 
     def __str__(self):
         return self.name
@@ -128,9 +136,13 @@ class Review(models.Model):
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     owner_reply = models.TextField(blank=True, null=True)
+    tags = models.ManyToManyField("Tag", blank=True, related_name="reviews")
+
 
     class Meta:
         unique_together = ('user', 'cafe')
 
     def __str__(self):
         return f'Reseña de {self.user} en {self.cafe}'
+
+

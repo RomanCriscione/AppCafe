@@ -206,7 +206,7 @@ class CafeListView(ListView):
 # Detalle de cafetería + dejar o editar reseña
 def cafe_detail(request, cafe_id):
     cafe = get_object_or_404(Cafe, id=cafe_id)
-    reviews = cafe.reviews.select_related("user").order_by("-created_at")
+    reviews = cafe.reviews.select_related("user").prefetch_related("tags").order_by("-created_at")
 
     # Calcular promedio y mejor reseña
     ratings = [review.rating for review in reviews]
@@ -248,6 +248,17 @@ def cafe_detail(request, cafe_id):
         else:
             form = ReviewForm()
 
+    # Etiquetas más usadas agrupadas por categoría
+    tag_counts = cafe.reviews.values('tags__id', 'tags__name', 'tags__category') \
+        .annotate(count=Count('tags')).order_by('-count')
+
+    tag_groups = defaultdict(list)
+    for tag in tag_counts:
+        tag_groups[tag['tags__category']].append({
+            'name': tag['tags__name'],
+            'count': tag['count'],
+        })
+
     # Obtener cafés recomendados por calificación promedio
     recommended_cafes = Cafe.objects.annotate(
         average_rating=Avg('reviews__rating')
@@ -260,6 +271,7 @@ def cafe_detail(request, cafe_id):
         "best_review": best_review,
         "form": form,
         "recommended_cafes": recommended_cafes,
+        "tag_groups": tag_groups,
     })
 
 # Responder a una reseña (dueño)
