@@ -1,31 +1,43 @@
 {% extends "base.html" %}
 {% load static %}
+{% load widget_tweaks %}
 
 {% block content %}
   <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
-<h2 class="text-2xl font-bold mb-4 text-center">📝 Dejá tu reseña</h2>
-<form class="space-y-4" method="post">
+    <h2 class="text-2xl font-bold mb-4 text-center">📝 Dejá tu reseña</h2>
+
+    <form class="space-y-4" method="post">
       {% csrf_token %}
 
       <div>
-<label class="block font-medium">{{ form.comment.label }}</label>
+        <label class="block font-medium">{{ form.comment.label }}</label>
         {{ form.comment|add_class:"w-full mt-1 p-2 border rounded" }}
       </div>
-<div>
-<label class="block font-medium">Puntuación:</label>
-<div class="flex flex-row-reverse justify-start gap-1 text-2xl">
+
+      <div>
+        <label class="block font-medium">Puntuación:</label>
+        <div class="flex flex-row-reverse justify-start gap-1 text-2xl">
           {% for i in "54321" %}
-            <input %}="" %}checked{%="" class="hidden" endif="" form.rating.value|stringformat:"s"="i" id="rating{{ i }}" if="" name="rating" type="radio" value="{{ i }}" {%=""/>
-<label class="cursor-pointer text-gray-300 hover:text-amber-500 transition-all peer-checked:text-amber-500" for="rating{{ i }}">☕</label>
+            <input type="radio" name="rating" id="rating{{ i }}" value="{{ i }}"
+                  class="hidden peer"
+                  {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
+            <label for="rating{{ i }}" class="cursor-pointer text-gray-300 hover:text-amber-500 transition-all peer-checked:text-amber-500">☕</label>
           {% endfor %}
         </div>
-</div>
-<button class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition" type="submit">
+      </div>
+
+      <div>
+        <label class="block font-medium mb-2">{{ form.tags.label }}</label>
+        {{ form.tags }}
+      </div>
+
+      <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition">
         Enviar
       </button>
-</form>
-<p class="mt-6 text-center">
-<a class="text-blue-600 hover:underline" href="{% url 'review_list' %}">← Volver al listado</a>
-</p>
-</div>
+    </form>
+
+    <p class="mt-6 text-center">
+      <a href="{% url 'review_list' %}" class="text-blue-600 hover:underline">← Volver al listado</a>
+    </p>
+  </div>
 {% endblock %}

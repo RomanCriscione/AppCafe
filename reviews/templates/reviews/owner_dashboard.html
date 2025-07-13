@@ -18,59 +18,88 @@
     </a>
   </div>
 
-  {% if cafes %}
-    <ul class="space-y-8">
-      {% for cafe in cafes %}
-        <li class="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg p-6 transition">
-          <div class="flex flex-col md:flex-row gap-6 items-start">
-            {% if cafe.photo1 %}
-              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="w-32 h-32 object-cover rounded-lg shadow">
+{% if cafes %}
+  <ul class="space-y-8">
+    {% for cafe in cafes %}
+      <li class="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg p-6 transition">
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+          {% if cafe.photo1 %}
+            <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="w-32 h-32 object-cover rounded-lg shadow">
+          {% endif %}
+
+          <div class="flex-1 space-y-3">
+            <h2 class="text-xl font-bold text-brown-800">
+              {{ cafe.name }} –
+              {% if cafe.visibility_level == 2 %}
+                ☕☕ <span class="text-yellow-600 font-medium">Plan Maestro</span>
+              {% elif cafe.visibility_level == 1 %}
+                ☕ <span class="text-blue-500 font-medium">Plan Barista</span>
+              {% else %}
+                ☕ <span class="text-gray-500 font-medium">Gratuito</span>
+              {% endif %}
+            </h2>
+
+            <p class="text-sm text-gray-600">📍 {{ cafe.address }}, {{ cafe.location }}</p>
+            <p class="text-sm">☕ Promedio: {{ cafe.average_rating|floatformat:1|default:"Sin puntuar" }}</p>
+            <p class="text-sm">🧾 Reseñas: {{ cafe.total_reviews }}</p>
+
+            {% if tag_data[cafe.id] %}
+              <div class="mt-2">
+                <h4 class="text-sm font-semibold mb-1 text-gray-700">🪄 Cómo lo perciben los visitantes:</h4>
+                {% for category, tags in tag_data[cafe.id].items %}
+                  <div class="mb-1">
+                    <p class="text-xs font-medium text-gray-600">{{ category|title }}</p>
+                    <div class="flex flex-wrap gap-2 mt-1">
+                      {% for tag in tags|slice:":5" %}
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                          {{ tag.name }} ({{ tag.count }})
+                        </span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
             {% endif %}
 
-            <div class="flex-1 space-y-3">
-              <h2 class="text-xl font-bold text-brown-800">
-                {{ cafe.name }} –
-                {% if cafe.visibility_level == 2 %}
-                  ☕☕ <span class="text-yellow-600 font-medium">Plan Maestro</span>
-                {% elif cafe.visibility_level == 1 %}
-                  ☕ <span class="text-blue-500 font-medium">Plan Barista</span>
-                {% else %}
-                  ☕ <span class="text-gray-500 font-medium">Gratuito</span>
-                {% endif %}
-              </h2>
-
-              <p class="text-sm text-gray-600">📍 {{ cafe.address }}, {{ cafe.location }}</p>
-              <p class="text-sm">☕ Promedio: {{ cafe.average_rating|floatformat:1|default:"Sin puntuar" }}</p>
-              <p class="text-sm">🧾 Reseñas: {{ cafe.total_reviews }}</p>
-
-              <form method="post" action="{% url 'cambiar_visibilidad' cafe.id %}" class="mt-2 flex flex-wrap items-center gap-2">
-                {% csrf_token %}
-                <label for="visibility_{{ cafe.id }}" class="text-sm font-medium">Cambiar plan:</label>
-                <select name="visibility_level" id="visibility_{{ cafe.id }}" class="border border-gray-300 rounded px-2 py-1 text-sm">
-                  <option value="0" {% if cafe.visibility_level == 0 %}selected{% endif %}>☕ Gratuito</option>
-                  <option value="1" {% if cafe.visibility_level == 1 %}selected{% endif %}>☕ Plan Barista</option>
-                  <option value="2" {% if cafe.visibility_level == 2 %}selected{% endif %}>☕☕ Plan Maestro</option>
-                </select>
-                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition">
-                  Aplicar
-                </button>
-              </form>
-
-              <div class="flex flex-wrap gap-4 mt-4 text-sm">
-                <a href="{% url 'cafe_detail' cafe.id %}" class="text-blue-600 hover:underline font-medium">🔍 Ver detalles</a>
-                <a href="{% url 'edit_cafe' cafe.id %}" class="text-yellow-600 hover:underline font-medium">✏️ Editar</a>
-                <form action="{% url 'delete_cafe' cafe.id %}" method="post" onsubmit="return confirm('¿Estás seguro de eliminar esta cafetería?')" class="inline">
-                  {% csrf_token %}
-                  <button type="submit" class="text-red-600 hover:underline font-medium">🗑️ Eliminar</button>
-                </form>
+            {% if cafe.tags.exists %}
+              <div class="mt-2">
+                <h4 class="text-sm font-semibold mb-1 text-gray-700">🏷️ Etiquetas del dueño:</h4>
+                <div class="flex flex-wrap gap-2">
+                  {% for tag in cafe.tags.all %}
+                    <span class="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-full">{{ tag.name }}</span>
+                  {% endfor %}
+                </div>
               </div>
+            {% endif %}
+
+
+            <form method="post" action="{% url 'cambiar_visibilidad' cafe.id %}" class="mt-2 flex flex-wrap items-center gap-2">
+              {% csrf_token %}
+              <label for="visibility_{{ cafe.id }}" class="text-sm font-medium">Cambiar plan:</label>
+              <select name="visibility_level" id="visibility_{{ cafe.id }}" class="border border-gray-300 rounded px-2 py-1 text-sm">
+                <option value="0" {% if cafe.visibility_level == 0 %}selected{% endif %}>☕ Gratuito</option>
+                <option value="1" {% if cafe.visibility_level == 1 %}selected{% endif %}>☕ Plan Barista</option>
+                <option value="2" {% if cafe.visibility_level == 2 %}selected{% endif %}>☕☕ Plan Maestro</option>
+              </select>
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition">
+                Aplicar
+              </button>
+            </form>
+
+            <div class="flex flex-wrap gap-4 mt-4 text-sm">
+              <a href="{% url 'cafe_detail' cafe.id %}" class="text-blue-600 hover:underline font-medium">🔍 Ver detalles</a>
+              <a href="{% url 'edit_cafe' cafe.id %}" class="text-yellow-600 hover:underline font-medium">✏️ Editar</a>
+              <form action="{% url 'delete_cafe' cafe.id %}" method="post" onsubmit="return confirm('¿Estás seguro de eliminar esta cafetería?')" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="text-red-600 hover:underline font-medium">🗑️ Eliminar</button>
+              </form>
             </div>
           </div>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p class="text-center text-gray-600 mt-10">No tenés cafeterías registradas todavía.</p>
-  {% endif %}
-</div>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="text-center text-gray-600 mt-10">No tenés cafeterías registradas todavía.</p>
+{% endif %}
 {% endblock %}

@@ -1,11 +1,10 @@
 from django.urls import path
 from . import views
-from .views import ReviewListView, ReviewCreateView, CreateCafeView, favorite_cafes, toggle_favorite, mapa_cafes, CafeListView
+from .views import ReviewListView, ReviewCreateView, CreateCafeView, favorite_cafes, toggle_favorite, mapa_cafes, CafeListView, create_review
 
 
 urlpatterns = [
     path('', ReviewListView.as_view(), name='review_list'),
-    path('nueva/', ReviewCreateView.as_view(), name='create_review'),
     path('cafes/', CafeListView.as_view(), name='cafe_list'),
     path('cafes/<int:cafe_id>/', views.cafe_detail, name='cafe_detail'),
     path('cafes/<int:cafe_id>/fotos/', views.upload_photos, name='upload_photos'),
@@ -22,5 +21,6 @@ urlpatterns = [
     path('owner/cambiar_visibilidad/<int:cafe_id>/', views.cambiar_visibilidad, name='cambiar_visibilidad'),
     path('planes/', views.planes_view, name='planes'),
     path('mapa/', mapa_cafes, name='mapa_cafes'),
+    path("cafes/<int:cafe_id>/review/", create_review, name="create_review"),
     
 ]

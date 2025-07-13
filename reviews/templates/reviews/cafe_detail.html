@@ -38,31 +38,38 @@
     {% endif %}
   </p>
 
-{% if tag_groups %}
-<div class="mt-8">
-  <h2 class="text-xl font-bold mb-4">🪄 ¿Cómo lo viven quienes lo visitan?</h2>
-
-  {% for category, tags in tag_groups.items %}
-    <div class="mb-4">
-      <h3 class="text-lg font-semibold">{{ category|title }}</h3>
-      <div class="flex flex-wrap gap-2 mt-1 transition-all duration-300 max-h-[96px] overflow-hidden relative" id="tag-container-{{ forloop.counter }}">
-        {% for tag in tags %}
-          <span class="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
-            {{ tag.name }} ({{ tag.count }})
-          </span>
-        {% endfor %}
-        {% if tags|length > 5 %}
-          <div class="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent pointer-events-none" id="fade-{{ forloop.counter }}"></div>
-        {% endif %}
-      </div>
-      {% if tags|length > 5 %}
-        <button onclick="toggleTags({{ forloop.counter }})" class="text-sm text-blue-600 mt-1 hover:underline" id="btn-{{ forloop.counter }}">Ver todas</button>
-      {% endif %}
+{% if cafe.tags.exists %}
+  <div class="mb-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-2">🏷️ Etiquetas destacadas del lugar:</h2>
+    <div class="flex flex-wrap gap-2">
+      {% for tag in cafe.tags.all %}
+        <span class="bg-gray-200 text-gray-800 text-sm px-3 py-1 rounded-full">{{ tag.name }}</span>
+      {% endfor %}
     </div>
-  {% endfor %}
-</div>
+  </div>
 {% endif %}
 
+{% if user.is_authenticated %}
+  <div class="text-right mb-4">
+    <a href="{% url 'create_review' cafe.id %}" class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition">
+      📝 Dejá tu reseña
+    </a>
+  </div>
+{% else %}
+  <p class="text-sm text-gray-600 mt-4">Iniciá sesión para dejar una reseña.</p>
+{% endif %}
+
+
+{% if sensory_tags %}
+  <div class="mt-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-2">🧠 Lo que otros destacan (etiquetas sensoriales)</h2>
+    <div class="flex flex-wrap gap-2">
+      {% for tag in sensory_tags %}
+        <span class="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">{{ tag.name }}</span>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
 
   {% if cafe.is_pet_friendly %}
     <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
@@ -228,7 +235,9 @@
 
     <h3 class="text-2xl font-bold text-center mb-4 text-brown-800">Dejá tu reseña</h3>
 
-    <form method="post" class="space-y-4">{% csrf_token %}
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1" for="comment">Tu comentario</label>
         {{ form.comment }}
@@ -238,12 +247,33 @@
         <label class="block text-sm font-medium text-gray-700 mb-1">☕ Calificación</label>
         <div class="flex flex-row-reverse justify-end gap-1" id="rating-stars">
           {% for i in "54321" %}
-            <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" class="sr-only">
+            <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" class="sr-only"
+                  {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
             <label for="star{{ i }}" class="text-2xl cursor-pointer text-gray-300 hover:text-yellow-400 transition-all duration-150" data-value="{{ i }}">☕</label>
           {% endfor %}
         </div>
         <p id="rating-label" class="text-sm text-center mt-1 text-gray-600"></p>
       </div>
+
+      {% if tag_groups %}
+        <div class="space-y-4">
+          {% for category, tags in tag_groups.items %}
+            <div>
+              <p class="text-sm font-semibold text-gray-800 mb-1">{{ category|capfirst }}</p>
+              <div class="flex flex-wrap gap-2">
+                {% for tag in tags %}
+                  <label class="flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="tags" value="{{ tag.id }}"
+                          {% if tag.id|stringformat:"s" in form.tags.value %}checked{% endif %}
+                          class="rounded border-gray-300 text-primary focus:ring-primary">
+                    {{ tag.name }}
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
 
       <div class="text-center pt-2">
         <button type="submit" class="bg-primary hover:bg-brown-700 text-white font-semibold px-5 py-2 rounded-lg transition-all duration-150">Enviar</button>

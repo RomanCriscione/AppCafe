@@ -5,6 +5,7 @@ from django.urls import reverse
 import json
 from statistics import mean
 from .utils import get_recently_viewed_cafes
+from reviews.utils.tags import get_tags_grouped_by_cafe
 
 # ✅ Función auxiliar para obtener cafés vistos recientemente
 def get_recently_viewed_cafes(request):
@@ -41,15 +42,19 @@ def home(request):
             if avg >= 4:
                 top_cafes.append(cafe)
 
+    tag_data = get_tags_grouped_by_cafe(top_cafes)
+
     recently_viewed_cafes = get_recently_viewed_cafes(request)
 
     context = {
         "latest_reviews": latest_reviews,
-        "top_cafes": top_cafes[:6],  # Sección "Cafés destacados"
-        "cafes_json": json.dumps(cafes_data),  # Mapa
+        "top_cafes": top_cafes[:6],
+        "cafes_json": json.dumps(cafes_data),
         "recently_viewed_cafes": recently_viewed_cafes,
+        "tag_data": tag_data,  # ⬅️ nuevo agregado al contexto
     }
     return render(request, "core/home.html", context)
+
 
 # ✅ Vista "Acerca de mí"
 def about_view(request):

@@ -8,10 +8,28 @@ def validar_phone(valor):
     if valor and not re.match(r'^\+?\d{6,15}$', valor):
         raise ValidationError("Número inválido. Usá solo números, con o sin +, de 6 a 15 dígitos.")
 
+from .models import Review, Cafe, Tag
+
 class ReviewForm(forms.ModelForm):
+    tags = forms.ModelMultipleChoiceField(
+        queryset=Tag.objects.all().order_by('category', 'name'),
+        widget=forms.CheckboxSelectMultiple(
+            attrs={'class': 'mb-2'}
+        ),
+        required=False,
+        label="¿Cómo describirías tu experiencia?",
+    )
+
     class Meta:
         model = Review
-        fields = ['rating', 'comment']
+        fields = ['rating', 'comment', 'tags']
+        widgets = {
+            'comment': forms.Textarea(attrs={
+                'class': 'w-full mt-1 p-2 border rounded',
+                'rows': 3
+            }),
+        }
+
 
 class CafeForm(forms.ModelForm):
     phone = forms.CharField(
