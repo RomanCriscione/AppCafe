@@ -314,7 +314,7 @@ def create_review(request, cafe_id):
             review.cafe = cafe
             review.save()
             form.save_m2m()
-            messages.success(request, "¡Gracias por tu reseña!")
+            messages.success(request, "¡Gracias por dejar tu reseña! ☕")
             return redirect("cafe_detail", cafe_id=cafe.id)
 
     # Agrupamos etiquetas por categoría

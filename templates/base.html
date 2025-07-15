@@ -103,9 +103,9 @@
   <!-- Contenido principal -->
   <main class="container mx-auto px-4 py-6 pt-24">
     {% if messages %}
-      <div class="mb-4">
+      <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
         {% for message in messages %}
-          <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-2 rounded">
+          <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded shadow-md animate-fade-in">
             {{ message }}
           </div>
         {% endfor %}
