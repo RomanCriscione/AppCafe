@@ -202,6 +202,16 @@
       </div>
       <p>{{ review.comment }}</p>
 
+      {% if review.tags.all %}
+        <div class="mt-2 text-sm text-gray-600">
+          <strong>Etiquetas:</strong>
+          {% for tag in review.tags.all %}
+            <span class="inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded-full mr-1 mb-1">{{ tag.name }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+
       {% if review.owner_reply %}
         <div class="bg-gray-100 rounded-md p-3 mt-2 text-sm border-l-4 border-primary">
           <strong class="text-primary">Respuesta del dueño:</strong><br>

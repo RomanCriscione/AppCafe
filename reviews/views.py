@@ -317,9 +317,18 @@ def create_review(request, cafe_id):
             messages.success(request, "¡Gracias por tu reseña!")
             return redirect("cafe_detail", cafe_id=cafe.id)
 
+    # Agrupamos etiquetas por categoría
+    tags = Tag.objects.all()
+    tag_categories = sorted(set(tag.category for tag in tags))
+    tags_by_category = defaultdict(list)
+    for tag in tags:
+        tags_by_category[tag.category].append(tag)
+
     return render(request, "reviews/create_review.html", {
         "form": form,
-        "cafe": cafe
+        "cafe": cafe,
+        "tag_categories": tag_categories,
+        "tags_by_category": dict(tags_by_category),
     })
 
 # Responder a una reseña (dueño)

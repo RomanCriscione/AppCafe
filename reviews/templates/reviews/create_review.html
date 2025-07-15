@@ -1,43 +1,93 @@
 {% extends "base.html" %}
 {% load static %}
 {% load widget_tweaks %}
+{% load custom_filters %}
 
 {% block content %}
-  <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
-    <h2 class="text-2xl font-bold mb-4 text-center">📝 Dejá tu reseña</h2>
+<div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
+  <form id="reviewForm" method="post">
+    {% csrf_token %}
 
-    <form class="space-y-4" method="post">
-      {% csrf_token %}
+    <!-- Paso 1: Comentario y puntuación -->
+    <div class="step" id="step-0">
+      <h2 class="text-xl font-bold mb-4">📝 Dejá tu reseña</h2>
 
-      <div>
-        <label class="block font-medium">{{ form.comment.label }}</label>
+      <div class="mb-4">
+        <label class="block font-medium">Comentario</label>
         {{ form.comment|add_class:"w-full mt-1 p-2 border rounded" }}
       </div>
 
-      <div>
-        <label class="block font-medium">Puntuación:</label>
+      <div class="mb-4">
+        <label class="block font-medium">Puntuación</label>
         <div class="flex flex-row-reverse justify-start gap-1 text-2xl">
           {% for i in "54321" %}
-            <input type="radio" name="rating" id="rating{{ i }}" value="{{ i }}"
-                  class="hidden peer"
-                  {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
-            <label for="rating{{ i }}" class="cursor-pointer text-gray-300 hover:text-amber-500 transition-all peer-checked:text-amber-500">☕</label>
+            <input type="radio" name="rating" id="rating{{ i }}" value="{{ i }}" class="hidden peer" {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
+            <label for="rating{{ i }}" class="cursor-pointer text-gray-300 hover:text-amber-500 transition-all peer-checked:text-amber-500">
+              ☕
+            </label>
           {% endfor %}
         </div>
       </div>
+    </div>
 
-      <div>
-        <label class="block font-medium mb-2">{{ form.tags.label }}</label>
-        {{ form.tags }}
+    <!-- Pasos siguientes: etiquetas por categoría -->
+    {% for category in tag_categories %}
+      <div class="step hidden" id="step-{{ forloop.counter }}">
+        <h3 class="text-lg font-semibold mb-2">¿Querés agregar alguna etiqueta <strong>{{ category }}</strong>?</h3>
+        <div class="space-y-2">
+          {% for tag in tags_by_category|get_item:category %}
+            <label class="block">
+              <input type="checkbox" name="tags" value="{{ tag.id }}" class="mr-2">
+              {{ tag.name }}
+            </label>
+          {% empty %}
+            <p class="text-sm text-gray-500">No hay etiquetas cargadas para esta categoría.</p>
+          {% endfor %}
+        </div>
       </div>
+    {% endfor %}
 
-      <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition">
-        Enviar
-      </button>
-    </form>
+    <!-- Botones -->
+    <div class="flex justify-between mt-6">
+      <button type="button" id="prevBtn" class="bg-gray-300 px-4 py-2 rounded hidden">Anterior</button>
+      <button type="button" id="nextBtn" class="bg-primary text-white px-4 py-2 rounded">Siguiente</button>
+      <button type="submit" id="submitBtn" class="bg-green-600 text-white px-4 py-2 rounded hidden">Enviar</button>
+    </div>
+  </form>
+</div>
 
-    <p class="mt-6 text-center">
-      <a href="{% url 'review_list' %}" class="text-blue-600 hover:underline">← Volver al listado</a>
-    </p>
-  </div>
+<!-- Wizard JS -->
+<script>
+  const steps = document.querySelectorAll('.step');
+  const nextBtn = document.getElementById('nextBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const submitBtn = document.getElementById('submitBtn');
+
+  let currentStep = 0;
+
+  function showStep(index) {
+    steps.forEach((step, i) => {
+      step.classList.toggle('hidden', i !== index);
+    });
+    prevBtn.classList.toggle('hidden', index === 0);
+    nextBtn.classList.toggle('hidden', index === steps.length - 1);
+    submitBtn.classList.toggle('hidden', index !== steps.length - 1);
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if (currentStep < steps.length - 1) {
+      currentStep++;
+      showStep(currentStep);
+    }
+  });
+
+  prevBtn.addEventListener('click', () => {
+    if (currentStep > 0) {
+      currentStep--;
+      showStep(currentStep);
+    }
+  });
+
+  showStep(currentStep);
+</script>
 {% endblock %}
