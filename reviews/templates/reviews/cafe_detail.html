@@ -30,9 +30,9 @@
   <p class="mb-4">
     🌟 <strong>Plan actual:</strong>
     {% if cafe.visibility_level == 2 %}
-      <span class="text-yellow-600 font-bold">☕☕ Plan Maestro</span>
+      <span class="text-accent font-bold">☕☕ Plan Maestro</span>
     {% elif cafe.visibility_level == 1 %}
-      <span class="text-blue-500 font-bold">☕ Plan Barista</span>
+      <span class="text-primary font-bold">☕ Plan Barista</span>
     {% else %}
       <span class="text-gray-500 font-bold">☕ Gratuito</span>
     {% endif %}
@@ -51,7 +51,7 @@
 
 {% if user.is_authenticated %}
   <div class="text-right mb-4">
-    <a href="{% url 'create_review' cafe.id %}" class="bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition">
+    <a href="{% url 'create_review' cafe.id %}" class="bg-accent hover:bg-[#14b8a6] text-white px-4 py-2 rounded-xl shadow transition">
       📝 Dejá tu reseña
     </a>
   </div>
@@ -65,7 +65,9 @@
     <h2 class="text-lg font-semibold text-gray-800 mb-2">🧠 Lo que otros destacan (etiquetas sensoriales)</h2>
     <div class="flex flex-wrap gap-2">
       {% for tag in sensory_tags %}
-        <span class="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">{{ tag.name }}</span>
+        <span class="bg-[#f0fdfa] text-accent text-sm px-3 py-1 rounded-full border border-accent">
+          {{ tag.name }}
+        </span>
       {% endfor %}
     </div>
   </div>
@@ -77,48 +79,48 @@
     </div>
   {% endif %}
   {% if cafe.is_vegan_friendly %}
-    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-leaf text-green-500"></i> Opciones veganas
+    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
+      <i class="fa-solid fa-leaf text-accent"></i> Opciones veganas
     </div>
   {% endif %}
   {% if cafe.has_outdoor_seating %}
-    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-chair text-yellow-500"></i> Mesas afuera
+    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
+      <i class="fa-solid fa-leaf text-accent"></i> Mesas afuera
     </div>
   {% endif %}
   {% if cafe.has_parking %}
-    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-square-parking text-gray-600"></i> Estacionamiento
+    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
+      <i class="fa-solid fa-leaf text-accent"></i> Estacionamiento
     </div>
   {% endif %}
   {% if cafe.is_accessible %}
-    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-wheelchair text-indigo-500"></i> Accesible
+    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
+      <i class="fa-solid fa-leaf text-accent"></i> Accesible
     </div>
   {% endif %}
   {% if cafe.has_vegetarian_options %}
-    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-carrot text-orange-500"></i> Vegetariano
+    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
+      <i class="fa-solid fa-leaf text-accent"></i> Vegetariano
     </div>
   {% endif %}
   {% if cafe.serves_breakfast %}
-    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-mug-saucer text-yellow-600"></i> Desayuno
+    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
+      <i class="fa-solid fa-leaf text-accent"></i> Desayuno
     </div>
   {% endif %}
   {% if cafe.serves_alcohol %}
-    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-wine-glass text-purple-500"></i> Bebidas alcohólicas
+    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
+      <i class="fa-solid fa-leaf text-accent"></i> Bebidas alcohólicas
     </div>
   {% endif %}
   {% if cafe.has_books_or_games %}
-    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-book text-amber-700"></i> Libros o juegos
+    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
+      <i class="fa-solid fa-leaf text-accent"></i> Libros o juegos
     </div>
   {% endif %}
   {% if cafe.has_air_conditioning %}
-    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-snowflake text-cyan-500"></i> Aire acondicionado
+    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
+      <i class="fa-solid fa-leaf text-accent"></i> Aire acondicionado
     </div>
   {% endif %}
 </div>
@@ -147,8 +149,8 @@
 {% if average_rating %}
   <p class="mb-4"><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
   {% if best_review %}
-    <div class="bg-yellow-100 p-4 rounded border-l-4 border-yellow-500 mb-6 animate-fade-in">
-      <p class="font-semibold">☕✨ Reseña destacada</p>
+    <div class="bg-[#f0fdfa] p-4 rounded border-l-4 border-accent mb-6 animate-fade-in">
+      <p class="font-semibold text-accent">☕✨ Reseña destacada</p>
       <p class="text-sm text-gray-600">{{ best_review.user.username }} ({{ best_review.created_at|date:"d M Y" }}) — ☕ {{ best_review.rating|floatformat:1 }}</p>
       <p>“{{ best_review.comment }}”</p>
     </div>
@@ -171,7 +173,7 @@
           <div class="p-3">
             <h3 class="font-semibold text-base text-gray-800">{{ cafe.name }}</h3>
             <p class="text-sm text-gray-600">{{ cafe.location }}</p>
-            <p class="text-yellow-500 text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
+            <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
           </div>
         </a>
       {% endfor %}
@@ -181,7 +183,7 @@
 
 {% if user.is_authenticated %}
   <form method="post" action="{% url 'toggle_favorite' cafe.id %}" class="mb-4">{% csrf_token %}
-    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-all">
+    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600 transition">
       {% if user in cafe.favorites.all %}
         💔 Quitar de favoritos
       {% else %}
@@ -233,7 +235,10 @@
 
 
 {% if user.is_authenticated %}
-  <button onclick="document.getElementById('modal-review').style.display='flex'" class="mt-6 bg-secondary text-white px-4 py-2 rounded">Dejá tu reseña</button>
+  <button onclick="document.getElementById('modal-review').style.display='flex'"
+        class="mt-6 bg-accent hover:bg-[#14b8a6] text-white px-4 py-2 rounded-xl transition">
+    Dejá tu reseña
+  </button>
 {% else %}
   <p class="mt-4">Para dejar una reseña necesitás <a href="{% url 'account_login' %}?next={{ request.path }}" class="text-blue-600 hover:underline">iniciar sesión</a>.</p>
 {% endif %}
@@ -286,7 +291,9 @@
       {% endif %}
 
       <div class="text-center pt-2">
-        <button type="submit" class="bg-primary hover:bg-brown-700 text-white font-semibold px-5 py-2 rounded-lg transition-all duration-150">Enviar</button>
+        <button type="submit" class="bg-primary hover:bg-[#172b68] text-white font-semibold px-5 py-2 rounded-lg transition-all duration-150">
+          Enviar
+        </button>
       </div>
     </form>
   </div>

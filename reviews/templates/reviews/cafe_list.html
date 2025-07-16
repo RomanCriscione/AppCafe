@@ -66,7 +66,10 @@
         {% endfor %}
       </fieldset>
 
-      <button type="submit" class="mt-4 bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition-colors">Aplicar filtros</button>
+      <button type="submit"
+        class="mt-4 bg-accent hover:bg-[#14b8a6] text-white px-4 py-2 rounded-xl transition-colors">
+        Aplicar filtros
+      </button>
     </form>
   </aside>
 
@@ -79,14 +82,16 @@
           <input type="hidden" name="orden" value="algoritmo">
           <input type="hidden" name="lat" id="lat">
           <input type="hidden" name="lon" id="lon">
-          <button type="submit" class="bg-accent text-white px-3 py-2 rounded text-sm hover:bg-secondary transition-transform hover:scale-105">
+          <button type="submit"
+            class="bg-accent hover:bg-[#14b8a6] text-white px-3 py-2 rounded-xl text-sm transition-transform hover:scale-105 shadow">
             📍 Cafés cerca mío
-          </button>
+          </button> 
 
         </form>
 
         {% if mostrar_boton_reset %}
-          <a href="{% url 'cafe_list' %}" class="inline-block bg-gray-200 text-gray-800 px-3 py-2 rounded hover:bg-gray-300 transition-colors">
+          <a href="{% url 'cafe_list' %}"
+            class="inline-block bg-gray-100 text-gray-800 px-3 py-2 rounded-xl hover:bg-gray-200 transition-colors">
             🔄 Ver todos los cafés
           </a>
         {% endif %}
@@ -97,7 +102,7 @@
 
 <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-6 mt-6">
   {% for cafe in cafes %}
-    <div class="bg-white rounded-lg shadow hover:shadow-md p-4 transition duration-200">
+    <div class="bg-white rounded-2xl shadow-md hover:shadow-lg p-4 transition duration-200">
       <a href="{% url 'cafe_detail' cafe.id %}" class="block">
         {% if cafe.photo1 %}
           <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}" class="w-full h-40 object-cover rounded-md mb-3">
@@ -109,7 +114,7 @@
 
         <h3 class="text-lg font-semibold text-gray-800">{{ cafe.name }}</h3>
         <p class="text-sm text-gray-600">{{ cafe.location }}</p>
-        <p class="text-yellow-500 text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
+        <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
       </a>
 
       {% with tag_data|get_item:cafe.id as grouped_tags %}
@@ -121,7 +126,7 @@
                 <p class="text-xs font-medium text-gray-600">{{ category|title }}</p>
                 <div class="flex flex-wrap gap-2 mt-1">
                   {% for tag in tags|slice:":5" %}
-                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                    <span class="bg-[#f0fdfa] text-accent text-xs px-2 py-1 rounded-full border border-accent">
                       {{ tag.name }} ({{ tag.count }})
                     </span>
                   {% endfor %}

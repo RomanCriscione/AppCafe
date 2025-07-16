@@ -1,6 +1,6 @@
 /* ===============================
     🎨 VARIABLES Y TIPOGRAFÍA
-================================= */
+================================= 
 :root {
     --color-primary: #4E342E;
     --color-secondary: #D7CCC8;
@@ -22,7 +22,7 @@ body {
 
 /* ===============================
     🧭 LAYOUT GENERAL
-================================= */
+================================= 
 header {
     background-color: var(--color-primary);
     color: white;
@@ -42,7 +42,7 @@ footer {
 
 /* ===============================
     🌐 NAVEGACIÓN
-================================= */
+================================= 
 nav {
     display: flex;
     justify-content: space-between;
@@ -83,7 +83,7 @@ nav ul li strong {
 
 /* ===============================
     🔘 BOTONES
-================================= */
+================================= 
 button,
 .btn {
     padding: 10px 18px;
@@ -119,7 +119,7 @@ button:hover,
 
 /* ===============================
     🖼️ IMÁGENES Y MINIATURAS
-================================= */
+================================= 
 .cafe-photo,
 .favorito-thumbnail,
 .cafe-thumbnail {
@@ -136,7 +136,7 @@ button:hover,
 
 /* ===============================
     📋 FORMULARIOS
-================================= */
+================================= 
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -154,7 +154,7 @@ textarea {
 
 /* ===============================
     🌟 ESTRELLAS / RATING
-================================= */
+================================= 
 .rating-widget {
     direction: rtl;
     font-size: 1.5rem;
@@ -180,7 +180,7 @@ textarea {
 
 /* ===============================
     💬 RESEÑAS Y COMENTARIOS
-================================= */
+================================= 
 .review-card {
     background: #fdfdfd;
     padding: 1rem;
@@ -201,7 +201,7 @@ textarea {
 
 /* ===============================
     ✅ UTILIDADES
-================================= */
+================================= 
 form {
     max-width: 800px;
     margin: 0 auto;
@@ -244,7 +244,7 @@ ul.messages li.error {
 
 /* ===============================
     📱 RESPONSIVE
-================================= */
+================================= 
 @media (max-width: 768px) {
     nav {
         flex-direction: column;
@@ -273,4 +273,4 @@ ul.messages li.error {
     .modal-content {
         width: 90%;
     }
-}
+} */
