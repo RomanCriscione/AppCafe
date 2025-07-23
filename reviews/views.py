@@ -245,8 +245,7 @@ def cafe_detail(request, cafe_id):
                 review.comment = form.cleaned_data["comment"]
                 review.rating = form.cleaned_data["rating"]
                 review.save()
-            # Asociar etiquetas (muchas a muchas)
-            review.tags.set(form.cleaned_data["tags"])
+            review.tags.set(form.cleaned_data["tags"])  # Asociar etiquetas
             messages.success(request, "¡Gracias por tu reseña!")
             return redirect("cafe_detail", cafe_id=cafe.id)
     else:
@@ -259,17 +258,13 @@ def cafe_detail(request, cafe_id):
         else:
             form = ReviewForm()
 
-    # Agrupar etiquetas sensoriales de reseñas por categoría
-    tag_counts = cafe.reviews.values(
-        'tags__id', 'tags__name', 'tags__category'
-    ).annotate(count=Count('tags')).order_by('-count')
-
+    # ✅ Agrupar TODAS las etiquetas por categoría (no solo las usadas)
+    all_tags = Tag.objects.all().order_by("category", "name")
     tag_groups = defaultdict(list)
-    for tag in tag_counts:
-        tag_groups[tag['tags__category']].append({
-            'id': tag['tags__id'],
-            'name': tag['tags__name'],
-            'count': tag['count'],
+    for tag in all_tags:
+        tag_groups[tag.category].append({
+            "id": tag.id,
+            "name": tag.name,
         })
 
     # Etiquetas sensoriales destacadas (planas, sin repetir)
@@ -287,49 +282,48 @@ def cafe_detail(request, cafe_id):
         "best_review": best_review,
         "form": form,
         "recommended_cafes": recommended_cafes,
-        "tag_groups": dict(tag_groups),
+        "tag_choices": dict(tag_groups),
         "sensory_tags": sensory_tags,
     })
 
+@login_required
 def create_review(request, cafe_id):
-    cafe = get_object_or_404(Cafe, id=cafe_id)
-
-    try:
-        existing_review = Review.objects.get(user=request.user, cafe=cafe)
-        form = ReviewForm(instance=existing_review)
-        editing = True
-    except Review.DoesNotExist:
-        form = ReviewForm()
-        editing = False
+    cafe = get_object_or_404(Cafe, pk=cafe_id)
 
     if request.method == "POST":
-        if editing:
-            form = ReviewForm(request.POST, instance=existing_review)
-        else:
-            form = ReviewForm(request.POST)
-
+        form = ReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)
-            review.user = request.user
             review.cafe = cafe
+            review.user = request.user
             review.save()
-            form.save_m2m()
-            messages.success(request, "¡Gracias por dejar tu reseña! ☕")
+
+            # Guardar etiquetas seleccionadas (tags desde checkboxes)
+            selected_tag_ids = request.POST.getlist("tags")
+            tags = Tag.objects.filter(id__in=selected_tag_ids)
+            review.tags.set(tags)
+
+            messages.success(request, "¡Gracias por dejar tu reseña!")
             return redirect("cafe_detail", cafe_id=cafe.id)
+        else:
+            messages.error(request, "Por favor corregí los errores.")
+    else:
+        form = ReviewForm()
 
-    # Agrupamos etiquetas por categoría
-    tags = Tag.objects.all()
-    tag_categories = sorted(set(tag.category for tag in tags))
-    tags_by_category = defaultdict(list)
+    # Agrupar tags por categoría para mostrar por pasos en el wizard
+    tags = Tag.objects.all().order_by("category", "name")
+    tag_categorias = {}
     for tag in tags:
-        tags_by_category[tag.category].append(tag)
+        tag_categorias.setdefault(tag.category, []).append(tag)
 
-    return render(request, "reviews/create_review.html", {
+    context = {
         "form": form,
         "cafe": cafe,
-        "tag_categories": tag_categories,
-        "tags_by_category": dict(tags_by_category),
-    })
+        "tag_categories": tag_categorias.keys(),  # ["Sensorial", "Ambiente", etc.]
+        "tags_by_category": tag_categorias         # { "Sensorial": [...], ... }
+    }
+
+    return render(request, "reviews/create_review.html", context)
 
 # Responder a una reseña (dueño)
 @login_required
@@ -381,13 +375,11 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
 @login_required
 def owner_dashboard(request):
     owner = request.user
-    cafes = Cafe.objects.filter(owner=owner).prefetch_related('review_set__tags')
-
-    tag_data = {}
+    cafes = Cafe.objects.filter(owner=owner).prefetch_related('reviews__tags')
 
     for cafe in cafes:
         tags = Tag.objects.filter(
-            review__cafe=cafe
+            reviews__cafe=cafe
         ).values('name', 'category').annotate(count=Count('id')).order_by('-count')
 
         grouped_tags = defaultdict(list)
@@ -397,13 +389,15 @@ def owner_dashboard(request):
                 'count': tag['count'],
             })
 
-        tag_data[cafe.id] = grouped_tags
+        # asignamos los tags agrupados como atributo temporal del café
+        cafe.tags_summary = grouped_tags
 
     context = {
-        'cafes': cafes,
-        'tag_data': tag_data,
+        'cafes': cafes
     }
-    return render(request, 'owner_dashboard.html', context)
+    return render(request, 'reviews/owner_dashboard.html', context)
+
+
 
 # Vista nueva: reseñas agrupadas por cafetería del dueño
 @login_required

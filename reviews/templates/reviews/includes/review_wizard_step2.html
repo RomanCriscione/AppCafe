@@ -1,0 +1,50 @@
+<div id="step-2" class="wizard-step hidden">
+  <h2 class="text-xl font-semibold mb-4 text-center">Paso 2: Etiquetas sensoriales</h2>
+
+  {% if tag_choices %}
+    <div id="tag-category-container">
+      {% for category, tags in tag_choices.items %}
+        <div class="tag-category-step hidden">
+          <h3 class="text-xl font-semibold mb-4 text-center">{{ category|title }}</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+            {% for tag in tags %}
+              <label class="inline-flex items-start gap-2">
+                <input type="checkbox" name="tags" value="{{ tag.id }}" class="form-checkbox text-blue-600 mt-1">
+                <span class="text-sm text-gray-800">{{ tag.name }}</span>
+              </label>
+            {% endfor %}
+          </div>
+
+          <div class="flex justify-between mt-6">
+            <button type="button"
+                    class="prev-btn bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
+              ← Volver
+            </button>
+            <div class="flex gap-2">
+              <button type="button" class="skip-btn text-sm text-gray-500 underline">
+                Saltar
+              </button>
+              {% if forloop.last %}
+                <button type="submit" form="review-form-step-1"
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded">
+                  Enviar reseña
+                </button>
+              {% else %}
+                <button type="button"
+                        class="next-btn bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
+                  Siguiente →
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-gray-600">Aún no hay etiquetas sensoriales disponibles.</p>
+    <div class="text-center mt-6">
+      <button type="button" class="prev-btn px-4 py-2 bg-gray-300 rounded">Volver</button>
+      <button type="submit" form="review-form-step-1" class="px-4 py-2 bg-blue-900 text-white rounded">Enviar reseña</button>
+    </div>
+  {% endif %}
+</div>

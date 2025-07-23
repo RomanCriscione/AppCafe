@@ -64,6 +64,10 @@
           <a href="{% url 'cafe_list' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Cafés</a>
           <a href="{% url 'mapa_cafes' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">📍 Mapa</a>
 
+          {% if user.is_authenticated %}
+            <a href="{% url 'favorite_cafes' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">❤️ Favoritos</a>
+          {% endif %}
+
           {% if user.is_authenticated and user.is_owner %}
             <a href="{% url 'create_cafe' %}" class="text-sm hover:underline">➕ Agregar Café</a>
             <a href="{% url 'owner_dashboard' %}" class="hover:underline">Mis Cafés</a>
@@ -86,6 +90,7 @@
             </div>
           {% endif %}
         </nav>
+
       </div>
     </header>
 

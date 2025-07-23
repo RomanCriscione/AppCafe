@@ -49,17 +49,6 @@
   </div>
 {% endif %}
 
-{% if user.is_authenticated %}
-  <div class="text-right mb-4">
-    <a href="{% url 'create_review' cafe.id %}" class="bg-accent hover:bg-[#14b8a6] text-white px-4 py-2 rounded-xl shadow transition">
-      📝 Dejá tu reseña
-    </a>
-  </div>
-{% else %}
-  <p class="text-sm text-gray-600 mt-4">Iniciá sesión para dejar una reseña.</p>
-{% endif %}
-
-
 {% if sensory_tags %}
   <div class="mt-6">
     <h2 class="text-lg font-semibold text-gray-800 mb-2">🧠 Lo que otros destacan (etiquetas sensoriales)</h2>
@@ -233,214 +222,212 @@
   <button onclick="toggleReviews()" class="text-sm text-blue-600 mt-1 hover:underline" id="btn-reviews">Ver todas</button>
 {% endif %}
 
-
-{% if user.is_authenticated %}
-  <button onclick="document.getElementById('modal-review').style.display='flex'"
-        class="mt-6 bg-accent hover:bg-[#14b8a6] text-white px-4 py-2 rounded-xl transition">
-    Dejá tu reseña
-  </button>
-{% else %}
-  <p class="mt-4">Para dejar una reseña necesitás <a href="{% url 'account_login' %}?next={{ request.path }}" class="text-blue-600 hover:underline">iniciar sesión</a>.</p>
-{% endif %}
-
-<!-- Modal -->
+<!-- Modal Wizard -->
 <div id="modal-review" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-  <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 relative animate-fade-in">
-    <button onclick="document.getElementById('modal-review').style.display='none'" class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+  <div class="bg-white w-full max-w-xl rounded-2xl shadow-xl p-6 relative animate-fade-in">
+    <button onclick="closeWizard()" class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
 
-    <h3 class="text-2xl font-bold text-center mb-4 text-brown-800">Dejá tu reseña</h3>
-
-    <form method="post" class="space-y-4">
-      {% csrf_token %}
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1" for="comment">Tu comentario</label>
-        {{ form.comment }}
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">☕ Calificación</label>
-        <div class="flex flex-row-reverse justify-end gap-1" id="rating-stars">
-          {% for i in "54321" %}
-            <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" class="sr-only"
-                  {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
-            <label for="star{{ i }}" class="text-2xl cursor-pointer text-gray-300 hover:text-yellow-400 transition-all duration-150" data-value="{{ i }}">☕</label>
-          {% endfor %}
+    <!-- Step 1 -->
+    <div id="step-1" class="wizard-step">
+      <h3 class="text-2xl font-bold text-center mb-4 text-brown-800">Paso 1: Comentario y puntuación</h3>
+      <form id="review-form-step-1" method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+          <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Tu comentario</label>
+          {{ form.comment }}
         </div>
-        <p id="rating-label" class="text-sm text-center mt-1 text-gray-600"></p>
-      </div>
 
-      {% if tag_groups %}
-        <div class="space-y-4">
-          {% for category, tags in tag_groups.items %}
-            <div>
-              <p class="text-sm font-semibold text-gray-800 mb-1">{{ category|capfirst }}</p>
-              <div class="flex flex-wrap gap-2">
-                {% for tag in tags %}
-                  <label class="flex items-center gap-2 text-sm">
-                    <input type="checkbox" name="tags" value="{{ tag.id }}"
-                          {% if tag.id|stringformat:"s" in form.tags.value %}checked{% endif %}
-                          class="rounded border-gray-300 text-primary focus:ring-primary">
-                    {{ tag.name }}
-                  </label>
-                {% endfor %}
-              </div>
-            </div>
-          {% endfor %}
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">☕ Calificación</label>
+          <div class="flex flex-row-reverse justify-end gap-1" id="rating-stars">
+            {% for i in "54321" %}
+              <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" class="sr-only"
+                {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
+              <label for="star{{ i }}" class="text-2xl cursor-pointer transition-transform duration-150 text-gray-300 hover:scale-110" data-value="{{ i }}">☕</label>
+            {% endfor %}
+          </div>
+          <p id="rating-label" class="text-sm text-center mt-1 text-gray-600"></p>
         </div>
-      {% endif %}
 
-      <div class="text-center pt-2">
-        <button type="submit" class="bg-primary hover:bg-[#172b68] text-white font-semibold px-5 py-2 rounded-lg transition-all duration-150">
-          Enviar
-        </button>
-      </div>
-    </form>
+        <div class="flex justify-end pt-2">
+          <button type="button" class="next-btn bg-primary text-white px-4 py-2 rounded-lg hover:bg-[#172b68]">
+            Siguiente
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Step 2 -->
+    {% include "reviews/includes/review_wizard_step2.html" with tag_choices=tag_choices %}
+
   </div>
 </div>
 
-{% include "reviews/includes/mapa_cafe_detail.html" %}
+<!-- Botón flotante para abrir el modal de reseña -->
+<button onclick="document.getElementById('modal-review').style.display='flex'"
+        class="fixed bottom-6 right-6 z-50 bg-primary text-white font-semibold px-5 py-3 rounded-full shadow-lg hover:bg-[#172b68] transition-all duration-300">
+  ✍️ Dejá tu reseña
+</button>
+
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // ⭐ Script para pintar las tazas y mostrar texto de calificación
-    const starsContainer = document.getElementById("rating-stars");
-    if (!starsContainer) return;
+// -----------------------------
+// ⭐ Estrellas de calificación
+// -----------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  const stars = document.querySelectorAll('#rating-stars label');
+  const radios = document.querySelectorAll('#rating-stars input');
+  const ratingLabel = document.getElementById('rating-label');
 
-    const stars = starsContainer.querySelectorAll("label");
-    const radios = starsContainer.querySelectorAll("input[type='radio']");
-    
-    // Crear contenedor de texto si no existe
-    let textLabel = document.getElementById("rating-label");
-    if (!textLabel) {
-      textLabel = document.createElement("p");
-      textLabel.id = "rating-label";
-      textLabel.className = "mt-2 text-sm font-medium text-center text-gray-700";
-      starsContainer.parentNode.insertBefore(textLabel, starsContainer.nextSibling);
-    }
+  const labels = {
+    5: "Excelente",
+    4: "Muy bueno",
+    3: "Bueno",
+    2: "Regular",
+    1: "Malo"
+  };
 
-    const labels = {
-      5: "Excelente",
-      4: "Muy bueno",
-      3: "Bueno",
-      2: "Regular",
-      1: "Malo"
-    };
-
-    function updateStars(selected) {
-      stars.forEach(label => {
-        const value = parseInt(label.getAttribute("for").replace("star", ""));
-        if (value <= selected) {
-          label.classList.remove("text-gray-300");
-          label.classList.add("text-yellow-500");
-        } else {
-          label.classList.remove("text-yellow-500");
-          label.classList.add("text-gray-300");
-        }
-      });
-      textLabel.textContent = selected > 0 ? labels[selected] : "";
-    }
-
-    // Manejo de clics
+  function updateRatingVisual() {
+    let selected = null;
     radios.forEach(radio => {
-      radio.addEventListener("change", () => {
-        updateStars(parseInt(radio.value));
-      });
+      if (radio.checked) selected = radio.value;
     });
 
-    // Hover visual
-    stars.forEach(label => {
-      label.addEventListener("mouseenter", () => {
-        const hovered = parseInt(label.getAttribute("for").replace("star", ""));
-        updateStars(hovered);
-      });
-      label.addEventListener("mouseleave", () => {
-        const selected = starsContainer.querySelector("input:checked");
-        updateStars(selected ? parseInt(selected.value) : 0);
-      });
+    stars.forEach(star => {
+      const value = star.dataset.value;
+      if (selected && value === selected) {
+        star.classList.add('text-yellow-400', 'scale-110', 'opacity-100');
+        star.classList.remove('text-gray-300', 'opacity-50');
+      } else {
+        star.classList.remove('text-yellow-400', 'scale-110');
+        star.classList.add('text-gray-300', 'opacity-50');
+      }
     });
 
-    // Mostrar la selección al cargar
-    const checked = starsContainer.querySelector("input:checked");
-    if (checked) {
-      updateStars(parseInt(checked.value));
+    ratingLabel.textContent = selected ? labels[selected] : "";
+  }
+
+  radios.forEach(radio => radio.addEventListener('change', updateRatingVisual));
+  updateRatingVisual();
+});
+
+// ----------------------------------
+// 🧩 Wizard paso a paso
+// ----------------------------------
+document.addEventListener("DOMContentLoaded", function () {
+  const wizardSteps = document.querySelectorAll(".wizard-step");
+  const nextButtons = document.querySelectorAll(".next-btn");
+  const prevButtons = document.querySelectorAll(".prev-btn");
+  const skipButtons = document.querySelectorAll(".skip-btn");
+
+  let currentStepIndex = 0;
+  let currentCategoryIndex = 0;
+  let tagCategorySteps = [];
+
+  function showStep(index) {
+    wizardSteps.forEach((step, i) => {
+      step.classList.toggle("hidden", i !== index);
+    });
+
+    if (index === 1) {
+      // Actualizar dinámicamente categorías
+      tagCategorySteps = document.querySelectorAll(".tag-category-step");
+      tagCategorySteps.forEach((cat, i) => {
+        cat.classList.toggle("hidden", i !== 0);
+      });
+      currentCategoryIndex = 0;
     }
-  });
+  }
 
-  // 🧭 Script para cafés vistos recientemente (Swiper)
-  document.addEventListener("DOMContentLoaded", function () {
-    const visitedCafe = {
-      id: {{ cafe.id }},
-      name: "{{ cafe.name|escapejs }}",
-      url: "{% url 'cafe_detail' cafe.id %}",
-      photo1: {% if cafe.photo1 %}"{{ cafe.photo1.url }}"{% else %}null{% endif %},
-      location: "{{ cafe.location|escapejs }}",
-      address: "{{ cafe.address|escapejs }}"
-    };
+  function showNextCategory() {
+    if (currentStepIndex === 1 && currentCategoryIndex < tagCategorySteps.length - 1) {
+      tagCategorySteps[currentCategoryIndex].classList.add("hidden");
+      currentCategoryIndex += 1;
+      tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
+    } else {
+      document.getElementById("review-form-step-1").submit();
+    }
+  }
 
-    let history = JSON.parse(localStorage.getItem("recently_viewed_cafes") || "[]");
-    history = history.filter(c => c.id !== visitedCafe.id);
-    history.unshift(visitedCafe);
-    history = history.slice(0, 5);
-    localStorage.setItem("recently_viewed_cafes", JSON.stringify(history));
+  function showPrevCategory() {
+    if (currentStepIndex === 1 && currentCategoryIndex > 0) {
+      tagCategorySteps[currentCategoryIndex].classList.add("hidden");
+      currentCategoryIndex -= 1;
+      tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
+    } else if (currentStepIndex === 1 && currentCategoryIndex === 0) {
+      currentStepIndex = 0;
+      showStep(currentStepIndex);
+    }
+  }
 
-    const container = document.getElementById("recently-viewed-list");
-    if (!container) return;
-    history.forEach(cafe => {
-      const card = document.createElement("div");
-      card.className = "swiper-slide w-[300px] bg-white rounded-lg shadow-md p-4 box-border";
-      card.innerHTML = `
-        <div class="flex gap-4 items-start">
-          ${cafe.photo1 ? `<img src="${cafe.photo1}" alt="${cafe.name}" class="w-20 h-20 object-cover rounded-md" loading="lazy">` : ""}
-          <div class="flex flex-col justify-between">
-            <p class="font-semibold leading-snug">
-              <a href="${cafe.url}" class="text-blue-600 hover:underline">${cafe.name}</a>
-            </p>
-            <p class="text-sm text-gray-700">${cafe.location}</p>
-            <p class="text-xs text-gray-500">${cafe.address}</p>
-          </div>
-        </div>`;
-      container.appendChild(card);
-    });
-
-    new Swiper("#recently-viewed-container", {
-      slidesPerView: 'auto',
-      spaceBetween: 16,
-      navigation: {
-        nextEl: ".swiper-button-next",
-        prevEl: ".swiper-button-prev",
-      },
-      pagination: {
-        el: ".swiper-pagination",
-        clickable: true,
-      },
+  nextButtons.forEach((btn) => {
+    btn.addEventListener("click", function () {
+      if (currentStepIndex === 0) {
+        currentStepIndex = 1;
+        showStep(currentStepIndex);
+      } else {
+        showNextCategory();
+      }
     });
   });
 
+  prevButtons.forEach((btn) => {
+    btn.addEventListener("click", function () {
+      showPrevCategory();
+    });
+  });
+
+  skipButtons.forEach((btn) => {
+    btn.addEventListener("click", function () {
+      document.getElementById("review-form-step-1").submit();
+    });
+  });
+
+  // Inicializar en paso 1
+  showStep(currentStepIndex);
+});
+
+// ----------------------------------
+// 🔽 Mostrar/Ocultar reseñas
+// ----------------------------------
+function toggleReviews() {
+  const container = document.getElementById("review-container");
+  const btn = document.getElementById("btn-reviews");
+  const fade = document.getElementById("fade-reviews");
+
+  if (container.classList.contains("max-h-[1056px]")) {
+    container.classList.remove("max-h-[1056px]", "overflow-hidden");
+    if (fade) fade.style.display = "none";
+    btn.textContent = "Ver menos";
+  } else {
+    container.classList.add("max-h-[1056px]", "overflow-hidden");
+    if (fade) fade.style.display = "block";
+    btn.textContent = "Ver todas";
+  }
+}
+
+// ----------------------------------
+// 🔽 Mostrar/Ocultar etiquetas
+// ----------------------------------
 function toggleTags(index) {
   const container = document.getElementById(`tag-container-${index}`);
   const button = document.getElementById(`btn-${index}`);
   const fade = document.getElementById(`fade-${index}`);
-
-  // Verifica si está expandido
   const isCollapsed = container.classList.contains("max-h-[96px]");
 
   if (isCollapsed) {
-    // Expandir
     container.classList.remove("max-h-[96px]", "overflow-hidden");
     if (fade) fade.style.display = "none";
     button.textContent = "Ver menos";
   } else {
-    // Colapsar
     container.classList.add("max-h-[96px]", "overflow-hidden");
     if (fade) fade.style.display = "block";
     button.textContent = "Ver todas";
   }
 }
-
 </script>
-
 {% endblock %}
+

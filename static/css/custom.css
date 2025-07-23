@@ -90,8 +90,28 @@
 }
 
 @media (max-width: 640px) {
-  .swiper-slide {
-    width: 260px !important;
-    margin-right: 12px;
-  }
+    .swiper-slide {
+        width: 260px !important;
+        margin-right: 12px;
+    }
+}
+
+/* Hero sections (si tenés imágenes o cabeceras grandes) */
+.hero {
+    @apply bg-cover bg-center text-white;
+}
+
+/* Cards antiguas -> ahora se verán con Tailwind pero dejo transición */
+.card {
+    @apply rounded-2xl shadow-lg overflow-hidden transition-transform transform hover:scale-105;
+}
+
+/* Form controls básicos */
+.form-control {
+    @apply border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring focus:border-blue-400;
+}
+
+/* Botones antiguos */
+.btn {
+    @apply bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition;
 }

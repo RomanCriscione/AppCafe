@@ -43,10 +43,10 @@
             <p class="text-sm">☕ Promedio: {{ cafe.average_rating|floatformat:1|default:"Sin puntuar" }}</p>
             <p class="text-sm">🧾 Reseñas: {{ cafe.total_reviews }}</p>
 
-            {% if tag_data[cafe.id] %}
+            {% if cafe.tags_summary %}
               <div class="mt-2">
                 <h4 class="text-sm font-semibold mb-1 text-gray-700">🪄 Cómo lo perciben los visitantes:</h4>
-                {% for category, tags in tag_data[cafe.id].items %}
+                {% for category, tags in cafe.tags_summary.items %}
                   <div class="mb-1">
                     <p class="text-xs font-medium text-gray-600">{{ category|title }}</p>
                     <div class="flex flex-wrap gap-2 mt-1">
@@ -60,6 +60,7 @@
                 {% endfor %}
               </div>
             {% endif %}
+
 
             {% if cafe.tags.exists %}
               <div class="mt-2">

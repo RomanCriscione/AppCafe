@@ -4,25 +4,28 @@
 {% load custom_filters %}
 
 {% block content %}
-<div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
+<div class="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-md border border-gray-200">
   <form id="reviewForm" method="post">
     {% csrf_token %}
 
     <!-- Paso 1: Comentario y puntuación -->
     <div class="step" id="step-0">
-      <h2 class="text-xl font-bold mb-4">📝 Dejá tu reseña</h2>
+      <h2 class="text-2xl font-bold mb-4 text-primary">📝 Dejá tu reseña</h2>
 
       <div class="mb-4">
-        <label class="block font-medium">Comentario</label>
-        {{ form.comment|add_class:"w-full mt-1 p-2 border rounded" }}
+        <label class="block font-medium mb-1">Comentario</label>
+        {{ form.comment|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
       </div>
 
       <div class="mb-4">
-        <label class="block font-medium">Puntuación</label>
+        <label class="block font-medium mb-2">Puntuación</label>
         <div class="flex flex-row-reverse justify-start gap-1 text-2xl">
           {% for i in "54321" %}
-            <input type="radio" name="rating" id="rating{{ i }}" value="{{ i }}" class="hidden peer" {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
-            <label for="rating{{ i }}" class="cursor-pointer text-gray-300 hover:text-amber-500 transition-all peer-checked:text-amber-500">
+            <input type="radio" name="rating" id="rating{{ i }}" value="{{ i }}"
+                   class="hidden peer"
+                   {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
+            <label for="rating{{ i }}"
+                   class="cursor-pointer text-gray-300 hover:text-accent transition-all peer-checked:text-accent">
               ☕
             </label>
           {% endfor %}
@@ -30,14 +33,15 @@
       </div>
     </div>
 
-    <!-- Pasos siguientes: etiquetas por categoría -->
+    <!-- Paso 2+: Etiquetas sensoriales por categoría -->
     {% for category in tag_categories %}
       <div class="step hidden" id="step-{{ forloop.counter }}">
-        <h3 class="text-lg font-semibold mb-2">¿Querés agregar alguna etiqueta <strong>{{ category }}</strong>?</h3>
-        <div class="space-y-2">
+        <h3 class="text-lg font-semibold mb-3 text-gray-800">🧠 ¿Querés agregar alguna etiqueta <span class="text-primary">{{ category }}</span>?</h3>
+        <div class="grid grid-cols-1 gap-2">
           {% for tag in tags_by_category|get_item:category %}
-            <label class="block">
-              <input type="checkbox" name="tags" value="{{ tag.id }}" class="mr-2">
+            <label class="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="tags" value="{{ tag.id }}"
+                      class="rounded border-gray-300 text-accent focus:ring-accent">
               {{ tag.name }}
             </label>
           {% empty %}
@@ -47,11 +51,20 @@
       </div>
     {% endfor %}
 
-    <!-- Botones -->
+    <!-- Botones de navegación -->
     <div class="flex justify-between mt-6">
-      <button type="button" id="prevBtn" class="bg-gray-300 px-4 py-2 rounded hidden">Anterior</button>
-      <button type="button" id="nextBtn" class="bg-primary text-white px-4 py-2 rounded">Siguiente</button>
-      <button type="submit" id="submitBtn" class="bg-green-600 text-white px-4 py-2 rounded hidden">Enviar</button>
+      <button type="button" id="prevBtn"
+              class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-xl shadow hidden transition">
+        ← Anterior
+      </button>
+      <button type="button" id="nextBtn"
+              class="bg-accent hover:bg-[#14b8a6] text-white px-4 py-2 rounded-xl shadow transition">
+        Siguiente →
+      </button>
+      <button type="submit" id="submitBtn"
+              class="bg-primary hover:bg-[#172b68] text-white px-4 py-2 rounded-xl shadow hidden transition">
+        ✅ Enviar reseña
+      </button>
     </div>
   </form>
 </div>
@@ -62,7 +75,6 @@
   const nextBtn = document.getElementById('nextBtn');
   const prevBtn = document.getElementById('prevBtn');
   const submitBtn = document.getElementById('submitBtn');
-
   let currentStep = 0;
 
   function showStep(index) {

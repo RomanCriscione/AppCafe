@@ -1,14 +1,15 @@
 {# reviews/templates/reviews/_cafe_card.html #}
-<div class="relative bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full min-h-[400px]">
+<div class="relative bg-white p-4 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full min-h-[420px] border border-gray-100">
 
   {% if user.is_authenticated %}
-    <form method="POST" action="{% url 'toggle_favorite' cafe.id %}" class="absolute top-2 right-2 z-10">
+    <form method="POST" action="{% url 'toggle_favorite' cafe.id %}" class="absolute top-3 right-3 z-10">
       {% csrf_token %}
-      <button type="submit" class="text-xl hover:scale-110 transition">
+      <button type="submit" 
+              class="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow hover:scale-110 transition">
         {% if cafe.id in favoritos_ids %}
-          ❤️
+          <span class="text-red-500 text-xl">❤️</span>
         {% else %}
-          🤍
+          <span class="text-gray-400 text-xl">🤍</span>
         {% endif %}
       </button>
     </form>
@@ -16,25 +17,30 @@
 
   {% if cafe.photo1 %}
     <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}"
-    class="w-full h-52 aspect-[4/3] object-cover rounded-lg mb-4 transition-transform duration-300 transform hover:scale-105 hover:shadow-lg hover:opacity-90">
+         class="w-full h-52 object-cover rounded-xl mb-4 transition-transform duration-300 hover:scale-105 hover:shadow-lg hover:opacity-90">
   {% else %}
-    <div class="w-full h-52 bg-gray-200 flex items-center justify-center rounded-lg mb-4 text-gray-500 text-3xl">
+    <div class="w-full h-52 bg-gray-100 flex items-center justify-center rounded-xl mb-4 text-gray-400 text-4xl">
       📷
     </div>
   {% endif %}
 
   <div class="flex-grow flex flex-col justify-between">
     <div>
-      <h2 class="text-xl font-semibold flex items-center">
+      <h2 class="text-xl font-bold text-gray-800 flex items-center">
         {{ cafe.name }}
         <span class="ml-2 text-sm text-gray-500">({{ cafe.location }})</span>
       </h2>
-      <p class="text-sm text-gray-600 mb-1">📍 {{ cafe.address }}</p>
-      <p class="text-sm">☕ {{ cafe.average_rating|floatformat:1 }}</p>
+      <p class="text-sm text-gray-600 mb-2">📍 {{ cafe.address }}</p>
+      <p class="text-sm font-semibold text-yellow-600 flex items-center gap-1">
+        ☕ {{ cafe.average_rating|floatformat:1 }}
+      </p>
     </div>
 
     <div class="mt-4">
-      <a href="{% url 'cafe_detail' cafe.id %}" class="inline-block text-blue-600 hover:underline text-sm font-medium">Ver detalles</a>
+      <a href="{% url 'cafe_detail' cafe.id %}"
+          class="inline-block px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-700 text-white text-sm rounded-lg shadow hover:from-blue-600 hover:to-blue-800 transition">
+        Ver detalles
+      </a>
     </div>
   </div>
 </div>
