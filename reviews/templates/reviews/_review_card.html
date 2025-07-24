@@ -1,58 +1,40 @@
-<div id="step2" class="wizard-step hidden">
-  <h2 class="text-2xl font-bold mb-6 text-center text-blue-700">
-    Paso 2: Etiquetas sensoriales
-  </h2>
+{# reviews/templates/reviews/_review_card.html #}
+<div class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition flex flex-col gap-4">
 
-  {% if tag_choices %}
-    <form id="tag-step-form" class="space-y-8">
-      <div id="tag-category-container" class="space-y-10">
-        {% for category, tags in tag_choices.items %}
-          <div class="tag-category-step hidden space-y-6">
-            <h3 class="text-xl font-semibold text-gray-800 text-center">
-              {{ category|title }}
-            </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-              {% for tag in tags %}
-                <label class="inline-flex items-center gap-3 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg transition">
-                  <input type="checkbox" name="tags" value="{{ tag.id }}" 
-                         class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
-                  <span class="text-sm font-medium text-gray-700">{{ tag.name }}</span>
-                </label>
-              {% endfor %}
-            </div>
-
-            <div class="flex justify-between mt-6">
-              <button type="button" 
-                      class="prev-btn flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg shadow transition">
-                <i class="fas fa-arrow-left"></i> Anterior
-              </button>
-
-              {% if not forloop.last %}
-                <button type="button" 
-                        class="next-btn flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg shadow transition">
-                  Siguiente <i class="fas fa-arrow-right"></i>
-                </button>
-              {% else %}
-                <button type="submit" 
-                        class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg shadow transition">
-                  <i class="fas fa-paper-plane"></i> Enviar reseña
-                </button>
-              {% endif %}
-            </div>
-          </div>
-        {% endfor %}
+  <!-- Header con usuario y puntaje -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      {% if review.user.avatar %}
+        <img src="{{ review.user.avatar.url }}" alt="{{ review.user.username }}"
+             class="w-10 h-10 rounded-full object-cover border" />
+      {% else %}
+        <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600">
+          <i class="fas fa-user"></i>
+        </div>
+      {% endif %}
+      <div>
+        <p class="font-semibold text-gray-800">{{ review.user.username }}</p>
+        <p class="text-xs text-gray-500">{{ review.created_at|date:"d M Y" }}</p>
       </div>
+    </div>
+    <div class="flex items-center gap-1 text-yellow-600 font-semibold">
+      ☕ {{ review.rating|floatformat:1 }}
+    </div>
+  </div>
 
-      <div class="mt-6 text-center">
-        <button type="button" 
-                class="skip-btn text-sm text-gray-500 hover:underline">
-          Omitir este paso
-        </button>
-      </div>
-    </form>
-  {% else %}
-    <p class="text-center text-gray-600">
-      No hay etiquetas disponibles por el momento.
-    </p>
+  <!-- Texto de la reseña -->
+  <p class="text-gray-700 text-sm leading-relaxed line-clamp-4">
+    {{ review.comment }}
+  </p>
+
+  <!-- Etiquetas -->
+  {% if review.tags.all %}
+    <div class="flex flex-wrap gap-2">
+      {% for tag in review.tags.all %}
+        <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
+          {{ tag.name }}
+        </span>
+      {% endfor %}
+    </div>
   {% endif %}
 </div>

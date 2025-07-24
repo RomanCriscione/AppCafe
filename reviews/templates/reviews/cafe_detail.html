@@ -62,77 +62,10 @@
   </div>
 {% endif %}
 
-  {% if cafe.is_pet_friendly %}
-    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-paw text-pink-500"></i> Pet friendly
-    </div>
-  {% endif %}
-  {% if cafe.is_vegan_friendly %}
-    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
-      <i class="fa-solid fa-leaf text-accent"></i> Opciones veganas
-    </div>
-  {% endif %}
-  {% if cafe.has_outdoor_seating %}
-    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
-      <i class="fa-solid fa-leaf text-accent"></i> Mesas afuera
-    </div>
-  {% endif %}
-  {% if cafe.has_parking %}
-    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
-      <i class="fa-solid fa-leaf text-accent"></i> Estacionamiento
-    </div>
-  {% endif %}
-  {% if cafe.is_accessible %}
-    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
-      <i class="fa-solid fa-leaf text-accent"></i> Accesible
-    </div>
-  {% endif %}
-  {% if cafe.has_vegetarian_options %}
-    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
-      <i class="fa-solid fa-leaf text-accent"></i> Vegetariano
-    </div>
-  {% endif %}
-  {% if cafe.serves_breakfast %}
-    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
-      <i class="fa-solid fa-leaf text-accent"></i> Desayuno
-    </div>
-  {% endif %}
-  {% if cafe.serves_alcohol %}
-    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
-      <i class="fa-solid fa-leaf text-accent"></i> Bebidas alcohólicas
-    </div>
-  {% endif %}
-  {% if cafe.has_books_or_games %}
-    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
-      <i class="fa-solid fa-leaf text-accent"></i> Libros o juegos
-    </div>
-  {% endif %}
-  {% if cafe.has_air_conditioning %}
-    <div class="flex items-center gap-2 bg-[#f9fafb] px-3 py-2 rounded border border-gray-200 shadow-sm">
-      <i class="fa-solid fa-leaf text-accent"></i> Aire acondicionado
-    </div>
-  {% endif %}
-</div>
+{% include "reviews/includes/cafe_features.html" with cafe=cafe %}
 
 {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
-  <h3 class="text-xl font-semibold mb-2">📸 Fotos del lugar</h3>
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-    {% if cafe.photo1 %}
-      <div class="w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-lg shadow">
-        <img src="{{ cafe.photo1.url }}" alt="{{ cafe.photo1_title }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
-      </div>
-    {% endif %}
-    {% if cafe.photo2 %}
-      <div class="w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-lg shadow">
-        <img src="{{ cafe.photo2.url }}" alt="{{ cafe.photo2_title }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
-      </div>
-    {% endif %}
-    {% if cafe.photo3 %}
-      <div class="w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-lg shadow">
-        <img src="{{ cafe.photo3.url }}" alt="{{ cafe.photo3_title }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
-      </div>
-    {% endif %}
-  </div>
+  {% include "reviews/includes/cafe_photos.html" with cafe=cafe %}
 {% endif %}
 
 {% if average_rating %}
@@ -149,25 +82,7 @@
 {% endif %}
 
 {% if recommended_cafes %}
-  <div class="mt-10">
-    <h2 class="text-xl font-semibold mb-4">☕ Cafés recomendados</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      {% for cafe in recommended_cafes %}
-        <a href="{% url 'cafe_detail' cafe.id %}" class="block bg-white rounded-lg shadow hover:shadow-md transition duration-200 overflow-hidden">
-          {% if cafe.photo1 %}
-            <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}" class="w-full h-40 object-cover">
-          {% else %}
-            <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500">Sin foto</div>
-          {% endif %}
-          <div class="p-3">
-            <h3 class="font-semibold text-base text-gray-800">{{ cafe.name }}</h3>
-            <p class="text-sm text-gray-600">{{ cafe.location }}</p>
-            <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
-          </div>
-        </a>
-      {% endfor %}
-    </div>
-  </div>
+  {% include "reviews/includes/recommended_cafes.html" with recommended_cafes=recommended_cafes %}
 {% endif %}
 
 {% if user.is_authenticated %}
@@ -183,93 +98,45 @@
 {% endif %}
 
 <h3 class="text-xl font-semibold mt-6 mb-4">Reseñas:</h3>
-
-<div id="review-container" class="space-y-4 divide-y divide-gray-100 transition-all duration-300 max-h-[1056px] overflow-hidden relative">
+<div id="review-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 transition-all duration-300 max-h-[1056px] overflow-hidden relative">
   {% for review in reviews %}
-    <div class="mb-6 p-4 border rounded-md shadow-sm bg-white">
-      <div class="flex justify-between items-center mb-2">
-        <strong>{{ review.user.username }}</strong>
-        <span class="text-yellow-600">☕ {{ review.rating }}</span>
-      </div>
-      <p>{{ review.comment }}</p>
-
-      {% if review.tags.all %}
-        <div class="mt-2 text-sm text-gray-600">
-          <strong>Etiquetas:</strong>
-          {% for tag in review.tags.all %}
-            <span class="inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded-full mr-1 mb-1">{{ tag.name }}</span>
-          {% endfor %}
-        </div>
-      {% endif %}
-
-
-      {% if review.owner_reply %}
-        <div class="bg-gray-100 rounded-md p-3 mt-2 text-sm border-l-4 border-primary">
-          <strong class="text-primary">Respuesta del dueño:</strong><br>
-          {{ review.owner_reply }}
-        </div>
-      {% endif %}
-    </div>
+    {% include "reviews/_review_card.html" with review=review %}
   {% empty %}
-    <p class="text-gray-500">No hay reseñas aún.</p>
+    <p class="text-gray-500 text-sm col-span-full">Aún no hay reseñas para este café.</p>
   {% endfor %}
   {% if reviews|length > 3 %}
-    <div class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" id="fade-reviews"></div>
+    <div id="fade-reviews" class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
   {% endif %}
 </div>
 
+{% if user.is_authenticated %}
+  <h3 class="text-xl font-semibold mt-8 mb-4">Dejá tu reseña rápida:</h3>
+  {% include "reviews/_review_form.html" with form=form %}
+{% else %}
+  <p class="mt-8 text-gray-600">
+    <a href="{% url 'account_login' %}" class="text-blue-600 hover:underline">Iniciá sesión</a> para dejar una reseña.
+  </p>
+{% endif %}
+
 {% if reviews|length > 3 %}
-  <button onclick="toggleReviews()" class="text-sm text-blue-600 mt-1 hover:underline" id="btn-reviews">Ver todas</button>
+  <button onclick="toggleReviews()" id="btn-reviews" class="text-sm text-blue-600 mt-1 hover:underline">Ver todas</button>
 {% endif %}
 
 <!-- Modal Wizard -->
-<div id="modal-review" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-  <div class="bg-white w-full max-w-xl rounded-2xl shadow-xl p-6 relative animate-fade-in">
-    <button onclick="closeWizard()" class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
-
-    <!-- Step 1 -->
-    <div id="step-1" class="wizard-step">
-      <h3 class="text-2xl font-bold text-center mb-4 text-brown-800">Paso 1: Comentario y puntuación</h3>
-      <form id="review-form-step-1" method="post" class="space-y-4">
-        {% csrf_token %}
-        <div>
-          <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Tu comentario</label>
-          {{ form.comment }}
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">☕ Calificación</label>
-          <div class="flex flex-row-reverse justify-end gap-1" id="rating-stars">
-            {% for i in "54321" %}
-              <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" class="sr-only"
-                {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
-              <label for="star{{ i }}" class="text-2xl cursor-pointer transition-transform duration-150 text-gray-300 hover:scale-110" data-value="{{ i }}">☕</label>
-            {% endfor %}
-          </div>
-          <p id="rating-label" class="text-sm text-center mt-1 text-gray-600"></p>
-        </div>
-
-        <div class="flex justify-end pt-2">
-          <button type="button" class="next-btn bg-primary text-white px-4 py-2 rounded-lg hover:bg-[#172b68]">
-            Siguiente
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Step 2 -->
+<div id="modal-review" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm hidden items-center justify-center z-50 opacity-0 transition-opacity duration-300">
+  <div id="modal-content" class="bg-white w-full max-w-xl rounded-2xl shadow-xl p-6 relative transform scale-95 transition-all duration-300">
+    <button id="close-modal-btn" class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl transition">
+      <i class="fas fa-times"></i>
+    </button>
+    {% include "reviews/includes/review_wizard_step1.html" %}
     {% include "reviews/includes/review_wizard_step2.html" with tag_choices=tag_choices %}
-
   </div>
 </div>
 
-<!-- Botón flotante para abrir el modal de reseña -->
-<button onclick="document.getElementById('modal-review').style.display='flex'"
-        class="fixed bottom-6 right-6 z-50 bg-primary text-white font-semibold px-5 py-3 rounded-full shadow-lg hover:bg-[#172b68] transition-all duration-300">
-  ✍️ Dejá tu reseña
+<!-- Botón flotante -->
+<button id="open-modal-btn" class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-primary to-blue-700 text-white font-semibold p-4 rounded-full shadow-lg hover:scale-110 transition-transform duration-300">
+  <i class="fas fa-pen"></i>
 </button>
-
-
 {% endblock %}
 
 {% block scripts %}
@@ -314,30 +181,108 @@ document.addEventListener("DOMContentLoaded", () => {
   updateRatingVisual();
 });
 
-// ----------------------------------
-// 🧩 Wizard paso a paso
-// ----------------------------------
-document.addEventListener("DOMContentLoaded", function () {
-  const wizardSteps = document.querySelectorAll(".wizard-step");
+// -----------------------------
+// 🔽 Mostrar/Ocultar reseñas
+// -----------------------------
+function toggleReviews() {
+  const container = document.getElementById("review-container");
+  const btn = document.getElementById("btn-reviews");
+  const fade = document.getElementById("fade-reviews");
+
+  if (container.classList.contains("max-h-[1056px]")) {
+    container.classList.remove("max-h-[1056px]", "overflow-hidden");
+    if (fade) fade.style.display = "none";
+    btn.textContent = "Ver menos";
+  } else {
+    container.classList.add("max-h-[1056px]", "overflow-hidden");
+    if (fade) fade.style.display = "block";
+    btn.textContent = "Ver todas";
+  }
+}
+
+// -----------------------------
+// 🔽 Mostrar/Ocultar etiquetas
+// -----------------------------
+function toggleTags(index) {
+  const container = document.getElementById(`tag-container-${index}`);
+  const button = document.getElementById(`btn-${index}`);
+  const fade = document.getElementById(`fade-${index}`);
+  const isCollapsed = container.classList.contains("max-h-[96px]");
+
+  if (isCollapsed) {
+    container.classList.remove("max-h-[96px]", "overflow-hidden");
+    if (fade) fade.style.display = "none";
+    button.textContent = "Ver menos";
+  } else {
+    container.classList.add("max-h-[96px]", "overflow-hidden");
+    if (fade) fade.style.display = "block";
+    button.textContent = "Ver todas";
+  }
+}
+
+// -----------------------------
+// Modal animado
+// -----------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("modal-review");
+  const modalContent = document.getElementById("modal-content");
+  const openBtn = document.getElementById("open-modal-btn");
+  const closeBtn = document.getElementById("close-modal-btn");
+
+  function openModal() {
+    modal.classList.remove("hidden");
+    setTimeout(() => {
+      modal.classList.remove("opacity-0");
+      modal.classList.add("opacity-100");
+      modalContent.classList.remove("scale-95");
+      modalContent.classList.add("scale-100");
+    }, 10);
+  }
+
+  function closeModal() {
+    modal.classList.remove("opacity-100");
+    modal.classList.add("opacity-0");
+    modalContent.classList.remove("scale-100");
+    modalContent.classList.add("scale-95");
+    setTimeout(() => modal.classList.add("hidden"), 300);
+  }
+
+  openBtn.addEventListener("click", openModal);
+  closeBtn.addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+});
+
+// -----------------------------
+// Wizard paso a paso + etiquetas
+// -----------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  const steps = document.querySelectorAll(".wizard-step");
   const nextButtons = document.querySelectorAll(".next-btn");
   const prevButtons = document.querySelectorAll(".prev-btn");
   const skipButtons = document.querySelectorAll(".skip-btn");
+  const tagCategorySteps = document.querySelectorAll(".tag-category-step");
 
   let currentStepIndex = 0;
   let currentCategoryIndex = 0;
-  let tagCategorySteps = [];
 
   function showStep(index) {
-    wizardSteps.forEach((step, i) => {
-      step.classList.toggle("hidden", i !== index);
+    steps.forEach((step, i) => {
+      step.classList.add("hidden");
+      step.classList.remove("active");
+      if (i === index) {
+        step.classList.remove("hidden");
+        void step.offsetWidth; // reflow para animación
+        step.classList.add("active");
+      }
     });
 
-    if (index === 1) {
-      // Actualizar dinámicamente categorías
-      tagCategorySteps = document.querySelectorAll(".tag-category-step");
-      tagCategorySteps.forEach((cat, i) => {
-        cat.classList.toggle("hidden", i !== 0);
-      });
+    // Si estamos en el paso 2 (etiquetas), mostrar la primera categoría
+    if (index === 1 && tagCategorySteps.length > 0) {
+      tagCategorySteps.forEach((cat, i) =>
+        cat.classList.toggle("hidden", i !== 0)
+      );
       currentCategoryIndex = 0;
     }
   }
@@ -345,7 +290,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function showNextCategory() {
     if (currentStepIndex === 1 && currentCategoryIndex < tagCategorySteps.length - 1) {
       tagCategorySteps[currentCategoryIndex].classList.add("hidden");
-      currentCategoryIndex += 1;
+      currentCategoryIndex++;
       tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
     } else {
       document.getElementById("review-form-step-1").submit();
@@ -355,7 +300,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function showPrevCategory() {
     if (currentStepIndex === 1 && currentCategoryIndex > 0) {
       tagCategorySteps[currentCategoryIndex].classList.add("hidden");
-      currentCategoryIndex -= 1;
+      currentCategoryIndex--;
       tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
     } else if (currentStepIndex === 1 && currentCategoryIndex === 0) {
       currentStepIndex = 0;
@@ -386,48 +331,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Inicializar en paso 1
-  showStep(currentStepIndex);
+  showStep(currentStepIndex); // Inicializar en el paso 1
 });
-
-// ----------------------------------
-// 🔽 Mostrar/Ocultar reseñas
-// ----------------------------------
-function toggleReviews() {
-  const container = document.getElementById("review-container");
-  const btn = document.getElementById("btn-reviews");
-  const fade = document.getElementById("fade-reviews");
-
-  if (container.classList.contains("max-h-[1056px]")) {
-    container.classList.remove("max-h-[1056px]", "overflow-hidden");
-    if (fade) fade.style.display = "none";
-    btn.textContent = "Ver menos";
-  } else {
-    container.classList.add("max-h-[1056px]", "overflow-hidden");
-    if (fade) fade.style.display = "block";
-    btn.textContent = "Ver todas";
-  }
-}
-
-// ----------------------------------
-// 🔽 Mostrar/Ocultar etiquetas
-// ----------------------------------
-function toggleTags(index) {
-  const container = document.getElementById(`tag-container-${index}`);
-  const button = document.getElementById(`btn-${index}`);
-  const fade = document.getElementById(`fade-${index}`);
-  const isCollapsed = container.classList.contains("max-h-[96px]");
-
-  if (isCollapsed) {
-    container.classList.remove("max-h-[96px]", "overflow-hidden");
-    if (fade) fade.style.display = "none";
-    button.textContent = "Ver menos";
-  } else {
-    container.classList.add("max-h-[96px]", "overflow-hidden");
-    if (fade) fade.style.display = "block";
-    button.textContent = "Ver todas";
-  }
-}
 </script>
 {% endblock %}
-

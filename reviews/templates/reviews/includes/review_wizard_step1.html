@@ -1,0 +1,27 @@
+<div id="step-1" class="wizard-step">
+  <h3 class="text-2xl font-bold text-center mb-4 text-brown-800">Paso 1: Comentario y puntuación</h3>
+  <form id="review-form-step-1" method="post" class="space-y-4">
+    {% csrf_token %}
+    <div>
+      <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Tu comentario</label>
+      {{ form.comment }}
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">☕ Calificación</label>
+      <div class="flex flex-row-reverse justify-end gap-1" id="rating-stars">
+        {% for i in "54321" %}
+          <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" class="sr-only"
+                 {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
+          <label for="star{{ i }}" class="text-2xl cursor-pointer transition-transform duration-150 text-gray-300 hover:scale-110"
+                 data-value="{{ i }}">☕</label>
+        {% endfor %}
+      </div>
+      <p id="rating-label" class="text-sm text-center mt-1 text-gray-600"></p>
+    </div>
+    <div class="flex justify-end pt-2">
+      <button type="button" class="next-btn bg-primary text-white px-4 py-2 rounded-lg hover:bg-[#172b68]">
+        Siguiente
+      </button>
+    </div>
+  </form>
+</div>

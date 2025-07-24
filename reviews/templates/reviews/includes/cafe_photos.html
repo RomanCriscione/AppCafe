@@ -1,0 +1,18 @@
+<h3 class="text-xl font-semibold mb-2">📸 Fotos del lugar</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+  {% if cafe.photo1 %}
+    <div class="w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-lg shadow">
+      <img src="{{ cafe.photo1.url }}" alt="{{ cafe.photo1_title }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+    </div>
+  {% endif %}
+  {% if cafe.photo2 %}
+    <div class="w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-lg shadow">
+      <img src="{{ cafe.photo2.url }}" alt="{{ cafe.photo2_title }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+    </div>
+  {% endif %}
+  {% if cafe.photo3 %}
+    <div class="w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-lg shadow">
+      <img src="{{ cafe.photo3.url }}" alt="{{ cafe.photo3_title }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+    </div>
+  {% endif %}
+</div>
