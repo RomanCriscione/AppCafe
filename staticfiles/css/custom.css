@@ -1,33 +1,33 @@
-/* static/css/custom.css */
-
-/* ✅ Botón de favorito */
+/* --- Botón de favorito global --- */
 .btn-fav {
-  background-color: #f87171; /* rojo suave */
+    background-color: #f87171;
     color: white;
     padding: 6px 12px;
     border-radius: 6px;
     font-weight: 500;
 }
-
 .btn-fav:hover {
     background-color: #dc2626;
 }
 
-.leaflet-marker-icon.animated-bounce {
-    animation: bounce 1s infinite;
+/* --- Animaciones --- */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
 }
-
-/* ✅ Animación fade-in */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-
-.animate-fade-in {
-    animation: fadeIn 0.4s ease-in-out;
+@keyframes reviewFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
+.animate-fade-in { animation: fadeIn 0.4s ease-in-out; }
+.review-animate-in { animation: reviewFadeIn 0.5s ease forwards; }
+.leaflet-marker-icon.animated-bounce { animation: bounce 1s infinite; }
 
-/* ✅ Igualar altura y evitar solapamiento en slider de reseñas */
+/* --- Slider reseñas --- */
 .swiper-slide {
     display: flex !important;
     flex-direction: column;
@@ -36,31 +36,9 @@
     box-sizing: border-box;
     overflow: hidden;
 }
+.swiper-wrapper, .swiper-container { padding-bottom: 2rem; }
 
-.swiper-wrapper {
-    padding-bottom: 2rem; 
-}
-
-.swiper-container {
-    padding-bottom: 2rem;
-}
-
-
-
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-}
-
-@media (max-width: 768px) {
-    input,
-    select,
-    textarea {
-        font-size: 1rem;
-    }
-}
-
-/* Animaciones para los pasos del wizard */
+/* --- Wizard --- */
 .wizard-step {
     opacity: 0;
     transform: translateX(10px);
@@ -70,6 +48,80 @@
     opacity: 1;
     transform: translateX(0);
 }
-.wizard-step.hidden {
-    display: none;
+.wizard-step.hidden { display: none; }
+.next-btn, .prev-btn, .skip-btn {
+    transition: transform 0.15s ease, background-color 0.2s ease;
+}
+.next-btn:hover, .prev-btn:hover { transform: scale(1.05); }
+.skip-btn:hover { color: #2563eb; }
+
+/* --- Modal reseñas --- */
+#modal-review { backdrop-filter: blur(4px); }
+#modal-content {
+    transition: all 0.3s ease-in-out;
+    transform: scale(0.95);
+    opacity: 0;
+}
+#modal-review.show #modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+#close-modal-btn { transition: color 0.2s ease-in-out; }
+#close-modal-btn:hover { color: #1f2937; }
+
+/* --- Cards reseñas --- */
+.review-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.review-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+.tag-sensorial {
+    transition: all 0.2s ease-in-out;
+}
+.tag-sensorial:hover {
+    transform: scale(1.05);
+    background: linear-gradient(to right, #bfdbfe, #93c5fd);
+}
+
+/* --- Cards cafés (listado principal) --- */
+.cafe-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.cafe-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* --- Cards recomendados --- */
+.recommended-card {
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    border-radius: 1rem;
+    border: 1px solid #f3f4f6;
+    overflow: hidden;
+    background: white;
+}
+.recommended-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+.recommended-card img {
+    transition: transform 0.5s ease, filter 0.5s ease;
+}
+.recommended-card:hover img {
+    transform: scale(1.1);
+    filter: brightness(0.95);
+}
+.recommended-card a {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.recommended-card a:hover {
+    transform: scale(1.04);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Responsive formularios --- */
+@media (max-width: 768px) {
+    input, select, textarea { font-size: 1rem; }
 }

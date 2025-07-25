@@ -1,46 +1,46 @@
 {# reviews/templates/reviews/_cafe_card.html #}
-<div class="relative bg-white p-4 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full min-h-[420px] border border-gray-100">
+<div class="recommended-card relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col h-full overflow-hidden border border-gray-100 group">
 
   {% if user.is_authenticated %}
-    <form method="POST" action="{% url 'toggle_favorite' cafe.id %}" class="absolute top-3 right-3 z-10">
+    <form method="POST" action="{% url 'toggle_favorite' cafe.id %}" class="absolute top-4 right-4 z-10">
       {% csrf_token %}
-      <button type="submit" 
-              class="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow hover:scale-110 transition">
+      <button type="submit"
+              class="favorite-btn w-10 h-10 flex items-center justify-center rounded-full bg-white shadow">
         {% if cafe.id in favoritos_ids %}
-          <span class="text-red-500 text-xl">❤️</span>
+          <span class="text-red-500 text-2xl">❤️</span>
         {% else %}
-          <span class="text-gray-400 text-xl">🤍</span>
+          <span class="text-gray-400 text-2xl">🤍</span>
         {% endif %}
       </button>
     </form>
   {% endif %}
 
   {% if cafe.photo1 %}
-    <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}"
-         class="w-full h-52 object-cover rounded-xl mb-4 transition-transform duration-300 hover:scale-105 hover:shadow-lg hover:opacity-90">
+    <div class="relative">
+      <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}"
+           class="w-full h-56 object-cover">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+    </div>
   {% else %}
-    <div class="w-full h-52 bg-gray-100 flex items-center justify-center rounded-xl mb-4 text-gray-400 text-4xl">
+    <div class="w-full h-56 bg-gray-100 flex items-center justify-center text-gray-300 text-5xl">
       📷
     </div>
   {% endif %}
 
-  <div class="flex-grow flex flex-col justify-between">
+  <div class="flex flex-col justify-between flex-grow p-5">
     <div>
-      <h2 class="text-xl font-bold text-gray-800 flex items-center">
+      <h2 class="text-xl font-bold text-gray-900 flex items-center gap-1">
         {{ cafe.name }}
-        <span class="ml-2 text-sm text-gray-500">({{ cafe.location }})</span>
+        <span class="text-sm text-gray-500 font-normal">({{ cafe.location }})</span>
       </h2>
-      <p class="text-sm text-gray-600 mb-2">📍 {{ cafe.address }}</p>
-      <p class="text-sm font-semibold text-yellow-600 flex items-center gap-1">
+      <p class="text-sm text-gray-600 mt-1 mb-2">📍 {{ cafe.address }}</p>
+      <p class="text-sm font-semibold text-yellow-500 flex items-center gap-1">
         ☕ {{ cafe.average_rating|floatformat:1 }}
       </p>
     </div>
-
-    <div class="mt-4">
-      <a href="{% url 'cafe_detail' cafe.id %}"
-          class="inline-block px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-700 text-white text-sm rounded-lg shadow hover:from-blue-600 hover:to-blue-800 transition">
-        Ver detalles
-      </a>
-    </div>
+    <a href="{% url 'cafe_detail' cafe.id %}"
+       class="mt-4 inline-block px-5 py-2 bg-gradient-to-r from-blue-500 to-blue-700 text-white text-sm rounded-xl shadow hover:from-blue-600 hover:to-blue-800 transition">
+      Ver detalles
+    </a>
   </div>
 </div>

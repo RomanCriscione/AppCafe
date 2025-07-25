@@ -1,19 +1,10 @@
-<div class="mt-10">
-  <h2 class="text-xl font-semibold mb-4">☕ Cafés recomendados</h2>
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+<div class="mt-12">
+  <h2 class="text-2xl font-bold text-gray-900 mb-8">☕ Cafés recomendados</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
     {% for cafe in recommended_cafes %}
-      <a href="{% url 'cafe_detail' cafe.id %}" class="block bg-white rounded-lg shadow hover:shadow-md transition duration-200 overflow-hidden">
-        {% if cafe.photo1 %}
-          <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}" class="w-full h-40 object-cover">
-        {% else %}
-          <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500">Sin foto</div>
-        {% endif %}
-        <div class="p-3">
-          <h3 class="font-semibold text-base text-gray-800">{{ cafe.name }}</h3>
-          <p class="text-sm text-gray-600">{{ cafe.location }}</p>
-          <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
-        </div>
-      </a>
+      {% include "reviews/_cafe_card.html" with cafe=cafe user=user favoritos_ids=favoritos_ids %}
+    {% empty %}
+      <p class="text-gray-500 text-sm">No hay recomendaciones disponibles por ahora.</p>
     {% endfor %}
   </div>
 </div>
