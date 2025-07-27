@@ -13,12 +13,12 @@ def register(request):
         form = CustomUserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})
 
+
 # Vista para editar avatar y otros datos del usuario
 @login_required
 def edit_avatar(request):
     if request.method == 'POST':
         form = CustomUserChangeForm(request.POST, request.FILES, instance=request.user)
-        print("AVATAR ENVIADO:", request.FILES.get('avatar'))  # solo para debug
         if form.is_valid():
             form.save()
             return redirect('profile')
@@ -32,4 +32,3 @@ def edit_avatar(request):
 @login_required
 def profile(request):
     return render(request, 'accounts/profile.html', {'user': request.user})
-

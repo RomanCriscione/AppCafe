@@ -1,11 +1,11 @@
 {# reviews/templates/reviews/_cafe_card.html #}
-<div class="recommended-card relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col h-full overflow-hidden border border-gray-100 group">
+<div class="recommended-card animate-fade-in-up {% cycle '' 'animate-delay-100' 'animate-delay-200' 'animate-delay-300' %} relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col h-full overflow-hidden border border-gray-100 group">
 
   {% if user.is_authenticated %}
     <form method="POST" action="{% url 'toggle_favorite' cafe.id %}" class="absolute top-4 right-4 z-10">
       {% csrf_token %}
       <button type="submit"
-              class="favorite-btn w-10 h-10 flex items-center justify-center rounded-full bg-white shadow">
+              class="favorite-btn w-10 h-10 flex items-center justify-center rounded-full bg-white shadow hover:scale-110 transition">
         {% if cafe.id in favoritos_ids %}
           <span class="text-red-500 text-2xl">❤️</span>
         {% else %}
@@ -18,7 +18,7 @@
   {% if cafe.photo1 %}
     <div class="relative">
       <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}"
-           class="w-full h-56 object-cover">
+            class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105">
       <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
     </div>
   {% else %}
@@ -29,7 +29,7 @@
 
   <div class="flex flex-col justify-between flex-grow p-5">
     <div>
-      <h2 class="text-xl font-bold text-gray-900 flex items-center gap-1">
+      <h2 class="text-xl font-bold text-gray-900 flex items-center gap-1 group-hover:text-blue-600 transition-colors duration-300">
         {{ cafe.name }}
         <span class="text-sm text-gray-500 font-normal">({{ cafe.location }})</span>
       </h2>
@@ -39,7 +39,7 @@
       </p>
     </div>
     <a href="{% url 'cafe_detail' cafe.id %}"
-       class="mt-4 inline-block px-5 py-2 bg-gradient-to-r from-blue-500 to-blue-700 text-white text-sm rounded-xl shadow hover:from-blue-600 hover:to-blue-800 transition">
+        class="mt-4 inline-block px-5 py-2 bg-gradient-to-r from-blue-500 to-blue-700 text-white text-sm rounded-xl shadow hover:from-blue-600 hover:to-blue-800 hover:scale-105 transition-transform duration-300">
       Ver detalles
     </a>
   </div>

@@ -13,22 +13,22 @@ from .models import Review, Cafe, Tag
 class ReviewForm(forms.ModelForm):
     tags = forms.ModelMultipleChoiceField(
         queryset=Tag.objects.all().order_by('category', 'name'),
-        widget=forms.CheckboxSelectMultiple(
-            attrs={'class': 'mb-2'}
-        ),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'mb-2'}),
         required=False,
         label="¿Cómo describirías tu experiencia?",
+    )
+    comment = forms.CharField(  # <- agregado
+        required=False, 
+        widget=forms.Textarea(attrs={
+            'class': 'w-full mt-1 p-2 border rounded',
+            'rows': 3
+        })
     )
 
     class Meta:
         model = Review
         fields = ['rating', 'comment', 'tags']
-        widgets = {
-            'comment': forms.Textarea(attrs={
-                'class': 'w-full mt-1 p-2 border rounded',
-                'rows': 3
-            }),
-        }
+
 
 
 class CafeForm(forms.ModelForm):

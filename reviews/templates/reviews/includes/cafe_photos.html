@@ -1,18 +1,38 @@
-<h3 class="text-xl font-semibold mb-2">📸 Fotos del lugar</h3>
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-  {% if cafe.photo1 %}
-    <div class="w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-lg shadow">
-      <img src="{{ cafe.photo1.url }}" alt="{{ cafe.photo1_title }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+<h3 class="text-xl font-semibold mb-4 text-gray-900">📸 Fotos del lugar</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+  {% if cafe.photo1 and cafe.photo1.url %}
+    <div class="photo-thumb animate-fade-in-up animate-delay-0 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
+         onclick="openLightbox(0)">
+      <img src="{{ cafe.photo1.url }}" alt="{{ cafe.photo1_title|default:'Foto 1' }}"
+           class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
     </div>
   {% endif %}
-  {% if cafe.photo2 %}
-    <div class="w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-lg shadow">
-      <img src="{{ cafe.photo2.url }}" alt="{{ cafe.photo2_title }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+  
+  {% if cafe.photo2 and cafe.photo2.url %}
+    <div class="photo-thumb animate-fade-in-up animate-delay-100 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
+         onclick="openLightbox(1)">
+      <img src="{{ cafe.photo2.url }}" alt="{{ cafe.photo2_title|default:'Foto 2' }}"
+           class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
     </div>
   {% endif %}
-  {% if cafe.photo3 %}
-    <div class="w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-lg shadow">
-      <img src="{{ cafe.photo3.url }}" alt="{{ cafe.photo3_title }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+  
+  {% if cafe.photo3 and cafe.photo3.url %}
+    <div class="photo-thumb animate-fade-in-up animate-delay-200 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
+         onclick="openLightbox(2)">
+      <img src="{{ cafe.photo3.url }}" alt="{{ cafe.photo3_title|default:'Foto 3' }}"
+           class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
     </div>
   {% endif %}
+</div>
+
+<!-- Lightbox Modal -->
+<div id="lightbox-modal"
+     class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+  <span id="lightbox-close"
+        class="absolute top-4 right-6 text-white text-4xl cursor-pointer hover:text-gray-300">&times;</span>
+  <img id="lightbox-image" src="" alt="" class="max-h-[80%] max-w-[90%] rounded-lg shadow-2xl">
+  <p id="lightbox-caption" class="text-white mt-4 text-lg text-center"></p>
 </div>
