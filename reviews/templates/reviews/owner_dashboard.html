@@ -101,6 +101,11 @@
     {% endfor %}
   </ul>
 {% else %}
-  <p class="text-center text-gray-600 mt-10">No tenés cafeterías registradas todavía.</p>
+  <div class="text-center py-12">
+    <p class="text-gray-600 text-lg">Aún no tenés cafés registrados.</p>
+    <a href="{% url 'create_cafe' %}" class="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+      Agregar mi primer café
+    </a>
+  </div>
 {% endif %}
 {% endblock %}

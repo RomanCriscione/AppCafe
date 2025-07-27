@@ -16,11 +16,13 @@
     <div>
       <label for="id_login" class="block font-medium">Usuario o Email:</label>
       {{ form.login|add_class:"w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-500" }}
+      <p class="text-xs text-gray-500 mt-1">Podés usar tu nombre de usuario o tu email registrado.</p>
     </div>
 
     <div>
       <label for="id_password" class="block font-medium">Contraseña:</label>
       {{ form.password|add_class:"w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-500" }}
+      <p class="text-xs text-gray-500 mt-1">Ingresá tu contraseña tal como la registraste.</p>
     </div>
 
     <button type="submit"

@@ -377,6 +377,9 @@ def owner_dashboard(request):
     owner = request.user
     cafes = Cafe.objects.filter(owner=owner).prefetch_related('reviews__tags')
 
+    if not cafes.exists():
+        messages.info(request, "Todavía no agregaste ningún café. ¡Comienza creando uno!")
+
     for cafe in cafes:
         tags = Tag.objects.filter(
             reviews__cafe=cafe
@@ -389,14 +392,12 @@ def owner_dashboard(request):
                 'count': tag['count'],
             })
 
-        # asignamos los tags agrupados como atributo temporal del café
         cafe.tags_summary = grouped_tags
 
     context = {
         'cafes': cafes
     }
     return render(request, 'reviews/owner_dashboard.html', context)
-
 
 
 # Vista nueva: reseñas agrupadas por cafetería del dueño
@@ -540,10 +541,13 @@ def toggle_favorite(request, cafe_id):
 
     if request.user in cafe.favorites.all():
         cafe.favorites.remove(request.user)
+        messages.info(request, f"{cafe.name} eliminado de favoritos.")
     else:
         cafe.favorites.add(request.user)
+        messages.success(request, f"{cafe.name} agregado a favoritos. ❤️")
 
     return redirect(request.META.get('HTTP_REFERER', 'cafe_list'))
+
 
 #Editar comentarios del dueño del café
 

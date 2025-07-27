@@ -37,6 +37,7 @@
         <div>
           <label class="block font-semibold text-gray-700 mb-1">{{ form.address.label }}</label>
           {{ form.address|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
+          <p class="text-xs text-gray-500 mt-1">Si cambiás la dirección, verificá que esté en formato Google Maps.</p>
           {% if form.address.errors %}
             <p class="text-red-600 text-sm mt-1">{{ form.address.errors.0 }}</p>
           {% endif %}
@@ -52,9 +53,6 @@
         <div>
           <label class="block font-semibold text-gray-700 mb-1">{{ form.phone.label }}</label>
           {{ form.phone|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-          {% if form.phone.errors %}
-            <p class="text-red-600 text-sm mt-1">{{ form.phone.errors.0 }}</p>
-          {% endif %}
         </div>
         <div>
           <label class="block font-semibold text-gray-700 mb-1">{{ form.google_maps_url.label }}</label>
