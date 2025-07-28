@@ -19,4 +19,3 @@ pytest-django==4.11.1
 setuptools==76.0.0
 sqlparse==0.5.3
 tzdata==2025.2
-gunicorn==21.2.0
