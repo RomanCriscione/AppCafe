@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-az@v_nvea=tqu^2#qp8r!lei&_(twgthkg&qsnx)s2)8@cg01('
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['gota-tath.onrender.com', 'localhost', '127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
