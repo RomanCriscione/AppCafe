@@ -32,3 +32,15 @@ def edit_avatar(request):
 @login_required
 def profile(request):
     return render(request, 'accounts/profile.html', {'user': request.user})
+
+from .forms import OwnerSignupForm
+
+def register_owner(request):
+    if request.method == 'POST':
+        form = OwnerSignupForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save()
+            return redirect('owner_dashboard')  # Asegúrate de tener esta URL creada
+    else:
+        form = OwnerSignupForm()
+    return render(request, 'accounts/register_owner.html', {'form': form})

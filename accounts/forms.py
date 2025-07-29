@@ -27,3 +27,16 @@ class CustomUserChangeForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['username', 'email', 'first_name', 'last_name', 'avatar']
+
+        # Formulario específico para dueños de café
+class OwnerSignupForm(UserCreationForm):
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'username', 'first_name', 'last_name', 'avatar', 'password1', 'password2')
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.is_owner = True  # Marca como dueño automáticamente
+        if commit:
+            user.save()
+        return user

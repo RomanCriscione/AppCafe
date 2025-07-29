@@ -28,5 +28,15 @@
       Registrarse
     </button>
   </form>
+
+  <p class="mt-4 text-center text-sm">
+    ¿Ya tenés cuenta?
+    <a href="{% url 'account_login' %}" class="text-blue-600 hover:underline font-medium">Iniciá sesión</a>
+  </p>
+
+  <p class="mt-2 text-center text-sm">
+    ¿Sos dueño de un café?
+    <a href="{% url 'register_owner' %}" class="text-green-600 hover:underline font-medium">Registralo aquí</a>
+  </p>
 </div>
 {% endblock %}
