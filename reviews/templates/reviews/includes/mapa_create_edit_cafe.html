@@ -1,12 +1,11 @@
-        <div class="h-80 mt-4 hidden md:block" id="map"></div>
-        <div class="mt-4 space-y-2" id="address-options"></div>
-        <p class="text-sm italic text-gray-600 mt-1" id="location-status"></p>
-    </form>
+<div class="h-80 mt-4 hidden md:block" id="map"></div>
+<div class="mt-4 space-y-2" id="address-options"></div>
+<p class="text-sm italic text-gray-600 mt-1" id="location-status"></p>
 
-    <link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+<link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
         const map = L.map('map').setView([-34.6037, -58.3816], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
@@ -38,7 +37,7 @@
             mostrarUbicacionTexto(lat, lon);
             direccionGeolocalizada = true;
             if (displayName) {
-            locationStatus.textContent = `📍 Seleccionado: ${displayName}`;
+                locationStatus.textContent = `📍 Seleccionado: ${displayName}`;
             }
         }
 
@@ -48,45 +47,44 @@
             const fullQuery = `${direccion}, ${localidad}, Buenos Aires, Argentina`;
 
             if (direccion.length > 5 && localidad.length > 1) {
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}`)
-                .then(res => res.json())
-                .then(data => {
-                optionsContainer.innerHTML = "";
-
-                if (data.length === 0) {
-                    direccionGeolocalizada = false;
-                    alert("❌ No se pudo encontrar la dirección ingresada.");
-                    locationStatus.textContent = "❌ Dirección no reconocida.";
-                    return;
-                }
-
-                if (data.length === 1) {
-                    const { lat, lon, display_name } = data[0];
-                    aplicarUbicacion(parseFloat(lat), parseFloat(lon), display_name);
-                } else {
-                    const heading = document.createElement("p");
-                    heading.textContent = "📌 Seleccioná la dirección correcta:";
-                    optionsContainer.appendChild(heading);
-
-                    data.slice(0, 5).forEach((place) => {
-                    const calleYNro = place.display_name.split(',')[0];
-                    const btn = document.createElement("button");
-                    btn.textContent = `📍 ${place.display_name}`;
-                    btn.title = place.display_name;
-                    btn.className = "block w-full text-left bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded";
-                    btn.onclick = () => {
-                        aplicarUbicacion(parseFloat(place.lat), parseFloat(place.lon), place.display_name);
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}`)
+                    .then(res => res.json())
+                    .then(data => {
                         optionsContainer.innerHTML = "";
-                    };
-                    optionsContainer.appendChild(btn);
-                    });
 
-                    const nota = document.createElement("p");
-                    nota.className = "text-sm italic text-gray-600 mt-2";
-                    nota.textContent = "🔧 Si la numeración no coincide exactamente, podés ajustar el marcador en el mapa manualmente.";
-                    optionsContainer.appendChild(nota);
-                }
-                });
+                        if (data.length === 0) {
+                            direccionGeolocalizada = false;
+                            alert("❌ No se pudo encontrar la dirección ingresada.");
+                            locationStatus.textContent = "❌ Dirección no reconocida.";
+                            return;
+                        }
+
+                        if (data.length === 1) {
+                            const { lat, lon, display_name } = data[0];
+                            aplicarUbicacion(parseFloat(lat), parseFloat(lon), display_name);
+                        } else {
+                            const heading = document.createElement("p");
+                            heading.textContent = "📌 Seleccioná la dirección correcta:";
+                            optionsContainer.appendChild(heading);
+
+                            data.slice(0, 5).forEach((place) => {
+                                const btn = document.createElement("button");
+                                btn.textContent = `📍 ${place.display_name}`;
+                                btn.title = place.display_name;
+                                btn.className = "block w-full text-left bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded";
+                                btn.onclick = () => {
+                                    aplicarUbicacion(parseFloat(place.lat), parseFloat(place.lon), place.display_name);
+                                    optionsContainer.innerHTML = "";
+                                };
+                                optionsContainer.appendChild(btn);
+                            });
+
+                            const nota = document.createElement("p");
+                            nota.className = "text-sm italic text-gray-600 mt-2";
+                            nota.textContent = "🔧 Si la numeración no coincide exactamente, podés ajustar el marcador en el mapa manualmente.";
+                            optionsContainer.appendChild(nota);
+                        }
+                    });
             }
         }
 
@@ -104,18 +102,15 @@
             const lat = parseFloat(latInput.value);
             const lon = parseFloat(lonInput.value);
             if (isNaN(lat) || isNaN(lon) || !direccionGeolocalizada) {
-            alert("⚠️ Por favor, asegurate de ingresar una dirección válida y que se haya ubicado correctamente en el mapa.");
-            return false;
+                alert("⚠️ Por favor, asegurate de ingresar una dirección válida y que se haya ubicado correctamente en el mapa.");
+                return false;
             }
             return true;
         };
-        });
+    });
 
-        function mostrarMapaMobile() {
+    function mostrarMapaMobile() {
         document.getElementById("map").classList.remove("hidden");
         document.getElementById("map").scrollIntoView({ behavior: "smooth" });
-        }
-
-        reviews/includes/mapa_create_edit_cafe.html
-        
-    </script>
+    }
+</script>
