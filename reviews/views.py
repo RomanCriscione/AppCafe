@@ -258,14 +258,11 @@ def cafe_detail(request, cafe_id):
         else:
             form = ReviewForm()
 
-    # ✅ Agrupar TODAS las etiquetas por categoría (no solo las usadas)
+    # ✅ Agrupar TODAS las etiquetas por categoría (devolviendo objetos Tag, no dicts)
     all_tags = Tag.objects.all().order_by("category", "name")
     tag_groups = defaultdict(list)
     for tag in all_tags:
-        tag_groups[tag.category].append({
-            "id": tag.id,
-            "name": tag.name,
-        })
+        tag_groups[tag.category].append(tag)  # 👈 Mantiene objetos Tag
 
     # Etiquetas sensoriales destacadas (planas, sin repetir)
     sensory_tags = Tag.objects.filter(reviews__cafe=cafe).distinct().order_by('category', 'name')
