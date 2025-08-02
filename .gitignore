@@ -25,6 +25,7 @@ __pycache__/
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db
+*.lnk   # <- NUEVO (para accesos directos de Windows)
 
 # Archivos temporales de editores
 .vscode/
@@ -37,3 +38,7 @@ Thumbs.db
 
 # Archivos subidos por usuarios (si usás media/)
 media/
+
+# Reportes de cobertura y estáticos generados
+htmlcov/    # <- NUEVO
+staticfiles/ # <- opcional, si generás staticfiles con collectstatic
