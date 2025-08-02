@@ -5,7 +5,9 @@
 <!-- Hero Section -->
 <section class="bg-cover bg-center py-20 text-center text-white" style="background-image: url('{% static 'images/coffee-hero.jpg' %}');">
   <div class="max-w-2xl mx-auto">
-    <h1 class="text-4xl md:text-5xl font-bold text-brown-900 mb-4">☕ Bienvenido a App Café</h1>
+    <h1 class="text-4xl md:text-5xl font-bold text-brown-900 mb-4">
+      ☕ {{ ui_messages.welcome }}
+    </h1>
     <p class="mb-6 text-lg">Descubrí, calificá y compartí tus cafeterías favoritas de Buenos Aires.</p>
     <a class="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 inline-block" href="{% url 'cafe_list' %}">✨ Explorá Cafeterías</a>
   </div>

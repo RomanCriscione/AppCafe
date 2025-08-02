@@ -1,0 +1,15 @@
+MESSAGES = {
+    "welcome_user": "Bienvenido. ¿Qué café descubrimos hoy?",
+    "search_no_results": "No encontramos lo que buscabas, pero hay más cafés por descubrir.",
+    "cafe_no_reviews": "Este café espera su primera historia. ¿Te animás a escribirla?",
+    "no_favorites": "Todavía no marcaste ningún favorito. El próximo sorbo puede ser el primero.",
+    "no_reviews_user": "Cada café tiene una historia. ¿Le agregamos la tuya?",
+    "loading": "Preparando tu próximo café…",
+    "error_404": "Parece que este café no existe aquí… todavía.",
+    "welcome_owner": "Tus mesas, tus aromas, tus historias. Bienvenido a la comunidad Gota.",
+    "cafe_added": "Tu café ya es parte de nuestra historia. Que empiece la tuya.",
+    "review_sent": "Gracias por tu reseña. Cada opinión suma una nueva historia.",
+    "owner_no_cafes": "Tu espacio en Gota todavía está vacío. ¿Le damos vida con tu primer café?",
+    "owner_no_reviews": "Todavía no hay reseñas para tus cafés. El primer comentario puede llegar pronto.",
+    "generic_404": "Ups... la página que buscabas no está disponible. Probá con otro aroma.",
+}

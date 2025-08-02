@@ -19,6 +19,7 @@ from django.http import HttpResponseForbidden
 from reviews.utils.geo import haversine_distance
 from statistics import mean
 from reviews.utils.tags import get_tags_grouped_by_cafe
+from core.messages import MESSAGES
 
 
 # Listar reseñas agrupadas por zona
@@ -300,7 +301,8 @@ def create_review(request, cafe_id):
             tags = Tag.objects.filter(id__in=selected_tag_ids)
             review.tags.set(tags)
 
-            messages.success(request, "¡Gracias por dejar tu reseña!")
+            # 👇 usamos el mensaje dinámico
+            messages.success(request, MESSAGES["review_sent"])
             return redirect("cafe_detail", cafe_id=cafe.id)
         else:
             messages.error(request, "Por favor corregí los errores.")
@@ -374,8 +376,8 @@ def owner_dashboard(request):
     owner = request.user
     cafes = Cafe.objects.filter(owner=owner).prefetch_related('reviews__tags')
 
-    if not cafes.exists():
-        messages.info(request, "Todavía no agregaste ningún café. ¡Comienza creando uno!")
+    # Chequear si no tiene cafés
+    no_cafes = not cafes.exists()
 
     for cafe in cafes:
         tags = Tag.objects.filter(
@@ -392,7 +394,8 @@ def owner_dashboard(request):
         cafe.tags_summary = grouped_tags
 
     context = {
-        'cafes': cafes
+        'cafes': cafes,
+        'no_cafes': no_cafes  # <-- AGREGADO
     }
     return render(request, 'reviews/owner_dashboard.html', context)
 
@@ -432,7 +435,9 @@ class CreateCafeView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        messages.success(self.request, MESSAGES["cafe_added"])
+        return response
 
 # Editar cafetería
 @login_required

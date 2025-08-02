@@ -88,6 +88,10 @@
             <a href="{% url 'account_logout' %}" class="text-red-500 hover:underline text-sm">Cerrar sesión</a>
           {% else %}
             <a href="{% url 'account_login' %}" class="text-primary hover:underline">Iniciar sesión</a>
+            <a href="{% url 'account_signup' %}" 
+              class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-md font-medium transition">
+              Registrarse
+            </a>
             <a href="{% url 'register_owner' %}" 
               class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md font-medium transition flex items-center gap-2">
               <i class="fas fa-coffee text-sm"></i> Registrar tu café
@@ -96,7 +100,6 @@
         </div>
       </div>
     </header>
-
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -113,7 +116,7 @@
       {% if messages %}
         <div class="fixed top-4 right-4 z-50 space-y-2">
           {% for message in messages %}
-            <div class="px-4 py-2 rounded shadow text-white animate-fade-in
+            <div class="px-4 py-2 rounded shadow text-white alert-message
                         {% if message.tags == 'success' %}
                             bg-green-500
                         {% elif message.tags == 'error' %}
@@ -156,6 +159,16 @@
           el: '.swiper-pagination',
           clickable: true,
         },
+      });
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const alerts = document.querySelectorAll('.alert-message');
+      alerts.forEach(alert => {
+        setTimeout(() => {
+          alert.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+          setTimeout(() => alert.remove(), 500);
+        }, 2000);  // 2 segundos
       });
     });
   </script>

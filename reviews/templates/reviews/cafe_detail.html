@@ -119,7 +119,9 @@
   {% for review in reviews %}
     {% include "reviews/_review_card.html" with review=review %}
   {% empty %}
-    <p class="text-gray-500 text-sm col-span-full">Aún no hay reseñas para este café.</p>
+    <p class="text-gray-500 text-sm col-span-full">
+      {{ ui_messages.no_reviews }}
+    </p>
   {% endfor %}
   {% if reviews|length > 3 %}
     <div id="fade-reviews" class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
@@ -215,28 +217,40 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalContent = document.getElementById("modal-content");
   const openBtn = document.getElementById("open-modal-btn");
   const closeBtn = document.getElementById("close-modal-btn");
+  const thankYouMessage = document.getElementById("thank-you-message");
+  const wizardStepsContainer = document.getElementById("wizard-steps");
 
-function openModal() {
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-  setTimeout(() => {
-    modal.classList.replace("opacity-0", "opacity-100");
-    modalContent.classList.replace("scale-95", "scale-100");
-  }, 10);
-}
-function closeModal() {
+  function openModal() {
+    modal.setAttribute("aria-hidden", "false");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    setTimeout(() => {
+      modal.classList.replace("opacity-0", "opacity-100");
+      modalContent.classList.replace("scale-95", "scale-100");
+      modalContent.focus();
+    }, 10);
+  }
+  function closeModal() {
+  modal.setAttribute("aria-hidden", "true");
   modal.classList.replace("opacity-100", "opacity-0");
   modalContent.classList.replace("scale-100", "scale-95");
   setTimeout(() => {
     modal.classList.remove("flex");
     modal.classList.add("hidden");
+
+    // 🔄 Reset del wizard al cerrar
+    wizardStepsContainer.classList.remove("hidden");
+    thankYouMessage.classList.add("hidden");
+    currentStepIndex = 0;
+    showStep(currentStepIndex);
   }, 300);
 }
+
   openBtn.addEventListener("click", openModal);
   closeBtn.addEventListener("click", closeModal);
   modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
 
-  // Wizard
+  // Wizard steps
   const steps = document.querySelectorAll(".wizard-step");
   const nextButtons = document.querySelectorAll(".next-btn");
   const prevButtons = document.querySelectorAll(".prev-btn");
@@ -258,7 +272,9 @@ function closeModal() {
       tagCategorySteps[currentCategoryIndex].classList.add("hidden");
       currentCategoryIndex++;
       tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
-    } else { document.getElementById("review-form-step-1").submit(); }
+    } else {
+      document.getElementById("review-form-step-1").requestSubmit();
+    }
   }
   function showPrevCategory() {
     if (currentStepIndex === 1 && currentCategoryIndex > 0) {
@@ -274,7 +290,17 @@ function closeModal() {
     else { showNextCategory(); }
   }));
   prevButtons.forEach(btn => btn.addEventListener("click", showPrevCategory));
-  skipButtons.forEach(btn => btn.addEventListener("click", () => { document.getElementById("review-form-step-1").submit(); }));
+  skipButtons.forEach(btn => btn.addEventListener("click", () => { document.getElementById("review-form-step-1").requestSubmit(); }));
+
+  // Al enviar formulario → mostrar mensaje de agradecimiento
+  const reviewForm = document.getElementById("review-form-step-1");
+  reviewForm.addEventListener("submit", (e) => {
+    e.preventDefault(); // Evitamos recarga completa
+    wizardStepsContainer.classList.add("hidden");
+    thankYouMessage.classList.remove("hidden");
+    setTimeout(closeModal, 2000); // Cierra modal luego de 2 segundos
+  });
+
   showStep(currentStepIndex);
 });
 

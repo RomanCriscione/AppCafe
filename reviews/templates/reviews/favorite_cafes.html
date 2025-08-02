@@ -64,13 +64,13 @@
 
         {% if cafes.has_next %}
           <a href="?{% if orden_actual %}orden={{ orden_actual }}&{% endif %}{% if zona_actual %}zona={{ zona_actual }}&{% endif %}page={{ cafes.next_page_number }}"
-             class="text-blue-600 hover:underline">Siguiente »</a>
+              class="text-blue-600 hover:underline">Siguiente »</a>
         {% endif %}
       </div>
     {% endif %}
   {% else %}
     <div class="text-center py-12">
-      <p class="text-gray-600 text-lg">Todavía no agregaste cafés a favoritos.</p>
+      <p class="text-gray-600 text-lg">{{ ui_messages.no_favorites }}</p>
       <a href="{% url 'cafe_list' %}" class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
         Explorar cafés
       </a>

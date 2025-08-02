@@ -137,6 +137,10 @@
         {% endif %}
       {% endwith %}
     </div>
+  {% empty %}
+    <p class="text-center text-gray-600 mt-10">
+      {{ ui_messages.no_results }}
+    </p>
   {% endfor %}
 </div>
 

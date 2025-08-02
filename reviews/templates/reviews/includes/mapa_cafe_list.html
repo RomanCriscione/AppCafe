@@ -20,7 +20,9 @@
   </div>
 {% else %}
   <div class="text-center text-lg text-gray-600 mt-8 space-y-4">
-    <p>😕 No se encontraron cafeterías con los filtros seleccionados.</p>
+    <p class="text-gray-600 text-center mt-4">
+      ☕ {{ ui_messages.search_no_results }}
+    </p>
     <a href="{% url 'cafe_list' %}" class="inline-block bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition-colors">
       Limpiar filtros
     </a>
