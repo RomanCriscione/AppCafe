@@ -10,22 +10,26 @@
 
   <!-- Acciones -->
   <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-4 mb-10">
-    <a href="{% url 'create_cafe' %}" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg shadow transition">
+    <a href="{% url 'create_cafe' %}" 
+       class="bg-green-600 hover:bg-green-700 hover:scale-105 text-white font-semibold px-5 py-2 rounded-lg shadow transition-all duration-200">
       ➕ Agregar nueva cafetería
     </a>
-    <a href="{% url 'owner_reviews' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow transition">
+    <a href="{% url 'owner_reviews' %}" 
+       class="bg-blue-600 hover:bg-blue-700 hover:scale-105 text-white font-semibold px-5 py-2 rounded-lg shadow transition-all duration-200">
       📋 Ver todas las reseñas
     </a>
-    <a href="{% url 'planes' %}" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2 rounded-lg shadow transition">
+    <a href="{% url 'planes' %}" 
+       class="bg-orange-500 hover:bg-orange-600 hover:scale-105 text-white font-semibold px-5 py-2 rounded-lg shadow transition-all duration-200">
       💼 Planes para crecer
     </a>
   </div>
 
   <!-- Si no hay cafés -->
   {% if no_cafes %}
-    <div class="text-center py-12">
+    <div class="text-center py-12 animate-fade-in-up">
       <p class="text-gray-600 text-lg">{{ ui_messages.owner_no_cafes }}</p>
-      <a href="{% url 'create_cafe' %}" class="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+      <a href="{% url 'create_cafe' %}" 
+         class="mt-4 inline-block bg-green-600 hover:bg-green-700 hover:scale-105 text-white px-4 py-2 rounded shadow transition-all duration-200">
         Agregar mi primer café
       </a>
     </div>
@@ -35,10 +39,11 @@
   {% if cafes %}
     <ul class="space-y-8">
       {% for cafe in cafes %}
-        <li class="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-lg p-6 transition">
+        <li class="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-xl transition-all duration-200 p-6">
           <div class="flex flex-col md:flex-row gap-6 items-start">
             {% if cafe.photo1 %}
-              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" class="w-32 h-32 object-cover rounded-lg shadow">
+              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" 
+                   class="w-32 h-32 object-cover rounded-lg shadow">
             {% endif %}
             <div class="flex-1 space-y-3">
               <h2 class="text-xl font-bold text-brown-800">
@@ -84,25 +89,34 @@
                 </div>
               {% endif %}
 
-              <form method="post" action="{% url 'cambiar_visibilidad' cafe.id %}" class="mt-2 flex flex-wrap items-center gap-2">
+              <form method="post" action="{% url 'cambiar_visibilidad' cafe.id %}" 
+                    class="mt-2 flex flex-wrap items-center gap-2">
                 {% csrf_token %}
                 <label for="visibility_{{ cafe.id }}" class="text-sm font-medium">Cambiar plan:</label>
-                <select name="visibility_level" id="visibility_{{ cafe.id }}" class="border border-gray-300 rounded px-2 py-1 text-sm">
+                <select name="visibility_level" id="visibility_{{ cafe.id }}" 
+                        class="border border-gray-300 rounded px-2 py-1 text-sm">
                   <option value="0" {% if cafe.visibility_level == 0 %}selected{% endif %}>☕ Gratuito</option>
                   <option value="1" {% if cafe.visibility_level == 1 %}selected{% endif %}>☕ Plan Barista</option>
                   <option value="2" {% if cafe.visibility_level == 2 %}selected{% endif %}>☕☕ Plan Maestro</option>
                 </select>
-                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition">
+                <button type="submit" 
+                        class="bg-green-500 hover:bg-green-600 hover:scale-105 text-white px-3 py-1 rounded text-sm transition-all duration-200">
                   Aplicar
                 </button>
               </form>
 
               <div class="flex flex-wrap gap-4 mt-4 text-sm">
-                <a href="{% url 'cafe_detail' cafe.id %}" class="text-blue-600 hover:underline font-medium">🔍 Ver detalles</a>
-                <a href="{% url 'edit_cafe' cafe.id %}" class="text-yellow-600 hover:underline font-medium">✏️ Editar</a>
-                <form action="{% url 'delete_cafe' cafe.id %}" method="post" onsubmit="return confirm('¿Estás seguro de eliminar esta cafetería?')" class="inline">
+                <a href="{% url 'cafe_detail' cafe.id %}" 
+                   class="text-blue-600 hover:underline hover:scale-105 font-medium transition-transform">🔍 Ver detalles</a>
+                <a href="{% url 'edit_cafe' cafe.id %}" 
+                   class="text-yellow-600 hover:underline hover:scale-105 font-medium transition-transform">✏️ Editar</a>
+                <form action="{% url 'delete_cafe' cafe.id %}" method="post" 
+                      onsubmit="return confirm('¿Estás seguro de eliminar esta cafetería?')" class="inline">
                   {% csrf_token %}
-                  <button type="submit" class="text-red-600 hover:underline font-medium">🗑️ Eliminar</button>
+                  <button type="submit" 
+                          class="text-red-600 hover:underline hover:scale-105 font-medium transition-transform">
+                    🗑️ Eliminar
+                  </button>
                 </form>
               </div>
             </div>
