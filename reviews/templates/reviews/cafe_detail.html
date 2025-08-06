@@ -268,14 +268,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   function showNextCategory() {
-    if (currentStepIndex === 1 && currentCategoryIndex < tagCategorySteps.length - 1) {
+    if (currentStepIndex === 1) {
+      // Ocultar la categoría actual
       tagCategorySteps[currentCategoryIndex].classList.add("hidden");
-      currentCategoryIndex++;
-      tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
-    } else {
-      document.getElementById("review-form-step-1").requestSubmit();
+
+      // Si no es la última categoría, mostrar la siguiente
+      if (currentCategoryIndex < tagCategorySteps.length - 1) {
+        currentCategoryIndex++;
+        tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
+      } else {
+        // Última categoría → enviar reseña
+        document.getElementById("review-form-step-1").requestSubmit();
+      }
     }
   }
+
   function showPrevCategory() {
     if (currentStepIndex === 1 && currentCategoryIndex > 0) {
       tagCategorySteps[currentCategoryIndex].classList.add("hidden");

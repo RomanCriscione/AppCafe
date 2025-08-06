@@ -34,13 +34,27 @@ class ReviewListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        reseñas_por_zona = defaultdict(list)
+        request = self.request
 
-        for review in context['reviews']:
-            zona = review.cafe.location or 'Sin zona'
-            reseñas_por_zona[zona].append(review)
+        # --- Filtros básicos ---
+        context['zonas_disponibles'] = Cafe.objects.values_list('location', flat=True).distinct().order_by('location')
+        context['zona_seleccionada'] = request.GET.get('zona')
+        context['orden_actual'] = request.GET.get('orden')
+        context['tags_seleccionados'] = [int(t) for t in request.GET.getlist('tags')]
 
-        context['reseñas_por_zona'] = dict(reseñas_por_zona)
+        # --- Todas las etiquetas (para el segundo bloque simple) ---
+        tags = Tag.objects.order_by('category', 'name')
+        context['tags'] = tags
+
+        # --- Etiquetas agrupadas por categoría (para el bloque "por percepción") ---
+        tag_categorias = {}
+        for tag in tags:
+            tag_categorias.setdefault(tag.category, []).append(tag)
+        context['tag_categorias'] = tag_categorias
+
+        # --- Etiquetas aplicadas a cada café con conteo ---
+        context['tag_data'] = get_tags_grouped_by_cafe(self._cafes_finales)
+
         return context
 
 
@@ -79,10 +93,6 @@ class CafeListView(ListView):
             if value:
                 cafes = cafes.filter(**{key: True})
 
-        tags_seleccionados = request.GET.getlist('tags')
-        if tags_seleccionados:
-            cafes = cafes.filter(tags__id__in=tags_seleccionados).distinct()
-
         cafes = cafes.annotate(
             average_rating=Avg('reviews__rating'),
             total_reviews=Count('reviews')
@@ -112,7 +122,6 @@ class CafeListView(ListView):
                     cafe.has_books_or_games,
                     cafe.has_air_conditioning
                 ])
-
                 score_base = (
                     rating * 2 +
                     reviews * 0.7 +
@@ -120,19 +129,17 @@ class CafeListView(ListView):
                     favs * 0.6 +
                     caracteristicas_count * 0.3
                 )
-
                 if cafe.visibility_level == 1:
                     cafe.score = score_base * 1.10
                 elif cafe.visibility_level == 2:
                     cafe.score = score_base * 1.20
                 else:
                     cafe.score = score_base
-
             cafes.sort(key=lambda c: c.score, reverse=True)
         else:
             cafes = cafes.order_by('name')
 
-        # Filtro por ubicación
+        # Filtro por ubicación (3 km)
         if lat and lon:
             try:
                 lat = float(lat)
@@ -145,72 +152,25 @@ class CafeListView(ListView):
             except ValueError:
                 pass
 
-        self._cafes_finales = cafes  # guardar para usar en context
+        self._cafes_finales = cafes
         return cafes
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         request = self.request
 
+        # --- Filtros de zonas y orden ---
         context['zonas_disponibles'] = Cafe.objects.values_list('location', flat=True).distinct().order_by('location')
         context['zona_seleccionada'] = request.GET.get('zona')
         context['orden_actual'] = request.GET.get('orden')
-        context['filtros_aplicados'] = {
-            'vegan': request.GET.get('vegan'),
-            'pet': request.GET.get('pet'),
-            'wifi': request.GET.get('wifi'),
-            'outdoor': request.GET.get('outdoor'),
-            'has_parking': request.GET.get('has_parking'),
-            'is_accessible': request.GET.get('is_accessible'),
-            'has_vegetarian_options': request.GET.get('has_vegetarian_options'),
-            'serves_breakfast': request.GET.get('serves_breakfast'),
-            'serves_alcohol': request.GET.get('serves_alcohol'),
-            'has_books_or_games': request.GET.get('has_books_or_games'),
-            'has_air_conditioning': request.GET.get('has_air_conditioning'),
-        }
-        context['caracteristicas'] = [
-            ('vegan', 'Vegano friendly'),
-            ('pet', 'Pet friendly'),
-            ('wifi', 'WiFi'),
-            ('outdoor', 'Mesas afuera'),
-            ('has_parking', 'Estacionamiento disponible'),
-            ('is_accessible', 'Accesible'),
-            ('has_vegetarian_options', 'Opciones vegetarianas'),
-            ('serves_breakfast', 'Sirve desayuno'),
-            ('serves_alcohol', 'Sirve alcohol'),
-            ('has_books_or_games', 'Libros o juegos disponibles'),
-            ('has_air_conditioning', 'Aire acondicionado'),
-        ]
-        tag_categorias = defaultdict(list)
-        for tag in Tag.objects.all():
-            tag_categorias[tag.category].append(tag)
 
-        context['tag_categorias'] = dict(tag_categorias)
-        context['tags_seleccionados'] = [int(t) for t in self.request.GET.getlist('tags')]
-
-        context['cafes_json'] = json.dumps([
-            {
-                'id': cafe.id,
-                'name': cafe.name,
-                'latitude': cafe.latitude,
-                'longitude': cafe.longitude,
-                'address': cafe.address,
-                'url': reverse_lazy('cafe_detail', args=[cafe.id]),
-            } for cafe in self._cafes_finales if cafe.latitude and cafe.longitude
-        ], cls=DjangoJSONEncoder)
-
-        if request.user.is_authenticated:
-            context['favoritos_ids'] = list(request.user.favorite_cafes.values_list('id', flat=True))
-        else:
-            context['favoritos_ids'] = []
-
-        context['mostrar_boton_reset'] = bool(request.GET.get('lat')) and bool(request.GET.get('lon'))
-
-        # Agregar agrupación de tags por café
-        from reviews.utils.tags import get_tags_grouped_by_cafe
-        context['tag_data'] = get_tags_grouped_by_cafe(self._cafes_finales)
+        # 👇 Quitamos completamente tags dinámicos de reseñas
+        # context['tags'] = []
+        # context['tag_categorias'] = {}
+        # context['tag_data'] = {}
 
         return context
+
 
 
 # Detalle de cafetería + dejar o editar reseña
@@ -259,13 +219,13 @@ def cafe_detail(request, cafe_id):
         else:
             form = ReviewForm()
 
-    # ✅ Agrupar TODAS las etiquetas por categoría (devolviendo objetos Tag, no dicts)
+    # ✅ Agrupar TODAS las etiquetas por categoría (no solo sensorial)
     all_tags = Tag.objects.all().order_by("category", "name")
     tag_groups = defaultdict(list)
     for tag in all_tags:
-        tag_groups[tag.category].append(tag)  # 👈 Mantiene objetos Tag
+        tag_groups[tag.category].append(tag)
 
-    # Etiquetas sensoriales destacadas (planas, sin repetir)
+    # Etiquetas sensoriales destacadas (para el bloque resumen del detalle)
     sensory_tags = Tag.objects.filter(reviews__cafe=cafe).distinct().order_by('category', 'name')
 
     # Obtener cafés recomendados por calificación promedio
@@ -280,9 +240,11 @@ def cafe_detail(request, cafe_id):
         "best_review": best_review,
         "form": form,
         "recommended_cafes": recommended_cafes,
-        "tag_choices": dict(tag_groups),
+        "tag_choices": dict(tag_groups),  # 👈 ahora manda todas las categorías
         "sensory_tags": sensory_tags,
     })
+
+
 
 @login_required
 def create_review(request, cafe_id):
@@ -301,7 +263,6 @@ def create_review(request, cafe_id):
             tags = Tag.objects.filter(id__in=selected_tag_ids)
             review.tags.set(tags)
 
-            # 👇 usamos el mensaje dinámico
             messages.success(request, MESSAGES["review_sent"])
             return redirect("cafe_detail", cafe_id=cafe.id)
         else:
@@ -309,17 +270,16 @@ def create_review(request, cafe_id):
     else:
         form = ReviewForm()
 
-    # Agrupar tags por categoría para mostrar por pasos en el wizard
-    tags = Tag.objects.all().order_by("category", "name")
-    tag_categorias = {}
-    for tag in tags:
-        tag_categorias.setdefault(tag.category, []).append(tag)
+    # Agrupar etiquetas por categoría → mismo formato que cafe_detail
+    all_tags = Tag.objects.all().order_by("category", "name")
+    tag_groups = defaultdict(list)
+    for tag in all_tags:
+        tag_groups[tag.category].append(tag)
 
     context = {
         "form": form,
         "cafe": cafe,
-        "tag_categories": tag_categorias.keys(),  # ["Sensorial", "Ambiente", etc.]
-        "tags_by_category": tag_categorias         # { "Sensorial": [...], ... }
+        "tag_choices": dict(tag_groups),  # <- clave usada en review_wizard_step2.html
     }
 
     return render(request, "reviews/create_review.html", context)

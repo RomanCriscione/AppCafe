@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static %}
-{% load custom_filters %}
 
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6 relative px-4">
@@ -39,31 +38,19 @@
         </select>
       </div>
 
+      <!-- Características booleanas -->
       <fieldset>
-        <legend class="font-medium mb-2">Etiquetas por percepción:</legend>
-        {% for categoria, tags in tag_categorias.items %}
-          <details class="mb-2">
-            <summary class="cursor-pointer font-medium text-sm text-gray-700">{{ categoria|title }}</summary>
-            <div class="pl-3 mt-1 space-y-1">
-              {% for tag in tags %}
-                <label class="flex items-center space-x-2 text-sm">
-                  <input type="checkbox" name="tags" value="{{ tag.id }}" {% if tag.id in tags_seleccionados %}checked{% endif %}>
-                  <span>{{ tag.name }}</span>
-                </label>
-              {% endfor %}
-            </div>
-          </details>
-        {% endfor %}
-      </fieldset>
-
-      <fieldset>
-        <legend class="font-medium">Etiquetas:</legend>
-        {% for tag in tags %}
-          <label class="block">
-            <input type="checkbox" name="tags" value="{{ tag.id }}" {% if tag.id in tags_seleccionados %}checked{% endif %}>
-            {{ tag.name }}
-          </label>
-        {% endfor %}
+        <legend class="font-medium mb-2">Características del café:</legend>
+        <label class="block"><input type="checkbox" name="wifi" {% if request.GET.wifi == "on" %}checked{% endif %}> WiFi</label>
+        <label class="block"><input type="checkbox" name="has_air_conditioning" {% if request.GET.has_air_conditioning == "on" %}checked{% endif %}> Aire acondicionado</label>
+        <label class="block"><input type="checkbox" name="serves_alcohol" {% if request.GET.serves_alcohol == "on" %}checked{% endif %}> Sirve alcohol</label>
+        <label class="block"><input type="checkbox" name="is_pet_friendly" {% if request.GET.is_pet_friendly == "on" %}checked{% endif %}> Pet friendly</label>
+        <label class="block"><input type="checkbox" name="is_vegan_friendly" {% if request.GET.is_vegan_friendly == "on" %}checked{% endif %}> Opción vegana</label>
+        <label class="block"><input type="checkbox" name="has_outdoor_seating" {% if request.GET.has_outdoor_seating == "on" %}checked{% endif %}> Mesas al aire libre</label>
+        <label class="block"><input type="checkbox" name="has_parking" {% if request.GET.has_parking == "on" %}checked{% endif %}> Estacionamiento</label>
+        <label class="block"><input type="checkbox" name="is_accessible" {% if request.GET.is_accessible == "on" %}checked{% endif %}> Accesible</label>
+        <label class="block"><input type="checkbox" name="has_vegetarian_options" {% if request.GET.has_vegetarian_options == "on" %}checked{% endif %}> Opción vegetariana</label>
+        <label class="block"><input type="checkbox" name="has_books_or_games" {% if request.GET.has_books_or_games == "on" %}checked{% endif %}> Libros o juegos</label>
       </fieldset>
 
       <button type="submit"
@@ -85,10 +72,8 @@
           <button type="submit"
             class="bg-accent hover:bg-[#14b8a6] text-white px-3 py-2 rounded-xl text-sm transition-transform hover:scale-105 shadow">
             📍 Cafés cerca mío
-          </button> 
-
+          </button>
         </form>
-
         {% if mostrar_boton_reset %}
           <a href="{% url 'cafe_list' %}"
             class="inline-block bg-gray-100 text-gray-800 px-3 py-2 rounded-xl hover:bg-gray-200 transition-colors">
@@ -98,53 +83,31 @@
       </div>
     </div>
 
-{% include "reviews/includes/mapa_cafe_list.html" %}
+    {% include "reviews/includes/mapa_cafe_list.html" %}
 
-<div class="grid md:grid-cols-2 lg:grid-cols-2 gap-6 mt-6">
-  {% for cafe in cafes %}
-    <div class="bg-white rounded-2xl shadow-md hover:shadow-lg p-4 transition duration-200">
-      <a href="{% url 'cafe_detail' cafe.id %}" class="block">
-        {% if cafe.photo1 %}
-          <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}" class="w-full h-40 object-cover rounded-md mb-3">
-        {% else %}
-          <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500 rounded-md mb-3">
-            Sin foto
-          </div>
-        {% endif %}
-
-        <h3 class="text-lg font-semibold text-gray-800">{{ cafe.name }}</h3>
-        <p class="text-sm text-gray-600">{{ cafe.location }}</p>
-        <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
-      </a>
-
-      {% with tag_data|get_item:cafe.id as grouped_tags %}
-        {% if grouped_tags %}
-          <div class="mt-3">
-            <h4 class="text-sm font-semibold mb-1 text-gray-700">🪄 Cómo lo perciben los visitantes:</h4>
-            {% for category, tags in grouped_tags.items %}
-              <div class="mb-1">
-                <p class="text-xs font-medium text-gray-600">{{ category|title }}</p>
-                <div class="flex flex-wrap gap-2 mt-1">
-                  {% for tag in tags|slice:":5" %}
-                    <span class="bg-[#f0fdfa] text-accent text-xs px-2 py-1 rounded-full border border-accent">
-                      {{ tag.name }} ({{ tag.count }})
-                    </span>
-                  {% endfor %}
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
-    </div>
-  {% empty %}
-    <p class="text-center text-gray-600 mt-10">
-      {{ ui_messages.no_results }}
-    </p>
-  {% endfor %}
+    {% for cafe in cafes %}
+      <div class="bg-white rounded-2xl shadow-md hover:shadow-lg p-4 transition duration-200">
+        <a href="{% url 'cafe_detail' cafe.id %}" class="block">
+          {% if cafe.photo1 %}
+            <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}" class="w-full h-40 object-cover rounded-md mb-3">
+          {% else %}
+            <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500 rounded-md mb-3">
+              Sin foto
+            </div>
+          {% endif %}
+          <h3 class="text-lg font-semibold text-gray-800">{{ cafe.name }}</h3>
+          <p class="text-sm text-gray-600">{{ cafe.location }}</p>
+          <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
+        </a>
+        <div class="mt-3">
+          {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
+        </div>
+      </div>
+    {% empty %}
+      <p class="text-center text-gray-600 mt-10">
+        {{ ui_messages.no_results }}
+      </p>
+    {% endfor %}
+  </section>
 </div>
-
-
-    </section>
-  </div>
 {% endblock %}

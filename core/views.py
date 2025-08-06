@@ -15,9 +15,16 @@ def get_recently_viewed_cafes(request):
 
 # ✅ Vista principal del home
 def home(request):
+    # Últimas reseñas
     latest_reviews = Review.objects.select_related("user", "cafe").order_by("-created_at")[:6]
-    cafes_with_coords = Cafe.objects.filter(latitude__isnull=False, longitude__isnull=False).prefetch_related("tags")
 
+    # Cafés con coordenadas (para mapa)
+    cafes_with_coords = Cafe.objects.filter(
+        latitude__isnull=False,
+        longitude__isnull=False
+    ).prefetch_related("tags")
+
+    # Datos para el mapa
     cafes_data = [
         {
             "id": cafe.id,
@@ -31,6 +38,7 @@ def home(request):
         for cafe in cafes_with_coords
     ]
 
+    # Cafés destacados con promedio >= 4
     top_cafes = []
     for cafe in cafes_with_coords:
         ratings = [review.rating for review in cafe.reviews.all()]
@@ -39,8 +47,14 @@ def home(request):
             if avg >= 4:
                 top_cafes.append(cafe)
 
+    # Etiquetas por café
     tag_data = get_tags_grouped_by_cafe(top_cafes)
+
+    # Cafés vistos recientemente
     recently_viewed_cafes = get_recently_viewed_cafes(request)
+
+    # 🔹 Zonas dinámicas desde cafés existentes
+    home_zones = Cafe.objects.values_list("location", flat=True).distinct()
 
     context = {
         "latest_reviews": latest_reviews,
@@ -48,6 +62,7 @@ def home(request):
         "cafes_json": json.dumps(cafes_data),
         "recently_viewed_cafes": recently_viewed_cafes,
         "tag_data": tag_data,
+        "home_zones": home_zones,  # <<--- dinámico
         "ui_messages": {
             "welcome": core_messages.MESSAGES.get("welcome_user"),
             "no_results": core_messages.MESSAGES.get("search_no_results"),
@@ -62,7 +77,6 @@ def home(request):
         }
     }
     return render(request, "core/home.html", context)
-
 
 # ✅ Vista "Acerca de mí"
 def about_view(request):

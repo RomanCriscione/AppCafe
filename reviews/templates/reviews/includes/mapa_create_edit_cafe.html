@@ -101,12 +101,16 @@
         window.validarDireccionAntesDeEnviar = function () {
             const lat = parseFloat(latInput.value);
             const lon = parseFloat(lonInput.value);
-            if (isNaN(lat) || isNaN(lon) || !direccionGeolocalizada) {
-                alert("⚠️ Por favor, asegurate de ingresar una dirección válida y que se haya ubicado correctamente en el mapa.");
+
+            if (isNaN(lat) || isNaN(lon)) {
+                alert("⚠️ Por favor, asegurate de ingresar una dirección válida y ubicar el pin en el mapa.");
                 return false;
             }
+
+            // Marca como válida incluso si no pasó por Nominatim pero el pin se movió o ya tenía coords
             return true;
         };
+
     });
 
     function mostrarMapaMobile() {

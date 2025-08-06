@@ -1,117 +1,139 @@
 /* static/css/custom.css */
 
-/* ✅ Botón de favorito */
+/* --- Botón de favorito --- */
 .btn-fav {
   background-color: #f87171; /* rojo suave */
-    color: white;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-weight: 500;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
 }
-
 .btn-fav:hover {
-    background-color: #dc2626;
+  background-color: #dc2626;
 }
 
+/* --- Animación bounce para marcadores del mapa --- */
 .leaflet-marker-icon.animated-bounce {
-    animation: bounce 1s infinite;
+  animation: bounce 1s infinite;
 }
 
-/* ✅ Animación fade-in */
+/* --- Animación fade-in --- */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
 .animate-fade-in {
-    animation: fadeIn 0.4s ease-in-out;
+  animation: fadeIn 0.4s ease-in-out;
 }
 
-/* ✅ Igualar altura y evitar solapamiento en slider de reseñas */
+/* --- Slider reseñas - altura uniforme --- */
 .swiper-slide {
-    display: flex !important;
-    flex-direction: column;
-    justify-content: start;
-    height: 240px;
-    padding: 1rem;
-    box-sizing: border-box;
-    overflow: hidden;
-    border-radius: 0.5rem;
-    background-color: white;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex !important;
+  flex-direction: column;
+  justify-content: start;
+  height: 240px;
+  padding: 1rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background-color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
-
 .swiper-slide img {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 0.5rem;
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 0.5rem;
 }
-
 .swiper-slide p {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
-
 .swiper-slide .text-sm {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; 
-    -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; 
+  -webkit-box-orient: vertical;
 }
-
-
 .swiper-wrapper {
-    display: flex;
-    gap: 1rem;
-    padding-left: 0.5rem;
+  display: flex;
+  gap: 1rem;
+  padding-left: 0.5rem;
 }
-
 .swiper-container {
-    width: 100%;
-    overflow: hidden;
-    padding-bottom: 2rem;
+  width: 100%;
+  overflow: hidden;
+  padding-bottom: 2rem;
 }
 
-
-
+/* --- Animación bounce --- */
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
+/* --- Responsive ajustes de input --- */
 @media (max-width: 768px) {
-    input,
-    select,
-    textarea {
-        font-size: 1rem;
-    }
+  input,
+  select,
+  textarea {
+    font-size: 1rem;
+  }
 }
-
 @media (max-width: 640px) {
-    .swiper-slide {
-        width: 260px !important;
-        margin-right: 12px;
-    }
+  .swiper-slide {
+    width: 260px !important;
+    margin-right: 12px;
+  }
 }
 
-/* Hero sections (si tenés imágenes o cabeceras grandes) */
-.hero {
-    @apply bg-cover bg-center text-white;
+/* --- Botones unificados --- */
+.btn-primary {
+  background-color: #1e3a8a; /* azul primario */
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px; /* rounded-full */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.btn-primary:hover {
+  background-color: #172c6d; /* un poco más oscuro */
+  transform: scale(1.05);
 }
 
-/* Cards antiguas -> ahora se verán con Tailwind pero dejo transición */
-.card {
-    @apply rounded-2xl shadow-lg overflow-hidden transition-transform transform hover:scale-105;
+.btn-outline {
+  background-color: white;
+  color: #1e3a8a;
+  border: 2px solid #1e3a8a;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+.btn-outline:hover {
+  background-color: #1e3a8a;
+  color: white;
+  transform: scale(1.05);
 }
 
-/* Form controls básicos */
-.form-control {
-    @apply border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring focus:border-blue-400;
-}
-
-/* Botones antiguos */
+/* Compatibilidad con botones antiguos */
 .btn {
-    @apply bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition;
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+.btn:hover {
+  background-color: #2563eb;
+}
+
+/* Enlaces dentro de botones heredan color */
+.btn-primary a,
+.btn-outline a {
+  color: inherit;
+  text-decoration: none;
 }

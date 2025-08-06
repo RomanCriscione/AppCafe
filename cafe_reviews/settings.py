@@ -8,7 +8,7 @@ SECRET_KEY = os.environ.get(
     'SECRET_KEY',
     'django-insecure-az@v_nvea=tqu^2#qp8r!lei&_(twgthkg&qsnx)s2)8@cg01('
 )
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = True
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
 INSTALLED_APPS = [
@@ -89,11 +89,15 @@ USE_L10N = True
 LOCALE_PATHS = [BASE_DIR / 'locale']
 
 STATIC_URL = '/static/'
+
 if DEBUG:
-    STATICFILES_DIRS = [BASE_DIR / 'static']
+    STATICFILES_DIRS = [
+        BASE_DIR / "static",  # carpeta estática del proyecto
+    ]
 else:
-    STATICFILES_DIRS = []
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+    STATICFILES_DIRS = []  # En producción no se usan carpetas adicionales
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
