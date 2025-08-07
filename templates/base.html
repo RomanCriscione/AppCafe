@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 {% load static %}
-  <link rel="stylesheet" href="{% static 'css/animations.css' %}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Gota - Reseñas de Cafés{% endblock %}</title>
   {% block meta %}{% endblock %}
+
+  <!-- Animaciones -->
+  <link rel="stylesheet" href="{% static 'css/animations.css' %}">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,12 +20,12 @@
             sans: ['Poppins', 'sans-serif'],
           },
           colors: {
-            primary: '#1e3a8a',      // Azul profundo
-            accent: '#2dd4bf',       // Verde menta (acento principal)
-            accentHover: '#14b8a6',  // Verde jade (hover)
-            secondary: '#172c6d',    // Fondo claro
-            dark: '#111827',         // Texto oscuro
-            light: '#f9fafb'         // Fondo claro alternativo
+            primary: '#1e3a8a',
+            accent: '#2dd4bf',
+            accentHover: '#14b8a6',
+            secondary: '#172c6d',
+            dark: '#111827',
+            light: '#f9fafb'
           }
         }
       }
@@ -58,6 +60,11 @@
         <div class="flex items-center gap-8">
           <a href="{% url 'home' %}" class="text-2xl font-bold text-primary">Gota</a>
 
+          <!-- Toggle para mobile -->
+          <button id="menu-toggle" class="lg:hidden text-gray-700">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+
           <nav id="navbar-menu" class="hidden lg:flex lg:items-center lg:gap-6">
             <a href="{% url 'home' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Inicio</a>
             <a href="{% url 'cafe_list' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Cafés</a>
@@ -74,7 +81,7 @@
             {% if user.avatar %}
               <img src="{{ user.avatar.url }}" alt="Avatar" class="w-8 h-8 rounded-full border object-cover" />
             {% endif %}
-            
+
             {% if user.is_owner %}
               <a href="{% url 'create_cafe' %}" class="hover:underline">➕ Agregar Café</a>
               <a href="{% url 'owner_dashboard' %}" class="hover:underline">Mis Cafés</a>
@@ -101,13 +108,16 @@
       </div>
     </header>
 
+    <!-- JS toggle navbar -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const toggle = document.getElementById("menu-toggle");
         const menu = document.getElementById("navbar-menu");
-        toggle.addEventListener("click", () => {
-          menu.classList.toggle("hidden");
-        });
+        if (toggle && menu) {
+          toggle.addEventListener("click", () => {
+            menu.classList.toggle("hidden");
+          });
+        }
       });
     </script>
 
@@ -140,12 +150,12 @@
   </div>
 
   <!-- Scripts -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script defer src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   {% block scripts %}{% endblock %}
 
-  <!-- Swiper config -->
+  <!-- Swiper + Alert logic -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       new Swiper('.swiper-container', {
@@ -160,15 +170,13 @@
           clickable: true,
         },
       });
-    });
 
-    document.addEventListener("DOMContentLoaded", () => {
       const alerts = document.querySelectorAll('.alert-message');
       alerts.forEach(alert => {
         setTimeout(() => {
           alert.classList.add('opacity-0', 'transition-opacity', 'duration-500');
           setTimeout(() => alert.remove(), 500);
-        }, 2000);  // 2 segundos
+        }, 2000);
       });
     });
   </script>

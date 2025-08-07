@@ -3,13 +3,11 @@
 {% load custom_filters %}
 
 {% block content %}
-<!-- Hero Section con overlay -->
-<!-- Hero Section con overlay -->
+
+<!-- Hero Section -->
 <section class="relative bg-no-repeat bg-center bg-cover w-full h-[400px] text-center text-white"
          style="background-image: url('{% static 'images/coffee-hero.jpg' %}');">
-  <!-- Overlay oscuro -->
   <div class="absolute inset-0 bg-black bg-opacity-40"></div>
-  <!-- Contenido Hero -->
   <div class="relative max-w-2xl mx-auto z-10 pt-20">
     <h1 class="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">
       ☕ {{ ui_messages.welcome_user|default:"Bienvenido. ¿Qué café descubrimos hoy?" }}
@@ -24,7 +22,6 @@
     </a>
   </div>
 </section>
-
 
 <!-- Últimas Reseñas -->
 <section class="py-12 bg-orange-50 overflow-x-hidden">
@@ -138,7 +135,7 @@
   </div>
 </section>
 
-<!-- Mapa interactivo con todos los cafés -->
+<!-- Mapa interactivo -->
 {% include "core/includes/mapa_home.html" %}
 
 <!-- Zona -->
@@ -194,4 +191,5 @@
     </div>
   </div>
 </section>
+
 {% endblock %}

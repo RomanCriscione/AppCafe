@@ -9,19 +9,16 @@ urlpatterns = [
     # Login, logout, register (Django Allauth)
     path('accounts/', include('allauth.urls')),
 
-    # Custom user actions (registro, editar avatar)
+    # Acciones personalizadas de usuarios
     path('users/', include('accounts.urls')),
 
-    # Core (inicio, contacto, about)
+    # Vistas públicas (inicio, contacto, about)
     path('', include('core.urls')),
 
     # Cafeterías y reseñas
     path('reviews/', include('reviews.urls')),
-
-    path('accounts/', include('django.contrib.auth.urls')),
 ]
 
-# --- Sirve archivos estáticos y media en desarrollo ---
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6 relative px-4">
@@ -7,7 +8,8 @@
   <button id="toggle-filtros" class="lg:hidden fixed bottom-4 right-4 z-50 bg-primary text-white p-3 rounded-full shadow-lg hover:bg-secondary transition">
     🔍 Filtros
   </button>
-  <!-- Overlay (fondo oscuro al abrir filtros en mobile) -->
+
+  <!-- Overlay -->
   <div id="filtros-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden opacity-0 transition-opacity duration-300 lg:hidden"></div>
 
   <!-- Filtros -->
@@ -41,16 +43,12 @@
       <!-- Características booleanas -->
       <fieldset>
         <legend class="font-medium mb-2">Características del café:</legend>
-        <label class="block"><input type="checkbox" name="wifi" {% if request.GET.wifi == "on" %}checked{% endif %}> WiFi</label>
-        <label class="block"><input type="checkbox" name="has_air_conditioning" {% if request.GET.has_air_conditioning == "on" %}checked{% endif %}> Aire acondicionado</label>
-        <label class="block"><input type="checkbox" name="serves_alcohol" {% if request.GET.serves_alcohol == "on" %}checked{% endif %}> Sirve alcohol</label>
-        <label class="block"><input type="checkbox" name="is_pet_friendly" {% if request.GET.is_pet_friendly == "on" %}checked{% endif %}> Pet friendly</label>
-        <label class="block"><input type="checkbox" name="is_vegan_friendly" {% if request.GET.is_vegan_friendly == "on" %}checked{% endif %}> Opción vegana</label>
-        <label class="block"><input type="checkbox" name="has_outdoor_seating" {% if request.GET.has_outdoor_seating == "on" %}checked{% endif %}> Mesas al aire libre</label>
-        <label class="block"><input type="checkbox" name="has_parking" {% if request.GET.has_parking == "on" %}checked{% endif %}> Estacionamiento</label>
-        <label class="block"><input type="checkbox" name="is_accessible" {% if request.GET.is_accessible == "on" %}checked{% endif %}> Accesible</label>
-        <label class="block"><input type="checkbox" name="has_vegetarian_options" {% if request.GET.has_vegetarian_options == "on" %}checked{% endif %}> Opción vegetariana</label>
-        <label class="block"><input type="checkbox" name="has_books_or_games" {% if request.GET.has_books_or_games == "on" %}checked{% endif %}> Libros o juegos</label>
+        {% for key, activo in campos_activos.items %}
+          <label class="block">
+            <input type="checkbox" name="{{ key }}" {% if activo %}checked{% endif %}>
+            {{ key|capfirst|replace:"_| " }}
+          </label>
+        {% endfor %}
       </fieldset>
 
       <button type="submit"

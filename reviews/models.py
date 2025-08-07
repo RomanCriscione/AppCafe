@@ -9,6 +9,7 @@ import os
 
 User = get_user_model()
 
+
 class Tag(models.Model):
     CATEGORY_CHOICES = [
         ("sensorial", "☕ Experiencia sensorial"),
@@ -24,6 +25,9 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name_plural = "Tags"
+
 
 class Cafe(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -33,6 +37,7 @@ class Cafe(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     google_maps_url = models.URLField(blank=True, null=True)
 
+    # Fotos
     photo1 = models.ImageField(upload_to='cafes/', blank=True, null=True)
     photo1_title = models.CharField(max_length=200, blank=True, null=True)
     photo2 = models.ImageField(upload_to='cafes/', blank=True, null=True)
@@ -52,13 +57,11 @@ class Cafe(models.Model):
     serves_alcohol = models.BooleanField(default=False, verbose_name="Sirve alcohol")
     has_books_or_games = models.BooleanField(default=False, verbose_name="Libros o juegos disponibles")
     has_air_conditioning = models.BooleanField(default=False, verbose_name="Aire acondicionado")
-
-    # Otras opciones extra
     has_gluten_free = models.BooleanField(default=False, verbose_name="Sin TACC / Gluten Free")
     has_specialty_coffee = models.BooleanField(default=False, verbose_name="Café de especialidad")
     has_artisanal_pastries = models.BooleanField(default=False, verbose_name="Pastelería artesanal")
 
-    # Relacionales
+    # Relaciones
     favorites = models.ManyToManyField(User, related_name='favorite_cafes', blank=True)
     tags = models.ManyToManyField(Tag, related_name='cafes', blank=True)
 
@@ -66,7 +69,7 @@ class Cafe(models.Model):
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
 
-    # Visibilidad / suscripción
+    # Visibilidad
     VISIBILITY_CHOICES = (
         (0, 'Gratis'),
         (1, 'Destacado'),
@@ -74,6 +77,7 @@ class Cafe(models.Model):
     )
     visibility_level = models.IntegerField(choices=VISIBILITY_CHOICES, default=0)
 
+    # Dueño
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -81,44 +85,43 @@ class Cafe(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        # Guardado inicial
+        procesar = kwargs.pop("procesar_imagenes", True)
         super().save(*args, **kwargs)
 
-        def procesar_imagen(campo):
-            img_field = getattr(self, campo)
-            if img_field and hasattr(img_field, 'path'):
-                try:
-                    img = Image.open(img_field.path)
-                    formato_original = img.format or 'JPEG'
+        if procesar:
+            def procesar_imagen(campo):
+                img_field = getattr(self, campo)
+                if img_field and hasattr(img_field, 'path'):
+                    try:
+                        img = Image.open(img_field.path)
+                        formato_original = img.format or 'JPEG'
 
-                    if img.mode in ("RGBA", "P"):
-                        img = img.convert("RGB")
+                        if img.mode in ("RGBA", "P"):
+                            img = img.convert("RGB")
 
-                    max_width = 1280
-                    if img.width > max_width:
-                        ratio = max_width / float(img.width)
-                        new_height = int(float(img.height) * ratio)
-                        img = img.resize((max_width, new_height), Image.LANCZOS)
+                        max_width = 1280
+                        if img.width > max_width:
+                            ratio = max_width / float(img.width)
+                            new_height = int(float(img.height) * ratio)
+                            img = img.resize((max_width, new_height), Image.LANCZOS)
 
-                    buffer = BytesIO()
-                    img.save(
-                        buffer,
-                        format='JPEG' if formato_original not in ['JPEG', 'PNG'] else formato_original,
-                        optimize=True,
-                        quality=70
-                    )
+                        buffer = BytesIO()
+                        img.save(
+                            buffer,
+                            format='JPEG' if formato_original not in ['JPEG', 'PNG'] else formato_original,
+                            optimize=True,
+                            quality=70
+                        )
 
-                    file_content = ContentFile(buffer.getvalue())
-                    img_field.save(os.path.basename(img_field.name), file_content, save=False)
-                except Exception as e:
-                    print(f"⚠️ Error al procesar la imagen en {campo}: {e}")
+                        file_content = ContentFile(buffer.getvalue())
+                        img_field.save(os.path.basename(img_field.name), file_content, save=False)
+                    except Exception as e:
+                        print(f"⚠️ Error al procesar la imagen en {campo}: {e}")
 
-        # Procesar imágenes
-        for campo in ['photo1', 'photo2', 'photo3']:
-            procesar_imagen(campo)
+            for campo in ['photo1', 'photo2', 'photo3']:
+                procesar_imagen(campo)
 
-        # Guardar nuevamente con imágenes optimizadas
-        super().save(update_fields=['photo1', 'photo2', 'photo3'])
+            super().save(update_fields=['photo1', 'photo2', 'photo3'])
 
     def average_rating(self):
         result = self.reviews.aggregate(Avg('rating'))
@@ -126,6 +129,9 @@ class Cafe(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['-visibility_level', 'name']
 
 
 class Review(models.Model):
@@ -138,11 +144,9 @@ class Review(models.Model):
     owner_reply = models.TextField(blank=True, null=True)
     tags = models.ManyToManyField("Tag", blank=True, related_name="reviews")
 
-
     class Meta:
         unique_together = ('user', 'cafe')
+        ordering = ['-created_at']
 
     def __str__(self):
         return f'Reseña de {self.user} en {self.cafe}'
-
-
