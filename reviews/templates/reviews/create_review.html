@@ -19,29 +19,37 @@
 
       <div class="mb-4">
         <label class="block font-medium mb-2">Puntuación</label>
-        <div class="flex flex-row-reverse justify-start gap-1 text-2xl">
+        <div id="rating-stars" class="flex flex-row-reverse justify-start gap-1 text-2xl">
           {% for i in "54321" %}
-            <input type="radio" name="rating" id="rating{{ i }}" value="{{ i }}"
+            <input type="radio"
+                   name="rating"
+                   id="rating{{ i }}"
+                   value="{{ i }}"
                    class="hidden peer"
                    {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
             <label for="rating{{ i }}"
-                   class="cursor-pointer text-gray-300 hover:text-accent transition-all peer-checked:text-accent">
-              ☕
-            </label>
+                   class="cursor-pointer text-gray-300 hover:text-accent transition-all peer-checked:text-accent"
+                   data-value="{{ i }}">☕</label>
           {% endfor %}
         </div>
+        <div id="rating-label" class="text-sm text-gray-600 mt-1"></div>
       </div>
     </div>
 
-    <!-- Paso 2+: Etiquetas sensoriales por categoría -->
-    {% for category in tag_categories %}
+    <!-- Paso 2+: Etiquetas por categoría (usa tag_choices del contexto) -->
+    {% for category, tags in tag_choices.items %}
       <div class="step hidden" id="step-{{ forloop.counter }}">
-        <h3 class="text-lg font-semibold mb-3 text-gray-800">🧠 ¿Querés agregar alguna etiqueta <span class="text-primary">{{ category }}</span>?</h3>
+        <h3 class="text-lg font-semibold mb-3 text-gray-800">
+          🧠 ¿Querés agregar alguna etiqueta <span class="text-primary">{{ category }}</span>?
+        </h3>
+
         <div class="grid grid-cols-1 gap-2">
-          {% for tag in tags_by_category|get_item:category %}
+          {% for tag in tags %}
             <label class="flex items-center gap-2 text-sm">
-              <input type="checkbox" name="tags" value="{{ tag.id }}"
-                      class="rounded border-gray-300 text-accent focus:ring-accent">
+              <input type="checkbox"
+                     name="tags"
+                     value="{{ tag.id }}"
+                     class="rounded border-gray-300 text-accent focus:ring-accent">
               {{ tag.name }}
             </label>
           {% empty %}
@@ -57,10 +65,12 @@
               class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-xl shadow hidden transition">
         ← Anterior
       </button>
+
       <button type="button" id="nextBtn"
               class="bg-accent hover:bg-[#14b8a6] text-white px-4 py-2 rounded-xl shadow transition">
         Siguiente →
       </button>
+
       <button type="submit" id="submitBtn"
               class="bg-primary hover:bg-[#172b68] text-white px-4 py-2 rounded-xl shadow hidden transition">
         ✅ Enviar reseña
@@ -69,8 +79,32 @@
   </form>
 </div>
 
-<!-- Wizard JS -->
+<!-- Wizard + UX JS -->
 <script>
+  // ------- Estrellas (UI) -------
+  document.addEventListener("DOMContentLoaded", () => {
+    const starsWrap = document.getElementById('rating-stars');
+    const ratingLabel = document.getElementById('rating-label');
+    if (!starsWrap || !ratingLabel) return;
+
+    const radios = starsWrap.querySelectorAll('input[type="radio"]');
+    const stars = starsWrap.querySelectorAll('label[data-value]');
+    const labels = { 5: "Excelente", 4: "Muy bueno", 3: "Bueno", 2: "Regular", 1: "Malo" };
+
+    function updateRatingVisual() {
+      const selected = Array.from(radios).find(r => r.checked)?.value;
+      stars.forEach(star => {
+        const v = star.dataset.value;
+        star.classList.toggle('text-accent', selected == v);
+        star.classList.toggle('text-gray-300', selected != v);
+      });
+      ratingLabel.textContent = selected ? labels[selected] : "";
+    }
+    radios.forEach(r => r.addEventListener('change', updateRatingVisual));
+    updateRatingVisual();
+  });
+
+  // ------- Wizard -------
   const steps = document.querySelectorAll('.step');
   const nextBtn = document.getElementById('nextBtn');
   const prevBtn = document.getElementById('prevBtn');
@@ -78,27 +112,31 @@
   let currentStep = 0;
 
   function showStep(index) {
-    steps.forEach((step, i) => {
-      step.classList.toggle('hidden', i !== index);
-    });
-    prevBtn.classList.toggle('hidden', index === 0);
-    nextBtn.classList.toggle('hidden', index === steps.length - 1);
-    submitBtn.classList.toggle('hidden', index !== steps.length - 1);
+    steps.forEach((step, i) => step.classList.toggle('hidden', i !== index));
+    if (prevBtn && nextBtn && submitBtn) {
+      prevBtn.classList.toggle('hidden', index === 0);
+      nextBtn.classList.toggle('hidden', index === steps.length - 1);
+      submitBtn.classList.toggle('hidden', index !== steps.length - 1);
+    }
   }
 
-  nextBtn.addEventListener('click', () => {
-    if (currentStep < steps.length - 1) {
-      currentStep++;
-      showStep(currentStep);
-    }
-  });
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        showStep(currentStep);
+      }
+    });
+  }
 
-  prevBtn.addEventListener('click', () => {
-    if (currentStep > 0) {
-      currentStep--;
-      showStep(currentStep);
-    }
-  });
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      if (currentStep > 0) {
+        currentStep--;
+        showStep(currentStep);
+      }
+    });
+  }
 
   showStep(currentStep);
 </script>

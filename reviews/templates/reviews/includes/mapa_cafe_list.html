@@ -1,5 +1,5 @@
 <!-- Mapa -->
-<div id="cafes-map" class="h-72 rounded mb-6"></div>
+<div id="cafes-map" class="h-72 min-h-[300px] rounded mb-6"></div>
 
 <!-- Formulario de búsqueda por dirección -->
 <form id="direccion-form" method="get" class="mb-4 flex gap-2 max-w-md">
@@ -29,114 +29,142 @@
   </div>
 {% endif %}
 
-<!-- Scripts del mapa -->
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const map = L.map('cafes-map').setView([-34.6037, -58.3816], 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(map);
+(function () {
+  // Evita doble init
+  if (window.__cafesMapInited) return;
+  window.__cafesMapInited = true;
 
-  const cafes = JSON.parse(`{{ cafes_json|escapejs }}`);
-
-  cafes.forEach(cafe => {
-    if (cafe.latitude && cafe.longitude) {
-      const marker = L.marker([cafe.latitude, cafe.longitude]).addTo(map);
-      const popupContent = `
-        <strong>${cafe.name}</strong><br>
-        <a href="${cafe.url}">Ver detalle</a>
-      `;
-      marker.bindPopup(popupContent);
-    }
-  });
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const lat = urlParams.get("lat");
-  const lon = urlParams.get("lon");
-
-  if (lat && lon) {
-    const userLat = parseFloat(lat);
-    const userLon = parseFloat(lon); 
-
-    const cafesCercanos = cafes.filter(cafe =>
-      cafe.latitude && cafe.longitude &&
-      Math.sqrt(
-        Math.pow((cafe.latitude - userLat) * 111, 2) +
-        Math.pow((cafe.longitude - userLon) * 85, 2)
-      ) <= 3
-    );
-
-
-    const circle = L.circle([userLat, userLon], {
-      radius: 3000,
-      color: cafesCercanos.length > 10 ? "#e76f51" : "#2a9d8f",
-      fillColor: cafesCercanos.length > 10 ? "#f4a261" : "#a8dadc",
-      fillOpacity: 0.3
-    }).addTo(map);
-
-    map.setView([userLat, userLon], 13);
+  function waitForLeaflet(cb, tries = 0) {
+    if (window.L && typeof L.map === "function") return cb();
+    if (tries > 200) return; // 10s guard
+    setTimeout(() => waitForLeaflet(cb, tries + 1), 50);
   }
 
-  // Buscar por dirección (usando Nominatim)
-  document.getElementById("direccion-form")?.addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const direccion = document.getElementById("direccion").value;
-    const errorDiv = document.getElementById("error-direccion");
-    errorDiv.classList.add("hidden");
+  document.addEventListener("DOMContentLoaded", function () {
+    waitForLeaflet(() => {
+      const mapEl = document.getElementById('cafes-map');
+      if (!mapEl) return;
 
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}`;
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      if (data.length > 0) {
-        const lat = data[0].lat;
-        const lon = data[0].lon;
+      const map = L.map('cafes-map').setView([-34.6037, -58.3816], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
 
-        const form = document.createElement("form");
-        form.method = "GET";
-        form.action = window.location.pathname;
+      // 👇 fuerza recalcular tamaño al terminar el frame y en resize
+      setTimeout(() => map.invalidateSize(), 0);
+      window.addEventListener('resize', () => map.invalidateSize());
 
-        const latInput = document.createElement("input");
-        latInput.type = "hidden";
-        latInput.name = "lat";
-        latInput.value = lat;
-        form.appendChild(latInput);
+      // ---- Datos de cafés ----
+      {% if cafes_json %}
+        const cafes = JSON.parse(`{{ cafes_json|escapejs }}`);
+      {% else %}
+        const cafes = [
+          {% for cafe in cafes %}
+            {
+              id: {{ cafe.id }},
+              name: "{{ cafe.name|escapejs }}",
+              latitude: {{ cafe.latitude|default:"null" }},
+              longitude: {{ cafe.longitude|default:"null" }},
+              url: "{% url 'cafe_detail' cafe.id %}"
+            }{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        ];
+      {% endif %}
 
-        const lonInput = document.createElement("input");
-        lonInput.type = "hidden";
-        lonInput.name = "lon";
-        lonInput.value = lon;
-        form.appendChild(lonInput);
+      cafes.forEach(cafe => {
+        if (cafe.latitude != null && cafe.longitude != null) {
+          const marker = L.marker([cafe.latitude, cafe.longitude]).addTo(map);
+          marker.bindPopup(`<strong>${cafe.name}</strong><br><a href="${cafe.url}">Ver detalle</a>`);
+        }
+      });
 
-        document.body.appendChild(form);
-        form.submit();
-      } else {
-        errorDiv.classList.remove("hidden");
+      // ---- Ubicación pasada por querystring (lat/lon) ----
+      const urlParams = new URLSearchParams(window.location.search);
+      const lat = urlParams.get("lat");
+      const lon = urlParams.get("lon");
+
+      if (lat && lon) {
+        const userLat = parseFloat(lat);
+        const userLon = parseFloat(lon);
+
+        const cafesCercanos = cafes.filter(cafe =>
+          cafe.latitude != null && cafe.longitude != null &&
+          Math.sqrt(
+            Math.pow((cafe.latitude - userLat) * 111, 2) +
+            Math.pow((cafe.longitude - userLon) * 85, 2)
+          ) <= 3
+        );
+
+        L.circle([userLat, userLon], {
+          radius: 3000,
+          color: cafesCercanos.length > 10 ? "#e76f51" : "#2a9d8f",
+          fillColor: cafesCercanos.length > 10 ? "#f4a261" : "#a8dadc",
+          fillOpacity: 0.3
+        }).addTo(map);
+
+        map.setView([userLat, userLon], 13);
       }
-    } catch (error) {
-      console.error("Error al buscar la dirección:", error);
-      errorDiv.classList.remove("hidden");
-    }
-  });
 
-  // Script para "📍 Cafés cerca mío"
-  const ubicacionForm = document.getElementById("ubicacion-form");
-  if (ubicacionForm) {
-    ubicacionForm.addEventListener("submit", function (event) {
-      event.preventDefault();
+      // ---- Buscar por dirección (Nominatim) ----
+      const dirForm = document.getElementById("direccion-form");
+      dirForm?.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const direccion = document.getElementById("direccion").value;
+        const errorDiv = document.getElementById("error-direccion");
+        errorDiv.classList.add("hidden");
 
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-          document.getElementById("lat").value = position.coords.latitude;
-          document.getElementById("lon").value = position.coords.longitude;
-          ubicacionForm.submit();
-        }, function () {
-          alert("No se pudo obtener tu ubicación. Asegúrate de habilitar la geolocalización.");
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}`;
+        try {
+          const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+          const data = await response.json();
+          if (Array.isArray(data) && data.length > 0) {
+            const lat = data[0].lat;
+            const lon = data[0].lon;
+
+            const form = document.createElement("form");
+            form.method = "GET";
+            form.action = window.location.pathname;
+
+            const latInput = document.createElement("input");
+            latInput.type = "hidden"; latInput.name = "lat"; latInput.value = lat;
+            form.appendChild(latInput);
+
+            const lonInput = document.createElement("input");
+            lonInput.type = "hidden"; lonInput.name = "lon"; lonInput.value = lon;
+            form.appendChild(lonInput);
+
+            document.body.appendChild(form);
+            form.submit();
+          } else {
+            errorDiv.classList.remove("hidden");
+          }
+        } catch (error) {
+          console.error("Error al buscar la dirección:", error);
+          document.getElementById("error-direccion").classList.remove("hidden");
+        }
+      });
+
+      // ---- Botón "📍 Cafés cerca mío" ----
+      const ubicacionForm = document.getElementById("ubicacion-form");
+      if (ubicacionForm) {
+        ubicacionForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+              document.getElementById("lat").value = position.coords.latitude;
+              document.getElementById("lon").value = position.coords.longitude;
+              ubicacionForm.submit();
+            }, function () {
+              alert("No se pudo obtener tu ubicación. Habilitá la geolocalización.");
+            });
+          } else {
+            alert("Tu navegador no soporta geolocalización.");
+          }
         });
-      } else {
-        alert("Tu navegador no soporta geolocalización.");
       }
     });
-  }
-});
+  });
+})();
 </script>
+

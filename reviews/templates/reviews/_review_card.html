@@ -1,4 +1,3 @@
-{# reviews/templates/reviews/_review_card.html #}
 <div class="review-card review-animate-in animate-fade-in-up {% cycle '' 'animate-delay-100' 'animate-delay-200' 'animate-delay-300' %} bg-white p-5 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col gap-4">
 
   <!-- Header con usuario y puntaje -->
@@ -37,7 +36,7 @@
   {% if review.tags.all %}
     <div class="flex flex-wrap gap-2 mt-1">
       {% for tag in review.tags.all %}
-        <span class="tag-sensorial bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full shadow-sm transition">
+        <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full shadow-sm">
           {{ tag.name }}
         </span>
       {% endfor %}

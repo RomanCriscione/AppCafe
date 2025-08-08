@@ -20,6 +20,7 @@ from reviews.utils.geo import haversine_distance
 from statistics import mean
 from reviews.utils.tags import get_tags_grouped_by_cafe
 from core.messages import MESSAGES
+from django.urls import reverse
 
 
 # Listar reseñas agrupadas por zona
@@ -36,26 +37,64 @@ class ReviewListView(ListView):
         context = super().get_context_data(**kwargs)
         request = self.request
 
-        # --- Filtros básicos ---
-        context['zonas_disponibles'] = Cafe.objects.values_list('location', flat=True).distinct().order_by('location')
+        # --- Zonas y orden actuales (para los selects) ---
+        context['zonas_disponibles'] = (
+            Cafe.objects.values_list('location', flat=True)
+            .distinct()
+            .order_by('location')
+        )
         context['zona_seleccionada'] = request.GET.get('zona')
         context['orden_actual'] = request.GET.get('orden')
-        context['tags_seleccionados'] = [int(t) for t in request.GET.getlist('tags')]
 
-        # --- Todas las etiquetas (para el segundo bloque simple) ---
-        tags = Tag.objects.order_by('category', 'name')
-        context['tags'] = tags
+        # --- Características booleanas disponibles (coinciden con name="" del form) ---
+        boolean_keys = [
+            'has_wifi',
+            'has_air_conditioning',
+            'serves_alcohol',
+            'is_pet_friendly',
+            'is_vegan_friendly',
+            'has_outdoor_seating',
+            'has_parking',
+            'is_accessible',
+            'has_vegetarian_options',
+            'has_books_or_games',
+        ]
+        context['campos_activos'] = {k: (request.GET.get(k) == 'on') for k in boolean_keys}
 
-        # --- Etiquetas agrupadas por categoría (para el bloque "por percepción") ---
-        tag_categorias = {}
-        for tag in tags:
-            tag_categorias.setdefault(tag.category, []).append(tag)
-        context['tag_categorias'] = tag_categorias
+        # --- Mostrar botón "Ver todos" si hay filtros o ubicación aplicados ---
+        context['mostrar_boton_reset'] = any([
+            request.GET.get('zona'),
+            request.GET.get('orden'),
+            request.GET.get('lat'),
+            request.GET.get('lon'),
+            *[request.GET.get(k) for k in boolean_keys],
+        ])
 
-        # --- Etiquetas aplicadas a cada café con conteo ---
-        context['tag_data'] = get_tags_grouped_by_cafe(self._cafes_finales)
+        # --- Favoritos del usuario (para pintar corazones en _cafe_card.html) ---
+        if request.user.is_authenticated:
+            context['favoritos_ids'] = set(
+                request.user.favorite_cafes.values_list('id', flat=True)
+            )
+        else:
+            context['favoritos_ids'] = set()
+
+        # --- Datos para el mapa (Leaflet) ---
+        cafes = context.get('cafes', [])
+        cafes_data = []
+        for c in cafes:
+            # c puede venir de queryset o ser una instancia directa
+            cafes_data.append({
+                'id': c.id,
+                'name': c.name,
+                'latitude': c.latitude,
+                'longitude': c.longitude,
+                'url': str(reverse_lazy('cafe_detail', args=[c.id])),
+            })
+        context['cafes_json'] = json.dumps(cafes_data, cls=DjangoJSONEncoder)
 
         return context
+
+
 
 
 class CafeListView(ListView):
@@ -156,20 +195,57 @@ class CafeListView(ListView):
         return cafes
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        request = self.request
+            context = super().get_context_data(**kwargs)
+            request = self.request
 
-        # --- Filtros de zonas y orden ---
-        context['zonas_disponibles'] = Cafe.objects.values_list('location', flat=True).distinct().order_by('location')
-        context['zona_seleccionada'] = request.GET.get('zona')
-        context['orden_actual'] = request.GET.get('orden')
+            # Selects
+            context['zonas_disponibles'] = (
+                Cafe.objects.values_list('location', flat=True)
+                .distinct()
+                .order_by('location')
+            )
+            context['zona_seleccionada'] = request.GET.get('zona')
+            context['orden_actual'] = request.GET.get('orden')
 
-        # 👇 Quitamos completamente tags dinámicos de reseñas
-        # context['tags'] = []
-        # context['tag_categorias'] = {}
-        # context['tag_data'] = {}
+            # Booleanos (coinciden con los name="" del form)
+            boolean_keys = [
+                'has_wifi', 'has_air_conditioning', 'serves_alcohol', 'is_pet_friendly',
+                'is_vegan_friendly', 'has_outdoor_seating', 'has_parking', 'is_accessible',
+                'has_vegetarian_options', 'has_books_or_games'
+            ]
+            context['campos_activos'] = {k: (request.GET.get(k) == 'on') for k in boolean_keys}
 
-        return context
+            # Mostrar botón “Ver todos” si hay filtros/ubicación
+            context['mostrar_boton_reset'] = any([
+                request.GET.get('zona'),
+                request.GET.get('orden'),
+                request.GET.get('lat'),
+                request.GET.get('lon'),
+                *[request.GET.get(k) for k in boolean_keys],
+            ])
+
+            # IDs de favoritos para _cafe_card
+            if request.user.is_authenticated:
+                context['favoritos_ids'] = set(
+                    request.user.favorite_cafes.values_list('id', flat=True)
+                )
+            else:
+                context['favoritos_ids'] = set()
+
+            # ✅ JSON para el mapa (robusto y listo para usar)
+            cafes = context.get('cafes', [])
+            cafes_data = []
+            for c in cafes:
+                cafes_data.append({
+                    'id': c.id,
+                    'name': c.name,
+                    'latitude': float(c.latitude) if c.latitude is not None else None,
+                    'longitude': float(c.longitude) if c.longitude is not None else None,
+                    'url': reverse('cafe_detail', args=[c.id]),
+                })
+            context['cafes_json'] = json.dumps(cafes_data, cls=DjangoJSONEncoder)
+
+            return context
 
 
 

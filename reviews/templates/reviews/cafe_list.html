@@ -46,7 +46,7 @@
         {% for key, activo in campos_activos.items %}
           <label class="block">
             <input type="checkbox" name="{{ key }}" {% if activo %}checked{% endif %}>
-            {{ key|capfirst|replace:"_| " }}
+            {{ key|replace:"_| "|capfirst }}
           </label>
         {% endfor %}
       </fieldset>

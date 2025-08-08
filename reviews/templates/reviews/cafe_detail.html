@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-  {% load static %}
+{% load static %}
 
 {% block meta %}
   <meta property="og:title" content="{{ cafe.name }} - Cafetería en {{ cafe.location }}" />
@@ -42,7 +42,7 @@
   </p>
 
   <!-- Etiquetas destacadas -->
-  {% if cafe.tags.exists %}
+  {% if cafe.tags.all %}
     <div class="animate-fade-in-up animate-delay-300">
       <h2 class="text-lg font-semibold text-gray-800 mb-2">🏷️ Etiquetas destacadas del lugar:</h2>
       <div class="flex flex-wrap gap-2">
@@ -113,57 +113,55 @@
     </form>
   {% endif %}
 
-<!-- Reseñas -->
-<h3 class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-1000">Reseñas:</h3>
-<div id="review-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 transition-all duration-300 max-h-[1056px] overflow-hidden relative animate-fade-in-up animate-delay-1100">
-  {% for review in reviews %}
-    {% include "reviews/_review_card.html" with review=review %}
-  {% empty %}
-    <p class="text-gray-500 text-sm col-span-full">
-      {{ ui_messages.no_reviews }}
-    </p>
-  {% endfor %}
+  <!-- Reseñas -->
+  <h3 class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-1000">Reseñas:</h3>
+  <div id="review-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 transition-all duration-300 max-h-[1056px] overflow-hidden relative animate-fade-in-up animate-delay-1100">
+    {% for review in reviews %}
+      {% include "reviews/_review_card.html" with review=review %}
+    {% empty %}
+      <p class="text-gray-500 text-sm col-span-full">
+        {{ ui_messages.no_reviews }}
+      </p>
+    {% endfor %}
+    {% if reviews|length > 3 %}
+      <div id="fade-reviews" class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+    {% endif %}
+  </div>
+
   {% if reviews|length > 3 %}
-    <div id="fade-reviews" class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+    <button onclick="toggleReviews()" id="btn-reviews" class="text-sm text-blue-600 mt-1 hover:underline animate-fade-in-up animate-delay-1300">Ver todas</button>
   {% endif %}
-</div>
 
-{% if reviews|length > 3 %}
-  <button onclick="toggleReviews()" id="btn-reviews" class="text-sm text-blue-600 mt-1 hover:underline animate-fade-in-up animate-delay-1300">Ver todas</button>
-{% endif %}
+  <!-- Modal Wizard -->
+  <div id="modal-review"
+       class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm hidden z-50 opacity-0 transition-opacity duration-300 flex items-center justify-center">
+    <div id="modal-content"
+         class="bg-white w-full max-w-xl rounded-2xl shadow-xl p-6 relative transform scale-95 transition-all duration-300">
+      <button id="close-modal-btn"
+              class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl transition">
+        <i class="fas fa-times"></i>
+      </button>
 
-<!-- Modal Wizard -->
-<div id="modal-review"
-     class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm hidden z-50 opacity-0 transition-opacity duration-300 flex items-center justify-center">
-  <div id="modal-content"
-       class="bg-white w-full max-w-xl rounded-2xl shadow-xl p-6 relative transform scale-95 transition-all duration-300">
-    <button id="close-modal-btn"
-            class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl transition">
-      <i class="fas fa-times"></i>
-    </button>
+      <!-- Contenedor pasos -->
+      <div id="wizard-steps" class="transition-transform duration-500 ease-in-out">
+        {% include "reviews/includes/review_wizard_step1.html" %}
+        {% include "reviews/includes/review_wizard_step2.html" with tag_choices=tag_choices %}
+      </div>
 
-    <!-- Contenedor pasos -->
-    <div id="wizard-steps" class="transition-transform duration-500 ease-in-out">
-      {% include "reviews/includes/review_wizard_step1.html" %}
-      {% include "reviews/includes/review_wizard_step2.html" with tag_choices=tag_choices %}
-    </div>
-
-    <!-- Mensaje de confirmación -->
-    <div id="thank-you-message"
-          class="hidden text-center py-6">
-      <h2 class="text-2xl font-semibold text-green-600 mb-4">¡Gracias por tu reseña! ☕</h2>
-      <p class="text-gray-700">Tu opinión nos ayuda a mejorar la experiencia de todos.</p>
+      <!-- Mensaje de confirmación -->
+      <div id="thank-you-message" class="hidden text-center py-6">
+        <h2 class="text-2xl font-semibold text-green-600 mb-4">¡Gracias por tu reseña! ☕</h2>
+        <p class="text-gray-700">Tu opinión nos ayuda a mejorar la experiencia de todos.</p>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Botón flotante -->
-<button id="open-modal-btn"
-        class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-primary to-blue-700 text-white font-semibold px-5 py-3 rounded-full shadow-lg hover:scale-110 transition-transform duration-300 flex items-center gap-2">
-  <i class="fas fa-pen"></i>
-  <span class="hidden sm:inline">Dejá tu reseña</span>
-</button>
-
+  <!-- Botón flotante -->
+  <button id="open-modal-btn"
+          class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-primary to-blue-700 text-white font-semibold px-5 py-3 rounded-full shadow-lg hover:scale-110 transition-transform duration-300 flex items-center gap-2">
+    <i class="fas fa-pen"></i>
+    <span class="hidden sm:inline">Dejá tu reseña</span>
+  </button>
 
 </div>
 {% endblock %}
@@ -177,6 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const stars = document.querySelectorAll('#rating-stars label');
   const radios = document.querySelectorAll('#rating-stars input');
   const ratingLabel = document.getElementById('rating-label');
+  if (!stars.length || !radios.length || !ratingLabel) return;
+
   const labels = { 5: "Excelente", 4: "Muy bueno", 3: "Bueno", 2: "Regular", 1: "Malo" };
 
   function updateRatingVisual() {
@@ -202,6 +202,8 @@ function toggleReviews() {
   const container = document.getElementById("review-container");
   const btn = document.getElementById("btn-reviews");
   const fade = document.getElementById("fade-reviews");
+  if (!container || !btn) return;
+
   const collapsed = container.classList.contains("max-h-[1056px]");
   container.classList.toggle("max-h-[1056px]", !collapsed);
   container.classList.toggle("overflow-hidden", !collapsed);
@@ -220,6 +222,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const thankYouMessage = document.getElementById("thank-you-message");
   const wizardStepsContainer = document.getElementById("wizard-steps");
 
+  if (!modal || !modalContent || !openBtn || !closeBtn || !wizardStepsContainer || !thankYouMessage) return;
+
   function openModal() {
     modal.setAttribute("aria-hidden", "false");
     modal.classList.remove("hidden");
@@ -231,20 +235,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 10);
   }
   function closeModal() {
-  modal.setAttribute("aria-hidden", "true");
-  modal.classList.replace("opacity-100", "opacity-0");
-  modalContent.classList.replace("scale-100", "scale-95");
-  setTimeout(() => {
-    modal.classList.remove("flex");
-    modal.classList.add("hidden");
-
-    // 🔄 Reset del wizard al cerrar
-    wizardStepsContainer.classList.remove("hidden");
-    thankYouMessage.classList.add("hidden");
-    currentStepIndex = 0;
-    showStep(currentStepIndex);
-  }, 300);
-}
+    modal.setAttribute("aria-hidden", "true");
+    modal.classList.replace("opacity-100", "opacity-0");
+    modalContent.classList.replace("scale-100", "scale-95");
+    setTimeout(() => {
+      modal.classList.remove("flex");
+      modal.classList.add("hidden");
+      // Reset wizard
+      wizardStepsContainer.classList.remove("hidden");
+      thankYouMessage.classList.add("hidden");
+      currentStepIndex = 0;
+      showStep(currentStepIndex);
+    }, 300);
+  }
 
   openBtn.addEventListener("click", openModal);
   closeBtn.addEventListener("click", closeModal);
@@ -269,20 +272,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   function showNextCategory() {
     if (currentStepIndex === 1) {
-      // Ocultar la categoría actual
+      if (!tagCategorySteps.length) return;
       tagCategorySteps[currentCategoryIndex].classList.add("hidden");
-
-      // Si no es la última categoría, mostrar la siguiente
       if (currentCategoryIndex < tagCategorySteps.length - 1) {
         currentCategoryIndex++;
         tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
       } else {
-        // Última categoría → enviar reseña
-        document.getElementById("review-form-step-1").requestSubmit();
+        const form = document.getElementById("review-form-step-1");
+        if (form) form.requestSubmit();
       }
     }
   }
-
   function showPrevCategory() {
     if (currentStepIndex === 1 && currentCategoryIndex > 0) {
       tagCategorySteps[currentCategoryIndex].classList.add("hidden");
@@ -297,33 +297,23 @@ document.addEventListener("DOMContentLoaded", () => {
     else { showNextCategory(); }
   }));
   prevButtons.forEach(btn => btn.addEventListener("click", showPrevCategory));
-  skipButtons.forEach(btn => btn.addEventListener("click", () => { document.getElementById("review-form-step-1").requestSubmit(); }));
+  skipButtons.forEach(btn => btn.addEventListener("click", () => {
+    const form = document.getElementById("review-form-step-1");
+    if (form) form.requestSubmit();
+  }));
 
-  // Al enviar formulario → mostrar mensaje de agradecimiento
+  // Al enviar formulario → gracias
   const reviewForm = document.getElementById("review-form-step-1");
-  reviewForm.addEventListener("submit", (e) => {
-    e.preventDefault(); // Evitamos recarga completa
-    wizardStepsContainer.classList.add("hidden");
-    thankYouMessage.classList.remove("hidden");
-    setTimeout(closeModal, 2000); // Cierra modal luego de 2 segundos
-  });
+  if (reviewForm) {
+    reviewForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      wizardStepsContainer.classList.add("hidden");
+      thankYouMessage.classList.remove("hidden");
+      setTimeout(closeModal, 2000);
+    });
+  }
 
   showStep(currentStepIndex);
-});
-
-// -----------------------------
-// Truncado dinámico de reseñas
-// -----------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".review-card").forEach(card => {
-    const text = card.querySelector(".review-text");
-    const btn = card.querySelector(".toggle-review");
-    if (text.scrollHeight > text.clientHeight) btn.classList.remove("hidden");
-    btn.addEventListener("click", () => {
-      text.classList.toggle("line-clamp-4");
-      btn.textContent = text.classList.contains("line-clamp-4") ? "Ver más" : "Ver menos";
-    });
-  });
 });
 
 // -----------------------------
@@ -332,63 +322,72 @@ document.addEventListener("DOMContentLoaded", () => {
 let currentImageIndex = 0;
 
 function openLightbox(index) {
-  const images = Array.from(document.querySelectorAll('.photo-thumb img'))
-    .filter(img => img && img.src);
-
+  const thumbs = document.querySelectorAll('.photo-thumb img');
+  const images = Array.from(thumbs).filter(img => img && img.src);
   if (!images.length || index < 0 || index >= images.length) return;
 
   const selected = images[index];
-  document.getElementById("lightbox-image").src = selected.src;
-  document.getElementById("lightbox-image").alt = selected.alt || "";
-  document.getElementById("lightbox-caption").textContent = selected.alt || "";
-
+  const img = document.getElementById("lightbox-image");
+  const caption = document.getElementById("lightbox-caption");
   const modal = document.getElementById('lightbox-modal');
+  if (!img || !caption || !modal) return;
+
+  img.src = selected.src;
+  img.alt = selected.alt || "";
+  caption.textContent = selected.alt || "";
+
   modal.classList.remove('hidden');
   modal.classList.add('flex');
 }
 
 function changeLightboxImage(direction) {
-  const images = Array.from(document.querySelectorAll('.photo-thumb img'))
-    .filter(img => img && img.src);
-
+  const thumbs = document.querySelectorAll('.photo-thumb img');
+  const images = Array.from(thumbs).filter(img => img && img.src);
   if (!images.length) return;
 
   currentImageIndex = (currentImageIndex + direction + images.length) % images.length;
   const newImage = images[currentImageIndex];
 
-  document.getElementById("lightbox-image").src = newImage.src;
-  document.getElementById("lightbox-image").alt = newImage.alt || "";
-  document.getElementById("lightbox-caption").textContent = newImage.alt || "";
+  const img = document.getElementById("lightbox-image");
+  const caption = document.getElementById("lightbox-caption");
+  if (!img || !caption) return;
+
+  img.src = newImage.src;
+  img.alt = newImage.alt || "";
+  caption.textContent = newImage.alt || "";
 }
 
-document.getElementById('lightbox-close').addEventListener('click', () => {
+(function initLightbox() {
+  const closeBtn = document.getElementById('lightbox-close');
   const modal = document.getElementById('lightbox-modal');
-  modal.classList.remove('flex');
-  modal.classList.add('hidden');
-});
-
-document.getElementById('lightbox-modal').addEventListener('click', (e) => {
-  if (e.target === e.currentTarget) {
-    e.currentTarget.classList.remove('flex');
-    e.currentTarget.classList.add('hidden');
+  if (closeBtn && modal) {
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    });
+    modal.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        e.currentTarget.classList.remove('flex');
+        e.currentTarget.classList.add('hidden');
+      }
+    });
+    // Swipe en mobile
+    let touchStartX = 0, touchEndX = 0;
+    modal.addEventListener('touchstart', (e) => touchStartX = e.changedTouches[0].screenX);
+    modal.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchEndX < touchStartX - 50) changeLightboxImage(1);
+      if (touchEndX > touchStartX + 50) changeLightboxImage(-1);
+    });
   }
-});
-
-// Swipe en mobile
-let touchStartX = 0, touchEndX = 0;
-const lightboxModal = document.getElementById('lightbox-modal');
-lightboxModal.addEventListener('touchstart', (e) => touchStartX = e.changedTouches[0].screenX);
-lightboxModal.addEventListener('touchend', (e) => {
-  touchEndX = e.changedTouches[0].screenX;
-  if (touchEndX < touchStartX - 50) changeLightboxImage(1);
-  if (touchEndX > touchStartX + 50) changeLightboxImage(-1);
-});
+})();
 
 // -----------------------------
 // Scroll Reveal seguro
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
   const elements = document.querySelectorAll('.animate-fade-in-up');
+  if (!elements.length) return;
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -405,26 +404,5 @@ document.addEventListener("DOMContentLoaded", () => {
     observer.observe(el);
   });
 });
-
-document.addEventListener("DOMContentLoaded", () => {
-  const elements = document.querySelectorAll('.animate-fade-in-up');
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.remove('opacity-0', 'translate-y-5');
-        entry.target.classList.add('animate-fade-in-up-active');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-
-  elements.forEach(el => {
-    el.classList.add('opacity-0', 'translate-y-5'); // estado inicial
-    observer.observe(el);
-  });
-});
 </script>
-
 {% endblock %}
-

@@ -9,6 +9,26 @@
       <i class="fa-solid fa-leaf text-green-500"></i> Opciones veganas
     </div>
   {% endif %}
+  {% if cafe.has_vegetarian_options %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-carrot text-green-500"></i> Vegetariano
+    </div>
+  {% endif %}
+  {% if cafe.has_gluten_free %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-bread-slice text-yellow-600"></i> Sin TACC
+    </div>
+  {% endif %}
+  {% if cafe.has_specialty_coffee %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-mug-hot text-amber-600"></i> Café de especialidad
+    </div>
+  {% endif %}
+  {% if cafe.has_artisanal_pastries %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-cookie text-orange-400"></i> Pastelería artesanal
+    </div>
+  {% endif %}
   {% if cafe.has_outdoor_seating %}
     <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
       <i class="fa-solid fa-chair text-orange-500"></i> Mesas afuera
@@ -24,9 +44,14 @@
       <i class="fa-solid fa-wheelchair text-purple-500"></i> Accesible
     </div>
   {% endif %}
-  {% if cafe.has_vegetarian_options %}
+  {% if cafe.has_air_conditioning %}
     <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-carrot text-green-500"></i> Vegetariano
+      <i class="fa-solid fa-snowflake text-blue-400"></i> Aire acondicionado
+    </div>
+  {% endif %}
+  {% if cafe.has_books_or_games %}
+    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
+      <i class="fa-solid fa-book text-indigo-500"></i> Libros o juegos
     </div>
   {% endif %}
   {% if cafe.serves_breakfast %}
@@ -37,16 +62,6 @@
   {% if cafe.serves_alcohol %}
     <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
       <i class="fa-solid fa-wine-glass text-red-500"></i> Bebidas alcohólicas
-    </div>
-  {% endif %}
-  {% if cafe.has_books_or_games %}
-    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-book text-indigo-500"></i> Libros o juegos
-    </div>
-  {% endif %}
-  {% if cafe.has_air_conditioning %}
-    <div class="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200">
-      <i class="fa-solid fa-snowflake text-blue-400"></i> Aire acondicionado
     </div>
   {% endif %}
 </div>
