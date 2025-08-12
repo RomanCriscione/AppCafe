@@ -1,30 +1,35 @@
 from django.shortcuts import render
-from reviews.models import Review, Cafe
-from django.db.models import Avg
+from django.http import HttpResponse
 from django.urls import reverse
-import json
-from statistics import mean
-from .utils import get_recently_viewed_cafes
+from django.core.serializers.json import DjangoJSONEncoder
+
+from reviews.models import Review, Cafe
 from reviews.utils.tags import get_tags_grouped_by_cafe
 from core import messages as core_messages
 
-# ✅ Función auxiliar para obtener cafés vistos recientemente
+import json
+
+# ✅ Cafés vistos recientemente (desde la sesión)
 def get_recently_viewed_cafes(request):
     cafe_ids = request.session.get("recently_viewed", [])
     return Cafe.objects.filter(id__in=cafe_ids).prefetch_related("tags")
 
-# ✅ Vista principal del home
+# ✅ Home
 def home(request):
     # Últimas reseñas
-    latest_reviews = Review.objects.select_related("user", "cafe").order_by("-created_at")[:6]
+    latest_reviews = (
+        Review.objects.select_related("user", "cafe")
+        .order_by("-created_at")[:6]
+    )
 
     # Cafés con coordenadas (para mapa)
-    cafes_with_coords = Cafe.objects.filter(
-        latitude__isnull=False,
-        longitude__isnull=False
-    ).prefetch_related("tags")
+    cafes_with_coords = (
+        Cafe.objects
+        .filter(latitude__isnull=False, longitude__isnull=False)
+        .prefetch_related("tags")
+    )
 
-    # Datos para el mapa
+    # Datos para el mapa (ojo con Decimals → JSON encoder)
     cafes_data = [
         {
             "id": cafe.id,
@@ -33,7 +38,7 @@ def home(request):
             "location": cafe.location,
             "latitude": cafe.latitude,
             "longitude": cafe.longitude,
-            "url": reverse("cafe_detail", args=[cafe.id])
+            "url": reverse("cafe_detail", args=[cafe.id]),
         }
         for cafe in cafes_with_coords
     ]
@@ -41,7 +46,7 @@ def home(request):
     # Cafés destacados con promedio >= 4
     top_cafes = []
     for cafe in cafes_with_coords:
-        ratings = [review.rating for review in cafe.reviews.all()]
+        ratings = [r.rating for r in cafe.reviews.all()]
         if ratings:
             avg = sum(ratings) / len(ratings)
             if avg >= 4:
@@ -53,16 +58,16 @@ def home(request):
     # Cafés vistos recientemente
     recently_viewed_cafes = get_recently_viewed_cafes(request)
 
-    # 🔹 Zonas dinámicas desde cafés existentes
+    # Zonas dinámicas
     home_zones = Cafe.objects.values_list("location", flat=True).distinct()
 
     context = {
         "latest_reviews": latest_reviews,
         "top_cafes": top_cafes[:6],
-        "cafes_json": json.dumps(cafes_data),
+        "cafes_json": json.dumps(cafes_data, cls=DjangoJSONEncoder),
         "recently_viewed_cafes": recently_viewed_cafes,
         "tag_data": tag_data,
-        "home_zones": home_zones,  # <<--- dinámico
+        "home_zones": home_zones,
         "ui_messages": {
             "welcome": core_messages.MESSAGES.get("welcome_user"),
             "no_results": core_messages.MESSAGES.get("search_no_results"),
@@ -74,20 +79,29 @@ def home(request):
             "owner_welcome": core_messages.MESSAGES.get("welcome_owner"),
             "cafe_added": core_messages.MESSAGES.get("cafe_added"),
             "review_submitted": core_messages.MESSAGES.get("review_sent"),
-        }
+        },
     }
     return render(request, "core/home.html", context)
 
-# ✅ Vista "Acerca de mí"
+# ✅ About
 def about_view(request):
-    return render(request, 'core/about.html')
+    return render(request, "core/about.html")
 
-# ✅ Vista de contacto
+# ✅ Contacto
 def contact_view(request):
     success = False
     if request.method == "POST":
-        name = request.POST.get("name")
-        email = request.POST.get("email")
-        message = request.POST.get("message")
+        # Podés procesar/guardar el mensaje acá si querés
         success = True
     return render(request, "core/contact.html", {"success": success})
+
+# ✅ Sitemap dinámico
+def sitemap_xml(request):
+    cafes = Cafe.objects.only("id").order_by("id")
+    # `render` ya pasa `request` al template → podés usar {{ request.get_host }} ahí
+    return render(
+        request,
+        "core/sitemap.xml",
+        {"cafes": cafes},
+        content_type="application/xml",
+    )

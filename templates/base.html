@@ -16,16 +16,10 @@
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            sans: ['Poppins', 'sans-serif'],
-          },
+          fontFamily: { sans: ['Poppins', 'sans-serif'] },
           colors: {
-            primary: '#1e3a8a',
-            accent: '#2dd4bf',
-            accentHover: '#14b8a6',
-            secondary: '#172c6d',
-            dark: '#111827',
-            light: '#f9fafb'
+            primary: '#1e3a8a', accent: '#2dd4bf', accentHover: '#14b8a6',
+            secondary: '#172c6d', dark: '#111827', light: '#f9fafb'
           }
         }
       }
@@ -38,16 +32,17 @@
   <!-- Custom CSS -->
   <link href="{% static 'css/custom.css' %}" rel="stylesheet" />
 
-  <!-- Font Awesome -->
+  <!-- Font Awesome (CSS) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
 
   <!-- Swiper & Leaflet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-  <style>
-    html, body { overflow-x: hidden; }
-  </style>
+  <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+
+
+  <style>html, body { overflow-x: hidden; }</style>
 </head>
 
 <body class="bg-light text-dark font-sans">
@@ -79,15 +74,15 @@
           {% if user.is_authenticated %}
             <span class="font-semibold text-gray-800">Hola, {{ user.username }}</span>
             {% if user.avatar %}
-              <img src="{{ user.avatar.url }}" alt="Avatar" class="w-8 h-8 rounded-full border object-cover" />
+              <img src="{{ user.avatar.url }}" alt="Avatar de {{ user.username }}" class="w-8 h-8 rounded-full border object-cover" />
             {% endif %}
 
             {% if user.is_owner %}
               <a href="{% url 'create_cafe' %}" class="hover:underline">➕ Agregar Café</a>
               <a href="{% url 'owner_dashboard' %}" class="hover:underline">Mis Cafés</a>
             {% else %}
-              <a href="{% url 'register_owner' %}" 
-                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md font-medium transition flex items-center gap-2">
+              <a href="{% url 'register_owner' %}"
+                 class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md font-medium transition flex items-center gap-2">
                 <i class="fas fa-coffee text-sm"></i> Registrar tu café
               </a>
             {% endif %}
@@ -95,12 +90,12 @@
             <a href="{% url 'account_logout' %}" class="text-red-500 hover:underline text-sm">Cerrar sesión</a>
           {% else %}
             <a href="{% url 'account_login' %}" class="text-primary hover:underline">Iniciar sesión</a>
-            <a href="{% url 'account_signup' %}" 
-              class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-md font-medium transition">
+            <a href="{% url 'account_signup' %}"
+               class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-md font-medium transition">
               Registrarse
             </a>
-            <a href="{% url 'register_owner' %}" 
-              class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md font-medium transition flex items-center gap-2">
+            <a href="{% url 'register_owner' %}"
+               class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md font-medium transition flex items-center gap-2">
               <i class="fas fa-coffee text-sm"></i> Registrar tu café
             </a>
           {% endif %}
@@ -113,11 +108,7 @@
       document.addEventListener("DOMContentLoaded", function () {
         const toggle = document.getElementById("menu-toggle");
         const menu = document.getElementById("navbar-menu");
-        if (toggle && menu) {
-          toggle.addEventListener("click", () => {
-            menu.classList.toggle("hidden");
-          });
-        }
+        if (toggle && menu) toggle.addEventListener("click", () => menu.classList.toggle("hidden"));
       });
     </script>
 
@@ -127,13 +118,9 @@
         <div class="fixed top-4 right-4 z-50 space-y-2">
           {% for message in messages %}
             <div class="px-4 py-2 rounded shadow text-white alert-message
-                        {% if message.tags == 'success' %}
-                            bg-green-500
-                        {% elif message.tags == 'error' %}
-                            bg-red-500
-                        {% else %}
-                            bg-blue-500
-                        {% endif %}">
+                        {% if message.tags == 'success' %} bg-green-500
+                        {% elif message.tags == 'error' %} bg-red-500
+                        {% else %} bg-blue-500 {% endif %}">
               {{ message }}
             </div>
           {% endfor %}
@@ -149,30 +136,24 @@
     </footer>
   </div>
 
-  <!-- Scripts -->
+  <!-- JS externos (defer) -->
   <script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-  <script defer src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  {% block scripts %}{% endblock %}
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script defer src="{% static 'js/main.js' %}"></script>
 
-  <!-- Swiper + Alert logic -->
+  <!-- Lógica común (alerts + swiper init básico) -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      new Swiper('.swiper-container', {
-        slidesPerView: 'auto',
-        spaceBetween: 16,
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev',
-        },
-        pagination: {
-          el: '.swiper-pagination',
-          clickable: true,
-        },
-      });
-
-      const alerts = document.querySelectorAll('.alert-message');
-      alerts.forEach(alert => {
+      if (document.querySelector('.swiper-container')) {
+        new Swiper('.swiper-container', {
+          slidesPerView: 'auto',
+          spaceBetween: 16,
+          navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+          pagination: { el: '.swiper-pagination', clickable: true },
+        });
+      }
+      document.querySelectorAll('.alert-message').forEach(alert => {
         setTimeout(() => {
           alert.classList.add('opacity-0', 'transition-opacity', 'duration-500');
           setTimeout(() => alert.remove(), 500);
@@ -180,5 +161,7 @@
       });
     });
   </script>
+
+  {% block scripts %}{% endblock %}
 </body>
 </html>

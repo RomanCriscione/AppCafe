@@ -21,6 +21,8 @@ from statistics import mean
 from reviews.utils.tags import get_tags_grouped_by_cafe
 from core.messages import MESSAGES
 from django.urls import reverse
+from django.db.models import F
+from django.templatetags.static import static
 
 
 # Listar reseñas agrupadas por zona
@@ -37,7 +39,7 @@ class ReviewListView(ListView):
         context = super().get_context_data(**kwargs)
         request = self.request
 
-        # --- Zonas y orden actuales (para los selects) ---
+        # Zonas y orden
         context['zonas_disponibles'] = (
             Cafe.objects.values_list('location', flat=True)
             .distinct()
@@ -46,22 +48,15 @@ class ReviewListView(ListView):
         context['zona_seleccionada'] = request.GET.get('zona')
         context['orden_actual'] = request.GET.get('orden')
 
-        # --- Características booleanas disponibles (coinciden con name="" del form) ---
+        # Booleanos
         boolean_keys = [
-            'has_wifi',
-            'has_air_conditioning',
-            'serves_alcohol',
-            'is_pet_friendly',
-            'is_vegan_friendly',
-            'has_outdoor_seating',
-            'has_parking',
-            'is_accessible',
-            'has_vegetarian_options',
-            'has_books_or_games',
+            'has_wifi', 'has_air_conditioning', 'serves_alcohol', 'is_pet_friendly',
+            'is_vegan_friendly', 'has_outdoor_seating', 'has_parking', 'is_accessible',
+            'has_vegetarian_options', 'has_books_or_games',
         ]
         context['campos_activos'] = {k: (request.GET.get(k) == 'on') for k in boolean_keys}
 
-        # --- Mostrar botón "Ver todos" si hay filtros o ubicación aplicados ---
+        # Mostrar botón “Ver todos”
         context['mostrar_boton_reset'] = any([
             request.GET.get('zona'),
             request.GET.get('orden'),
@@ -70,7 +65,7 @@ class ReviewListView(ListView):
             *[request.GET.get(k) for k in boolean_keys],
         ])
 
-        # --- Favoritos del usuario (para pintar corazones en _cafe_card.html) ---
+        # Favoritos del usuario
         if request.user.is_authenticated:
             context['favoritos_ids'] = set(
                 request.user.favorite_cafes.values_list('id', flat=True)
@@ -78,23 +73,26 @@ class ReviewListView(ListView):
         else:
             context['favoritos_ids'] = set()
 
-        # --- Datos para el mapa (Leaflet) ---
-        cafes = context.get('cafes', [])
-        cafes_data = []
-        for c in cafes:
-            # c puede venir de queryset o ser una instancia directa
-            cafes_data.append({
+        # Datos para el mapa (Leaflet) — consulta directa, liviana
+        cafes = (
+            Cafe.objects
+                .only('id', 'name', 'latitude', 'longitude')
+                .exclude(latitude__isnull=True)
+                .exclude(longitude__isnull=True)
+        )
+        cafes_data = [
+            {
                 'id': c.id,
                 'name': c.name,
-                'latitude': c.latitude,
-                'longitude': c.longitude,
-                'url': str(reverse_lazy('cafe_detail', args=[c.id])),
-            })
+                'latitude': float(c.latitude),
+                'longitude': float(c.longitude),
+                'url': reverse('cafe_detail', args=[c.id]),
+            }
+            for c in cafes
+        ]
         context['cafes_json'] = json.dumps(cafes_data, cls=DjangoJSONEncoder)
 
         return context
-
-
 
 
 class CafeListView(ListView):
@@ -259,55 +257,50 @@ def cafe_detail(request, cafe_id):
     average_rating = round(mean(ratings), 1) if ratings else None
     best_review = reviews[0] if reviews else None
 
-    # 👉 Guardar el café en sesión como "visto recientemente"
+    # Guardar "visto recientemente"
     viewed = request.session.get("recently_viewed", [])
     if cafe.id in viewed:
         viewed.remove(cafe.id)
     viewed.insert(0, cafe.id)
     request.session["recently_viewed"] = viewed[:5]
 
-    # Manejo del formulario de reseña
-    if request.method == "POST":
-        form = ReviewForm(request.POST)
-        if form.is_valid() and request.user.is_authenticated:
-            review, created = Review.objects.get_or_create(
-                user=request.user,
-                cafe=cafe,
-                defaults={
-                    "comment": form.cleaned_data["comment"],
-                    "rating": form.cleaned_data["rating"],
-                }
-            )
-            if not created:
-                review.comment = form.cleaned_data["comment"]
-                review.rating = form.cleaned_data["rating"]
-                review.save()
-            review.tags.set(form.cleaned_data["tags"])  # Asociar etiquetas
-            messages.success(request, "¡Gracias por tu reseña!")
-            return redirect("cafe_detail", cafe_id=cafe.id)
-    else:
-        if request.user.is_authenticated:
-            try:
-                existing_review = Review.objects.get(user=request.user, cafe=cafe)
-                form = ReviewForm(instance=existing_review)
-            except Review.DoesNotExist:
-                form = ReviewForm()
-        else:
+    # Preparar formulario (sin manejar POST acá)
+    if request.user.is_authenticated:
+        try:
+            existing_review = Review.objects.get(user=request.user, cafe=cafe)
+            form = ReviewForm(instance=existing_review)
+        except Review.DoesNotExist:
             form = ReviewForm()
+    else:
+        form = ReviewForm()
 
-    # ✅ Agrupar TODAS las etiquetas por categoría (no solo sensorial)
+    # Agrupar TODAS las etiquetas por categoría
     all_tags = Tag.objects.all().order_by("category", "name")
     tag_groups = defaultdict(list)
     for tag in all_tags:
         tag_groups[tag.category].append(tag)
 
-    # Etiquetas sensoriales destacadas (para el bloque resumen del detalle)
+    # Etiquetas sensoriales destacadas
     sensory_tags = Tag.objects.filter(reviews__cafe=cafe).distinct().order_by('category', 'name')
 
-    # Obtener cafés recomendados por calificación promedio
+    # Recomendados por calificación
     recommended_cafes = Cafe.objects.annotate(
         average_rating=Avg('reviews__rating')
     ).filter(average_rating__isnull=False).exclude(id=cafe.id).order_by('-average_rating')[:4]
+    full_page_url = request.build_absolute_uri(
+    reverse('cafe_detail', args=[cafe.id])
+    )
+    # Elegimos la mejor imagen disponible o un fallback
+    if cafe.photo1:
+        og_image_path = cafe.photo1.url
+    elif cafe.photo2:
+        og_image_path = cafe.photo2.url
+    elif cafe.photo3:
+        og_image_path = cafe.photo3.url
+    else:
+        og_image_path = static('img/og-default.jpg')  # <-- creá este archivo
+
+    full_image_url = request.build_absolute_uri(og_image_path)
 
     return render(request, "reviews/cafe_detail.html", {
         "cafe": cafe,
@@ -316,10 +309,11 @@ def cafe_detail(request, cafe_id):
         "best_review": best_review,
         "form": form,
         "recommended_cafes": recommended_cafes,
-        "tag_choices": dict(tag_groups),  # 👈 ahora manda todas las categorías
+        "tag_choices": dict(tag_groups),
         "sensory_tags": sensory_tags,
+        "full_page_url": full_page_url,
+        "full_image_url": full_image_url, 
     })
-
 
 
 @login_required
@@ -634,7 +628,7 @@ def nearby_cafes(request):
             'address': c.address,
             'location': c.location,
             'distance_km': round(dist, 2),
-            'url': reverse_lazy('cafe_detail', args=[c.id]),
+            'url': reverse('cafe_detail', args=[c.id]),
         }
         for c, dist in cafes_ordenados
     ]
@@ -710,7 +704,7 @@ def mapa_cafes(request):
             'longitude': cafe.longitude,
             'address': cafe.address,
             'location': cafe.location,
-            'url': reverse_lazy('cafe_detail', args=[cafe.id]),
+            'url': reverse('cafe_detail', args=[cafe.id]),
         }
         for cafe in cafes
     ]

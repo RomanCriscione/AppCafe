@@ -26,7 +26,11 @@
   <div class="mb-4 text-gray-700 space-y-1 animate-fade-in-up animate-delay-100">
     <p>📍 <strong>Dirección:</strong> {{ cafe.address }}, {{ cafe.location }}</p>
     <p>☎ <strong>Teléfono:</strong> {{ cafe.phone }}</p>
-    <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}" target="_blank" class="text-blue-600 hover:underline">📍 Ver en Google Maps</a>
+    <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
+       target="_blank"
+       class="text-blue-600 hover:underline">
+       📍 Ver en Google Maps
+    </a>
   </div>
 
   <!-- Plan -->
@@ -166,243 +170,244 @@
 </div>
 {% endblock %}
 
+{# ==== DEJAR UN SOLO BLOQUE SCRIPTS ==== #}
 {% block scripts %}
-<script>
-// -----------------------------
-// ⭐ Estrellas de calificación
-// -----------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  const stars = document.querySelectorAll('#rating-stars label');
-  const radios = document.querySelectorAll('#rating-stars input');
-  const ratingLabel = document.getElementById('rating-label');
-  if (!stars.length || !radios.length || !ratingLabel) return;
+  {{ block.super }}
+  <script>
+  // -----------------------------
+  // ⭐ Estrellas de calificación
+  // -----------------------------
+  document.addEventListener("DOMContentLoaded", () => {
+    const stars = document.querySelectorAll('#rating-stars label');
+    const radios = document.querySelectorAll('#rating-stars input');
+    const ratingLabel = document.getElementById('rating-label');
+    if (!stars.length || !radios.length || !ratingLabel) return;
 
-  const labels = { 5: "Excelente", 4: "Muy bueno", 3: "Bueno", 2: "Regular", 1: "Malo" };
+    const labels = { 5: "Excelente", 4: "Muy bueno", 3: "Bueno", 2: "Regular", 1: "Malo" };
 
-  function updateRatingVisual() {
-    const selected = Array.from(radios).find(r => r.checked)?.value;
-    stars.forEach(star => {
-      const value = star.dataset.value;
-      star.classList.toggle('text-yellow-400', selected == value);
-      star.classList.toggle('scale-110', selected == value);
-      star.classList.toggle('opacity-100', selected == value);
-      star.classList.toggle('text-gray-300', selected != value);
-      star.classList.toggle('opacity-50', selected != value);
-    });
-    ratingLabel.textContent = selected ? labels[selected] : "";
-  }
-  radios.forEach(radio => radio.addEventListener('change', updateRatingVisual));
-  updateRatingVisual();
-});
-
-// -----------------------------
-// Mostrar/Ocultar reseñas
-// -----------------------------
-function toggleReviews() {
-  const container = document.getElementById("review-container");
-  const btn = document.getElementById("btn-reviews");
-  const fade = document.getElementById("fade-reviews");
-  if (!container || !btn) return;
-
-  const collapsed = container.classList.contains("max-h-[1056px]");
-  container.classList.toggle("max-h-[1056px]", !collapsed);
-  container.classList.toggle("overflow-hidden", !collapsed);
-  if (fade) fade.style.display = collapsed ? "block" : "none";
-  btn.textContent = collapsed ? "Ver todas" : "Ver menos";
-}
-
-// -----------------------------
-// Modal animado + Wizard
-// -----------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  const modal = document.getElementById("modal-review");
-  const modalContent = document.getElementById("modal-content");
-  const openBtn = document.getElementById("open-modal-btn");
-  const closeBtn = document.getElementById("close-modal-btn");
-  const thankYouMessage = document.getElementById("thank-you-message");
-  const wizardStepsContainer = document.getElementById("wizard-steps");
-
-  if (!modal || !modalContent || !openBtn || !closeBtn || !wizardStepsContainer || !thankYouMessage) return;
-
-  function openModal() {
-    modal.setAttribute("aria-hidden", "false");
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-    setTimeout(() => {
-      modal.classList.replace("opacity-0", "opacity-100");
-      modalContent.classList.replace("scale-95", "scale-100");
-      modalContent.focus();
-    }, 10);
-  }
-  function closeModal() {
-    modal.setAttribute("aria-hidden", "true");
-    modal.classList.replace("opacity-100", "opacity-0");
-    modalContent.classList.replace("scale-100", "scale-95");
-    setTimeout(() => {
-      modal.classList.remove("flex");
-      modal.classList.add("hidden");
-      // Reset wizard
-      wizardStepsContainer.classList.remove("hidden");
-      thankYouMessage.classList.add("hidden");
-      currentStepIndex = 0;
-      showStep(currentStepIndex);
-    }, 300);
-  }
-
-  openBtn.addEventListener("click", openModal);
-  closeBtn.addEventListener("click", closeModal);
-  modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
-
-  // Wizard steps
-  const steps = document.querySelectorAll(".wizard-step");
-  const nextButtons = document.querySelectorAll(".next-btn");
-  const prevButtons = document.querySelectorAll(".prev-btn");
-  const skipButtons = document.querySelectorAll(".skip-btn");
-  let currentStepIndex = 0;
-  let tagCategorySteps = [];
-  let currentCategoryIndex = 0;
-
-  function showStep(index) {
-    steps.forEach((step, i) => step.classList.toggle("hidden", i !== index));
-    if (index === 1) {
-      tagCategorySteps = document.querySelectorAll(".tag-category-step");
-      tagCategorySteps.forEach((cat, i) => cat.classList.toggle("hidden", i !== 0));
-      currentCategoryIndex = 0;
+    function updateRatingVisual() {
+      const selected = Array.from(radios).find(r => r.checked)?.value;
+      stars.forEach(star => {
+        const value = star.dataset.value;
+        star.classList.toggle('text-yellow-400', selected == value);
+        star.classList.toggle('scale-110', selected == value);
+        star.classList.toggle('opacity-100', selected == value);
+        star.classList.toggle('text-gray-300', selected != value);
+        star.classList.toggle('opacity-50', selected != value);
+      });
+      ratingLabel.textContent = selected ? labels[selected] : "";
     }
-  }
-  function showNextCategory() {
-    if (currentStepIndex === 1) {
-      if (!tagCategorySteps.length) return;
-      tagCategorySteps[currentCategoryIndex].classList.add("hidden");
-      if (currentCategoryIndex < tagCategorySteps.length - 1) {
-        currentCategoryIndex++;
-        tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
-      } else {
-        const form = document.getElementById("review-form-step-1");
-        if (form) form.requestSubmit();
-      }
-    }
-  }
-  function showPrevCategory() {
-    if (currentStepIndex === 1 && currentCategoryIndex > 0) {
-      tagCategorySteps[currentCategoryIndex].classList.add("hidden");
-      currentCategoryIndex--;
-      tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
-    } else if (currentStepIndex === 1 && currentCategoryIndex === 0) {
-      currentStepIndex = 0; showStep(currentStepIndex);
-    }
-  }
-  nextButtons.forEach(btn => btn.addEventListener("click", () => {
-    if (currentStepIndex === 0) { currentStepIndex = 1; showStep(currentStepIndex); }
-    else { showNextCategory(); }
-  }));
-  prevButtons.forEach(btn => btn.addEventListener("click", showPrevCategory));
-  skipButtons.forEach(btn => btn.addEventListener("click", () => {
-    const form = document.getElementById("review-form-step-1");
-    if (form) form.requestSubmit();
-  }));
-
-  // Al enviar formulario → gracias
-  const reviewForm = document.getElementById("review-form-step-1");
-  if (reviewForm) {
-    reviewForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      wizardStepsContainer.classList.add("hidden");
-      thankYouMessage.classList.remove("hidden");
-      setTimeout(closeModal, 2000);
-    });
-  }
-
-  showStep(currentStepIndex);
-});
-
-// -----------------------------
-// Lightbox con protección
-// -----------------------------
-let currentImageIndex = 0;
-
-function openLightbox(index) {
-  const thumbs = document.querySelectorAll('.photo-thumb img');
-  const images = Array.from(thumbs).filter(img => img && img.src);
-  if (!images.length || index < 0 || index >= images.length) return;
-
-  const selected = images[index];
-  const img = document.getElementById("lightbox-image");
-  const caption = document.getElementById("lightbox-caption");
-  const modal = document.getElementById('lightbox-modal');
-  if (!img || !caption || !modal) return;
-
-  img.src = selected.src;
-  img.alt = selected.alt || "";
-  caption.textContent = selected.alt || "";
-
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
-}
-
-function changeLightboxImage(direction) {
-  const thumbs = document.querySelectorAll('.photo-thumb img');
-  const images = Array.from(thumbs).filter(img => img && img.src);
-  if (!images.length) return;
-
-  currentImageIndex = (currentImageIndex + direction + images.length) % images.length;
-  const newImage = images[currentImageIndex];
-
-  const img = document.getElementById("lightbox-image");
-  const caption = document.getElementById("lightbox-caption");
-  if (!img || !caption) return;
-
-  img.src = newImage.src;
-  img.alt = newImage.alt || "";
-  caption.textContent = newImage.alt || "";
-}
-
-(function initLightbox() {
-  const closeBtn = document.getElementById('lightbox-close');
-  const modal = document.getElementById('lightbox-modal');
-  if (closeBtn && modal) {
-    closeBtn.addEventListener('click', () => {
-      modal.classList.remove('flex');
-      modal.classList.add('hidden');
-    });
-    modal.addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) {
-        e.currentTarget.classList.remove('flex');
-        e.currentTarget.classList.add('hidden');
-      }
-    });
-    // Swipe en mobile
-    let touchStartX = 0, touchEndX = 0;
-    modal.addEventListener('touchstart', (e) => touchStartX = e.changedTouches[0].screenX);
-    modal.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-      if (touchEndX < touchStartX - 50) changeLightboxImage(1);
-      if (touchEndX > touchStartX + 50) changeLightboxImage(-1);
-    });
-  }
-})();
-
-// -----------------------------
-// Scroll Reveal seguro
-// -----------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  const elements = document.querySelectorAll('.animate-fade-in-up');
-  if (!elements.length) return;
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.remove('opacity-0', 'translate-y-5');
-        entry.target.classList.add('animate-fade-in-up-active');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-
-  elements.forEach(el => {
-    el.classList.add('opacity-0', 'translate-y-5');
-    observer.observe(el);
+    radios.forEach(radio => radio.addEventListener('change', updateRatingVisual));
+    updateRatingVisual();
   });
-});
-</script>
+
+  // -----------------------------
+  // Mostrar/Ocultar reseñas
+  // -----------------------------
+  function toggleReviews() {
+    const container = document.getElementById("review-container");
+    const btn = document.getElementById("btn-reviews");
+    const fade = document.getElementById("fade-reviews");
+    if (!container || !btn) return;
+
+    const collapsed = container.classList.contains("max-h-[1056px]");
+    container.classList.toggle("max-h-[1056px]", !collapsed);
+    container.classList.toggle("overflow-hidden", !collapsed);
+    if (fade) fade.style.display = collapsed ? "block" : "none";
+    btn.textContent = collapsed ? "Ver todas" : "Ver menos";
+  }
+
+  // -----------------------------
+  // Modal animado + Wizard
+  // -----------------------------
+  document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("modal-review");
+    const modalContent = document.getElementById("modal-content");
+    const openBtn = document.getElementById("open-modal-btn");
+    const closeBtn = document.getElementById("close-modal-btn");
+    const thankYouMessage = document.getElementById("thank-you-message");
+    const wizardStepsContainer = document.getElementById("wizard-steps");
+
+    if (!modal || !modalContent || !openBtn || !closeBtn || !wizardStepsContainer || !thankYouMessage) return;
+
+    function openModal() {
+      modal.setAttribute("aria-hidden", "false");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      setTimeout(() => {
+        modal.classList.replace("opacity-0", "opacity-100");
+        modalContent.classList.replace("scale-95", "scale-100");
+        modalContent.focus();
+      }, 10);
+    }
+    function closeModal() {
+      modal.setAttribute("aria-hidden", "true");
+      modal.classList.replace("opacity-100", "opacity-0");
+      modalContent.classList.replace("scale-100", "scale-95");
+      setTimeout(() => {
+        modal.classList.remove("flex");
+        modal.classList.add("hidden");
+        // Reset wizard
+        wizardStepsContainer.classList.remove("hidden");
+        thankYouMessage.classList.add("hidden");
+        currentStepIndex = 0;
+        showStep(currentStepIndex);
+      }, 300);
+    }
+
+    openBtn.addEventListener("click", openModal);
+    closeBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+    // Wizard steps
+    const steps = document.querySelectorAll(".wizard-step");
+    const nextButtons = document.querySelectorAll(".next-btn");
+    const prevButtons = document.querySelectorAll(".prev-btn");
+    const skipButtons = document.querySelectorAll(".skip-btn");
+    let currentStepIndex = 0;
+    let tagCategorySteps = [];
+    let currentCategoryIndex = 0;
+
+    function showStep(index) {
+      steps.forEach((step, i) => step.classList.toggle("hidden", i !== index));
+      if (index === 1) {
+        tagCategorySteps = document.querySelectorAll(".tag-category-step");
+        tagCategorySteps.forEach((cat, i) => cat.classList.toggle("hidden", i !== 0));
+        currentCategoryIndex = 0;
+      }
+    }
+    function showNextCategory() {
+      if (currentStepIndex === 1) {
+        if (!tagCategorySteps.length) return;
+        tagCategorySteps[currentCategoryIndex].classList.add("hidden");
+        if (currentCategoryIndex < tagCategorySteps.length - 1) {
+          currentCategoryIndex++;
+          tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
+        } else {
+          const form = document.getElementById("review-form-step-1");
+          if (form) form.requestSubmit();
+        }
+      }
+    }
+    function showPrevCategory() {
+      if (currentStepIndex === 1 && currentCategoryIndex > 0) {
+        tagCategorySteps[currentCategoryIndex].classList.add("hidden");
+        currentCategoryIndex--;
+        tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
+      } else if (currentStepIndex === 1 && currentCategoryIndex === 0) {
+        currentStepIndex = 0; showStep(currentStepIndex);
+      }
+    }
+    nextButtons.forEach(btn => btn.addEventListener("click", () => {
+      if (currentStepIndex === 0) { currentStepIndex = 1; showStep(currentStepIndex); }
+      else { showNextCategory(); }
+    }));
+    prevButtons.forEach(btn => btn.addEventListener("click", showPrevCategory));
+    skipButtons.forEach(btn => btn.addEventListener("click", () => {
+      const form = document.getElementById("review-form-step-1");
+      if (form) form.requestSubmit();
+    }));
+
+// Enviar formulario (envío real, sin prevenir)
+const reviewForm = document.getElementById("review-form-step-1");
+if (reviewForm) {
+  reviewForm.addEventListener("submit", () => {
+    // feedback mínimo y evita doble click
+    const btns = reviewForm.querySelectorAll("button, input[type=submit]");
+    btns.forEach(b => b.setAttribute("disabled", "disabled"));
+  });
+}
+
+    showStep(currentStepIndex);
+  });
+
+  // -----------------------------
+  // Lightbox con protección
+  // -----------------------------
+  let currentImageIndex = 0;
+
+  function openLightbox(index) {
+    const thumbs = document.querySelectorAll('.photo-thumb img');
+    const images = Array.from(thumbs).filter(img => img && img.src);
+    if (!images.length || index < 0 || index >= images.length) return;
+
+    const selected = images[index];
+    const img = document.getElementById("lightbox-image");
+    const caption = document.getElementById("lightbox-caption");
+    const modal = document.getElementById('lightbox-modal');
+    if (!img || !caption || !modal) return;
+
+    img.src = selected.src;
+    img.alt = selected.alt || "";
+    caption.textContent = selected.alt || "";
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function changeLightboxImage(direction) {
+    const thumbs = document.querySelectorAll('.photo-thumb img');
+    const images = Array.from(thumbs).filter(img => img && img.src);
+    if (!images.length) return;
+
+    currentImageIndex = (currentImageIndex + direction + images.length) % images.length;
+    const newImage = images[currentImageIndex];
+
+    const img = document.getElementById("lightbox-image");
+    const caption = document.getElementById("lightbox-caption");
+    if (!img || !caption) return;
+
+    img.src = newImage.src;
+    img.alt = newImage.alt || "";
+    caption.textContent = newImage.alt || "";
+  }
+
+  (function initLightbox() {
+    const closeBtn = document.getElementById('lightbox-close');
+    const modal = document.getElementById('lightbox-modal');
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+      });
+      modal.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+          e.currentTarget.classList.remove('flex');
+          e.currentTarget.classList.add('hidden');
+        }
+      });
+      // Swipe en mobile
+      let touchStartX = 0, touchEndX = 0;
+      modal.addEventListener('touchstart', (e) => touchStartX = e.changedTouches[0].screenX);
+      modal.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX < touchStartX - 50) changeLightboxImage(1);
+        if (touchEndX > touchStartX + 50) changeLightboxImage(-1);
+      });
+    }
+  })();
+
+  // -----------------------------
+  // Scroll Reveal seguro
+  // -----------------------------
+  document.addEventListener("DOMContentLoaded", () => {
+    const elements = document.querySelectorAll('.animate-fade-in-up');
+    if (!elements.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.remove('opacity-0', 'translate-y-5');
+          entry.target.classList.add('animate-fade-in-up-active');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    elements.forEach(el => {
+      el.classList.add('opacity-0', 'translate-y-5');
+      observer.observe(el);
+    });
+  });
+  </script>
 {% endblock %}
