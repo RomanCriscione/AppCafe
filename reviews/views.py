@@ -253,7 +253,7 @@ def cafe_detail(request, cafe_id):
     reviews = cafe.reviews.select_related("user").prefetch_related("tags").order_by("-created_at")
 
     # Calcular promedio y mejor reseña
-    ratings = [review.rating for review in reviews]
+    ratings = [r.rating for r in reviews]
     average_rating = round(mean(ratings), 1) if ratings else None
     best_review = reviews[0] if reviews else None
 
@@ -281,24 +281,35 @@ def cafe_detail(request, cafe_id):
         tag_groups[tag.category].append(tag)
 
     # Etiquetas sensoriales destacadas
-    sensory_tags = Tag.objects.filter(reviews__cafe=cafe).distinct().order_by('category', 'name')
+    sensory_tags = (
+        Tag.objects.filter(reviews__cafe=cafe)
+        .distinct()
+        .order_by("category", "name")
+    )
 
     # Recomendados por calificación
-    recommended_cafes = Cafe.objects.annotate(
-        average_rating=Avg('reviews__rating')
-    ).filter(average_rating__isnull=False).exclude(id=cafe.id).order_by('-average_rating')[:4]
-    full_page_url = request.build_absolute_uri(
-    reverse('cafe_detail', args=[cafe.id])
+    recommended_cafes = (
+        Cafe.objects.annotate(average_rating=Avg("reviews__rating"))
+        .filter(average_rating__isnull=False)
+        .exclude(id=cafe.id)
+        .order_by("-average_rating")[:4]
     )
-    # Elegimos la mejor imagen disponible o un fallback
-    if cafe.photo1:
+
+    # URLs absolutas para SEO/OG
+    full_page_url = request.build_absolute_uri(
+        reverse("cafe_detail", args=[cafe.id])
+    )
+
+    # Elegimos la mejor imagen disponible o fallback
+    if getattr(cafe, "photo1", None):
         og_image_path = cafe.photo1.url
-    elif cafe.photo2:
+    elif getattr(cafe, "photo2", None):
         og_image_path = cafe.photo2.url
-    elif cafe.photo3:
+    elif getattr(cafe, "photo3", None):
         og_image_path = cafe.photo3.url
     else:
-        og_image_path = static('img/og-default.jpg')  # <-- creá este archivo
+        # tu archivo fallback: static/images/og-default.jpg
+        og_image_path = static("images/og-default.jpg")
 
     full_image_url = request.build_absolute_uri(og_image_path)
 
@@ -312,8 +323,9 @@ def cafe_detail(request, cafe_id):
         "tag_choices": dict(tag_groups),
         "sensory_tags": sensory_tags,
         "full_page_url": full_page_url,
-        "full_image_url": full_image_url, 
+        "full_image_url": full_image_url,
     })
+
 
 
 @login_required
