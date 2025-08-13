@@ -2,6 +2,18 @@
 {% load static %}
 {% load custom_filters %}
 
+{% block meta %}
+  {# Prev/Next para SEO cuando hay paginación #}
+  {% if page_obj %}
+    {% if page_obj.has_previous %}
+      <link rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">
+    {% endif %}
+    {% if page_obj.has_next %}
+      <link rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">
+    {% endif %}
+  {% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6 relative px-4">
   <!-- Botón de Filtros para Mobile -->
@@ -83,29 +95,103 @@
 
     {% include "reviews/includes/mapa_cafe_list.html" %}
 
-    {% for cafe in cafes %}
-      <div class="bg-white rounded-2xl shadow-md hover:shadow-lg p-4 transition duration-200">
-        <a href="{% url 'cafe_detail' cafe.id %}" class="block">
-          {% if cafe.photo1 %}
-            <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}" class="w-full h-40 object-cover rounded-md mb-3">
-          {% else %}
-            <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500 rounded-md mb-3">
-              Sin foto
-            </div>
-          {% endif %}
-          <h3 class="text-lg font-semibold text-gray-800">{{ cafe.name }}</h3>
-          <p class="text-sm text-gray-600">{{ cafe.location }}</p>
-          <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
-        </a>
-        <div class="mt-3">
-          {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for cafe in cafes %}
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-lg p-4 transition duration-200">
+          <a href="{% url 'cafe_detail' cafe.id %}" class="block">
+            {% if cafe.photo1 %}
+              <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}" class="w-full h-40 object-cover rounded-md mb-3" loading="lazy" decoding="async" width="800" height="533">
+            {% else %}
+              <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500 rounded-md mb-3">
+                Sin foto
+              </div>
+            {% endif %}
+            <h3 class="text-lg font-semibold text-gray-800 line-clamp-1">{{ cafe.name }}</h3>
+            <p class="text-sm text-gray-600 line-clamp-1">{{ cafe.location }}</p>
+            <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
+          </a>
+          <div class="mt-3">
+            {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
+          </div>
         </div>
-      </div>
-    {% empty %}
-      <p class="text-center text-gray-600 mt-10">
-        {{ ui_messages.no_results }}
-      </p>
-    {% endfor %}
+      {% empty %}
+        <p class="text-center text-gray-600 mt-10">
+          {{ ui_messages.no_results }}
+        </p>
+      {% endfor %}
+    </div>
+
+    {# Paginación #}
+    {% if is_paginated %}
+      <nav class="flex items-center justify-center gap-2 mt-8" aria-label="Paginación">
+        {% if page_obj.has_previous %}
+          <a class="px-3 py-2 rounded border hover:bg-gray-50"
+             href="?page={{ page_obj.previous_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">
+            « Anterior
+          </a>
+        {% endif %}
+
+        <span class="px-3 py-2">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+          <a class="px-3 py-2 rounded border hover:bg-gray-50"
+             href="?page={{ page_obj.next_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">
+            Siguiente »
+          </a>
+        {% endif %}
+      </nav>
+    {% endif %}
   </section>
 </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script>
+    // Geolocalización básica para el botón "Cafés cerca mío"
+    (function () {
+      const form = document.getElementById('ubicacion-form');
+      const latEl = document.getElementById('lat');
+      const lonEl = document.getElementById('lon');
+      if (!form || !latEl || !lonEl) return;
+
+      form.addEventListener('submit', function (e) {
+        if (!navigator.geolocation) return; // sigue sin coords
+        e.preventDefault();
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            latEl.value = pos.coords.latitude.toFixed(6);
+            lonEl.value = pos.coords.longitude.toFixed(6);
+            form.submit();
+          },
+          () => form.submit(), // si falla, igual envía sin coords
+          { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+        );
+      });
+    })();
+
+    // Panel de filtros en mobile
+    (function () {
+      const toggle = document.getElementById('toggle-filtros');
+      const overlay = document.getElementById('filtros-overlay');
+      const panel = document.getElementById('panel-filtros');
+      const cerrar = document.getElementById('cerrar-filtros');
+      if (!toggle || !overlay || !panel || !cerrar) return;
+
+      function open() {
+        panel.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        requestAnimationFrame(() => overlay.classList.add('opacity-100'));
+      }
+      function close() {
+        panel.classList.add('-translate-x-full');
+        overlay.classList.remove('opacity-100');
+        setTimeout(() => overlay.classList.add('hidden'), 200);
+      }
+
+      toggle.addEventListener('click', open);
+      cerrar.addEventListener('click', close);
+      overlay.addEventListener('click', close);
+    })();
+  </script>
 {% endblock %}

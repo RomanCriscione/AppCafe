@@ -1,40 +1,35 @@
+# cafe_reviews/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
-
-from core.views import sitemap_xml
+from django.contrib.sitemaps import views as sitemap_views
+from cafe_reviews.sitemaps import sitemaps
 
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # Auth (django-allauth)
+    # Auth
     path("accounts/", include("allauth.urls")),
-
-    # Acciones personalizadas de usuarios
     path("users/", include("accounts.urls")),
 
-    # Vistas públicas (home, about, contact, etc.)
+    # Público
     path("", include("core.urls")),
 
     # Cafeterías y reseñas
     path("reviews/", include("reviews.urls")),
 
-    # robots.txt (estático)
+    # robots.txt estático
     path(
         "robots.txt",
-        TemplateView.as_view(
-            template_name="core/robots.txt",
-            content_type="text/plain",
-        ),
+        TemplateView.as_view(template_name="core/robots.txt", content_type="text/plain"),
         name="robots_txt",
     ),
 
-    # sitemap.xml (dinámico) — única ruta
-    path("sitemap.xml", sitemap_xml, name="sitemap_xml"),
+    # sitemap.xml con el framework oficial
+    path("sitemap.xml", sitemap_views.sitemap, {"sitemaps": sitemaps}, name="sitemap"),
 ]
 
-# Archivos MEDIA en desarrollo
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

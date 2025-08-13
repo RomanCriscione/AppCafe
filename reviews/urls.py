@@ -25,6 +25,8 @@ urlpatterns = [
     path('owner/replies/<int:review_id>/', views.edit_owner_reply, name='edit_owner_reply'),
     path('owner/cambiar_visibilidad/<int:cafe_id>/', views.cambiar_visibilidad, name='cambiar_visibilidad'),
     path('planes/', views.planes_view, name='planes'),
+    path('review/<int:review_id>/editar/', views.edit_review, name='edit_review'),
+    path('review/<int:review_id>/eliminar/', views.delete_review, name='delete_review'),
 
     # Mapa
     path('mapa/', views.mapa_cafes, name='mapa_cafes'),

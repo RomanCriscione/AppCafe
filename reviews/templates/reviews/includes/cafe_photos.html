@@ -3,54 +3,46 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
   {% if cafe.photo1 and cafe.photo1.url %}
-    <div
-      class="photo-thumb animate-fade-in-up animate-delay-0 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
-      onclick="currentImageIndex=0; openLightbox(0)"
-    >
+    <div class="photo-thumb animate-fade-in-up animate-delay-0 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
+         onclick="currentImageIndex=0; openLightbox(0)">
       <img
         src="{{ cafe.photo1.url }}"
         alt="{{ cafe.photo1_title|default:cafe.name }}"
-        width="1200" height="900"            {# ⬅️ fija dimensiones (4:3 aprox.) #}
+        loading="lazy"
         decoding="async"
-        fetchpriority="high"                 {# ⬅️ la primera sin lazy, prioritaria #}
-        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-      >
+        fetchpriority="low"
+        width="1200" height="800"
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
       <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
     </div>
   {% endif %}
 
   {% if cafe.photo2 and cafe.photo2.url %}
-    <div
-      class="photo-thumb animate-fade-in-up animate-delay-100 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
-      onclick="currentImageIndex=1; openLightbox(1)"
-    >
+    <div class="photo-thumb animate-fade-in-up animate-delay-100 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
+         onclick="currentImageIndex=1; openLightbox(1)">
       <img
         src="{{ cafe.photo2.url }}"
         alt="{{ cafe.photo2_title|default:cafe.name }}"
-        width="1200" height="900"
+        loading="lazy"
         decoding="async"
-        loading="lazy"                       {# ⬅️ lazy para las siguientes #}
         fetchpriority="low"
-        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-      >
+        width="1200" height="800"
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
       <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
     </div>
   {% endif %}
 
   {% if cafe.photo3 and cafe.photo3.url %}
-    <div
-      class="photo-thumb animate-fade-in-up animate-delay-200 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
-      onclick="currentImageIndex=2; openLightbox(2)"
-    >
+    <div class="photo-thumb animate-fade-in-up animate-delay-200 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
+         onclick="currentImageIndex=2; openLightbox(2)">
       <img
         src="{{ cafe.photo3.url }}"
         alt="{{ cafe.photo3_title|default:cafe.name }}"
-        width="1200" height="900"
-        decoding="async"
         loading="lazy"
+        decoding="async"
         fetchpriority="low"
-        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-      >
+        width="1200" height="800"
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
       <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
     </div>
   {% endif %}
@@ -60,14 +52,7 @@
 <div id="lightbox-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
   <button id="lightbox-close" class="absolute top-4 right-6 text-white text-4xl cursor-pointer hover:text-gray-300">&times;</button>
   <div class="flex flex-col items-center">
-    <img
-      id="lightbox-image"
-      src=""
-      alt=""
-      class="max-h-[80%] max-w-[90%] rounded-lg shadow-2xl object-contain"
-      width="1600" height="1200"          {# opcional: reserva espacio en el modal #}
-      decoding="async"
-    >
+    <img id="lightbox-image" src="" alt="" class="max-h-[80%] max-w-[90%] rounded-lg shadow-2xl object-contain">
     <p id="lightbox-caption" class="text-white mt-4 text-lg text-center opacity-90"></p>
     <div class="flex gap-4 mt-4">
       <button onclick="changeLightboxImage(-1)" class="bg-white/20 text-white px-4 py-2 rounded hover:bg-white/30">← Anterior</button>

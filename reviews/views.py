@@ -24,6 +24,10 @@ from django.urls import reverse
 from django.db.models import F
 from django.templatetags.static import static
 
+# ✅ imports para invalidar el caché de fragmentos
+from django.core.cache.utils import make_template_fragment_key
+from django.core.cache import cache
+
 
 # Listar reseñas agrupadas por zona
 class ReviewListView(ListView):
@@ -99,6 +103,7 @@ class CafeListView(ListView):
     model = Cafe
     template_name = 'reviews/cafe_list.html'
     context_object_name = 'cafes'
+    paginate_by = 12  # ✅ paginación
 
     def get_queryset(self):
         request = self.request
@@ -189,61 +194,59 @@ class CafeListView(ListView):
             except ValueError:
                 pass
 
+        # ⛔️ OJO: ListView paginará si cafes es QuerySet; si lo convertiste a list() (algoritmo),
+        # igual funciona, pero la paginación es en memoria. Aceptable por ahora.
         self._cafes_finales = cafes
         return cafes
 
     def get_context_data(self, **kwargs):
-            context = super().get_context_data(**kwargs)
-            request = self.request
+        context = super().get_context_data(**kwargs)
+        request = self.request
 
-            # Selects
-            context['zonas_disponibles'] = (
-                Cafe.objects.values_list('location', flat=True)
-                .distinct()
-                .order_by('location')
+        context['zonas_disponibles'] = (
+            Cafe.objects.values_list('location', flat=True)
+            .distinct()
+            .order_by('location')
+        )
+        context['zona_seleccionada'] = request.GET.get('zona')
+        context['orden_actual'] = request.GET.get('orden')
+
+        boolean_keys = [
+            'has_wifi', 'has_air_conditioning', 'serves_alcohol', 'is_pet_friendly',
+            'is_vegan_friendly', 'has_outdoor_seating', 'has_parking', 'is_accessible',
+            'has_vegetarian_options', 'has_books_or_games'
+        ]
+        context['campos_activos'] = {k: (request.GET.get(k) == 'on') for k in boolean_keys}
+
+        context['mostrar_boton_reset'] = any([
+            request.GET.get('zona'),
+            request.GET.get('orden'),
+            request.GET.get('lat'),
+            request.GET.get('lon'),
+            *[request.GET.get(k) for k in boolean_keys],
+        ])
+
+        if request.user.is_authenticated:
+            context['favoritos_ids'] = set(
+                request.user.favorite_cafes.values_list('id', flat=True)
             )
-            context['zona_seleccionada'] = request.GET.get('zona')
-            context['orden_actual'] = request.GET.get('orden')
+        else:
+            context['favoritos_ids'] = set()
 
-            # Booleanos (coinciden con los name="" del form)
-            boolean_keys = [
-                'has_wifi', 'has_air_conditioning', 'serves_alcohol', 'is_pet_friendly',
-                'is_vegan_friendly', 'has_outdoor_seating', 'has_parking', 'is_accessible',
-                'has_vegetarian_options', 'has_books_or_games'
-            ]
-            context['campos_activos'] = {k: (request.GET.get(k) == 'on') for k in boolean_keys}
+        cafes = context.get('cafes', [])
+        cafes_data = []
+        for c in cafes:
+            cafes_data.append({
+                'id': c.id,
+                'name': c.name,
+                'latitude': float(c.latitude) if c.latitude is not None else None,
+                'longitude': float(c.longitude) if c.longitude is not None else None,
+                'url': reverse('cafe_detail', args=[c.id]),
+            })
+        context['cafes_json'] = json.dumps(cafes_data, cls=DjangoJSONEncoder)
 
-            # Mostrar botón “Ver todos” si hay filtros/ubicación
-            context['mostrar_boton_reset'] = any([
-                request.GET.get('zona'),
-                request.GET.get('orden'),
-                request.GET.get('lat'),
-                request.GET.get('lon'),
-                *[request.GET.get(k) for k in boolean_keys],
-            ])
+        return context
 
-            # IDs de favoritos para _cafe_card
-            if request.user.is_authenticated:
-                context['favoritos_ids'] = set(
-                    request.user.favorite_cafes.values_list('id', flat=True)
-                )
-            else:
-                context['favoritos_ids'] = set()
-
-            # ✅ JSON para el mapa (robusto y listo para usar)
-            cafes = context.get('cafes', [])
-            cafes_data = []
-            for c in cafes:
-                cafes_data.append({
-                    'id': c.id,
-                    'name': c.name,
-                    'latitude': float(c.latitude) if c.latitude is not None else None,
-                    'longitude': float(c.longitude) if c.longitude is not None else None,
-                    'url': reverse('cafe_detail', args=[c.id]),
-                })
-            context['cafes_json'] = json.dumps(cafes_data, cls=DjangoJSONEncoder)
-
-            return context
 
 
 
@@ -345,6 +348,10 @@ def create_review(request, cafe_id):
             tags = Tag.objects.filter(id__in=selected_tag_ids)
             review.tags.set(tags)
 
+            # 🧹 invalidar caché del listado de reseñas
+            key = make_template_fragment_key("cafe_reviews_list", [cafe.id])
+            cache.delete(key)
+
             messages.success(request, MESSAGES["review_sent"])
             return redirect("cafe_detail", cafe_id=cafe.id)
         else:
@@ -366,6 +373,73 @@ def create_review(request, cafe_id):
 
     return render(request, "reviews/create_review.html", context)
 
+@login_required
+def edit_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+
+    # Solo el autor (o staff) puede editar
+    if request.user != review.user and not request.user.is_staff:
+        raise PermissionDenied("No podés editar esta reseña.")
+
+    if request.method == "POST":
+        form = ReviewForm(request.POST, instance=review)
+        if form.is_valid():
+            form.save()
+
+            # Si usás checkboxes fuera del M2M del form:
+            if "tags" in request.POST:
+                selected_tag_ids = request.POST.getlist("tags")
+                tags = Tag.objects.filter(id__in=selected_tag_ids)
+                review.tags.set(tags)
+
+            # 🧹 invalidar caché del listado de reseñas
+            key = make_template_fragment_key("cafe_reviews_list", [review.cafe_id])
+            cache.delete(key)
+
+            messages.success(request, "Reseña actualizada correctamente.")
+            return redirect("cafe_detail", cafe_id=review.cafe_id)
+        else:
+            messages.error(request, "Por favor corregí los errores.")
+    else:
+        form = ReviewForm(instance=review)
+
+    # Necesitamos las categorías de tags como en create_review
+    all_tags = Tag.objects.all().order_by("category", "name")
+    tag_groups = defaultdict(list)
+    for tag in all_tags:
+        tag_groups[tag.category].append(tag)
+
+    return render(
+        request,
+        "reviews/create_review.html",  # reutilizamos el mismo template
+        {"form": form, "cafe": review.cafe, "tag_choices": dict(tag_groups), "editing": True},
+    )
+
+
+@login_required
+def delete_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+
+    # Solo el autor (o staff) puede eliminar
+    if request.user != review.user and not request.user.is_staff:
+        raise PermissionDenied("No podés eliminar esta reseña.")
+
+    cafe_id = review.cafe_id
+
+    if request.method == "POST":
+        review.delete()
+
+        # 🧹 invalidar caché del listado de reseñas
+        key = make_template_fragment_key("cafe_reviews_list", [cafe_id])
+        cache.delete(key)
+
+        messages.success(request, "Reseña eliminada.")
+        return redirect("cafe_detail", cafe_id=cafe_id)
+
+    # Pantalla simple de confirmación
+    return render(request, "reviews/delete_review.html", {"review": review, "cafe": review.cafe})
+
+
 # Responder a una reseña (dueño)
 @login_required
 def reply_review(request, review_id):
@@ -377,6 +451,11 @@ def reply_review(request, review_id):
     if request.method == 'POST':
         review.owner_reply = request.POST.get('reply')
         review.save()
+
+        # 🧹 invalidar caché del listado de reseñas
+        key = make_template_fragment_key("cafe_reviews_list", [review.cafe_id])
+        cache.delete(key)
+
         messages.success(request, "Respuesta guardada con éxito.")
         return redirect('cafe_detail', cafe_id=review.cafe.id)
 
@@ -408,6 +487,11 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
         tags = form.cleaned_data.get('tags')
         if tags:
             self.object.tags.set(tags)
+
+        # 🧹 invalidar caché del listado de reseñas (si tiene café asociado)
+        if getattr(self.object, "cafe_id", None):
+            key = make_template_fragment_key("cafe_reviews_list", [self.object.cafe_id])
+            cache.delete(key)
 
         return response
 
@@ -594,7 +678,6 @@ def toggle_favorite(request, cafe_id):
 
 
 #Editar comentarios del dueño del café
-
 @login_required
 def edit_owner_reply(request, review_id):
     review = get_object_or_404(Review, id=review_id)
@@ -605,6 +688,11 @@ def edit_owner_reply(request, review_id):
     if request.method == 'POST':
         review.owner_reply = request.POST.get('reply')
         review.save()
+
+        # 🧹 invalidar caché del listado de reseñas
+        key = make_template_fragment_key("cafe_reviews_list", [review.cafe_id])
+        cache.delete(key)
+
         messages.success(request, "Respuesta del dueño actualizada correctamente.")
 
     return redirect('owner_reviews')

@@ -4,7 +4,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Gota - Reseñas de Cafés{% endblock %}</title>
+
+  {# === NUEVO: título y description dinámicos === #}
+  {% block head_title %}
+    <title>{{ meta_title|default:"Gota - Reseñas de Cafés" }}</title>
+  {% endblock %}
+  {% block head_description %}
+    <meta name="description" content="{{ meta_description|default:'Descubrí cafeterías, reseñas reales y mapas.' }}">
+  {% endblock %}
+
+  {# Meta extra por página (OG/Twitter, canonical, JSON-LD, etc.) #}
   {% block meta %}{% endblock %}
 
   <!-- Animaciones -->
@@ -41,9 +50,9 @@
 
   <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
 
-
   <style>html, body { overflow-x: hidden; }</style>
 </head>
+
 
 <body class="bg-light text-dark font-sans">
   <div class="min-h-screen flex flex-col">
