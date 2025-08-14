@@ -131,7 +131,12 @@ class Cafe(models.Model):
         return self.name
 
     class Meta:
-        ordering = ['-visibility_level', 'name']
+        indexes = [
+            models.Index(fields=["location"]),
+            models.Index(fields=["visibility_level"]),
+            models.Index(fields=["latitude", "longitude"]),
+            models.Index(fields=["owner"]),
+        ]
 
 
 class Review(models.Model):
@@ -145,8 +150,12 @@ class Review(models.Model):
     tags = models.ManyToManyField("Tag", blank=True, related_name="reviews")
 
     class Meta:
-        unique_together = ('user', 'cafe')
-        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=["cafe"]),
+            models.Index(fields=["rating"]),
+            models.Index(fields=["-created_at"]),
+        ]
 
     def __str__(self):
         return f'Reseña de {self.user} en {self.cafe}'
+

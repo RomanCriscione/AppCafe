@@ -3,7 +3,7 @@
 {% load custom_filters %}
 
 {% block meta %}
-  {# Prev/Next para SEO cuando hay paginación #}
+  <link rel="canonical" href="{{ request.build_absolute_uri }}">
   {% if page_obj %}
     {% if page_obj.has_previous %}
       <link rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">
@@ -12,6 +12,22 @@
       <link rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">
     {% endif %}
   {% endif %}
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+      {% for c in cafes %}
+      {
+        "@type": "ListItem",
+        "position": {{ forloop.counter }},
+        "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'cafe_detail' c.id %}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+  </script>
 {% endblock %}
 
 {% block content %}
@@ -52,7 +68,6 @@
         </select>
       </div>
 
-      <!-- Características booleanas -->
       <fieldset>
         <legend class="font-medium mb-2">Características del café:</legend>
         {% for key, activo in campos_activos.items %}
@@ -63,8 +78,7 @@
         {% endfor %}
       </fieldset>
 
-      <button type="submit"
-        class="mt-4 bg-accent hover:bg-[#14b8a6] text-white px-4 py-2 rounded-xl transition-colors">
+      <button type="submit" class="mt-4 bg-accent hover:bg-[#14b8a6] text-white px-4 py-2 rounded-xl transition-colors">
         Aplicar filtros
       </button>
     </form>
@@ -79,14 +93,12 @@
           <input type="hidden" name="orden" value="algoritmo">
           <input type="hidden" name="lat" id="lat">
           <input type="hidden" name="lon" id="lon">
-          <button type="submit"
-            class="bg-accent hover:bg-[#14b8a6] text-white px-3 py-2 rounded-xl text-sm transition-transform hover:scale-105 shadow">
+          <button type="submit" class="bg-accent hover:bg-[#14b8a6] text-white px-3 py-2 rounded-xl text-sm transition-transform hover:scale-105 shadow">
             📍 Cafés cerca mío
           </button>
         </form>
         {% if mostrar_boton_reset %}
-          <a href="{% url 'cafe_list' %}"
-            class="inline-block bg-gray-100 text-gray-800 px-3 py-2 rounded-xl hover:bg-gray-200 transition-colors">
+          <a href="{% url 'cafe_list' %}" class="inline-block bg-gray-100 text-gray-800 px-3 py-2 rounded-xl hover:bg-gray-200 transition-colors">
             🔄 Ver todos los cafés
           </a>
         {% endif %}
@@ -115,29 +127,20 @@
           </div>
         </div>
       {% empty %}
-        <p class="text-center text-gray-600 mt-10">
-          {{ ui_messages.no_results }}
-        </p>
+        <p class="text-center text-gray-600 mt-10">{{ ui_messages.no_results }}</p>
       {% endfor %}
     </div>
 
-    {# Paginación #}
     {% if is_paginated %}
-      <nav class="flex items-center justify-center gap-2 mt-8" aria-label="Paginación">
+      <nav class="mt-8 flex items-center justify-center gap-2" aria-label="Paginación de cafeterías">
         {% if page_obj.has_previous %}
-          <a class="px-3 py-2 rounded border hover:bg-gray-50"
-             href="?page={{ page_obj.previous_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">
-            « Anterior
-          </a>
+          <a rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}"
+             class="px-3 py-2 rounded bg-gray-100 hover:bg-gray-200">Anterior</a>
         {% endif %}
-
-        <span class="px-3 py-2">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-
+        <span class="px-3 py-2 text-sm text-gray-700">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
         {% if page_obj.has_next %}
-          <a class="px-3 py-2 rounded border hover:bg-gray-50"
-             href="?page={{ page_obj.next_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">
-            Siguiente »
-          </a>
+          <a rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}"
+             class="px-3 py-2 rounded bg-gray-100 hover:bg-gray-200">Siguiente</a>
         {% endif %}
       </nav>
     {% endif %}
@@ -148,7 +151,7 @@
 {% block scripts %}
   {{ block.super }}
   <script>
-    // Geolocalización básica para el botón "Cafés cerca mío"
+    // Geolocalización "Cafés cerca mío"
     (function () {
       const form = document.getElementById('ubicacion-form');
       const latEl = document.getElementById('lat');
@@ -156,7 +159,7 @@
       if (!form || !latEl || !lonEl) return;
 
       form.addEventListener('submit', function (e) {
-        if (!navigator.geolocation) return; // sigue sin coords
+        if (!navigator.geolocation) return;
         e.preventDefault();
         navigator.geolocation.getCurrentPosition(
           (pos) => {
@@ -164,7 +167,7 @@
             lonEl.value = pos.coords.longitude.toFixed(6);
             form.submit();
           },
-          () => form.submit(), // si falla, igual envía sin coords
+          () => form.submit(),
           { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
         );
       });

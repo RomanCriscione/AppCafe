@@ -1,4 +1,5 @@
 User-agent: *
-Disallow:
+Allow: /
 
-Sitemap: {{ request.scheme }}://{{ request.get_host }}{% url 'sitemap_xml' %}
+Sitemap: {{ request.scheme }}://{{ request.get_host }}{% url 'django_sitemap' %}
+
