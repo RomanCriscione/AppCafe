@@ -86,8 +86,12 @@
 
   <!-- Lista de Cafés -->
   <section class="lg:w-3/4 max-w-6xl mx-auto">
+    <!-- Skip links (6.2) -->
+    <a href="#resultados" class="sr-only">Saltar a resultados</a>
+    <a href="#paginacion" class="sr-only">Saltar a paginación</a>
+
     <div class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold">Cafeterías</h1>
+      <h1 id="titulo-cafeterias" class="text-2xl font-bold">Cafeterías</h1>
       <div class="flex gap-3 items-center">
         <form id="ubicacion-form" method="get" class="inline">
           <input type="hidden" name="orden" value="algoritmo">
@@ -107,43 +111,84 @@
 
     {% include "reviews/includes/mapa_cafe_list.html" %}
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {% for cafe in cafes %}
-        <div class="bg-white rounded-2xl shadow-md hover:shadow-lg p-4 transition duration-200">
-          <a href="{% url 'cafe_detail' cafe.id %}" class="block">
-            {% if cafe.photo1 %}
-              <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}" class="w-full h-40 object-cover rounded-md mb-3" loading="lazy" decoding="async" width="800" height="533">
-            {% else %}
-              <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500 rounded-md mb-3">
-                Sin foto
-              </div>
-            {% endif %}
-            <h3 class="text-lg font-semibold text-gray-800 line-clamp-1">{{ cafe.name }}</h3>
-            <p class="text-sm text-gray-600 line-clamp-1">{{ cafe.location }}</p>
-            <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
-          </a>
-          <div class="mt-3">
-            {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
+    <!-- SKELETON: muestra placeholders mientras cargan imágenes -->
+    <div id="grid-skeleton" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for _ in "123" %}
+        <div class="card">
+          <div class="skeleton h-44 w-full"></div>
+          <div class="p-4 space-y-3">
+            <div class="skeleton h-5 w-3/4"></div>
+            <div class="skeleton h-4 w-1/2"></div>
+            <div class="flex gap-2">
+              <div class="skeleton h-6 w-16 rounded-full"></div>
+              <div class="skeleton h-6 w-20 rounded-full"></div>
+            </div>
+            <div class="skeleton h-9 w-full"></div>
           </div>
         </div>
-      {% empty %}
-        <p class="text-center text-gray-600 mt-10">{{ ui_messages.no_results }}</p>
       {% endfor %}
     </div>
 
-    {% if is_paginated %}
-      <nav class="mt-8 flex items-center justify-center gap-2" aria-label="Paginación de cafeterías">
-        {% if page_obj.has_previous %}
-          <a rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}"
-             class="px-3 py-2 rounded bg-gray-100 hover:bg-gray-200">Anterior</a>
-        {% endif %}
-        <span class="px-3 py-2 text-sm text-gray-700">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-        {% if page_obj.has_next %}
-          <a rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}"
-             class="px-3 py-2 rounded bg-gray-100 hover:bg-gray-200">Siguiente</a>
-        {% endif %}
-      </nav>
-    {% endif %}
+    <!-- CONTENIDO REAL: oculto hasta que termine de cargar -->
+    <div id="grid-cafes" class="hidden" tabindex="-1" aria-labelledby="titulo-cafeterias">
+      <div id="resultados" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" tabindex="-1">
+        {% for cafe in cafes %}
+          <article class="card group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition">
+            {% if cafe.photo1 %}
+              <a href="{% url 'cafe_detail' cafe.id %}">
+                <img
+                  src="{{ cafe.photo1.url }}"
+                  alt="{{ cafe.name }}"
+                  class="h-44 w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  width="800"
+                  height="533"
+                >
+              </a>
+            {% else %}
+              <a href="{% url 'cafe_detail' cafe.id %}" class="block">
+                <div class="h-44 w-full bg-gray-200 flex items-center justify-center text-gray-500 rounded-md">
+                  Sin foto
+                </div>
+              </a>
+            {% endif %}
+
+            <div class="p-4">
+              <h3 class="text-lg font-semibold tracking-tight line-clamp-1">
+                <a href="{% url 'cafe_detail' cafe.id %}" class="hover:underline">{{ cafe.name }}</a>
+              </h3>
+              <p class="text-sm text-gray-600 line-clamp-1">{{ cafe.location }}</p>
+              <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
+
+              <div class="mt-3">
+                {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
+              </div>
+
+              <div class="mt-4">
+                <a href="{% url 'cafe_detail' cafe.id %}" class="btn btn-outline">Ver detalle</a>
+              </div>
+            </div>
+          </article>
+        {% empty %}
+          <p class="text-center text-gray-600 mt-10">{{ ui_messages.no_results }}</p>
+        {% endfor %}
+      </div>
+
+      {% if is_paginated %}
+        <nav id="paginacion" class="mt-8 flex items-center justify-center gap-2" aria-label="Paginación de cafeterías">
+          {% if page_obj.has_previous %}
+            <a rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}"
+               class="px-3 py-2 rounded bg-gray-100 hover:bg-gray-200">Anterior</a>
+          {% endif %}
+          <span class="px-3 py-2 text-sm text-gray-700">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+          {% if page_obj.has_next %}
+            <a rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}"
+               class="px-3 py-2 rounded bg-gray-100 hover:bg-gray-200">Siguiente</a>
+          {% endif %}
+        </nav>
+      {% endif %}
+    </div>
   </section>
 </div>
 {% endblock %}
@@ -195,6 +240,27 @@
       toggle.addEventListener('click', open);
       cerrar.addEventListener('click', close);
       overlay.addEventListener('click', close);
+    })();
+
+    // Mostrar grid real cuando termine de cargar la página (y se hayan resuelto imágenes)
+    (function () {
+      const sk = document.getElementById('grid-skeleton');
+      const real = document.getElementById('grid-cafes');
+
+      function swap() {
+        if (sk) sk.style.display = 'none';
+        if (real) real.classList.remove('hidden');
+        // Enfocar resultados para quien usó teclado / skip link
+        const resultados = document.getElementById('resultados');
+        if (resultados) resultados.focus();
+      }
+
+      if (document.readyState === 'complete') {
+        swap();
+      } else {
+        window.addEventListener('load', swap);
+        setTimeout(swap, 2000);
+      }
     })();
   </script>
 {% endblock %}

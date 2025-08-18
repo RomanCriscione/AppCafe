@@ -4,14 +4,16 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
-from django.contrib.sitemaps import views as sitemap_views
+from django.contrib.sitemaps.views import sitemap
 from cafe_reviews.sitemaps import sitemaps
 
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # Auth
+    # Autenticación (allauth)
     path("accounts/", include("allauth.urls")),
+
+    # Usuarios (acciones personalizadas)
     path("users/", include("accounts.urls")),
 
     # Público
@@ -20,15 +22,15 @@ urlpatterns = [
     # Cafeterías y reseñas
     path("reviews/", include("reviews.urls")),
 
-    # robots.txt estático
+    # robots.txt (template plano)
     path(
         "robots.txt",
         TemplateView.as_view(template_name="core/robots.txt", content_type="text/plain"),
         name="robots_txt",
     ),
 
-    # sitemap.xml con el framework oficial
-    path("sitemap.xml", sitemap_views.sitemap, {"sitemaps": sitemaps}, name="sitemap"),
+    # Sitemap (framework de Django)
+    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django_sitemap"),
 ]
 
 if settings.DEBUG:

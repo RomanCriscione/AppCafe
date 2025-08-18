@@ -6,7 +6,7 @@
   <link rel="canonical" href="{{ full_page_url }}" />
 
   <!-- Open Graph / Twitter -->
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content="place" /> {# opcionalmente 'place' en vez de 'website' #}
   <meta property="og:title" content="{{ cafe.name }} - Cafetería en {{ cafe.location }}" />
   <meta property="og:description" content="Reseñas, fotos y ubicación de {{ cafe.name }}." />
   {% if full_image_url %}
@@ -20,34 +20,65 @@
     <meta name="twitter:image" content="{{ full_image_url }}" />
   {% endif %}
 
+  {# Meta description dinámica #}
+  {% if cafe.description %}
+    <meta name="description" content="{{ cafe.description|striptags|truncatechars:155 }}">
+  {% elif best_review %}
+    <meta name="description" content="{{ best_review.comment|striptags|truncatechars:155 }}">
+  {% else %}
+    <meta name="description" content="{{ cafe.name }} en {{ cafe.location }}: reseñas, fotos y ubicación.">
+  {% endif %}
+
   <!-- JSON-LD: Breadcrumbs -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Inicio",
-        "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'home' %}"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Cafeterías",
-        "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'cafe_list' %}"
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": "{{ cafe.name|escapejs }}",
-        "item": "{{ full_page_url }}"
-      }
+      { "@type": "ListItem", "position": 1, "name": "Inicio", "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'home' %}" },
+      { "@type": "ListItem", "position": 2, "name": "Cafeterías", "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'cafe_list' %}" },
+      { "@type": "ListItem", "position": 3, "name": "{{ cafe.name|escapejs }}", "item": "{{ full_page_url }}" }
     ]
   }
   </script>
+
+  <!-- JSON-LD: Cafe / LocalBusiness -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CafeOrCoffeeShop",
+    "@id": "{{ full_page_url }}#identity",
+    "name": "{{ cafe.name|escapejs }}",
+    {% if full_image_url %}"image": ["{{ full_image_url }}"],{% endif %}
+    "url": "{{ full_page_url }}",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{ cafe.address|default_if_none:''|escapejs }}",
+      "addressLocality": "{{ cafe.location|default_if_none:''|escapejs }}",
+      "addressCountry": "AR"
+    }{% if cafe.phone %},
+    "telephone": "{{ cafe.phone|escapejs }}"{% endif %}{% if cafe.latitude and cafe.longitude %},
+    "geo": { "@type": "GeoCoordinates", "latitude": {{ cafe.latitude }}, "longitude": {{ cafe.longitude }} }{% endif %}{% if average_rating %},
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "{{ average_rating|floatformat:1 }}",
+      "bestRating": "5",
+      "worstRating": "1",
+      "reviewCount": "{{ reviews|length }}"
+    }{% endif %}{% if reviews and reviews|length > 0 %},
+    "review": [
+      {% for r in reviews|slice:":5" %}{
+        "@type": "Review",
+        "author": { "@type": "Person", "name": "{{ r.user.username|default:'Usuario'|escapejs }}" },
+        "datePublished": "{{ r.created_at|date:'Y-m-d' }}",
+        "reviewBody": "{{ r.comment|default_if_none:''|truncatechars:300|escapejs }}",
+        "reviewRating": { "@type": "Rating", "ratingValue": "{{ r.rating }}", "bestRating": "5", "worstRating": "1" }
+      }{% if not forloop.last %},{% endif %}{% endfor %}
+    ]{% endif %}
+  }
+  </script>
 {% endblock %}
+
 
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 space-y-8">

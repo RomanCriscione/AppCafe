@@ -6,6 +6,7 @@ from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
 import os
+from reviews.utils.images import resize_and_compress
 
 User = get_user_model()
 
@@ -68,6 +69,10 @@ class Cafe(models.Model):
     # Ubicación
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
 
     # Visibilidad
     VISIBILITY_CHOICES = (

@@ -1,5 +1,18 @@
-<!-- Mapa -->
-<div id="cafes-map" class="h-72 min-h-[300px] rounded mb-6"></div>
+{# templates/reviews/includes/mapa_cafe_list.html #}
+
+<!-- Mapa + chips -->
+<div class="relative mb-6">
+  <!-- Chips (Prioridad 5) -->
+  <div class="absolute top-3 left-3 right-3 z-10 flex gap-2 overflow-x-auto no-scrollbar">
+    <button type="button" class="chip" data-filter="nearby" aria-pressed="false">📍 Cerca mío</button>
+    <button type="button" class="chip" data-filter="has_wifi" aria-pressed="false">Wi-Fi</button>
+    <button type="button" class="chip" data-filter="is_pet_friendly" aria-pressed="false">Pet-friendly</button>
+    <button type="button" class="chip" data-filter="has_outdoor_seating" aria-pressed="false">Exterior</button>
+  </div>
+
+  <!-- Mapa -->
+  <div id="cafes-map" class="h-72 min-h-[300px] rounded"></div>
+</div>
 
 <!-- Formulario de búsqueda por dirección -->
 <form id="direccion-form" method="get" class="mb-4 flex gap-2 max-w-md">
@@ -37,11 +50,79 @@
 
   function waitForLeaflet(cb, tries = 0) {
     if (window.L && typeof L.map === "function") return cb();
-    if (tries > 200) return; // 10s guard
+    if (tries > 200) return; // ~10s guard
     setTimeout(() => waitForLeaflet(cb, tries + 1), 50);
   }
 
   document.addEventListener("DOMContentLoaded", function () {
+    // ==== Chips de filtros (activos por query y toggle al click) ====
+    (function () {
+      const params = new URLSearchParams(location.search);
+
+      // Marcar activos según query (excepto "nearby" que depende de lat/lon)
+      document.querySelectorAll('[data-filter]').forEach(chip => {
+        const key = chip.getAttribute('data-filter');
+
+        if (key === 'nearby') {
+          const hasCoords = params.has('lat') && params.has('lon');
+          if (hasCoords) {
+            chip.classList.add('active');
+            chip.setAttribute('aria-pressed', 'true');
+          }
+          chip.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (!navigator.geolocation) {
+              // Toggle off si no hay geolocalización
+              const u = new URL(location.href);
+              u.searchParams.delete('lat');
+              u.searchParams.delete('lon');
+              u.searchParams.delete('page');
+              location.href = u.toString();
+              return;
+            }
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                const u = new URL(location.href);
+                u.searchParams.set('lat', pos.coords.latitude.toFixed(6));
+                u.searchParams.set('lon', pos.coords.longitude.toFixed(6));
+                if (!u.searchParams.get('orden')) u.searchParams.set('orden', 'algoritmo');
+                u.searchParams.delete('page');
+                location.href = u.toString();
+              },
+              () => {
+                // Si falla, quita coords (toggle off)
+                const u = new URL(location.href);
+                u.searchParams.delete('lat');
+                u.searchParams.delete('lon');
+                u.searchParams.delete('page');
+                location.href = u.toString();
+              },
+              { timeout: 5000, maximumAge: 60000 }
+            );
+          });
+          return;
+        }
+
+        // Otros filtros booleanos (has_wifi, is_pet_friendly, has_outdoor_seating, etc.)
+        const isOn = params.has(key) && params.get(key) !== '0';
+        if (isOn) {
+          chip.classList.add('active');
+          chip.setAttribute('aria-pressed', 'true');
+        }
+        chip.addEventListener('click', () => {
+          const u = new URL(location.href);
+          if (u.searchParams.has(key)) {
+            u.searchParams.delete(key);
+          } else {
+            u.searchParams.set(key, '1');
+          }
+          u.searchParams.delete('page'); // reset paginación
+          location.href = u.toString();
+        });
+      });
+    })();
+
+    // ==== Leaflet map ====
     waitForLeaflet(() => {
       const mapEl = document.getElementById('cafes-map');
       if (!mapEl) return;
@@ -51,7 +132,7 @@
         attribution: '© OpenStreetMap contributors'
       }).addTo(map);
 
-      // 👇 fuerza recalcular tamaño al terminar el frame y en resize
+      // Asegurar tamaño correcto
       setTimeout(() => map.invalidateSize(), 0);
       window.addEventListener('resize', () => map.invalidateSize());
 
@@ -79,8 +160,8 @@
         }
       });
 
-      // ---- Ubicación pasada por querystring (lat/lon) ----
-      const urlParams = new URLSearchParams(window.location.search);
+      // ---- Ubicación por query (lat/lon) ----
+      const urlParams = new URLSearchParams(location.search);
       const lat = urlParams.get("lat");
       const lon = urlParams.get("lon");
 
@@ -108,44 +189,46 @@
 
       // ---- Buscar por dirección (Nominatim) ----
       const dirForm = document.getElementById("direccion-form");
-      dirForm?.addEventListener("submit", async function (e) {
-        e.preventDefault();
-        const direccion = document.getElementById("direccion").value;
-        const errorDiv = document.getElementById("error-direccion");
-        errorDiv.classList.add("hidden");
+      if (dirForm) {
+        dirForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const direccion = document.getElementById("direccion").value;
+          const errorDiv = document.getElementById("error-direccion");
+          errorDiv.classList.add("hidden");
 
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}`;
-        try {
-          const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
-          const data = await response.json();
-          if (Array.isArray(data) && data.length > 0) {
-            const lat = data[0].lat;
-            const lon = data[0].lon;
+          const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}`;
+          try {
+            const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            const data = await response.json();
+            if (Array.isArray(data) && data.length > 0) {
+              const lat = data[0].lat;
+              const lon = data[0].lon;
 
-            const form = document.createElement("form");
-            form.method = "GET";
-            form.action = window.location.pathname;
+              const form = document.createElement("form");
+              form.method = "GET";
+              form.action = window.location.pathname;
 
-            const latInput = document.createElement("input");
-            latInput.type = "hidden"; latInput.name = "lat"; latInput.value = lat;
-            form.appendChild(latInput);
+              const latInput = document.createElement("input");
+              latInput.type = "hidden"; latInput.name = "lat"; latInput.value = lat;
+              form.appendChild(latInput);
 
-            const lonInput = document.createElement("input");
-            lonInput.type = "hidden"; lonInput.name = "lon"; lonInput.value = lon;
-            form.appendChild(lonInput);
+              const lonInput = document.createElement("input");
+              lonInput.type = "hidden"; lonInput.name = "lon"; lonInput.value = lon;
+              form.appendChild(lonInput);
 
-            document.body.appendChild(form);
-            form.submit();
-          } else {
-            errorDiv.classList.remove("hidden");
+              document.body.appendChild(form);
+              form.submit();
+            } else {
+              errorDiv.classList.remove("hidden");
+            }
+          } catch (error) {
+            console.error("Error al buscar la dirección:", error);
+            document.getElementById("error-direccion").classList.remove("hidden");
           }
-        } catch (error) {
-          console.error("Error al buscar la dirección:", error);
-          document.getElementById("error-direccion").classList.remove("hidden");
-        }
-      });
+        });
+      }
 
-      // ---- Botón "📍 Cafés cerca mío" ----
+      // ---- Botón "📍 Cafés cerca mío" del layout padre (fallback) ----
       const ubicacionForm = document.getElementById("ubicacion-form");
       if (ubicacionForm) {
         ubicacionForm.addEventListener("submit", function (event) {
@@ -167,4 +250,3 @@
   });
 })();
 </script>
-

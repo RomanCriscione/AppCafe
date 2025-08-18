@@ -5,6 +5,22 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  {# === 7.1: Preconnect / DNS Prefetch para recursos externos === #}
+  <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
+  <link rel="dns-prefetch" href="https://tile.openstreetmap.org">
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="dns-prefetch" href="https://unpkg.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://code.jquery.com" crossorigin>
+  <link rel="dns-prefetch" href="https://code.jquery.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+
   {# === NUEVO: título y description dinámicos === #}
   {% block head_title %}
     <title>{{ meta_title|default:"Gota - Reseñas de Cafés" }}</title>
@@ -19,26 +35,13 @@
   <!-- Animaciones -->
   <link rel="stylesheet" href="{% static 'css/animations.css' %}">
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Poppins', 'sans-serif'] },
-          colors: {
-            primary: '#1e3a8a', accent: '#2dd4bf', accentHover: '#14b8a6',
-            secondary: '#172c6d', dark: '#111827', light: '#f9fafb'
-          }
-        }
-      }
-    }
-  </script>
+  <!-- Tailwind CSS (build local) -->
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
 
-  <!-- Custom CSS -->
+  <!-- Custom CSS (después de Tailwind para overrides) -->
   <link href="{% static 'css/custom.css' %}" rel="stylesheet" />
 
   <!-- Font Awesome (CSS) -->
@@ -48,13 +51,32 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-  <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+  <link rel="icon" href="{% static 'img/favicon.ico' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/icon-192.png' %}">
+  <link rel="manifest" href="{% static 'site.webmanifest' %}">
 
-  <style>html, body { overflow-x: hidden; }</style>
+  <meta name="theme-color" content="#111827">
+  <link rel="canonical" href="{{ request.build_absolute_uri }}"/>
+
+  <meta property="og:title" content="{{ page_title|default:'Gota — Descubrí tu próximo café' }}">
+  <meta property="og:description" content="{{ page_description|default:'Encontrá cafés por zona, estilo y experiencia.' }}">
+  {% if og_image_url %}
+    <meta property="og:image" content="{{ og_image_url }}">
+  {% else %}
+    <meta property="og:image" content="{% static 'img/og-default.jpg' %}">
+  {% endif %}
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <style>
+    html, body { overflow-x: hidden; }
+    /* Mantener Poppins como fuente principal ahora que no usamos el config del CDN */
+    body { font-family: 'Poppins', sans-serif; }
+  </style>
 </head>
 
-
-<body class="bg-light text-dark font-sans">
+<body class="bg-light text-dark">
   <div class="min-h-screen flex flex-col">
 
     <!-- Navbar -->
@@ -65,8 +87,8 @@
           <a href="{% url 'home' %}" class="text-2xl font-bold text-primary">Gota</a>
 
           <!-- Toggle para mobile -->
-          <button id="menu-toggle" class="lg:hidden text-gray-700">
-            <i class="fas fa-bars text-xl"></i>
+          <button id="menu-toggle" class="lg:hidden text-gray-700" aria-label="Abrir menú">
+            <i class="fas fa-bars text-xl" aria-hidden="true"></i>
           </button>
 
           <nav id="navbar-menu" class="hidden lg:flex lg:items-center lg:gap-6">
@@ -92,7 +114,7 @@
             {% else %}
               <a href="{% url 'register_owner' %}"
                  class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md font-medium transition flex items-center gap-2">
-                <i class="fas fa-coffee text-sm"></i> Registrar tu café
+                <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
               </a>
             {% endif %}
 
@@ -105,7 +127,7 @@
             </a>
             <a href="{% url 'register_owner' %}"
                class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md font-medium transition flex items-center gap-2">
-              <i class="fas fa-coffee text-sm"></i> Registrar tu café
+              <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
             </a>
           {% endif %}
         </div>

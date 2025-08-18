@@ -67,6 +67,40 @@
   padding-bottom: 2rem;
 }
 
+/* Tokens rápidos */
+:root{
+  --fg:#111827; --muted:#6b7280; --border:rgba(17,24,39,.06);
+  --radius:1rem;
+}
+
+/* Foco visible (a11y) */
+:focus-visible{ outline:3px solid #93c5fd; outline-offset:2px }
+
+/* Cards */
+.card{border-radius:var(--radius);background:#fff;border:1px solid var(--border);
+  box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);overflow:hidden}
+.card:hover{box-shadow:0 8px 24px rgba(0,0,0,.12)}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  border-radius:var(--radius);padding:.55rem 1rem;font-weight:600;
+  transition:transform .15s ease,box-shadow .2s ease;border:1px solid transparent}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:#111827;color:#fff}
+.btn-outline{background:#fff;color:#111827;border-color:var(--border)}
+.btn-ghost{background:transparent;color:#111827}
+
+/* Chips/pills */
+.chip{display:inline-flex;align-items:center;gap:.375rem;padding:.25rem .625rem;
+  font-size:.75rem;border-radius:9999px;background:#f3f4f6;color:var(--fg)}
+
+/* Skeleton loader */
+.skeleton{position:relative;overflow:hidden;
+  background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 37%,#f3f4f6 63%);
+  background-size:400% 100%;animation:skeleton 1.2s ease-in-out infinite}
+@keyframes skeleton{0%{background-position:100% 0}100%{background-position:-100% 0}}
+
+
 /* --- Animación bounce --- */
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
@@ -137,3 +171,9 @@
   color: inherit;
   text-decoration: none;
 }
+
+/* Accesibilidad: enlaces para saltar contenido */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.sr-only:focus{position:fixed;left:1rem;top:1rem;width:auto;height:auto;margin:0;overflow:visible};
+
+.text-muted{color:#6b7280} /* >= #6b7280 */
