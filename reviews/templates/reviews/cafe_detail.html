@@ -6,7 +6,7 @@
   <link rel="canonical" href="{{ full_page_url }}" />
 
   <!-- Open Graph / Twitter -->
-  <meta property="og:type" content="place" /> {# opcionalmente 'place' en vez de 'website' #}
+  <meta property="og:type" content="place" />
   <meta property="og:title" content="{{ cafe.name }} - Cafetería en {{ cafe.location }}" />
   <meta property="og:description" content="Reseñas, fotos y ubicación de {{ cafe.name }}." />
   {% if full_image_url %}
@@ -79,74 +79,70 @@
   </script>
 {% endblock %}
 
-
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 space-y-8">
 
   <!-- Título -->
   <h1 class="text-3xl font-bold animate-fade-in-up">{{ cafe.name }}</h1>
 
-  <!-- Información básica -->
-  <div class="mb-4 text-gray-700 space-y-1 animate-fade-in-up animate-delay-100">
-    <p>📍 <strong>Dirección:</strong> {{ cafe.address }}, {{ cafe.location }}</p>
-    <p>☎ <strong>Teléfono:</strong> {{ cafe.phone }}</p>
-    <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
-        target="_blank"
-        class="text-blue-600 hover:underline">
-        📍 Ver en Google Maps
-    </a>
-  </div>
+  <!-- Tarjeta de contacto (sin mostrar plan) -->
+  <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-100">
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="flex items-start gap-2">
+        <span aria-hidden="true">📍</span>
+        <div>
+          <div class="font-semibold">Dirección</div>
+          <div class="text-sm text-gray-600">{{ cafe.address }}, {{ cafe.location }}</div>
+        </div>
+      </div>
 
-  <!-- Plan -->
-  <p class="mb-4 animate-fade-in-up animate-delay-200">
-    🌟 <strong>Plan actual:</strong>
-    {% if cafe.visibility_level == 2 %}
-      <span class="text-accent font-bold">☕☕ Plan Maestro</span>
-    {% elif cafe.visibility_level == 1 %}
-      <span class="text-primary font-bold">☕ Plan Barista</span>
-    {% else %}
-      <span class="text-gray-500 font-bold">☕ Gratuito</span>
-    {% endif %}
-  </p>
+      <div class="flex items-start gap-2">
+        <span aria-hidden="true">☎</span>
+        <div>
+          <div class="font-semibold">Teléfono</div>
+          <div class="text-sm text-gray-600">{{ cafe.phone|default:"—" }}</div>
+        </div>
+      </div>
 
-  <!-- Etiquetas destacadas -->
-  {% if cafe.tags.all|length %}
-    <div class="animate-fade-in-up animate-delay-300">
-      <h2 class="text-lg font-semibold text-gray-800 mb-2">🏷️ Etiquetas destacadas del lugar:</h2>
-      <div class="flex flex-wrap gap-2">
-        {% for tag in cafe.tags.all %}
-          <span class="bg-gray-200 text-gray-800 text-sm px-3 py-1 rounded-full">{{ tag.name }}</span>
-        {% endfor %}
+      <div class="sm:col-span-2">
+        <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
+           target="_blank" rel="noopener"
+           class="btn btn-primary rounded-xl">
+          📍 Ver en Google Maps
+        </a>
       </div>
     </div>
-  {% endif %}
+  </section>
 
-  <!-- Etiquetas sensoriales -->
-  {% if sensory_tags %}
-    <div class="animate-fade-in-up animate-delay-400">
-      <h2 class="text-lg font-semibold text-gray-800 mb-2">🧠 Lo que otros destacan (etiquetas sensoriales)</h2>
-      <div class="flex flex-wrap gap-2">
-        {% for tag in sensory_tags %}
-          <span class="bg-[#f0fdfa] text-accent text-sm px-3 py-1 rounded-full border border-accent">{{ tag.name }}</span>
-        {% endfor %}
-      </div>
-    </div>
-  {% endif %}
-
-  <!-- Features -->
-  <div class="animate-fade-in-up animate-delay-500">
+  <!-- Features (badges) -->
+  <section class="mt-4 animate-fade-in-up animate-delay-150">
     {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
-  </div>
+  </section>
 
   <!-- Fotos -->
   {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
-    <div class="animate-fade-in-up animate-delay-600">
+    <div class="animate-fade-in-up animate-delay-200">
       {% include "reviews/includes/cafe_photos.html" with cafe=cafe %}
     </div>
   {% endif %}
 
-  <!-- Calificación -->
-  <div class="animate-fade-in-up animate-delay-700">
+  <!-- Etiquetas sensoriales (debajo de features/fotos) -->
+  {% if sensory_tags %}
+    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-250">
+      <h2 class="text-lg font-semibold text-gray-800 mb-2">🧠 Lo que otros destacan</h2>
+      <ul class="tag-list">
+        {% for tag in sensory_tags %}
+          <li class="tag-item">
+            <span class="tag-dot" aria-hidden="true"></span>
+            <span class="tag-text">{{ tag.name }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  <!-- Calificación + reseña destacada -->
+  <div class="animate-fade-in-up animate-delay-300">
     {% if average_rating %}
       <p class="mb-4"><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
       {% if best_review %}
@@ -161,12 +157,12 @@
     {% endif %}
   </div>
 
-  <!-- Reseñas (con caché de fragmento) -->
-  <h3 class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-1000">Reseñas:</h3>
+  <!-- Reseñas -->
+  <h3 class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-400">Reseñas:</h3>
 
   {% cache 600 cafe_reviews_list cafe.id %}
     <div id="review-container"
-         class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 transition-all duration-300 max-h-[1056px] overflow-hidden relative animate-fade-in-up animate-delay-1100">
+         class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 transition-all duration-300 max-h-[1056px] overflow-hidden relative animate-fade-in-up animate-delay-500">
       {% for review in reviews %}
         {% include "reviews/_review_card.html" with review=review %}
       {% empty %}
@@ -181,8 +177,10 @@
     </div>
 
     {% if reviews|length > 3 %}
-      <button onclick="toggleReviews()" id="btn-reviews"
-              class="text-sm text-blue-600 mt-1 hover:underline animate-fade-in-up animate-delay-1300">
+      <button
+        onclick="toggleReviews()" id="btn-reviews"
+        class="btn btn-outline btn-sm mt-2 animate-fade-in-up animate-delay-600"
+      >
         Ver todas
       </button>
     {% endif %}
@@ -190,13 +188,9 @@
 
   <!-- Favorito -->
   {% if user.is_authenticated %}
-    <form method="post" action="{% url 'toggle_favorite' cafe.id %}" class="mb-4 animate-fade-in-up animate-delay-900">{% csrf_token %}
-      <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600 transition">
-        {% if user in cafe.favorites.all %}
-          💔 Quitar de favoritos
-        {% else %}
-          ❤️ Agregar a favoritos
-        {% endif %}
+    <form method="post" action="{% url 'toggle_favorite' cafe.id %}" class="mb-4 animate-fade-in-up animate-delay-700">{% csrf_token %}
+      <button type="submit" class="btn btn-danger rounded-xl">
+        {% if user in cafe.favorites.all %} 💔 Quitar de favoritos {% else %} ❤️ Agregar a favoritos {% endif %}
       </button>
     </form>
   {% endif %}
@@ -238,7 +232,7 @@
 {% block scripts %}
   {{ block.super }}
   <script>
-  // ⭐ Estrellas de calificación
+  // ⭐ Estrellas de calificación (si usás el widget de estrellas en el wizard)
   document.addEventListener("DOMContentLoaded", () => {
     const stars = document.querySelectorAll('#rating-stars label');
     const radios = document.querySelectorAll('#rating-stars input');
@@ -263,7 +257,7 @@
     updateRatingVisual();
   });
 
-  // Mostrar/Ocultar reseñas
+  // Mostrar/Ocultar TODAS las reseñas (botón debajo del grid)
   function toggleReviews() {
     const container = document.getElementById("review-container");
     const btn = document.getElementById("btn-reviews");
@@ -276,6 +270,44 @@
     if (fade) fade.style.display = collapsed ? "block" : "none";
     btn.textContent = collapsed ? "Ver todas" : "Ver menos";
   }
+
+  // “Ver más / Ver menos” dentro de cada tarjeta de reseña (un único bloque)
+  document.addEventListener('DOMContentLoaded', () => {
+    // Si no definiste la variable en tu CSS, por defecto usamos 140px
+    const MAX = parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue('--review-collapsed')
+    ) || 140;
+
+    document.querySelectorAll('.review-card').forEach(card => {
+      const body = card.querySelector('.review-body');
+      const text = card.querySelector('.review-text');
+      const btn  = card.querySelector('.review-toggle');
+      const fade = card.querySelector('.review-fade');
+      if (!body || !text || !btn) return;
+
+      function sync(){
+        const needs = text.scrollHeight > MAX + 8;
+        body.classList.toggle('collapsible', needs);
+        body.classList.toggle('collapsed', needs);
+        btn.hidden = !needs;
+        if (fade) fade.style.display = needs ? 'block' : 'none';
+        if (!needs) btn.textContent = 'Ver más';
+      }
+
+      btn.addEventListener('click', () => {
+        const collapsed = body.classList.contains('collapsed');
+        body.classList.toggle('collapsed', !collapsed);
+        btn.textContent = collapsed ? 'Ver menos' : 'Ver más';
+      });
+
+      sync();
+      let rto;
+      window.addEventListener('resize', () => {
+        clearTimeout(rto);
+        rto = setTimeout(sync, 120);
+      });
+    });
+  });
 
   // Modal + Wizard
   document.addEventListener("DOMContentLoaded", () => {
@@ -307,145 +339,12 @@
         modal.classList.add("hidden");
         wizardStepsContainer.classList.remove("hidden");
         thankYouMessage.classList.add("hidden");
-        currentStepIndex = 0;
-        showStep(currentStepIndex);
       }, 300);
     }
 
     openBtn.addEventListener("click", openModal);
     closeBtn.addEventListener("click", closeModal);
     modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
-
-    const steps = document.querySelectorAll(".wizard-step");
-    const nextButtons = document.querySelectorAll(".next-btn");
-    const prevButtons = document.querySelectorAll(".prev-btn");
-    const skipButtons = document.querySelectorAll(".skip-btn");
-    let currentStepIndex = 0;
-    let tagCategorySteps = [];
-    let currentCategoryIndex = 0;
-
-    function showStep(index) {
-      steps.forEach((step, i) => step.classList.toggle("hidden", i !== index));
-      if (index === 1) {
-        tagCategorySteps = document.querySelectorAll(".tag-category-step");
-        tagCategorySteps.forEach((cat, i) => cat.classList.toggle("hidden", i !== 0));
-        currentCategoryIndex = 0;
-      }
-    }
-    function showNextCategory() {
-      if (currentStepIndex === 1) {
-        if (!tagCategorySteps.length) return;
-        tagCategorySteps[currentCategoryIndex].classList.add("hidden");
-        if (currentCategoryIndex < tagCategorySteps.length - 1) {
-          currentCategoryIndex++;
-          tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
-        } else {
-          const form = document.getElementById("review-form-step-1");
-          if (form) form.requestSubmit();
-        }
-      }
-    }
-    function showPrevCategory() {
-      if (currentStepIndex === 1 && currentCategoryIndex > 0) {
-        tagCategorySteps[currentCategoryIndex].classList.add("hidden");
-        currentCategoryIndex--;
-        tagCategorySteps[currentCategoryIndex].classList.remove("hidden");
-      } else if (currentStepIndex === 1 && currentCategoryIndex === 0) {
-        currentStepIndex = 0; showStep(currentStepIndex);
-      }
-    }
-    nextButtons.forEach(btn => btn.addEventListener("click", () => {
-      if (currentStepIndex === 0) { currentStepIndex = 1; showStep(currentStepIndex); }
-      else { showNextCategory(); }
-    }));
-    prevButtons.forEach(btn => btn.addEventListener("click", showPrevCategory));
-    skipButtons.forEach(btn => btn.addEventListener("click", () => {
-      const form = document.getElementById("review-form-step-1");
-      if (form) form.requestSubmit();
-    }));
-
-    const reviewForm = document.getElementById("review-form-step-1");
-    if (reviewForm) {
-      reviewForm.addEventListener("submit", () => {
-        const btns = reviewForm.querySelectorAll("button, input[type=submit]");
-        btns.forEach(b => b.setAttribute("disabled", "disabled"));
-      });
-    }
-
-    showStep(currentStepIndex);
-  });
-
-  // Lightbox
-  let currentImageIndex = 0;
-  function openLightbox(index) {
-    const thumbs = document.querySelectorAll('.photo-thumb img');
-    const images = Array.from(thumbs).filter(img => img && img.src);
-    if (!images.length || index < 0 || index >= images.length) return;
-    const selected = images[index];
-    const img = document.getElementById("lightbox-image");
-    const caption = document.getElementById("lightbox-caption");
-    const modal = document.getElementById('lightbox-modal');
-    if (!img || !caption || !modal) return;
-    img.src = selected.src;
-    img.alt = selected.alt || "";
-    caption.textContent = selected.alt || "";
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  }
-  function changeLightboxImage(direction) {
-    const thumbs = document.querySelectorAll('.photo-thumb img');
-    const images = Array.from(thumbs).filter(img => img && img.src);
-    if (!images.length) return;
-    currentImageIndex = (currentImageIndex + direction + images.length) % images.length;
-    const newImage = images[currentImageIndex];
-    const img = document.getElementById("lightbox-image");
-    const caption = document.getElementById("lightbox-caption");
-    if (!img || !caption) return;
-    img.src = newImage.src;
-    img.alt = newImage.alt || "";
-    caption.textContent = newImage.alt || "";
-  }
-  (function initLightbox() {
-    const closeBtn = document.getElementById('lightbox-close');
-    const modal = document.getElementById('lightbox-modal');
-    if (closeBtn && modal) {
-      closeBtn.addEventListener('click', () => {
-        modal.classList.remove('flex');
-        modal.classList.add('hidden');
-      });
-      modal.addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) {
-          e.currentTarget.classList.remove('flex');
-          e.currentTarget.classList.add('hidden');
-        }
-      });
-      let touchStartX = 0, touchEndX = 0;
-      modal.addEventListener('touchstart', (e) => touchStartX = e.changedTouches[0].screenX);
-      modal.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        if (touchEndX < touchStartX - 50) changeLightboxImage(1);
-        if (touchEndX > touchStartX + 50) changeLightboxImage(-1);
-      });
-    }
-  })();
-
-  // Scroll Reveal
-  document.addEventListener("DOMContentLoaded", () => {
-    const elements = document.querySelectorAll('.animate-fade-in-up');
-    if (!elements.length) return;
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.remove('opacity-0', 'translate-y-5');
-          entry.target.classList.add('animate-fade-in-up-active');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
-    elements.forEach(el => {
-      el.classList.add('opacity-0', 'translate-y-5');
-      observer.observe(el);
-    });
   });
   </script>
 {% endblock %}

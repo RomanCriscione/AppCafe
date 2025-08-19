@@ -33,7 +33,7 @@
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6 relative px-4">
   <!-- Botón de Filtros para Mobile -->
-  <button id="toggle-filtros" class="lg:hidden fixed bottom-4 right-4 z-50 bg-primary text-white p-3 rounded-full shadow-lg hover:bg-secondary transition">
+  <button id="toggle-filtros" class="lg:hidden fixed bottom-4 right-4 z-50 btn btn-primary rounded-full shadow-lg">
     🔍 Filtros
   </button>
 
@@ -78,15 +78,15 @@
         {% endfor %}
       </fieldset>
 
-<button type="submit" class="mt-4 btn btn-primary rounded-xl">
-  Aplicar filtros
-</button>
+      <button type="submit" class="mt-4 btn btn-primary rounded-xl w-full">
+        Aplicar filtros
+      </button>
     </form>
   </aside>
 
   <!-- Lista de Cafés -->
   <section class="lg:w-3/4 max-w-6xl mx-auto">
-    <!-- Skip links (6.2) -->
+    <!-- Skip links -->
     <a href="#resultados" class="sr-only">Saltar a resultados</a>
     <a href="#paginacion" class="sr-only">Saltar a paginación</a>
 
@@ -97,12 +97,12 @@
           <input type="hidden" name="orden" value="algoritmo">
           <input type="hidden" name="lat" id="lat">
           <input type="hidden" name="lon" id="lon">
-          <button type="submit" class="bg-accent hover:bg-[#14b8a6] text-white px-3 py-2 rounded-xl text-sm transition-transform hover:scale-105 shadow">
+          <button type="submit" class="btn btn-primary rounded-xl text-sm">
             📍 Cafés cerca mío
           </button>
         </form>
         {% if mostrar_boton_reset %}
-          <a href="{% url 'cafe_list' %}" class="inline-block bg-gray-100 text-gray-800 px-3 py-2 rounded-xl hover:bg-gray-200 transition-colors">
+          <a href="{% url 'cafe_list' %}" class="btn btn-secondary rounded-xl text-sm">
             🔄 Ver todos los cafés
           </a>
         {% endif %}
@@ -111,7 +111,7 @@
 
     {% include "reviews/includes/mapa_cafe_list.html" %}
 
-    <!-- SKELETON: muestra placeholders mientras cargan imágenes -->
+    <!-- SKELETON -->
     <div id="grid-skeleton" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {% for _ in "123" %}
         <div class="card">
@@ -129,7 +129,7 @@
       {% endfor %}
     </div>
 
-    <!-- CONTENIDO REAL: oculto hasta que termine de cargar -->
+    <!-- CONTENIDO REAL -->
     <div id="grid-cafes" class="hidden" tabindex="-1" aria-labelledby="titulo-cafeterias">
       <div id="resultados" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" tabindex="-1">
         {% for cafe in cafes %}
@@ -166,7 +166,9 @@
               </div>
 
               <div class="mt-4">
-                <a href="{% url 'cafe_detail' cafe.id %}" class="btn btn-outline">Ver detalle</a>
+                <a href="{% url 'cafe_detail' cafe.id %}" class="btn btn-outline rounded-xl w-full">
+                  Ver detalle
+                </a>
               </div>
             </div>
           </article>
@@ -250,7 +252,6 @@
       function swap() {
         if (sk) sk.style.display = 'none';
         if (real) real.classList.remove('hidden');
-        // Enfocar resultados para quien usó teclado / skip link
         const resultados = document.getElementById('resultados');
         if (resultados) resultados.focus();
       }
