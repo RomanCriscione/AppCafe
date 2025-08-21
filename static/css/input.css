@@ -12,9 +12,15 @@
 /* COMPONENTS */
 @layer components {
   .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition shadow-sm; }
-  .btn-primary { @apply btn bg-primary text-white hover:bg-secondary; }
-  .btn-outline { @apply btn border border-gray-300 text-gray-800 hover:bg-gray-100; }
-  .btn-ghost { @apply btn text-gray-700 hover:bg-gray-100; }
+
+  /* 👉 Azul consistente */
+  .btn-primary { @apply btn bg-primary text-white hover:bg-primary/90 focus:ring-2 focus:ring-primary/30; }
+
+  /* Outline azul */
+  .btn-outline { @apply btn border border-primary text-primary hover:bg-primary/5; }
+
+  /* Ghost azul (acciones secundarias) */
+  .btn-ghost { @apply btn text-primary hover:bg-primary/10; }
 
   .chip { @apply inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50; }
   .chip.active { @apply bg-accent text-white border-accent; }

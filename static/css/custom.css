@@ -1,4 +1,3 @@
-/* static/css/custom.css */
 /* === Design tokens (CSS vars) === */
 :root{
   --radius-lg: 16px;
@@ -14,13 +13,25 @@
   --text-1: #0f172a;      /* slate-900 */
   --text-2: #475569;      /* slate-600 */
 
-  /* Paleta de apoyo; no pisa tu Tailwind */
-  --brand: #8b5e34;       /* café */
+  /* (solo por compatibilidad con restos viejos) */
+  --brand: #8b5e34;
   --brand-600: #7a4f2a;
   --brand-700: #6a4425;
+
+  /* 🎨 Paleta AZUL (principal de UI) */
+  --primary:     #2563eb; /* blue-600 */
+  --primary-600: #1d4ed8;
+  --primary-700: #1e40af;
+  --primary-50:  #eff6ff;
+  --primary-100: #dbeafe;
+
+  /* Otros */
   --accent: #10b981;      /* verde ok */
   --warning: #f59e0b;     /* ámbar */
   --danger: #ef4444;      /* rojo suave */
+
+  /* Alto del preview de reseñas */
+  --review-collapsed: 140px;
 }
 
 /* === Base tweaks === */
@@ -29,28 +40,50 @@ html { scroll-behavior: smooth; }
 body { color: var(--text-1); background: var(--surface); }
 img { display:block; max-width:100%; height:auto; }
 a { text-decoration: none; }
-:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 /* === Utilidades suaves === */
 .container-default { max-width: 1280px; margin: 0 auto; padding: 0 1rem; }
 .text-muted { color: var(--text-2); }
 .surface { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
-/* ⚠️ No redefinimos .rounded-xl para no pisar Tailwind */
 
-/* === Botones === */
+/* === Botones (azules) === */
 .btn{
   display:inline-flex; align-items:center; gap:.5rem;
   padding:.625rem .95rem; border-radius: var(--radius-md);
   font-weight:600; border:1px solid transparent; transition: all .18s ease;
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-soft); line-height:1;
 }
 .btn:hover{ transform: translateY(-1px); box-shadow: var(--shadow-hover); }
 .btn:active{ transform: translateY(0); }
 
-.btn-primary{ background: var(--brand); color:#fff; }
-.btn-primary:hover{ background: var(--brand-600); }
-.btn-secondary{ background:#fff; color:var(--text-1); border-color: var(--border); }
-.btn-secondary:hover{ background: var(--surface-2); }
+/* Principal azul */
+.btn-primary{ background: var(--primary) !important; color:#fff !important; }
+.btn-primary:hover{ background: var(--primary-600) !important; }
+.btn-primary:focus-visible{ outline:2px solid var(--primary-700); outline-offset:2px; }
+
+/* Contorno azul */
+.btn-outline{
+  background:#fff; color: var(--primary) !important; border-color: var(--primary) !important;
+}
+.btn-outline:hover{ background: var(--primary-50); }
+
+/* Ghost azul */
+.btn-ghost{
+  background: transparent; color: var(--primary) !important; border-color: transparent;
+}
+.btn-ghost:hover{ background: var(--primary-50); }
+
+/* Variantes */
+.btn-danger{ background: var(--danger); color:#fff; }
+.btn-danger:hover{ background:#dc2626; }
+.btn-success{ background: var(--accent); color:#fff; }
+.btn-success:hover{ filter:brightness(.95); }
+
+/* Tamaños / helpers */
+.btn-sm{ padding:.45rem .65rem; font-size:.9rem; border-radius: var(--radius-sm); }
+.btn-block{ width:100%; justify-content:center; }
+.btn-icon{ padding:.5rem; width:2.5rem; height:2.5rem; justify-content:center; }
 
 /* === Enlaces de navegación === */
 .nav-link{
@@ -59,7 +92,7 @@ a { text-decoration: none; }
   color: var(--text-1);
   transition: background-color .15s ease, color .15s ease;
 }
-.nav-link:hover{ background: var(--surface-2); color: var(--brand); }
+.nav-link:hover{ background: var(--surface-2); color: var(--primary); }
 
 /* === Badges / chips === */
 .badge{
@@ -70,14 +103,13 @@ a { text-decoration: none; }
 .badge-success{ background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.25); color:#047857; }
 .badge-warning{ background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.25); color:#92400e; }
 
-/* === Cards de café (contenedor + media) === */
+/* === Cards de café === */
 .card{
   background: var(--surface); border:1px solid var(--border);
   border-radius: var(--radius-lg); overflow:hidden; box-shadow: var(--shadow-soft);
   transition: transform .18s ease, box-shadow .18s ease;
 }
 .card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-hover); }
-
 .card-media{ aspect-ratio: 4 / 3; overflow:hidden; background: var(--surface-2); }
 .card-media img{ width:100%; height:100%; object-fit:cover; }
 
@@ -88,10 +120,7 @@ a { text-decoration: none; }
 .card-actions{ display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-top:.75rem; }
 
 /* === Grid de cards === */
-.grid-cafes{
-  display:grid; gap:1rem;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
+.grid-cafes{ display:grid; gap:1rem; grid-template-columns: repeat(1, minmax(0, 1fr)); }
 @media (min-width:640px){ .grid-cafes{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width:1024px){ .grid-cafes{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width:1280px){ .grid-cafes{ grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -103,68 +132,14 @@ a { text-decoration: none; }
   transition:border-color .18s ease, box-shadow .18s ease;
 }
 .input:focus, .select:focus, .textarea:focus{
-  border-color: var(--brand); box-shadow: 0 0 0 3px rgba(139,94,52,.15);
+  border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.15);
   outline: none;
 }
-.checkbox{ width:1rem; height:1rem; accent-color: var(--brand); }
 
-/* === Drawer de filtros (mobile) === */
-#panel-filtros{
-  will-change: transform; box-shadow: var(--shadow-hover);
-  background:#fff; border-right:1px solid var(--border);
-}
-#filtros-overlay{ transition: opacity .2s ease; }
-
-/* === Map container === */
-.map-container{
-  min-height: 320px; background:#fff; border:1px solid var(--border);
-  border-radius: var(--radius-lg); overflow:hidden;
-}
-@media (min-width:1024px){ .map-container{ min-height: 420px; } }
-
-/* === Swiper / sliders uniformes === */
-.swiper{ overflow: visible; }
-.swiper-slide{ display:flex !important; height:auto; }
-.review-card{ display:flex; flex-direction:column; height:100%; }
-
-/* === Estados vacíos / skeleton === */
-.empty{
-  padding:2rem; text-align:center; color:var(--text-2);
-  border:1px dashed var(--border); border-radius: var(--radius-lg); background: var(--surface-2);
-}
-.skeleton{ position:relative; overflow:hidden; background: #e5e7eb; }
-.skeleton::after{
-  content:""; position:absolute; inset:0; transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
-  animation: shimmer 1.25s infinite;
-}
-
-/* === Animaciones === */
-@keyframes bounce { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
-@keyframes fadeIn { from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
-@keyframes shimmer { to{ transform: translateX(100%); } }
-
-.animated-bounce{ animation: bounce 1s infinite; }
-.animate-fade-in{ animation: fadeIn .35s ease; }
-
-/* === Botón de favorito (compat) === */
-.btn-fav{
-  background-color:#f87171; color:#fff; padding:.4rem .65rem;
-  border-radius: var(--radius-sm); font-weight:600;
-}
-.btn-fav:hover{ background-color:#dc2626; }
-
-/* ===== SAFE ADD-ONS (no tocan lo existente) ===== */
-
-/* Formularios básicos (aunque no tengan clases .input/.select) */
+/* Formularios básicos (sin clases específicas) */
 select,
-input[type="text"],
-input[type="search"],
-input[type="email"],
-input[type="number"],
-input[type="password"],
-input[type="tel"],
-textarea {
+input[type="text"], input[type="search"], input[type="email"], input[type="number"],
+input[type="password"], input[type="tel"], textarea {
   width: 100%;
   padding: .55rem .7rem;
   border-radius: var(--radius-md);
@@ -176,38 +151,25 @@ textarea {
   font: inherit;
 }
 select:focus,
-input[type="text"]:focus,
-input[type="search"]:focus,
-input[type="email"]:focus,
-input[type="number"]:focus,
-input[type="password"]:focus,
-input[type="tel"]:focus,
+input[type="text"]:focus, input[type="search"]:focus, input[type="email"]:focus,
+input[type="number"]:focus, input[type="password"]:focus, input[type="tel"]:focus,
 textarea:focus {
-  border-color: var(--brand);
+  border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(139,94,52,.15);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.15);
 }
 
-/* Checkboxes sueltos */
-input[type="checkbox"]{
-  width: 1rem;
-  height: 1rem;
-  accent-color: var(--brand);
-  vertical-align: middle;
-}
+/* Checkboxes */
+input[type="checkbox"]{ width:1rem; height:1rem; accent-color: var(--primary); vertical-align: middle; }
 label { display: inline-flex; align-items: center; gap: .45rem; }
 
-/* Fieldset de "Características del café" */
-fieldset {
-  border-top: 1px solid var(--border);
-  margin-top: .5rem;
-  padding-top: .5rem;
-}
+/* Fieldset */
+fieldset { border-top: 1px solid var(--border); margin-top: .5rem; padding-top: .5rem; }
 
-/* Submit del formulario de filtros (si no usa .btn) */
+/* Submit genérico (cuando no usa .btn) */
 form button[type="submit"]:not(.btn),
 form input[type="submit"]:not(.btn) {
-  background: var(--brand);
+  background: var(--primary);
   color: #fff;
   padding: .55rem .9rem;
   border-radius: var(--radius-md);
@@ -217,11 +179,10 @@ form input[type="submit"]:not(.btn) {
   cursor: pointer;
 }
 form button[type="submit"]:not(.btn):hover,
-form input[type="submit"]:not(.btn):hover { background: var(--brand-600); }
+form input[type="submit"]:not(.btn):hover { background: var(--primary-600); }
 
-/* Link "Limpiar" junto al submit (si aparece) */
-form a.button-reset,
-form a[type="reset"] {
+/* Link "Limpiar" */
+form a.button-reset, form a[type="reset"] {
   display: inline-flex; align-items: center; justify-content: center;
   padding: .55rem .9rem;
   border-radius: var(--radius-md);
@@ -231,29 +192,29 @@ form a[type="reset"] {
   text-decoration: none;
 }
 
-/* Botón flotante/trigger del Drawer de filtros (si existe) */
+/* Botón flotante/trigger del Drawer de filtros */
 #toggle-filtros,
 a[href="#panel-filtros"] {
   display: inline-flex; align-items: center; gap: .5rem;
   padding: .6rem .9rem;
   border-radius: var(--radius-md);
-  background: var(--brand);
+  background: var(--primary);
   color: #fff;
   border: 1px solid transparent;
   font-weight: 600;
   box-shadow: var(--shadow-soft);
 }
 #toggle-filtros:hover,
-a[href="#panel-filtros"]:hover { background: var(--brand-600); }
+a[href="#panel-filtros"]:hover { background: var(--primary-600); }
 
-/* Título Filtros + respiración general */
+/* Títulos y respiración */
 h2 { margin: .25rem 0 .5rem; }
 h2 + form { margin-top: .25rem; }
 
-/* Pequeño fix de imágenes anchas dentro de contenidos variados */
+/* Imágenes en contenidos variados */
 main img { max-width: 100%; height: auto; display: block; }
 
-/* ==== FIX DURO: visibilidad del submit en el panel de filtros (y genérico) ==== */
+/* Forzar visibilidad del submit en panel filtros / formularios */
 #panel-filtros .btn[type="submit"],
 #panel-filtros button[type="submit"],
 #panel-filtros button:not([type]),
@@ -263,16 +224,10 @@ main img { max-width: 100%; height: auto; display: block; }
 form .btn[type="submit"]:not(.btn-secondary),
 form button[type="submit"],
 form button:not([type]) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  background: var(--brand) !important;
-  color: #fff !important;
-  padding: .6rem .95rem;
-  border-radius: var(--radius-md);
-  border: 1px solid transparent !important;
-  font-weight: 600;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: .5rem; background: var(--primary) !important; color: #fff !important;
+  padding: .6rem .95rem; border-radius: var(--radius-md);
+  border: 1px solid transparent !important; font-weight: 600;
   box-shadow: var(--shadow-soft);
   transition: background-color .18s ease, box-shadow .18s ease, transform .12s ease;
   margin-top: .5rem;
@@ -286,7 +241,7 @@ form button:not([type]) {
 form .btn[type="submit"]:not(.btn-secondary):hover,
 form button[type="submit"]:hover,
 form button:not([type]):hover {
-  background: var(--brand-600) !important;
+  background: var(--primary-600) !important;
   box-shadow: var(--shadow-hover);
   transform: translateY(-1px);
 }
@@ -298,19 +253,9 @@ form button:not([type]):hover {
 #panel-filtros form > input[type="submit"]:active,
 form .btn[type="submit"]:not(.btn-secondary):active,
 form button[type="submit"]:active,
-form button:not([type]):active {
-  transform: translateY(0);
-}
-/* Botón “outline” neutro (ya usas .btn btn-outline) */
-.btn-outline{ background:#fff; color:var(--text-1); border-color:var(--border); }
-.btn-outline:hover{ background: var(--surface-2); }
+form button:not([type]):active { transform: translateY(0); }
 
-/* Alias rápidos usados en plantillas */
-.bg-primary{ background-color: var(--brand) !important; color:#fff !important; }
-.text-accent{ color: var(--accent) !important; }
-.border-accent{ border-color: var(--accent) !important; }
-
-/* Chips (mapa-lista) */
+/* === Chips (mapa-lista) === */
 .chip{
   display:inline-flex; align-items:center; gap:.35rem;
   padding:.4rem .7rem; border-radius:9999px;
@@ -323,12 +268,10 @@ form button:not([type]):active {
   border-color: rgba(16,185,129,.25);
   color:#047857;
 }
-
-/* Ocultar scrollbar en chips horizontales */
 .no-scrollbar::-webkit-scrollbar{ display:none; }
 .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
 
-/* === Etiquetas sensoriales (lista sobria en 2 columnas) === */
+/* === Etiquetas sensoriales (lista en 2 columnas) === */
 .tag-list{ display:grid; gap:.4rem; grid-template-columns:1fr; }
 @media (min-width:640px){ .tag-list{ grid-template-columns:1fr 1fr; } }
 .tag-item{ display:flex; align-items:flex-start; gap:.55rem; padding:.25rem 0; }
@@ -340,45 +283,25 @@ form button:not([type]):active {
 }
 .tag-text{ font-size:.95rem; color:var(--text-1); }
 
-/* === Variantes de botón (consistencia en toda la app) === */
-.btn-outline{ background:#fff; color:var(--text-1); border-color:var(--border); }
-.btn-outline:hover{ background: var(--surface-2); }
-
-.btn-danger{ background: var(--danger); color:#fff; }
-.btn-danger:hover{ background:#dc2626; }
-
-.btn-success{ background: var(--accent); color:#fff; }
-.btn-success:hover{ filter:brightness(.95); }
-
-.btn-sm{ padding:.45rem .65rem; font-size:.9rem; border-radius: var(--radius-sm); }
-.btn-block{ width:100%; justify-content:center; }
-.btn-icon{ padding:.5rem; width:2.5rem; height:2.5rem; justify-content:center; }
-
 /* === Reseñas: tarjeta compacta + expandible === */
-:root{ --review-collapsed: 140px; } /* altura del preview */
-
 .review-card{
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
 }
-
 .review-head{ display:flex; gap:.75rem; align-items:flex-start; }
 .review-avatar{
   width: 42px; height: 42px; border-radius: 999px;
   background: #e5e7eb; display:flex; align-items:center; justify-content:center;
   font-weight: 700; color:#64748b;
 }
-
 .review-meta{ line-height:1.2; }
 .review-user{ font-weight:700; }
 .review-date{ font-size:.85rem; color: var(--text-2); }
 
 .review-rating{ display:inline-flex; align-items:center; gap:.4rem; }
-.review-rating .dot{
-  width:.5rem; height:.5rem; border-radius:999px; background:#f59e0b;
-}
+.review-rating .dot{ width:.5rem; height:.5rem; border-radius:999px; background:#f59e0b; }
 
 .review-body{ position:relative; }
 .review-body.collapsed{ max-height: var(--review-collapsed); overflow:hidden; }
@@ -395,71 +318,15 @@ form button:not([type]):active {
 .tags-inline{ display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.5rem; }
 .badge-xs{ font-size:.72rem; padding:.18rem .5rem; }
 
-:root{ --review-collapsed: 140px; } /* alto del preview */
+/* === Alias rápidos === */
+.bg-primary{ background-color: var(--primary) !important; color:#fff !important; }
+.text-accent{ color: var(--accent) !important; }
+.border-accent{ border-color: var(--accent) !important; }
 
-.review-card{
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-soft);
-}
+/* === Animaciones === */
+@keyframes bounce { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
+@keyframes fadeIn { from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
+@keyframes shimmer { to{ transform: translateX(100%); } }
 
-.review-head{ display:flex; gap:.75rem; align-items:flex-start; }
-.review-avatar{
-  width: 42px; height: 42px; border-radius: 999px;
-  background: #e5e7eb; display:flex; align-items:center; justify-content:center;
-  font-weight: 700; color:#64748b;
-}
-.review-meta{ line-height:1.2; }
-.review-user{ font-weight:700; }
-.review-date{ font-size:.85rem; color: var(--text-2); }
-.review-rating{ display:inline-flex; align-items:center; gap:.4rem; }
-
-.review-body{ position:relative; }
-.review-body.collapsed{ max-height: var(--review-collapsed); overflow:hidden; }
-.review-fade{
-  position:absolute; left:0; right:0; bottom:0; height:48px;
-  background: linear-gradient(180deg, rgba(255,255,255,0), var(--surface));
-  display:none; pointer-events:none;
-}
-.review-body.collapsible.collapsed .review-fade{ display:block; }
-
-.tags-inline{ display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.5rem; }
-.badge-xs{ font-size:.72rem; padding:.18rem .5rem; }
-
-/* Botones variantes pequeñas + outline */
-.btn-sm{ padding:.4rem .7rem; font-size:.9rem; }
-.btn-outline{ background:#fff; color:var(--text-1); border:1px solid var(--border); }
-.btn-outline:hover{ background: var(--surface-2); }
-
-/* Reseñas: tarjeta compacta + expandible */
-:root{ --review-collapsed: 140px; } /* altura del preview */
-
-.review-card{
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-soft);
-}
-
-.review-head{ display:flex; gap:.75rem; align-items:flex-start; }
-.review-avatar{
-  width: 42px; height: 42px; border-radius: 999px;
-  background: #e5e7eb; display:flex; align-items:center; justify-content:center;
-  font-weight: 700; color:#64748b;
-}
-.review-meta{ line-height:1.2; }
-.review-user{ font-weight:700; }
-.review-date{ font-size:.85rem; color: var(--text-2); }
-
-.review-body{ position:relative; }
-.review-body.collapsed{ max-height: var(--review-collapsed); overflow:hidden; }
-.review-fade{
-  position:absolute; left:0; right:0; bottom:0; height:48px;
-  background: linear-gradient(180deg, rgba(255,255,255,0), var(--surface));
-  display:none; pointer-events:none;
-}
-.review-body.collapsible.collapsed .review-fade{ display:block; }
-
-.tags-inline{ display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.5rem; }
-.badge-xs{ font-size:.72rem; padding:.18rem .5rem; }
+.animated-bounce{ animation: bounce 1s infinite; }
+.animate-fade-in{ animation: fadeIn .35s ease; }

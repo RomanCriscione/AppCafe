@@ -2,30 +2,27 @@
 module.exports = {
   content: [
     "./templates/**/*.html",
-    "./**/templates/**/*.html",
-    "./static/js/**/*.js",
-    "./**/static/js/**/*.js"
+    "./**/*.html",
+    "./static/**/*.js",
   ],
   theme: {
     extend: {
       colors: {
-        primary: "#1e3a8a",
-        secondary: "#172c6d",
-        accent: "#2dd4bf",
-        accentHover: "#14b8a6",
-        dark: "#111827",
-        light: "#f9fafb"
+        primary: {
+          DEFAULT: '#2563eb',
+          50:  '#eff6ff',
+          100: '#dbeafe',
+          600: '#1d4ed8',
+          700: '#1e40af',
+        },
+        // Por si quedó algo usando 'secondary', lo igualamos al azul:
+        secondary: '#2563eb',
+        accent: '#10b981',
       },
-      fontFamily: { sans: ["Poppins", "sans-serif"] },
       boxShadow: {
-        card: "0 6px 20px rgba(0,0,0,.06)"
-      }
-    }
+        card: "0 10px 25px rgba(2,8,23,.06)",
+      },
+    },
   },
-  plugins: [
-    require("@tailwindcss/forms"),
-    require("@tailwindcss/typography"),
-    require("@tailwindcss/aspect-ratio"),
-    require("@tailwindcss/line-clamp")
-  ]
+  plugins: [],
 }
