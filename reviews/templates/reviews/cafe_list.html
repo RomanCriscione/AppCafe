@@ -102,7 +102,7 @@
           </button>
         </form>
         {% if mostrar_boton_reset %}
-          <a href="{% url 'cafe_list' %}" class="btn btn-secondary rounded-xl text-sm">
+          <a href="{% url 'cafe_list' %}" class="btn btn-ghost rounded-xl text-sm">
             🔄 Ver todos los cafés
           </a>
         {% endif %}
@@ -131,9 +131,9 @@
 
     <!-- CONTENIDO REAL -->
     <div id="grid-cafes" class="hidden" tabindex="-1" aria-labelledby="titulo-cafeterias">
-      <div id="resultados" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" tabindex="-1">
+      <<div id="resultados" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
         {% for cafe in cafes %}
-          <article class="card group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition">
+          <article class="card group relative h-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition">
             {% if cafe.photo1 %}
               <a href="{% url 'cafe_detail' cafe.id %}">
                 <img
@@ -244,7 +244,7 @@
       overlay.addEventListener('click', close);
     })();
 
-    // Mostrar grid real cuando termine de cargar la página (y se hayan resuelto imágenes)
+    // Mostrar grid real cuando termine de cargar
     (function () {
       const sk = document.getElementById('grid-skeleton');
       const real = document.getElementById('grid-cafes');

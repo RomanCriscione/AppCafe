@@ -281,7 +281,7 @@ form button:not([type]):active { transform: translateY(0); }
   box-shadow: 0 0 0 3px rgba(16,185,129,.15);
   margin-top:.45rem; flex:0 0 auto;
 }
-.tag-text{ font-size:.95rem; color:var(--text-1); }
+.tag-text{ font-size:.95rem; color: var(--text-1); }
 
 /* === Reseñas: tarjeta compacta + expandible === */
 .review-card{
@@ -330,3 +330,16 @@ form button:not([type]):active { transform: translateY(0); }
 
 .animated-bounce{ animation: bounce 1s infinite; }
 .animate-fade-in{ animation: fadeIn .35s ease; }
+
+/* --- ⚙️ Cafe list: micro-fixes para evitar “solape” visual --- */
+
+/* a) En la grilla de cafés no levantamos la card en hover (sólo cambia la sombra) */
+#grid-cafes .card:hover { transform: none !important; }
+
+/* b) El foco del CTA no usa ring voluminoso para que no invada la fila de abajo */
+#grid-cafes .btn:focus-visible {
+  box-shadow: none !important;
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+

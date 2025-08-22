@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  {# === 7.1: Preconnect / DNS Prefetch para recursos externos === #}
+  <!-- Preconnect -->
   <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
   <link rel="dns-prefetch" href="https://tile.openstreetmap.org">
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
@@ -21,40 +21,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://fonts.gstatic.com">
 
-  {# === NUEVO: título y description dinámicos === #}
-  {% block head_title %}
-    <title>{{ meta_title|default:"Gota - Reseñas de Cafés" }}</title>
-  {% endblock %}
-  {% block head_description %}
-    <meta name="description" content="{{ meta_description|default:'Descubrí cafeterías, reseñas reales y mapas.' }}">
-  {% endblock %}
-
-  {# Meta extra por página (OG/Twitter, canonical, JSON-LD, etc.) #}
+  {% block head_title %}<title>{{ meta_title|default:"Gota - Reseñas de Cafés" }}</title>{% endblock %}
+  {% block head_description %}<meta name="description" content="{{ meta_description|default:'Descubrí cafeterías, reseñas reales y mapas.' }}">{% endblock %}
   {% block meta %}{% endblock %}
 
-  <!-- Animaciones -->
   <link rel="stylesheet" href="{% static 'css/animations.css' %}?v=20250811">
-
-  <!-- Tailwind CSS (build local) -->
   <link rel="stylesheet" href="{% static 'css/tailwind.css' %}?v=20250811">
-
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
-
-  <!-- Custom CSS (después de Tailwind para overrides) -->
   <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=20250811">
-
-  <!-- Font Awesome (CSS) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
-
-  <!-- Swiper & Leaflet CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
   <link rel="icon" href="{% static 'img/favicon.ico' %}">
   <link rel="apple-touch-icon" href="{% static 'img/icon-192.png' %}">
   <link rel="manifest" href="{% static 'site.webmanifest' %}">
-
   <meta name="theme-color" content="#111827">
   <link rel="canonical" href="{{ request.build_absolute_uri }}"/>
 
@@ -71,8 +52,35 @@
 
   <style>
     html, body { overflow-x: hidden; }
-    /* Mantener Poppins como fuente principal ahora que no usamos el config del CDN */
     body { font-family: 'Poppins', sans-serif; }
+
+    /* Header SIEMPRE arriba y con fondo blanco sólido */
+    header.site-nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 2147483647 !important;
+      background: #ffffff !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+
+    /* Leaflet por debajo del header */
+    .leaflet-container,
+    .leaflet-pane,
+    .leaflet-map-pane,
+    .leaflet-tile-pane,
+    .leaflet-overlay-pane,
+    .leaflet-marker-pane,
+    .leaflet-shadow-pane,
+    .leaflet-tooltip-pane,
+    .leaflet-popup-pane,
+    .leaflet-top,
+    .leaflet-bottom,
+    .leaflet-control { z-index: 0 !important; }
+
+    /* Panel/overlay de filtros debajo del header pero sobre contenido */
+    #panel-filtros { z-index: 2000 !important; }
+    #filtros-overlay { z-index: 1900 !important; }
+    #toggle-filtros { z-index: 1800 !important; }
   </style>
 </head>
 
@@ -80,13 +88,13 @@
   <div class="min-h-screen flex flex-col">
 
     <!-- Navbar -->
-    <header class="bg-white shadow fixed w-full z-50">
+    <header class="site-nav shadow">
       <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <!-- Contenedor logo + enlaces -->
+        <!-- Logo + enlaces -->
         <div class="flex items-center gap-8">
           <a href="{% url 'home' %}" class="text-2xl font-bold text-primary">Gota</a>
 
-          <!-- Toggle para mobile -->
+          <!-- Toggle mobile -->
           <button id="menu-toggle" class="lg:hidden text-gray-700" aria-label="Abrir menú">
             <i class="fas fa-bars text-xl" aria-hidden="true"></i>
           </button>
@@ -97,6 +105,9 @@
             <a href="{% url 'mapa_cafes' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">📍 Mapa</a>
             <a href="{% url 'about' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Acerca de</a>
             <a href="{% url 'contact' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">Contacto</a>
+            {% if user.is_authenticated %}
+              <a href="{% url 'favorite_cafes' %}" class="block py-2 lg:py-0 text-gray-700 hover:text-primary">❤️ Favoritos</a>
+            {% endif %}
           </nav>
         </div>
 
@@ -144,9 +155,9 @@
     </script>
 
     <!-- Contenido principal -->
-    <main class="flex-1 container mx-auto px-4 py-6 pt-24">
+    <main class="flex-1 container mx-auto px-4 py-6 pt-24 relative z-0">
       {% if messages %}
-        <div class="fixed top-4 right-4 z-50 space-y-2">
+        <div class="fixed top-4 right-4 z-[2147483000] space-y-2">
           {% for message in messages %}
             <div class="px-4 py-2 rounded shadow text-white alert-message
                         {% if message.tags == 'success' %} bg-green-500
@@ -173,7 +184,6 @@
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script defer src="{% static 'js/main.js' %}"></script>
 
-  <!-- Lógica común (alerts + swiper init básico) -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       if (document.querySelector('.swiper-container')) {
