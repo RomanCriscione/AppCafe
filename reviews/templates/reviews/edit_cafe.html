@@ -37,7 +37,7 @@
         <div>
           <label class="block font-semibold text-gray-700 mb-1">{{ form.address.label }}</label>
           {{ form.address|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-          <p class="text-xs text-gray-500 mt-1">Si cambiás la dirección, verificá que esté en formato Google Maps.</p>
+          <p class="text-xs text-gray-500 mt-1">Si cambiás la dirección, verificá el formato Google Maps.</p>
           {% if form.address.errors %}
             <p class="text-red-600 text-sm mt-1">{{ form.address.errors.0 }}</p>
           {% endif %}
@@ -61,67 +61,131 @@
       </div>
     </div>
 
-    <!-- Fotos -->
+    <!-- Fotos (custom, prolijo) -->
     <div class="bg-blue-50 p-6 rounded-xl shadow-sm space-y-6">
       <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
         <i class="fas fa-camera"></i> Fotos
       </h3>
+      <p class="text-xs text-gray-600 -mt-2">Formatos: JPG o PNG. Máx 3 MB por foto.</p>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
+
+        {# ---------- FOTO 1 ---------- #}
+        <div class="space-y-2">
+          <p class="text-sm font-medium text-gray-700">Foto 1</p>
+
           {% if cafe.photo1 %}
-            <p class="text-sm font-medium text-gray-600 mb-1">Foto 1 actual:</p>
-            <img src="{{ cafe.photo1.url }}" alt="Foto 1" class="w-32 rounded shadow mb-2" loading="lazy">
+            <img src="{{ cafe.photo1.url }}" alt="Foto 1" class="w-36 h-36 object-cover rounded-lg shadow" loading="lazy">
+            <label for="id_photo1-clear" class="inline-flex items-center gap-2 text-sm text-red-600">
+              <input type="checkbox" id="id_photo1-clear" name="photo1-clear" class="rounded border-gray-300">
+              Eliminar foto
+            </label>
+          {% else %}
+            <div class="w-36 h-36 rounded-lg bg-white/70 border border-dashed grid place-items-center text-xs text-gray-500">
+              Sin imagen
+            </div>
           {% endif %}
-          <label class="block font-semibold text-gray-700">{{ form.photo1.label }}</label>
-          {{ form.photo1|add_class:"block mt-1" }}
-          {{ form.photo1_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm mt-1" }}
+
+          <label class="block text-sm text-gray-700">Cambiar:</label>
+          <input
+            type="file"
+            name="{{ form.photo1.html_name }}"
+            id="{{ form.photo1.id_for_label }}"
+            accept="image/jpeg,image/png"
+            class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg
+                   file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700
+                   border rounded-lg bg-white/80"
+          >
+          {% if form.photo1.errors %}
+            <p class="text-xs text-red-600">{{ form.photo1.errors.0 }}</p>
+          {% endif %}
+
+          {{ form.photo1_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
         </div>
 
-        <div>
+        {# ---------- FOTO 2 ---------- #}
+        <div class="space-y-2">
+          <p class="text-sm font-medium text-gray-700">Foto 2</p>
+
           {% if cafe.photo2 %}
-            <p class="text-sm font-medium text-gray-600 mb-1">Foto 2 actual:</p>
-            <img src="{{ cafe.photo2.url }}" alt="Foto 2" class="w-32 rounded shadow mb-2" loading="lazy">
+            <img src="{{ cafe.photo2.url }}" alt="Foto 2" class="w-36 h-36 object-cover rounded-lg shadow" loading="lazy">
+            <label for="id_photo2-clear" class="inline-flex items-center gap-2 text-sm text-red-600">
+              <input type="checkbox" id="id_photo2-clear" name="photo2-clear" class="rounded border-gray-300">
+              Eliminar foto
+            </label>
+          {% else %}
+            <div class="w-36 h-36 rounded-lg bg-white/70 border border-dashed grid place-items-center text-xs text-gray-500">
+              Sin imagen
+            </div>
           {% endif %}
-          <label class="block font-semibold text-gray-700">{{ form.photo2.label }}</label>
-          {{ form.photo2|add_class:"block mt-1" }}
-          {{ form.photo2_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm mt-1" }}
+
+          <label class="block text-sm text-gray-700">Cambiar:</label>
+          <input
+            type="file"
+            name="{{ form.photo2.html_name }}"
+            id="{{ form.photo2.id_for_label }}"
+            accept="image/jpeg,image/png"
+            class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg
+                   file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700
+                   border rounded-lg bg-white/80"
+          >
+          {% if form.photo2.errors %}
+            <p class="text-xs text-red-600">{{ form.photo2.errors.0 }}</p>
+          {% endif %}
+
+          {{ form.photo2_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
         </div>
 
-        <div>
+        {# ---------- FOTO 3 ---------- #}
+        <div class="space-y-2">
+          <p class="text-sm font-medium text-gray-700">Foto 3</p>
+
           {% if cafe.photo3 %}
-            <p class="text-sm font-medium text-gray-600 mb-1">Foto 3 actual:</p>
-            <img src="{{ cafe.photo3.url }}" alt="Foto 3" class="w-32 rounded shadow mb-2" loading="lazy">
+            <img src="{{ cafe.photo3.url }}" alt="Foto 3" class="w-36 h-36 object-cover rounded-lg shadow" loading="lazy">
+            <label for="id_photo3-clear" class="inline-flex items-center gap-2 text-sm text-red-600">
+              <input type="checkbox" id="id_photo3-clear" name="photo3-clear" class="rounded border-gray-300">
+              Eliminar foto
+            </label>
+          {% else %}
+            <div class="w-36 h-36 rounded-lg bg-white/70 border border-dashed grid place-items-center text-xs text-gray-500">
+              Sin imagen
+            </div>
           {% endif %}
-          <label class="block font-semibold text-gray-700">{{ form.photo3.label }}</label>
-          {{ form.photo3|add_class:"block mt-1" }}
-          {{ form.photo3_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm mt-1" }}
+
+          <label class="block text-sm text-gray-700">Cambiar:</label>
+          <input
+            type="file"
+            name="{{ form.photo3.html_name }}"
+            id="{{ form.photo3.id_for_label }}"
+            accept="image/jpeg,image/png"
+            class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg
+                   file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700
+                   border rounded-lg bg-white/80"
+          >
+          {% if form.photo3.errors %}
+            <p class="text-xs text-red-600">{{ form.photo3.errors.0 }}</p>
+          {% endif %}
+
+          {{ form.photo3_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
         </div>
+
       </div>
     </div>
 
-    <!-- Opciones -->
+    <!-- Opciones (todas las booleanas) -->
     <div class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-4">
       <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
         <i class="fas fa-cog"></i> Opciones
       </h3>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
         {% for field in form %}
-          {% if field.name|slice:":3" == "is_" or field.name|slice:":4" == "has_" or field.name|slice:":7" == "serves_" %}
+          {% if field.name|slice:":3" == "is_" or field.name|slice:":4" == "has_" or field.name|slice:":7" == "serves_" or field.name == "accepts_cards" or field.name == "gluten_free_options" or field.name == "has_baby_changing" or field.name == "has_power_outlets" or field.name == "laptop_friendly" or field.name == "quiet_space" or field.name == "specialty_coffee" or field.name == "brunch" or field.name == "accepts_reservations" %}
             <label class="flex items-center space-x-2">
               {{ field }} <span>{{ field.label }}</span>
             </label>
           {% endif %}
         {% endfor %}
       </div>
-    </div>
-
-    <!-- Etiquetas -->
-    <div class="bg-blue-50 p-6 rounded-xl shadow-sm space-y-4">
-      <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
-        <i class="fas fa-tags"></i> Etiquetas
-      </h3>
-      {{ form.tags|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
     </div>
 
     <!-- Ubicación -->

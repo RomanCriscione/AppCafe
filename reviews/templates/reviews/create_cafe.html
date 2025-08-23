@@ -38,7 +38,7 @@
         <div>
           <label class="block font-semibold text-gray-700 mb-1">{{ form.address.label }}</label>
           {{ form.address|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-          <p class="text-xs text-gray-500 mt-1">Usa la dirección exacta tal como aparece en Google Maps.</p>
+          <p class="text-xs text-gray-500 mt-1">Usá la dirección exacta tal como aparece en Google Maps.</p>
           {% if form.address.errors %}
             <p class="text-red-600 text-sm mt-1">{{ form.address.errors.0 }}</p>
           {% endif %}
@@ -55,7 +55,7 @@
         <div>
           <label class="block font-semibold text-gray-700 mb-1">{{ form.phone.label }}</label>
           {{ form.phone|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-          <p class="text-xs text-gray-500 mt-1">Agrega un número con código de área, sin espacios.</p>
+          <p class="text-xs text-gray-500 mt-1">Agregá un número con código de área, sin espacios.</p>
           {% if form.phone.errors %}
             <p class="text-red-600 text-sm mt-1">{{ form.phone.errors.0 }}</p>
           {% endif %}
@@ -63,7 +63,7 @@
         <div>
           <label class="block font-semibold text-gray-700 mb-1">{{ form.google_maps_url.label }}</label>
           {{ form.google_maps_url|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-          <p class="text-xs text-gray-500 mt-1">Pega el link de Google Maps de tu cafetería.</p>
+          <p class="text-xs text-gray-500 mt-1">Pegá el link de Google Maps de tu cafetería.</p>
         </div>
       </div>
     </div>
@@ -73,7 +73,7 @@
       <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
         <i class="fas fa-camera"></i> Fotos
       </h3>
-      <p class="text-xs text-gray-500 mb-2">Subí hasta 3 fotos de tu cafetería. Las fotos horizontales se ven mejor.</p>
+      <p class="text-xs text-gray-500 mb-2">Subí hasta 3 fotos. Las horizontales se ven mejor.</p>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block font-semibold text-gray-700">{{ form.photo1.label }}</label>
@@ -93,34 +93,22 @@
       </div>
     </div>
 
-    <!-- Opciones -->
+    <!-- Opciones (todas las booleanas) -->
     <div class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-4">
       <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
         <i class="fas fa-cog"></i> Opciones
       </h3>
       <p class="text-xs text-gray-500">Seleccioná las características que tiene tu cafetería.</p>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <label class="flex items-center space-x-2">{{ form.is_vegan_friendly }} <span>Vegano friendly</span></label>
-        <label class="flex items-center space-x-2">{{ form.is_pet_friendly }} <span>Pet friendly</span></label>
-        <label class="flex items-center space-x-2">{{ form.has_wifi }} <span>WiFi</span></label>
-        <label class="flex items-center space-x-2">{{ form.has_outdoor_seating }} <span>Mesas al aire libre</span></label>
-        <label class="flex items-center space-x-2">{{ form.has_parking }} <span>Estacionamiento</span></label>
-        <label class="flex items-center space-x-2">{{ form.is_accessible }} <span>Accesible</span></label>
-        <label class="flex items-center space-x-2">{{ form.has_vegetarian_options }} <span>Opciones vegetarianas</span></label>
-        <label class="flex items-center space-x-2">{{ form.serves_breakfast }} <span>Sirve desayuno</span></label>
-        <label class="flex items-center space-x-2">{{ form.serves_alcohol }} <span>Sirve alcohol</span></label>
-        <label class="flex items-center space-x-2">{{ form.has_books_or_games }} <span>Libros/juegos</span></label>
-        <label class="flex items-center space-x-2">{{ form.has_air_conditioning }} <span>Aire acondicionado</span></label>
-      </div>
-    </div>
 
-    <!-- Etiquetas -->
-    <div class="bg-blue-50 p-6 rounded-xl shadow-sm space-y-4">
-      <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
-        <i class="fas fa-tags"></i> Etiquetas
-      </h3>
-      <p class="text-xs text-gray-500">Seleccioná etiquetas que describan la experiencia de tu cafetería.</p>
-      {{ form.tags|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {% for field in form %}
+          {% if field.name|slice:":3" == "is_" or field.name|slice:":4" == "has_" or field.name|slice:":7" == "serves_" %}
+            <label class="flex items-center space-x-2">
+              {{ field }} <span>{{ field.label }}</span>
+            </label>
+          {% endif %}
+        {% endfor %}
+      </div>
     </div>
 
     <!-- Ubicación -->
@@ -128,7 +116,7 @@
       <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
         <i class="fas fa-map-marker-alt"></i> Ubicación geográfica
       </h3>
-      <p class="text-xs text-gray-500">Si ya elegiste la dirección exacta, la latitud y longitud se completan automáticamente.</p>
+      <p class="text-xs text-gray-500">Si ya elegiste la dirección exacta, la latitud/longitud se completan solas.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block font-semibold text-gray-700">{{ form.latitude.label }}</label>

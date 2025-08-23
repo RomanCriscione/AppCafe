@@ -1,51 +1,50 @@
+{# === Ubicación + características dinámicas === #}
 {% if cafe.latitude and cafe.longitude %}
-  <h3 class="text-xl font-semibold mt-10 mb-2">📍 Ubicación</h3>
+  <section aria-labelledby="ubicacion" class="mt-10">
+    <h3 id="ubicacion" class="text-xl font-semibold mb-2">📍 Ubicación</h3>
 
-  <!-- Botón para mostrar mapa -->
-  <button onclick="toggleMap(this)" class="mb-4 text-sm text-blue-600 hover:underline focus:outline-none">
-    Mostrar mapa
-  </button>
+    {# Badges de características (mismas que en el card) #}
+    {% if cafe.has_wifi or cafe.has_air_conditioning or cafe.serves_alcohol or cafe.is_pet_friendly
+       or cafe.is_vegan_friendly or cafe.has_outdoor_seating or cafe.has_parking or cafe.is_accessible
+       or cafe.has_vegetarian_options or cafe.has_books_or_games or cafe.serves_breakfast
+       or cafe.has_gluten_free or cafe.has_specialty_coffee or cafe.has_artisanal_pastries %}
+      <div class="mb-4">
+        {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
+      </div>
+    {% endif %}
 
-  <!-- Filtros visuales -->
-  <div class="flex flex-wrap gap-2 mb-4">
-    <span class="bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200 text-sm flex items-center gap-2">
-      <i class="fa-solid fa-wifi text-blue-500"></i> Wi-Fi
-    </span>
-    <span class="bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200 text-sm flex items-center gap-2">
-      <i class="fa-solid fa-paw text-pink-500"></i> Pet friendly
-    </span>
-    <span class="bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200 text-sm flex items-center gap-2">
-      <i class="fa-solid fa-leaf text-green-500"></i> Vegano
-    </span>
-    <span class="bg-gray-50 px-3 py-2 rounded shadow-sm border border-gray-200 text-sm flex items-center gap-2">
-      <i class="fa-solid fa-chair text-yellow-500"></i> Exterior
-    </span>
-  </div>
+    <!-- Botón para mostrar/ocultar mapa -->
+    <button type="button" id="btn-toggle-map" onclick="toggleMap(this)"
+            class="mb-4 text-sm text-blue-600 hover:underline focus:outline-none">
+      Mostrar mapa
+    </button>
 
-  <!-- Mapa oculto -->
-  <div id="map-container" class="hidden">
-    <div id="map" class="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] rounded-xl overflow-hidden shadow-lg mb-10"></div>
-  </div>
+    <!-- Mapa oculto -->
+    <div id="map-container" class="hidden">
+      <div id="map"
+           class="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] rounded-xl overflow-hidden shadow-lg mb-10"></div>
+    </div>
+  </section>
 
   <script>
     function toggleMap(btn) {
-      const mapContainer = document.getElementById("map-container");
-      const mapDiv = document.getElementById("map");
+      const mapContainer = document.getElementById('map-container');
+      const mapDiv = document.getElementById('map');
       if (!mapContainer || !mapDiv) return;
 
-      const isHidden = mapContainer.classList.contains("hidden");
+      const willShow = mapContainer.classList.contains('hidden');
 
-      if (isHidden) {
-        mapContainer.classList.remove("hidden");
-        btn.textContent = "Ocultar mapa";
+      if (willShow) {
+        mapContainer.classList.remove('hidden');
+        btn.textContent = 'Ocultar mapa';
 
-        // esperamos un tick para que el div tenga tamaño
+        // Esperar un tick para asegurar dimensiones del contenedor
         setTimeout(() => {
-          if (typeof L === "undefined") return;
+          if (typeof L === 'undefined') return;
 
           if (!mapContainer.dataset.mapLoaded) {
-            const lat = parseFloat("{{ cafe.latitude|escapejs }}");
-            const lon = parseFloat("{{ cafe.longitude|escapejs }}");
+            const lat = parseFloat('{{ cafe.latitude|escapejs }}');
+            const lon = parseFloat('{{ cafe.longitude|escapejs }}');
 
             window._cafeMap = L.map('map').setView([lat, lon], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -53,19 +52,17 @@
             }).addTo(window._cafeMap);
 
             L.marker([lat, lon]).addTo(window._cafeMap)
-              .bindPopup(`<strong>{{ cafe.name|escapejs }}</strong><br>{{ cafe.address|escapejs }}`).openPopup();
+              .bindPopup(`<strong>{{ cafe.name|escapejs }}</strong><br>{{ cafe.address|default:'Sin dirección'|escapejs }}`)
+              .openPopup();
 
-            mapContainer.dataset.mapLoaded = "1";
-          } else {
-            // si ya existe, re-calcular tamaño por si estaba oculto
-            if (window._cafeMap && typeof window._cafeMap.invalidateSize === 'function') {
-              window._cafeMap.invalidateSize();
-            }
+            mapContainer.dataset.mapLoaded = '1';
+          } else if (window._cafeMap && typeof window._cafeMap.invalidateSize === 'function') {
+            window._cafeMap.invalidateSize();
           }
         }, 50);
       } else {
-        mapContainer.classList.add("hidden");
-        btn.textContent = "Mostrar mapa";
+        mapContainer.classList.add('hidden');
+        btn.textContent = 'Mostrar mapa';
       }
     }
   </script>

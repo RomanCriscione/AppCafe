@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, F, Q
 from django.views.generic import ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
@@ -21,7 +21,6 @@ from statistics import mean
 from reviews.utils.tags import get_tags_grouped_by_cafe
 from core.messages import MESSAGES
 from django.urls import reverse
-from django.db.models import F
 from django.templatetags.static import static
 
 # ✅ imports para invalidar el caché de fragmentos
@@ -290,18 +289,21 @@ def cafe_detail(request, cafe_id):
     else:
         form = ReviewForm()
 
-    # Agrupar TODAS las etiquetas por categoría
+    # Agrupar TODAS las etiquetas por categoría (para el wizard de reseña)
     all_tags = Tag.objects.all().order_by("category", "name")
     tag_groups = defaultdict(list)
     for tag in all_tags:
         tag_groups[tag.category].append(tag)
 
-    # Etiquetas sensoriales destacadas
-    sensory_tags = (
-        Tag.objects.filter(reviews__cafe=cafe)
-        .distinct()
-        .order_by("category", "name")
+    # === Etiquetas sensoriales ordenadas por uso en reseñas de ESTE café ===
+    tag_counts_qs = (
+        Tag.objects
+        .filter(reviews__cafe=cafe)
+        .annotate(num=Count('reviews', filter=Q(reviews__cafe=cafe)))
+        .order_by('-num', 'name')
     )
+    top_tags = list(tag_counts_qs[:5])   # Top 5 destacadas
+    more_tags = list(tag_counts_qs[5:])  # El resto (para "ver más")
 
     # Recomendados por calificación
     recommended_cafes = (
@@ -312,9 +314,7 @@ def cafe_detail(request, cafe_id):
     )
 
     # URLs absolutas para SEO/OG
-    full_page_url = request.build_absolute_uri(
-        reverse("cafe_detail", args=[cafe.id])
-    )
+    full_page_url = request.build_absolute_uri(reverse("cafe_detail", args=[cafe.id]))
 
     # Elegimos la mejor imagen disponible o fallback
     if getattr(cafe, "photo1", None):
@@ -324,7 +324,6 @@ def cafe_detail(request, cafe_id):
     elif getattr(cafe, "photo3", None):
         og_image_path = cafe.photo3.url
     else:
-        # tu archivo fallback: static/images/og-default.jpg
         og_image_path = static("images/og-default.jpg")
 
     full_image_url = request.build_absolute_uri(og_image_path)
@@ -337,10 +336,15 @@ def cafe_detail(request, cafe_id):
         "form": form,
         "recommended_cafes": recommended_cafes,
         "tag_choices": dict(tag_groups),
-        "sensory_tags": sensory_tags,
+
+        
+        "top_tags": top_tags,
+        "more_tags": more_tags,
+
         "full_page_url": full_page_url,
         "full_image_url": full_image_url,
     })
+
 
 
 
@@ -808,19 +812,46 @@ def planes_view(request):
     return render(request, 'reviews/planes.html', {'cafes': cafes})
 
 def mapa_cafes(request):
-    cafes = Cafe.objects.exclude(latitude__isnull=True, longitude__isnull=True)
-    cafes_data = [
-        {
-            'id': cafe.id,
-            'name': cafe.name,
-            'latitude': cafe.latitude,
-            'longitude': cafe.longitude,
-            'address': cafe.address,
-            'location': cafe.location,
-            'url': reverse('cafe_detail', args=[cafe.id]),
-        }
-        for cafe in cafes
+    # Sólo con coordenadas
+    cafes_qs = Cafe.objects.exclude(latitude__isnull=True, longitude__isnull=True)
+
+    # Incluir todos los flags que usás en el front
+    BOOL_FIELDS = [
+        "is_pet_friendly",
+        "has_wifi",
+        "has_outdoor_seating",
+        "is_vegan_friendly",
+        "has_parking",
+        "is_accessible",
+        "has_vegetarian_options",
+        "serves_breakfast",
+        "serves_alcohol",
+        "has_books_or_games",
+        "has_air_conditioning",
+        # extras opcionales (dejálos si existen en tu modelo)
+        "has_gluten_free",
+        "has_specialty_coffee",
+        "has_artisanal_pastries",
     ]
-    return render(request, 'reviews/mapa_cafes.html', {
-        'cafes_json': json.dumps(cafes_data, cls=DjangoJSONEncoder),
-    })
+
+    cafes_data = []
+    for c in cafes_qs:
+        item = {
+            "id": c.id,
+            "name": c.name,
+            "latitude": float(c.latitude) if c.latitude is not None else None,
+            "longitude": float(c.longitude) if c.longitude is not None else None,
+            "address": c.address,
+            "location": c.location,
+            "url": reverse("cafe_detail", args=[c.id]),
+        }
+        # adjuntar booleanos (si el atributo no existe, False)
+        for f in BOOL_FIELDS:
+            item[f] = bool(getattr(c, f, False))
+        cafes_data.append(item)
+
+    return render(
+        request,
+        "reviews/mapa_cafes.html",
+        {"cafes_json": json.dumps(cafes_data, cls=DjangoJSONEncoder)},
+    )

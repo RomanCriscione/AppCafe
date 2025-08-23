@@ -41,19 +41,26 @@ class CafeForm(forms.ModelForm):
 
     class Meta:
         model = Cafe
+        # ✅ SIN 'tags' (las etiquetas sensoriales se eligen en las reviews)
         fields = [
             'name', 'address', 'location', 'description', 'phone', 'google_maps_url',
             'photo1', 'photo1_title',
             'photo2', 'photo2_title',
             'photo3', 'photo3_title',
+
+            # características (booleans)
             'is_vegan_friendly', 'is_pet_friendly', 'has_wifi', 'has_outdoor_seating',
             'has_parking', 'is_accessible', 'has_vegetarian_options',
             'serves_breakfast', 'serves_alcohol',
             'has_books_or_games', 'has_air_conditioning',
             'has_gluten_free', 'has_specialty_coffee', 'has_artisanal_pastries',
-            'tags', 'latitude', 'longitude', "accepts_cards", "gluten_free_options", "has_baby_changing",
-            "has_power_outlets", "laptop_friendly", "quiet_space",
-            "specialty_coffee", "brunch", "accepts_reservations",
+
+            # ⚠️ Mantené solo los que EXISTAN en tu modelo:
+            'accepts_cards', 'gluten_free_options', 'has_baby_changing',
+            'has_power_outlets', 'laptop_friendly', 'quiet_space',
+            'specialty_coffee', 'brunch', 'accepts_reservations',
+
+            'latitude', 'longitude',
         ]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
@@ -61,7 +68,7 @@ class CafeForm(forms.ModelForm):
             'photo1_title': forms.TextInput(attrs={'placeholder': 'Título de la foto 1'}),
             'photo2_title': forms.TextInput(attrs={'placeholder': 'Título de la foto 2'}),
             'photo3_title': forms.TextInput(attrs={'placeholder': 'Título de la foto 3'}),
-            'tags': forms.CheckboxSelectMultiple(),
+            # ❌ Ojo: sin widget para 'tags'
             'photo1': forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png'}),
             'photo2': forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png'}),
             'photo3': forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png'}),
@@ -71,7 +78,23 @@ class CafeForm(forms.ModelForm):
             'photo2': 'Máximo 3MB. Formatos aceptados: JPG o PNG.',
             'photo3': 'Máximo 3MB. Formatos aceptados: JPG o PNG.',
         }
-
+        # (opcional) etiquetas más legibles
+        labels = {
+            'has_wifi': 'Wi-Fi',
+            'is_pet_friendly': 'Pet friendly',
+            'is_vegan_friendly': 'Vegano friendly',
+            'has_outdoor_seating': 'Mesas afuera',
+            'has_parking': 'Estacionamiento',
+            'is_accessible': 'Accesible',
+            'has_vegetarian_options': 'Opción vegetariana',
+            'serves_breakfast': 'Desayuno',
+            'serves_alcohol': 'Bebidas alcohólicas',
+            'has_books_or_games': 'Juegos o libros',
+            'has_air_conditioning': 'Aire acondicionado',
+            'has_gluten_free': 'Sin TACC',
+            'has_specialty_coffee': 'Café de especialidad',
+            'has_artisanal_pastries': 'Pastelería artesanal',
+        }
 
     def clean_address(self):
         address = self.cleaned_data.get('address')
