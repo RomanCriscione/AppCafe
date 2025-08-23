@@ -52,11 +52,13 @@ class ReviewListView(ListView):
         context['zona_seleccionada'] = request.GET.get('zona')
         context['orden_actual'] = request.GET.get('orden')
 
-        # Booleanos
+        # ✅ Booleanos (incluye serves_breakfast)
         boolean_keys = [
             'has_wifi', 'has_air_conditioning', 'serves_alcohol', 'is_pet_friendly',
             'is_vegan_friendly', 'has_outdoor_seating', 'has_parking', 'is_accessible',
-            'has_vegetarian_options', 'has_books_or_games',
+            'has_vegetarian_options', 'has_books_or_games', 'serves_breakfast', "accepts_cards", "gluten_free_options", "has_baby_changing",
+            "has_power_outlets", "laptop_friendly", "quiet_space",
+            "specialty_coffee", "brunch", "accepts_reservations",
         ]
         context['campos_activos'] = {k: (request.GET.get(k) == 'on') for k in boolean_keys}
 
@@ -124,7 +126,16 @@ class CafeListView(ListView):
             'serves_alcohol': request.GET.get('serves_alcohol') == 'on',
             'has_books_or_games': request.GET.get('has_books_or_games') == 'on',
             'has_air_conditioning': request.GET.get('has_air_conditioning') == 'on',
-        }
+            "accepts_cards": request.GET.get("accepts_cards") == "on",
+            "gluten_free_options": request.GET.get("gluten_free_options") == "on",
+            "has_baby_changing": request.GET.get("has_baby_changing") == "on",
+            "has_power_outlets": request.GET.get("has_power_outlets") == "on",
+            "laptop_friendly": request.GET.get("laptop_friendly") == "on",
+            "quiet_space": request.GET.get("quiet_space") == "on",
+            "specialty_coffee": request.GET.get("specialty_coffee") == "on",
+            "brunch": request.GET.get("brunch") == "on",
+            "accepts_reservations": request.GET.get("accepts_reservations") == "on",
+            }
 
         cafes = Cafe.objects.all()
 
@@ -214,7 +225,9 @@ class CafeListView(ListView):
         boolean_keys = [
             'has_wifi', 'has_air_conditioning', 'serves_alcohol', 'is_pet_friendly',
             'is_vegan_friendly', 'has_outdoor_seating', 'has_parking', 'is_accessible',
-            'has_vegetarian_options', 'has_books_or_games'
+            'has_vegetarian_options', 'has_books_or_games', "accepts_cards", "gluten_free_options", "has_baby_changing",
+            "has_power_outlets", "laptop_friendly", "quiet_space",
+            "specialty_coffee", "brunch", "accepts_reservations",
         ]
         context['campos_activos'] = {k: (request.GET.get(k) == 'on') for k in boolean_keys}
 

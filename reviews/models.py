@@ -61,6 +61,15 @@ class Cafe(models.Model):
     has_gluten_free = models.BooleanField(default=False, verbose_name="Sin TACC / Gluten Free")
     has_specialty_coffee = models.BooleanField(default=False, verbose_name="Café de especialidad")
     has_artisanal_pastries = models.BooleanField(default=False, verbose_name="Pastelería artesanal")
+    accepts_cards = models.BooleanField(default=False, verbose_name="Acepta tarjetas")
+    gluten_free_options = models.BooleanField(default=False, verbose_name="Opciones sin gluten")
+    has_baby_changing = models.BooleanField(default=False, verbose_name="Cambiador para bebés")
+    has_power_outlets = models.BooleanField(default=False, verbose_name="Enchufes disponibles")
+    laptop_friendly = models.BooleanField(default=False, verbose_name="Apto para trabajar")
+    quiet_space = models.BooleanField(default=False, verbose_name="Espacio tranquilo")
+    specialty_coffee = models.BooleanField(default=False, verbose_name="Café de especialidad")
+    brunch = models.BooleanField(default=False, verbose_name="Brunch")
+    accepts_reservations = models.BooleanField(default=False, verbose_name="Acepta reservas")
 
     # Relaciones
     favorites = models.ManyToManyField(User, related_name='favorite_cafes', blank=True)

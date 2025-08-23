@@ -1,22 +1,49 @@
+{# reviews/templates/reviews/includes/cafe_features.html #}
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-  {% if cafe.is_pet_friendly %}
-    <div class="badge"><i class="fa-solid fa-paw text-pink-500"></i> Pet friendly</div>
-  {% endif %}
-  {% if cafe.is_vegan_friendly %}
-    <div class="badge"><i class="fa-solid fa-leaf text-green-500"></i> Opciones veganas</div>
-  {% endif %}
-  {% if cafe.has_vegetarian_options %}
-    <div class="badge"><i class="fa-solid fa-carrot text-green-500"></i> Vegetariano</div>
-  {% endif %}
-  {% if cafe.has_gluten_free %}
-    <div class="badge"><i class="fa-solid fa-bread-slice text-yellow-600"></i> Sin TACC</div>
-  {% endif %}
-  {% if cafe.has_specialty_coffee %}
+
+  {# Calidad/servicio principal #}
+  {% if cafe.has_specialty_coffee or cafe.specialty_coffee %}
     <div class="badge"><i class="fa-solid fa-mug-hot text-amber-600"></i> Café de especialidad</div>
   {% endif %}
   {% if cafe.has_artisanal_pastries %}
     <div class="badge"><i class="fa-solid fa-cookie text-orange-400"></i> Pastelería artesanal</div>
   {% endif %}
+
+  {# Conectividad y trabajo #}
+  {% if cafe.has_wifi %}
+    <div class="badge"><i class="fa-solid fa-wifi text-blue-500"></i> Wi-Fi disponible</div>
+  {% endif %}
+  {% if cafe.has_power_outlets %}
+    <div class="badge"><i class="fa-solid fa-plug text-gray-700"></i> Enchufes disponibles</div>
+  {% endif %}
+  {% if cafe.laptop_friendly %}
+    <div class="badge"><i class="fa-solid fa-laptop text-slate-700"></i> Apto para trabajar</div>
+  {% endif %}
+  {% if cafe.quiet_space %}
+    <div class="badge"><i class="fa-solid fa-volume-xmark text-slate-600"></i> Espacio tranquilo</div>
+  {% endif %}
+
+  {# Opciones de comida/bebida #}
+  {% if cafe.is_vegan_friendly %}
+    <div class="badge"><i class="fa-solid fa-leaf text-green-500"></i> Opciones veganas</div>
+  {% endif %}
+  {% if cafe.has_vegetarian_options %}
+    <div class="badge"><i class="fa-solid fa-carrot text-green-500"></i> Opciones vegetarianas</div>
+  {% endif %}
+  {% if cafe.has_gluten_free or cafe.gluten_free_options %}
+    <div class="badge"><i class="fa-solid fa-bread-slice text-yellow-600"></i> Sin TACC</div>
+  {% endif %}
+  {% if cafe.serves_breakfast %}
+    <div class="badge"><i class="fa-solid fa-mug-saucer text-yellow-500"></i> Desayuno</div>
+  {% endif %}
+  {% if cafe.brunch %}
+    <div class="badge"><i class="fa-solid fa-utensils text-orange-500"></i> Brunch</div>
+  {% endif %}
+  {% if cafe.serves_alcohol %}
+    <div class="badge"><i class="fa-solid fa-wine-glass text-red-500"></i> Bebidas alcohólicas</div>
+  {% endif %}
+
+  {# Comodidades del lugar #}
   {% if cafe.has_outdoor_seating %}
     <div class="badge"><i class="fa-solid fa-chair text-orange-500"></i> Mesas afuera</div>
   {% endif %}
@@ -32,10 +59,19 @@
   {% if cafe.has_books_or_games %}
     <div class="badge"><i class="fa-solid fa-book text-indigo-500"></i> Libros o juegos</div>
   {% endif %}
-  {% if cafe.serves_breakfast %}
-    <div class="badge"><i class="fa-solid fa-mug-saucer text-yellow-500"></i> Desayuno</div>
+  {% if cafe.is_pet_friendly %}
+    <div class="badge"><i class="fa-solid fa-paw text-pink-500"></i> Pet friendly</div>
   {% endif %}
-  {% if cafe.serves_alcohol %}
-    <div class="badge"><i class="fa-solid fa-wine-glass text-red-500"></i> Bebidas alcohólicas</div>
+  {% if cafe.has_baby_changing %}
+    <div class="badge"><i class="fa-solid fa-baby text-rose-500"></i> Cambiador para bebés</div>
   {% endif %}
+
+  {# Pagos y reservas #}
+  {% if cafe.accepts_cards %}
+    <div class="badge"><i class="fa-solid fa-credit-card text-emerald-600"></i> Acepta tarjetas</div>
+  {% endif %}
+  {% if cafe.accepts_reservations %}
+    <div class="badge"><i class="fa-solid fa-calendar-check text-emerald-600"></i> Acepta reservas</div>
+  {% endif %}
+
 </div>

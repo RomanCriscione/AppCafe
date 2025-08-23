@@ -33,15 +33,15 @@
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6 relative px-4">
   <!-- Botón de Filtros para Mobile -->
-  <button id="toggle-filtros" class="lg:hidden fixed bottom-4 right-4 z-50 btn btn-primary rounded-full shadow-lg">
+  <button id="toggle-filtros" class="lg:hidden fixed bottom-4 right-4 z-[1001] btn btn-primary rounded-full shadow-lg">
     🔍 Filtros
   </button>
 
   <!-- Overlay -->
-  <div id="filtros-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden opacity-0 transition-opacity duration-300 lg:hidden"></div>
+  <div id="filtros-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[1000] hidden opacity-0 transition-opacity duration-300 lg:hidden"></div>
 
   <!-- Filtros -->
-  <aside id="panel-filtros" class="lg:static fixed top-0 left-0 h-full w-4/5 max-w-xs bg-white p-4 rounded-lg shadow-lg z-50 transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:w-1/4 lg:h-auto lg:shadow-none overflow-auto">
+  <aside id="panel-filtros" class="lg:static fixed top-0 left-0 h-full w-4/5 max-w-xs bg-white p-4 rounded-lg shadow-lg z-[1001] transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:w-1/4 lg:h-auto lg:shadow-none overflow-auto">
     <div class="flex justify-between items-center lg:hidden mb-4">
       <h2 class="text-xl font-semibold">🔍 Filtros</h2>
       <button id="cerrar-filtros" class="text-gray-600 hover:text-black text-2xl">&times;</button>
@@ -73,7 +73,7 @@
         {% for key, activo in campos_activos.items %}
           <label class="block">
             <input type="checkbox" name="{{ key }}" {% if activo %}checked{% endif %}>
-            {{ key|replace:"_| "|capfirst }}
+            {{ key|feature_label }}
           </label>
         {% endfor %}
       </fieldset>
@@ -85,7 +85,7 @@
   </aside>
 
   <!-- Lista de Cafés -->
-  <section class="lg:w-3/4 max-w-6xl mx-auto">
+  <section class="lg:w-3/4 max-w-6xl mx-auto relative z-0">
     <!-- Skip links -->
     <a href="#resultados" class="sr-only">Saltar a resultados</a>
     <a href="#paginacion" class="sr-only">Saltar a paginación</a>
@@ -131,7 +131,7 @@
 
     <!-- CONTENIDO REAL -->
     <div id="grid-cafes" class="hidden" tabindex="-1" aria-labelledby="titulo-cafeterias">
-      <<div id="resultados" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+      <div id="resultados" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
         {% for cafe in cafes %}
           <article class="card group relative h-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition">
             {% if cafe.photo1 %}

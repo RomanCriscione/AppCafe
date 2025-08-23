@@ -51,7 +51,9 @@ class CafeForm(forms.ModelForm):
             'serves_breakfast', 'serves_alcohol',
             'has_books_or_games', 'has_air_conditioning',
             'has_gluten_free', 'has_specialty_coffee', 'has_artisanal_pastries',
-            'tags', 'latitude', 'longitude',
+            'tags', 'latitude', 'longitude', "accepts_cards", "gluten_free_options", "has_baby_changing",
+            "has_power_outlets", "laptop_friendly", "quiet_space",
+            "specialty_coffee", "brunch", "accepts_reservations",
         ]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
