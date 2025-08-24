@@ -173,3 +173,14 @@ class Review(models.Model):
     def __str__(self):
         return f'Reseña de {self.user} en {self.cafe}'
 
+class CafeStat(models.Model):
+    cafe = models.ForeignKey('Cafe', on_delete=models.CASCADE, related_name='stats')
+    date = models.DateField()
+    views = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = ('cafe', 'date')
+        ordering = ['-date']
+
+    def __str__(self):
+        return f'{self.cafe.name} - {self.date}: {self.views} vistas'

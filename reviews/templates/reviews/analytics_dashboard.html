@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
+
+  <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">📊</span>
+      <h1 class="text-3xl font-bold">Analíticas</h1>
+    </div>
+
+    {% if cafes|length > 0 %}
+      <form method="get" class="flex items-center gap-2">
+        <label class="text-sm text-gray-600">Cafetería:</label>
+        <select name="cafe"
+                class="border rounded px-3 py-2 text-sm"
+                onchange="this.form.submit()">
+          {% for c in cafes %}
+            <option value="{{ c.id }}" {% if cafe and c.id == cafe.id %}selected{% endif %}>
+              {{ c.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </form>
+    {% endif %}
+  </div>
+
+  {% if cafes|length == 0 %}
+    <div class="border rounded-xl bg-white p-4 text-gray-700">
+      Todavía no tenés cafeterías cargadas.
+    </div>
+  {% else %}
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="p-4 rounded-xl border bg-white">
+        <p class="text-sm text-gray-500">Vistas (total)</p>
+        <p class="text-2xl font-semibold">{{ totals.views }}</p>
+      </div>
+      <div class="p-4 rounded-xl border bg-white">
+        <p class="text-sm text-gray-500">Favoritos</p>
+        <p class="text-2xl font-semibold">{{ totals.favorites }}</p>
+      </div>
+      <div class="p-4 rounded-xl border bg-white">
+        <p class="text-sm text-gray-500">Reseñas</p>
+        <p class="text-2xl font-semibold">{{ totals.reviews }}</p>
+      </div>
+    </div>
+
+    <!-- Gráfico: vistas últimos 30 días -->
+    <div class="p-4 rounded-xl border bg-white">
+      <h2 class="text-lg font-semibold mb-3">Vistas (últimos 30 días)</h2>
+      <canvas id="viewsChart" height="110"></canvas>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function(){
+  const el = document.getElementById('viewsChart');
+  if (!el) return;
+
+  const labels = {{ labels_json|safe }};
+  const data = {{ views_json|safe }};
+
+  new Chart(el.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Vistas',
+        data,
+        tension: 0.3,
+        fill: false,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+  });
+})();
+</script>
+{% endblock %}

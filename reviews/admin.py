@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Cafe, Review
+from .models import Cafe, Review, CafeStat
 
 @admin.register(Cafe)
 class CafeAdmin(admin.ModelAdmin):
@@ -12,3 +12,7 @@ class ReviewAdmin(admin.ModelAdmin):
     list_filter = ('cafe', 'rating')
     search_fields = ('comment',)
 
+@admin.register(CafeStat)
+class CafeStatAdmin(admin.ModelAdmin):
+    list_display = ('cafe', 'date', 'views')
+    list_filter = ('cafe', 'date')

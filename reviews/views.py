@@ -11,7 +11,7 @@ from .models import Review, Cafe
 from .forms import ReviewForm, CafeForm
 import os, json, math
 from django.core.paginator import Paginator
-from .models import Tag
+from .models import Tag, CafeStat  
 from django.http import JsonResponse
 from math import radians, cos, sin, asin, sqrt
 from django.core.serializers.json import DjangoJSONEncoder
@@ -22,6 +22,10 @@ from reviews.utils.tags import get_tags_grouped_by_cafe
 from core.messages import MESSAGES
 from django.urls import reverse
 from django.templatetags.static import static
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Sum
+
 
 # ✅ imports para invalidar el caché de fragmentos
 from django.core.cache.utils import make_template_fragment_key
@@ -279,15 +283,19 @@ def cafe_detail(request, cafe_id):
     viewed.insert(0, cafe.id)
     request.session["recently_viewed"] = viewed[:5]
 
-    # Preparar formulario (sin manejar POST acá)
-    if request.user.is_authenticated:
-        try:
-            existing_review = Review.objects.get(user=request.user, cafe=cafe)
-            form = ReviewForm(instance=existing_review)
-        except Review.DoesNotExist:
-            form = ReviewForm()
-    else:
-        form = ReviewForm()
+    # ===== Tracking de visita (1 vez por día por sesión) =====
+    try:
+        today = timezone.localdate()
+        session_key = f"viewed_cafe_{cafe.id}_{today.isoformat()}"
+        # no contar vistas del staff ni del dueño
+        skip_count = (getattr(request.user, "is_staff", False) or request.user == cafe.owner)
+        if not skip_count and not request.session.get(session_key):
+            stat, _ = CafeStat.objects.get_or_create(cafe=cafe, date=today)
+            CafeStat.objects.filter(pk=stat.pk).update(views=F('views') + 1)
+            request.session[session_key] = True
+    except Exception:
+        # Nunca romper la ficha por analíticas
+        pass
 
     # Agrupar TODAS las etiquetas por categoría (para el wizard de reseña)
     all_tags = Tag.objects.all().order_by("category", "name")
@@ -333,18 +341,14 @@ def cafe_detail(request, cafe_id):
         "reviews": reviews,
         "average_rating": average_rating,
         "best_review": best_review,
-        "form": form,
+        "form": form if (form := (ReviewForm(instance=Review.objects.get(user=request.user, cafe=cafe)) if request.user.is_authenticated and Review.objects.filter(user=request.user, cafe=cafe).exists() else ReviewForm())) else ReviewForm(),
         "recommended_cafes": recommended_cafes,
         "tag_choices": dict(tag_groups),
-
-        
         "top_tags": top_tags,
         "more_tags": more_tags,
-
         "full_page_url": full_page_url,
         "full_image_url": full_image_url,
     })
-
 
 
 
@@ -855,3 +859,56 @@ def mapa_cafes(request):
         "reviews/mapa_cafes.html",
         {"cafes_json": json.dumps(cafes_data, cls=DjangoJSONEncoder)},
     )
+
+@login_required
+def analytics_dashboard(request):
+    if not request.user.is_owner:
+        raise PermissionDenied("Solo los dueños pueden ver analíticas.")
+
+    # Elegimos un café del dueño (o el pasado por ?cafe=)
+    cafes_owner = Cafe.objects.filter(owner=request.user).order_by("name")
+    if not cafes_owner.exists():
+        return render(request, "reviews/analytics_dashboard.html", {
+            "cafes": cafes_owner, "cafe": None,
+            "labels_json": "[]", "views_json": "[]",
+            "totals": {"views": 0, "favorites": 0, "reviews": 0},
+        })
+
+    selected_id = request.GET.get("cafe")
+    if selected_id:
+        cafe = get_object_or_404(Cafe, id=selected_id, owner=request.user)
+    else:
+        cafe = cafes_owner.first()
+
+    # Totales
+    from .models import CafeStat  # por si aún no importaste arriba
+    totals = {
+        "views": CafeStat.objects.filter(cafe=cafe).aggregate(s=Sum("views"))["s"] or 0,
+        "favorites": cafe.favorites.count(),
+        "reviews": cafe.reviews.count(),
+    }
+
+    # Serie últimos 30 días (solo vistas, que es lo que registramos día a día)
+    today = timezone.localdate()
+    start = today - timedelta(days=29)
+    qs = (
+        CafeStat.objects.filter(cafe=cafe, date__range=[start, today])
+        .values("date").annotate(v=Sum("views"))
+    )
+    by_date = {row["date"]: (row["v"] or 0) for row in qs}
+
+    labels, values = [], []
+    for i in range(30):
+        d = start + timedelta(days=i)
+        labels.append(d.strftime("%d/%m"))
+        values.append(by_date.get(d, 0))
+
+    import json
+    context = {
+        "cafes": cafes_owner,
+        "cafe": cafe,
+        "totals": totals,
+        "labels_json": json.dumps(labels),
+        "views_json": json.dumps(values),
+    }
+    return render(request, "reviews/analytics_dashboard.html", context)

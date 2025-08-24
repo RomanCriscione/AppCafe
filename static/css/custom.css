@@ -13,12 +13,12 @@
   --text-1: #0f172a;      /* slate-900 */
   --text-2: #475569;      /* slate-600 */
 
-  /* (solo por compatibilidad con restos viejos) */
+  /* (compat) */
   --brand: #8b5e34;
   --brand-600: #7a4f2a;
   --brand-700: #6a4425;
 
-  /* 🎨 Paleta AZUL (principal de UI) */
+  /* 🎨 Paleta azul */
   --primary:     #2563eb; /* blue-600 */
   --primary-600: #1d4ed8;
   --primary-700: #1e40af;
@@ -26,9 +26,9 @@
   --primary-100: #dbeafe;
 
   /* Otros */
-  --accent: #10b981;      /* verde ok */
-  --warning: #f59e0b;     /* ámbar */
-  --danger: #ef4444;      /* rojo suave */
+  --accent: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
 
   /* Alto del preview de reseñas */
   --review-collapsed: 140px;
@@ -47,7 +47,7 @@ a { text-decoration: none; }
 .text-muted { color: var(--text-2); }
 .surface { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
 
-/* === Botones (azules) === */
+/* === Botones genéricos existentes === */
 .btn{
   display:inline-flex; align-items:center; gap:.5rem;
   padding:.625rem .95rem; border-radius: var(--radius-md);
@@ -57,30 +57,21 @@ a { text-decoration: none; }
 .btn:hover{ transform: translateY(-1px); box-shadow: var(--shadow-hover); }
 .btn:active{ transform: translateY(0); }
 
-/* Principal azul */
 .btn-primary{ background: var(--primary) !important; color:#fff !important; }
 .btn-primary:hover{ background: var(--primary-600) !important; }
 .btn-primary:focus-visible{ outline:2px solid var(--primary-700); outline-offset:2px; }
 
-/* Contorno azul */
-.btn-outline{
-  background:#fff; color: var(--primary) !important; border-color: var(--primary) !important;
-}
+.btn-outline{ background:#fff; color: var(--primary) !important; border-color: var(--primary) !important; }
 .btn-outline:hover{ background: var(--primary-50); }
 
-/* Ghost azul */
-.btn-ghost{
-  background: transparent; color: var(--primary) !important; border-color: transparent;
-}
+.btn-ghost{ background: transparent; color: var(--primary) !important; border-color: transparent; }
 .btn-ghost:hover{ background: var(--primary-50); }
 
-/* Variantes */
 .btn-danger{ background: var(--danger); color:#fff; }
 .btn-danger:hover{ background:#dc2626; }
 .btn-success{ background: var(--accent); color:#fff; }
 .btn-success:hover{ filter:brightness(.95); }
 
-/* Tamaños / helpers */
 .btn-sm{ padding:.45rem .65rem; font-size:.9rem; border-radius: var(--radius-sm); }
 .btn-block{ width:100%; justify-content:center; }
 .btn-icon{ padding:.5rem; width:2.5rem; height:2.5rem; justify-content:center; }
@@ -113,7 +104,6 @@ a { text-decoration: none; }
 .card-media{ aspect-ratio: 4 / 3; overflow:hidden; background: var(--surface-2); }
 .card-media img{ width:100%; height:100%; object-fit:cover; }
 
-/* Meta y layout interno */
 .card-body{ padding: .9rem .95rem 1rem; }
 .card-title{ font-size: 1.05rem; font-weight:700; line-height:1.2; }
 .card-sub{ font-size:.85rem; color: var(--text-2); }
@@ -136,7 +126,7 @@ a { text-decoration: none; }
   outline: none;
 }
 
-/* Formularios básicos (sin clases específicas) */
+/* Formularios básicos */
 select,
 input[type="text"], input[type="search"], input[type="email"], input[type="number"],
 input[type="password"], input[type="tel"], textarea {
@@ -192,7 +182,7 @@ form a.button-reset, form a[type="reset"] {
   text-decoration: none;
 }
 
-/* Botón flotante/trigger del Drawer de filtros */
+/* Trigger del Drawer de filtros */
 #toggle-filtros,
 a[href="#panel-filtros"] {
   display: inline-flex; align-items: center; gap: .5rem;
@@ -211,10 +201,9 @@ a[href="#panel-filtros"]:hover { background: var(--primary-600); }
 h2 { margin: .25rem 0 .5rem; }
 h2 + form { margin-top: .25rem; }
 
-/* Imágenes en contenidos variados */
 main img { max-width: 100%; height: auto; display: block; }
 
-/* Forzar visibilidad del submit en panel filtros / formularios */
+/* Submits en panel filtros / formularios */
 #panel-filtros .btn[type="submit"],
 #panel-filtros button[type="submit"],
 #panel-filtros button:not([type]),
@@ -271,7 +260,7 @@ form button:not([type]):active { transform: translateY(0); }
 .no-scrollbar::-webkit-scrollbar{ display:none; }
 .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
 
-/* === Etiquetas sensoriales (lista en 2 columnas) === */
+/* === Etiquetas sensoriales === */
 .tag-list{ display:grid; gap:.4rem; grid-template-columns:1fr; }
 @media (min-width:640px){ .tag-list{ grid-template-columns:1fr 1fr; } }
 .tag-item{ display:flex; align-items:flex-start; gap:.55rem; padding:.25rem 0; }
@@ -283,7 +272,7 @@ form button:not([type]):active { transform: translateY(0); }
 }
 .tag-text{ font-size:.95rem; color: var(--text-1); }
 
-/* === Reseñas: tarjeta compacta + expandible === */
+/* === Reseñas === */
 .review-card{
   background: var(--surface);
   border: 1px solid var(--border);
@@ -314,7 +303,6 @@ form button:not([type]):active { transform: translateY(0); }
 
 .review-text p{ margin: .25rem 0; }
 
-/* Chips de etiquetas dentro de reseña (más pequeñas) */
 .tags-inline{ display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.5rem; }
 .badge-xs{ font-size:.72rem; padding:.18rem .5rem; }
 
@@ -331,15 +319,75 @@ form button:not([type]):active { transform: translateY(0); }
 .animated-bounce{ animation: bounce 1s infinite; }
 .animate-fade-in{ animation: fadeIn .35s ease; }
 
-/* --- ⚙️ Cafe list: micro-fixes para evitar “solape” visual --- */
-
-/* a) En la grilla de cafés no levantamos la card en hover (sólo cambia la sombra) */
+/* --- Cafe list: micro-fixes --- */
 #grid-cafes .card:hover { transform: none !important; }
-
-/* b) El foco del CTA no usa ring voluminoso para que no invada la fila de abajo */
 #grid-cafes .btn:focus-visible {
   box-shadow: none !important;
   outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
 
+/* =========================================================
+   ✅ CTAs UNIFICADOS (mismo alto/ancho y sin fondo blanco)
+   ========================================================= */
+a.cta{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:.5rem !important;
+  height:48px !important;           /* alto consistente */
+  padding:0 1.25rem !important;
+  min-width:280px !important;       /* ancho visual mínimo */
+  border-radius:12px !important;
+  font-weight:700 !important;
+  letter-spacing:.01em;
+  line-height:1 !important;
+  color:#fff !important;
+  border:1px solid transparent !important;
+  background-color:#2563eb !important;   /* fallback azul */
+  box-shadow: var(--shadow-soft) !important;
+  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+  white-space:nowrap;
+  text-align:center;
+}
+@media (max-width: 639px){
+  a.cta{ width:100% !important; min-width:0 !important; }
+}
+a.cta:hover{ transform: translateY(-1px); box-shadow: var(--shadow-hover) !important; }
+a.cta:active{ transform: translateY(0); }
+a.cta:focus-visible{ outline:2px solid #1e40af; outline-offset:2px; }
+
+/* Variantes de color (se fuerza background-color) */
+a.cta.cta-blue   { background-color: #2563eb !important; } /* blue-600 */
+a.cta.cta-blue:hover   { background-color: #1d4ed8 !important; }
+
+a.cta.cta-green  { background-color: #16a34a !important; } /* green-600 */
+a.cta.cta-green:hover  { background-color: #15803d !important; }
+
+a.cta.cta-indigo { background-color: #4f46e5 !important; } /* indigo-600 */
+a.cta.cta-indigo:hover { background-color: #4338ca !important; }
+
+a.cta.cta-orange { background-color: #f97316 !important; } /* orange-500 */
+a.cta.cta-orange:hover { background-color: #ea580c !important; }
+
+/* === Acciones en tarjeta de dueño (fila uniforme) === */
+.owner-card-actions{ 
+  display:flex; flex-wrap:wrap; align-items:center; gap:.5rem;
+}
+.owner-card-actions .btn{ 
+  min-width:120px;              /* ancho visual parejo */
+  justify-content:center;
+}
+.owner-card-actions form{ display:inline; } /* que el form no rompa la fila */
+
+/* Tamaño chico consistente para acciones */
+.btn-sm{ 
+  height:40px;                  /* alto fijo para todos */
+  padding:.45rem .8rem;
+  font-size:.92rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Variante warning (para “Editar”, opcional) */
+.btn-warning{ background: var(--warning); color:#fff; }
+.btn-warning:hover{ filter:brightness(.95); }

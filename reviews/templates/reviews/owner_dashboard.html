@@ -4,27 +4,28 @@
 {% block content %}
 <div class="max-w-6xl mx-auto px-4 py-8 animate-fade-in">
 
-  <!-- Panel siempre visible -->
   <h1 class="text-3xl font-bold mb-8 text-center">📊 Panel del dueño</h1>
   <p class="text-center text-gray-600 mb-8">{{ ui_messages.welcome_owner }}</p>
 
-  <!-- Acciones -->
-  <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-4 mb-10">
-    <a href="{% url 'create_cafe' %}" 
-       class="bg-green-600 hover:bg-green-700 hover:scale-105 text-white font-semibold px-5 py-2 rounded-lg shadow transition-all duration-200">
-      ➕ Agregar nueva cafetería
+  <!-- CTAs unificados -->
+  <div id="owner-actions" class="actions flex flex-col sm:flex-row flex-wrap justify-center gap-4 mb-10">
+    <a href="{% url 'create_cafe' %}" class="cta cta-green">
+      ➕ <span>Agregar nueva cafetería</span>
     </a>
-    <a href="{% url 'owner_reviews' %}" 
-       class="bg-blue-600 hover:bg-blue-700 hover:scale-105 text-white font-semibold px-5 py-2 rounded-lg shadow transition-all duration-200">
-      📋 Ver todas las reseñas
+
+    <a href="{% url 'owner_reviews' %}" class="cta cta-blue">
+      📝 <span>Ver todas las reseñas</span>
     </a>
-    <a href="{% url 'planes' %}" 
-       class="bg-orange-500 hover:bg-orange-600 hover:scale-105 text-white font-semibold px-5 py-2 rounded-lg shadow transition-all duration-200">
-      💼 Planes para crecer
+
+    <a href="{% url 'analytics_dashboard' %}" class="cta cta-indigo">
+      📊 <span>Ver analíticas</span>
+    </a>
+
+    <a href="{% url 'planes' %}" class="cta cta-orange">
+      💼 <span>Planes para crecer</span>
     </a>
   </div>
 
-  <!-- Si no hay cafés -->
   {% if no_cafes %}
     <div class="text-center py-12 animate-fade-in-up">
       <p class="text-gray-600 text-lg">{{ ui_messages.owner_no_cafes }}</p>
@@ -35,16 +36,16 @@
     </div>
   {% endif %}
 
-  <!-- Listado de cafés -->
   {% if cafes %}
     <ul class="space-y-8">
       {% for cafe in cafes %}
         <li class="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-xl transition-all duration-200 p-6">
           <div class="flex flex-col md:flex-row gap-6 items-start">
             {% if cafe.photo1 %}
-              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}" 
-                   class="w-32 h-32 object-cover rounded-lg shadow">
+              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}"
+                  class="w-32 h-32 object-cover rounded-lg shadow">
             {% endif %}
+
             <div class="flex-1 space-y-3">
               <h2 class="text-xl font-bold text-brown-800">
                 {{ cafe.name }} –
@@ -56,6 +57,7 @@
                   ☕ <span class="text-gray-500 font-medium">Gratuito</span>
                 {% endif %}
               </h2>
+
               <p class="text-sm text-gray-600">📍 {{ cafe.address }}, {{ cafe.location }}</p>
               <p class="text-sm">☕ Promedio: {{ cafe.average_rating|floatformat:1|default:"Sin puntuar" }}</p>
               <p class="text-sm">🧾 Reseñas: {{ cafe.total_reviews }}</p>
@@ -89,32 +91,36 @@
                 </div>
               {% endif %}
 
-              <form method="post" action="{% url 'cambiar_visibilidad' cafe.id %}" 
-                    class="mt-2 flex flex-wrap items-center gap-2">
+              {# === Form de “Cambiar plan” (SOLO selects; sin botón aquí) === #}
+              <form id="vis_form_{{ cafe.id }}" method="post" action="{% url 'cambiar_visibilidad' cafe.id %}" class="mt-2 flex flex-wrap items-center gap-2">
                 {% csrf_token %}
                 <label for="visibility_{{ cafe.id }}" class="text-sm font-medium">Cambiar plan:</label>
-                <select name="visibility_level" id="visibility_{{ cafe.id }}" 
-                        class="border border-gray-300 rounded px-2 py-1 text-sm">
+                <select name="visibility_level" id="visibility_{{ cafe.id }}" class="border border-gray-300 rounded px-2 py-1 text-sm">
                   <option value="0" {% if cafe.visibility_level == 0 %}selected{% endif %}>☕ Gratuito</option>
                   <option value="1" {% if cafe.visibility_level == 1 %}selected{% endif %}>☕ Plan Barista</option>
                   <option value="2" {% if cafe.visibility_level == 2 %}selected{% endif %}>☕☕ Plan Maestro</option>
                 </select>
-                <button type="submit" 
-                        class="bg-green-500 hover:bg-green-600 hover:scale-105 text-white px-3 py-1 rounded text-sm transition-all duration-200">
-                  Aplicar
-                </button>
               </form>
 
-              <div class="flex flex-wrap gap-4 mt-4 text-sm">
-                <a href="{% url 'cafe_detail' cafe.id %}" 
-                   class="text-blue-600 hover:underline hover:scale-105 font-medium transition-transform">🔍 Ver detalles</a>
-                <a href="{% url 'edit_cafe' cafe.id %}" 
-                   class="text-yellow-600 hover:underline hover:scale-105 font-medium transition-transform">✏️ Editar</a>
-                <form action="{% url 'delete_cafe' cafe.id %}" method="post" 
-                      onsubmit="return confirm('¿Estás seguro de eliminar esta cafetería?')" class="inline">
+              {# === Acciones unificadas (los 4 botones en una sola fila) === #}
+              <div class="owner-card-actions mt-4">
+                <!-- Apunta al form de arriba por id -->
+                <button type="submit" form="vis_form_{{ cafe.id }}" class="btn btn-primary btn-sm">
+                  Aplicar
+                </button>
+
+                <a href="{% url 'cafe_detail' cafe.id %}" class="btn btn-outline btn-sm">
+                  🔍 Ver detalles
+                </a>
+
+                <a href="{% url 'edit_cafe' cafe.id %}" class="btn btn-warning btn-sm">
+                  ✏️ Editar
+                </a>
+
+                <form action="{% url 'delete_cafe' cafe.id %}" method="post"
+                      onsubmit="return confirm('¿Estás seguro de eliminar esta cafetería?')">
                   {% csrf_token %}
-                  <button type="submit" 
-                          class="text-red-600 hover:underline hover:scale-105 font-medium transition-transform">
+                  <button type="submit" class="btn btn-danger btn-sm">
                     🗑️ Eliminar
                   </button>
                 </form>

@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="{% static 'css/animations.css' %}?v=20250811">
   <link rel="stylesheet" href="{% static 'css/tailwind.css' %}?v=20250811">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=20250811">
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=20250814">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -81,6 +81,56 @@
     #panel-filtros { z-index: 2000 !important; }
     #filtros-overlay { z-index: 1900 !important; }
     #toggle-filtros { z-index: 1800 !important; }
+
+    /* ========= ✅ CTA OVERRIDES (cargado al final) ========= */
+    :root { --cta-w: 280px; }
+
+    /* Se usa junto con id="owner-actions" en owner_dashboard.html */
+    #owner-actions a.cta{
+      display:inline-flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:.5rem !important;
+      width: var(--cta-w) !important;   /* mismo ancho */
+      height:48px !important;           /* mismo alto  */
+      padding:0 1.25rem !important;
+      border-radius:12px !important;
+      font-weight:700 !important;
+      letter-spacing:.01em;
+      line-height:1 !important;
+      color:#fff !important;
+      border:1px solid transparent !important;
+      background-color:#2563eb !important; /* fallback azul */
+      box-shadow: 0 10px 25px rgba(2,8,23,.06) !important;
+      transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+      white-space:nowrap;
+      text-align:center;
+    }
+    #owner-actions a.cta:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 16px 36px rgba(2,8,23,.12) !important;
+      filter: saturate(1.05);
+    }
+    #owner-actions a.cta:active{ transform: translateY(0); }
+    #owner-actions a.cta:focus-visible{ outline:2px solid #1e40af; outline-offset:2px; }
+
+    /* Variantes de color */
+    #owner-actions a.cta.cta-blue   { background-color:#2563eb !important; }
+    #owner-actions a.cta.cta-blue:hover   { background-color:#1d4ed8 !important; }
+
+    #owner-actions a.cta.cta-green  { background-color:#16a34a !important; }
+    #owner-actions a.cta.cta-green:hover  { background-color:#15803d !important; }
+
+    #owner-actions a.cta.cta-indigo { background-color:#4f46e5 !important; }
+    #owner-actions a.cta.cta-indigo:hover { background-color:#4338ca !important; }
+
+    #owner-actions a.cta.cta-orange { background-color:#f97316 !important; }
+    #owner-actions a.cta.cta-orange:hover { background-color:#ea580c !important; }
+
+    @media (max-width: 639px){
+      #owner-actions a.cta{ width:100% !important; }
+    }
+    /* ========= /CTA OVERRIDES ========= */
   </style>
 </head>
 
