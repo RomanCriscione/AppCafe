@@ -1,0 +1,2 @@
+Tu código para reclamar {{ cafe.name }} es: {{ code }}
+Vence en 60 minutos. Si no fuiste vos, ignorá este correo.

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto space-y-4">
+  <h1 class="text-2xl font-bold">Verificá tu email</h1>
+  <p>Te enviamos un código a <strong>{{ claim.email_to }}</strong>. Ingresalo abajo:</p>
+  <form method="post" class="space-y-3">{% csrf_token %}
+    {{ form.code }}
+    <button class="cta cta-indigo">Verificar y reclamar</button>
+  </form>
+</div>
+{% endblock %}

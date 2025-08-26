@@ -88,32 +88,39 @@
 
   <!-- Tarjeta de contacto (sin mostrar plan) -->
   <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-100">
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div class="flex items-start gap-2">
-        <span aria-hidden="true">📍</span>
-        <div>
-          <div class="font-semibold">Dirección</div>
-          <div class="text-sm text-gray-600">{{ cafe.address }}, {{ cafe.location }}</div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="flex items-start gap-2">
+          <span aria-hidden="true">📍</span>
+          <div>
+            <div class="font-semibold">Dirección</div>
+            <div class="text-sm text-gray-600">{{ cafe.address }}, {{ cafe.location }}</div>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-2">
+          <span aria-hidden="true">☎</span>
+          <div>
+            <div class="font-semibold">Teléfono</div>
+            <div class="text-sm text-gray-600">{{ cafe.phone|default:"—" }}</div>
+          </div>
+        </div>
+
+        <div class="sm:col-span-2 flex flex-wrap gap-3">
+          <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
+            target="_blank" rel="noopener"
+            class="btn btn-primary rounded-xl">
+            📍 Ver en Google Maps
+          </a>
+
+          {# ✅ Botón de reclamar, solo si NO está verificado #}
+          {% if cafe.claim_status != 'verified' %}
+            <a href="{% url 'claim_start' cafe.id %}" class="cta cta-indigo">
+              🏷️ ¿Sos el dueño? Reclamá este local
+            </a>
+          {% endif %}
         </div>
       </div>
-
-      <div class="flex items-start gap-2">
-        <span aria-hidden="true">☎</span>
-        <div>
-          <div class="font-semibold">Teléfono</div>
-          <div class="text-sm text-gray-600">{{ cafe.phone|default:"—" }}</div>
-        </div>
-      </div>
-
-      <div class="sm:col-span-2">
-        <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
-           target="_blank" rel="noopener"
-           class="btn btn-primary rounded-xl">
-          📍 Ver en Google Maps
-        </a>
-      </div>
-    </div>
-  </section>
+    </section>
 
   <!-- Features (badges) -->
   <section class="mt-4 animate-fade-in-up animate-delay-150">

@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from django.views.generic import TemplateView
+from . import views_claims
 
 urlpatterns = [
     # Reseñas y cafés
@@ -31,4 +32,9 @@ urlpatterns = [
 
     # Mapa
     path('mapa/', views.mapa_cafes, name='mapa_cafes'),
+
+    path("cafes/<int:cafe_id>/claim/", views_claims.claim_start, name="claim_start"),
+    path("cafes/<int:cafe_id>/claim/<int:claim_id>/verify/", views_claims.claim_verify_email, name="claim_verify_email"),
+    path("cafes/<int:cafe_id>/claim/<int:claim_id>/evidence/", views_claims.claim_upload_evidence, name="claim_upload_evidence"),
+    
 ]

@@ -129,8 +129,8 @@ ACCOUNT_FORMS = {
 }
 
 # Correo
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'no-responder@cafereviews.com'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "no-reply@gota.local"
 
 # Seguridad extra
 SITE_ID = 1

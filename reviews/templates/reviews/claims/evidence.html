@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-xl mx-auto space-y-5">
+  <h1 class="text-2xl font-bold">Subí evidencias</h1>
+  <p class="text-gray-600">
+    Mostrá en una foto el código del día <strong>{{ daily_code }}</strong> escrito a mano junto al mostrador,
+    o subí un ticket del día donde se vea el nombre del local.
+  </p>
+  <form method="post" enctype="multipart/form-data" class="space-y-4">{% csrf_token %}
+    {{ form.files }}
+    <button type="submit" class="cta cta-blue">Enviar para revisión</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-xl mx-auto space-y-6">
+  <h1 class="text-2xl font-bold">Reclamar: {{ cafe.name }}</h1>
+  <p class="text-gray-600">Elegí un método de verificación:</p>
+  <form method="post" class="space-y-4">{% csrf_token %}
+    {{ form.non_field_errors }}
+    <div>{{ form.method }}</div>
+    <div>{{ form.notes_user }}</div>
+    <button type="submit" class="cta cta-blue">Continuar</button>
+  </form>
+</div>
+{% endblock %}

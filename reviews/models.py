@@ -7,6 +7,7 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 import os
 from reviews.utils.images import resize_and_compress
+from .claims import ClaimStatus
 
 User = get_user_model()
 
@@ -37,6 +38,11 @@ class Cafe(models.Model):
     description = models.TextField(blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     google_maps_url = models.URLField(blank=True, null=True)
+    email = models.EmailField(
+    blank=True, null=True,
+    verbose_name="Email del negocio",
+    help_text="Se usa para verificar al dueño por dominio (no se muestra públicamente)."
+)
 
     # Fotos
     photo1 = models.ImageField(upload_to='cafes/', blank=True, null=True)
@@ -73,7 +79,7 @@ class Cafe(models.Model):
 
     # Relaciones
     favorites = models.ManyToManyField(User, related_name='favorite_cafes', blank=True)
-    tags = models.ManyToManyField(Tag, related_name='cafes', blank=True)
+    tags = models.ManyToManyField('Tag', related_name='cafes', blank=True)
 
     # Ubicación
     latitude = models.FloatField(blank=True, null=True)
@@ -81,7 +87,6 @@ class Cafe(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
     # Visibilidad
     VISIBILITY_CHOICES = (
@@ -91,12 +96,33 @@ class Cafe(models.Model):
     )
     visibility_level = models.IntegerField(choices=VISIBILITY_CHOICES, default=0)
 
-    # Dueño
+    # Dueño (ya lo tenías)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='cafes'
     )
+
+    # ✅ NUEVO: estado de reclamo y quién lo reclamó (fallback)
+    claim_status = models.CharField(
+        max_length=12,
+        choices=ClaimStatus.choices,
+        default=ClaimStatus.UNCLAIMED,
+    )
+    claimed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name="cafes_claimed",
+    )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["location"]),
+            models.Index(fields=["visibility_level"]),
+            models.Index(fields=["latitude", "longitude"]),
+            models.Index(fields=["owner"]),
+        ]
 
     def save(self, *args, **kwargs):
         procesar = kwargs.pop("procesar_imagenes", True)
@@ -143,14 +169,6 @@ class Cafe(models.Model):
 
     def __str__(self):
         return self.name
-
-    class Meta:
-        indexes = [
-            models.Index(fields=["location"]),
-            models.Index(fields=["visibility_level"]),
-            models.Index(fields=["latitude", "longitude"]),
-            models.Index(fields=["owner"]),
-        ]
 
 
 class Review(models.Model):
