@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-lg mx-auto px-4 py-8">
+  <h1 class="text-2xl font-semibold mb-4">Denunciar reseña</h1>
+
+  <div class="surface p-4 rounded-xl mb-6">
+    <p class="text-sm text-gray-700"><strong>Reseña:</strong> {{ review.user.username }} — ☕ {{ review.rating }}</p>
+    <p class="mt-2 text-gray-800">{{ review.comment }}</p>
+  </div>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    <div>
+      <label class="block font-medium mb-1">Motivo</label>
+      {{ form.reason }}
+      {% if form.reason.errors %}<p class="text-red-600 text-sm">{{ form.reason.errors }}</p>{% endif %}
+    </div>
+    <div>
+      <label class="block font-medium mb-1">Comentario (opcional)</label>
+      {{ form.comment }}
+      {% if form.comment.errors %}<p class="text-red-600 text-sm">{{ form.comment.errors }}</p>{% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar denuncia</button>
+    <a href="{% url 'cafe_detail' review.cafe_id %}" class="btn btn-ghost">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

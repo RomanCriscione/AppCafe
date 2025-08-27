@@ -7,8 +7,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.core.exceptions import PermissionDenied
 from collections import defaultdict
-from .models import Review, Cafe
-from .forms import ReviewForm, CafeForm
+from .models import Review, Cafe, ReviewLike, ReviewReport
+from .forms import ReviewForm, CafeForm, ReviewReportForm
 import os, json, math
 from django.core.paginator import Paginator
 from .models import Tag, CafeStat  
@@ -25,7 +25,8 @@ from django.templatetags.static import static
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Sum
-
+from django.views.decorators.http import require_POST
+from django.conf import settings
 
 # ✅ imports para invalidar el caché de fragmentos
 from django.core.cache.utils import make_template_fragment_key
@@ -269,7 +270,15 @@ class CafeListView(ListView):
 # Detalle de cafetería + dejar o editar reseña
 def cafe_detail(request, cafe_id):
     cafe = get_object_or_404(Cafe, id=cafe_id)
-    reviews = cafe.reviews.select_related("user").prefetch_related("tags").order_by("-created_at")
+
+    # === Reseñas con conteo de likes ===
+    reviews = (
+        cafe.reviews
+        .select_related("user")
+        .prefetch_related("tags")
+        .annotate(likes_count=Count("likes", distinct=True))
+        .order_by("-created_at")
+    )
 
     # Calcular promedio y mejor reseña
     ratings = [r.rating for r in reviews]
@@ -336,20 +345,38 @@ def cafe_detail(request, cafe_id):
 
     full_image_url = request.build_absolute_uri(og_image_path)
 
+    # === IDs de reseñas que el usuario actual ya likeó ===
+    liked_ids = set()
+    if request.user.is_authenticated:
+        liked_ids = set(
+            ReviewLike.objects
+            .filter(user=request.user, review__cafe=cafe)
+            .values_list("review_id", flat=True)
+        )
+
+    # Preparar formulario (tu lógica compacta original)
+    form = (
+        ReviewForm(instance=Review.objects.get(user=request.user, cafe=cafe))
+        if request.user.is_authenticated and Review.objects.filter(user=request.user, cafe=cafe).exists()
+        else ReviewForm()
+    )
+
     return render(request, "reviews/cafe_detail.html", {
         "cafe": cafe,
         "reviews": reviews,
         "average_rating": average_rating,
         "best_review": best_review,
-        "form": form if (form := (ReviewForm(instance=Review.objects.get(user=request.user, cafe=cafe)) if request.user.is_authenticated and Review.objects.filter(user=request.user, cafe=cafe).exists() else ReviewForm())) else ReviewForm(),
+        "form": form,
         "recommended_cafes": recommended_cafes,
         "tag_choices": dict(tag_groups),
         "top_tags": top_tags,
         "more_tags": more_tags,
         "full_page_url": full_page_url,
         "full_image_url": full_image_url,
-    })
 
+        # 👇 nuevo para el botón ❤️ en cada card
+        "liked_ids": liked_ids,
+    })
 
 
 @login_required
@@ -757,11 +784,15 @@ def nearby_cafes(request):
     return JsonResponse(data, safe=False)
 
 # Función reutilizable para asignar plan de visibilidad
-def asignar_plan(cafe, nivel):
-    if nivel in [0, 1, 2]:
-        cafe.visibility_level = nivel
-        cafe.save()
+def asignar_plan(cafe, nivel: int):
+    """
+    Hoy sólo permitimos el plan gratuito (0).
+    """
+    if nivel == 0:
+        cafe.visibility_level = 0
+        cafe.save(update_fields=["visibility_level"])
         return True
+    # Nada que actualizar para planes pagos (desactivados por ahora)
     return False
 
 
@@ -775,14 +806,45 @@ def cambiar_visibilidad(request, cafe_id):
     if request.method == 'POST':
         try:
             nuevo_nivel = int(request.POST.get('visibility_level'))
-            if asignar_plan(cafe, nuevo_nivel):
-                messages.success(request, "Nivel de visibilidad actualizado.")
-            else:
-                messages.error(request, "Nivel inválido.")
-        except (ValueError, TypeError):
+        except (TypeError, ValueError):
             messages.error(request, "Nivel inválido.")
+            return redirect('owner_dashboard')
+
+        if nuevo_nivel == 0:
+            asignar_plan(cafe, 0)
+            messages.success(request, "Se activó el plan gratuito.")
+            return redirect('owner_dashboard')
+
+        # Nivel pago → checkout
+        link = getattr(settings, "PAYMENT_LINKS", {}).get(nuevo_nivel)
+        if not getattr(settings, "PLAN_UPGRADES_ENABLED", False) or not link:
+            messages.info(request, "Los planes pagos todavía no están disponibles. Te avisamos pronto.")
+            return redirect('planes')
+
+        # Mandamos a la pasarela
+        return redirect(f"{link}?cafe={cafe.id}&user={request.user.id}")
 
     return redirect('owner_dashboard')
+
+@login_required
+def plan_checkout_redirect(request, cafe_id, nivel):
+    cafe = get_object_or_404(Cafe, id=cafe_id, owner=request.user)
+    try:
+        nivel = int(nivel)
+    except (TypeError, ValueError):
+        messages.error(request, "Nivel inválido.")
+        return redirect('planes')
+
+    if nivel == 0:
+        messages.info(request, "El plan gratuito ya está activo.")
+        return redirect('planes')
+
+    link = getattr(settings, "PAYMENT_LINKS", {}).get(nivel)
+    if not getattr(settings, "PLAN_UPGRADES_ENABLED", False) or not link:
+        messages.info(request, "Los planes pagos estarán disponibles pronto.")
+        return redirect('planes')
+
+    return redirect(f"{link}?cafe={cafe.id}&user={request.user.id}")
 
 
 @login_required
@@ -797,23 +859,24 @@ def planes_view(request):
 
         try:
             nivel = int(nivel)
-            # TODO: Integrar con pasarela de pago aquí en el futuro
-            if asignar_plan(cafe, nivel):
-                nombres_planes = {
-                    0: "☕ Gratuito – nivel base",
-                    1: "☕ Plan Barista – intermedio",
-                    2: "☕☕ Plan Maestro – nivel superior"
-                }
-                messages.success(request, f"{cafe.name} actualizado al plan: {nombres_planes[nivel]}")
-            else:
-                messages.error(request, "Nivel inválido.")
-        except ValueError:
+        except (TypeError, ValueError):
             messages.error(request, "Nivel inválido.")
+            return redirect('planes')
 
-        return redirect('planes')
+        if nivel == 0:
+            asignar_plan(cafe, 0)
+            messages.success(request, "Plan gratuito activado.")
+            return redirect('planes')
+
+        # Cualquier pago → a checkout / o “pronto”
+        return redirect('plan_checkout_redirect', cafe_id=cafe.id, nivel=nivel)
 
     cafes = Cafe.objects.filter(owner=request.user)
-    return render(request, 'reviews/planes.html', {'cafes': cafes})
+    return render(request, 'reviews/planes.html', {
+        'cafes': cafes,
+        'upgrades_enabled': getattr(settings, "PLAN_UPGRADES_ENABLED", False),
+    })
+
 
 def mapa_cafes(request):
     # Sólo con coordenadas
@@ -912,3 +975,57 @@ def analytics_dashboard(request):
         "views_json": json.dumps(values),
     }
     return render(request, "reviews/analytics_dashboard.html", context)
+
+@require_POST
+@login_required
+def toggle_review_like(request, review_id):
+    review = get_object_or_404(Review, pk=review_id)
+    # Evitamos likes propios si querés (opcional)
+    # if review.user_id == request.user.id:
+    #     messages.info(request, "No podés likear tu propia reseña.")
+    #     return redirect("cafe_detail", cafe_id=review.cafe_id)
+
+    obj, created = ReviewLike.objects.get_or_create(review=review, user=request.user)
+    if not created:
+        obj.delete()
+        liked = False
+    else:
+        liked = True
+
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        # respuesta JSON para AJAX
+        count = ReviewLike.objects.filter(review=review).count()
+        return JsonResponse({"ok": True, "liked": liked, "count": count})
+
+    return redirect("cafe_detail", cafe_id=review.cafe_id)
+
+@login_required
+def report_review(request, review_id):
+    review = get_object_or_404(Review, pk=review_id)
+
+    if request.method == "POST":
+        form = ReviewReportForm(request.POST)
+        if form.is_valid():
+            # Evitá duplicado PENDING del mismo user
+            pending_exists = ReviewReport.objects.filter(
+                review=review, user=request.user, status=ReviewReport.Status.PENDING
+            ).exists()
+            if pending_exists:
+                messages.info(request, "Ya enviaste un reporte para esta reseña. Está en revisión.")
+                return redirect("cafe_detail", cafe_id=review.cafe_id)
+
+            rep = form.save(commit=False)
+            rep.review = review
+            rep.user = request.user
+            rep.save()
+            messages.success(request, "¡Gracias! Recibimos tu denuncia y la revisaremos.")
+            return redirect("cafe_detail", cafe_id=review.cafe_id)
+    else:
+        form = ReviewReportForm()
+
+    return render(
+        request,
+        "reviews/reports/report_form.html",
+        {"review": review, "form": form}
+    )
+

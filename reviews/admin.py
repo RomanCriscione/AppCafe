@@ -1,6 +1,6 @@
 # reviews/admin.py
 from django.contrib import admin
-from .models import Cafe, Review, CafeStat
+from .models import Cafe, Review, CafeStat, ReviewLike, ReviewReport
 from .claims import ClaimRequest, ClaimEvidence, ClaimStatus, ClaimMethod
 
 
@@ -84,3 +84,24 @@ class ClaimEvidenceAdmin(admin.ModelAdmin):
     list_display = ("id", "claim", "uploaded_at")
     search_fields = ("claim__cafe__name",)
     raw_id_fields = ("claim",)
+
+@admin.register(ReviewLike)
+class ReviewLikeAdmin(admin.ModelAdmin):
+    list_display = ("review", "user", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("review__cafe__name", "user__username")
+    raw_id_fields = ("review", "user")
+    date_hierarchy = "created_at"
+
+
+@admin.register(ReviewReport)
+class ReviewReportAdmin(admin.ModelAdmin):
+    list_display = ("id", "review", "user", "reason", "status", "created_at", "resolved_at")
+    list_filter = ("status", "reason", "created_at")
+    search_fields = ("review__comment", "user__username")
+    raw_id_fields = ("review", "user", "resolved_by")
+    date_hierarchy = "created_at"
+    fieldsets = (
+        ("Reporte", {"fields": ("review", "user", "reason", "comment")}),
+        ("Estado", {"fields": ("status", "resolved_by", "resolved_at", "resolution_notes")}),
+    )

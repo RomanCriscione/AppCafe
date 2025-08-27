@@ -3,13 +3,14 @@ from __future__ import annotations
 import re
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Review, Cafe, Tag
+from .models import Review, Cafe, Tag, ReviewReport
 # Formularios de reclamo: dependen de tu archivo reviews/claims.py
 from .claims import (
     ClaimRequest,
     ClaimEvidence,
     ClaimMethod,  # p.ej.: EMAIL_DOMAIN, PHOTO_CODE, PHONE
 )
+
 
 # --------------------------------------------------------------------------------------
 # Helpers / Validaciones compartidas
@@ -251,3 +252,34 @@ class ClaimEvidenceForm(forms.Form):
                 raise ValidationError(f"Cada archivo debe pesar menos de {self.MAX_SIZE_MB} MB.")
 
         return files
+
+class ReviewReportForm(forms.ModelForm):
+    # Campo “visual” para el template; se guarda en `message`
+    comment = forms.CharField(
+        label="Comentario (opcional)",
+        required=False,
+        widget=forms.Textarea(attrs={
+            "rows": 4,
+            "class": "textarea w-full",
+            "placeholder": "Contanos por qué debería revisarse esta reseña…",
+        }),
+    )
+
+    class Meta:
+        model = ReviewReport
+        fields = ("reason",)  # no incluimos message; lo setea save()
+        labels = {"reason": "Motivo"}
+        widgets = {"reason": forms.Select(attrs={"class": "select w-full"})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # si se edita un reporte existente, precargar
+        if self.instance and getattr(self.instance, "pk", None):
+            self.fields["comment"].initial = self.instance.message or ""
+
+    def save(self, commit=True):
+        inst = super().save(commit=False)
+        inst.message = self.cleaned_data.get("comment", "")
+        if commit:
+            inst.save()
+        return inst

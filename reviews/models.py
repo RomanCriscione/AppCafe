@@ -202,3 +202,79 @@ class CafeStat(models.Model):
 
     def __str__(self):
         return f'{self.cafe.name} - {self.date}: {self.views} vistas'
+    
+    # --- Likes de reseñas ---
+class ReviewLike(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="review_likes",
+    )
+    review = models.ForeignKey(
+        "Review",
+        on_delete=models.CASCADE,
+        related_name="likes",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (("user", "review"),)
+        indexes = [
+            models.Index(fields=["review"]),
+            models.Index(fields=["user"]),
+            models.Index(fields=["created_at"]),
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"❤️ {self.user} → Review {self.review_id}"
+
+
+# --- Reportes/denuncias de reseñas ---
+class ReviewReport(models.Model):
+    class Reason(models.TextChoices):
+        SPAM = "SPAM", "Spam o autopromo"
+        OFFENSIVE = "OFFENSIVE", "Ofensivo / lenguaje inapropiado"
+        FALSE = "FALSE_INFO", "Información falsa"
+        OTHER = "OTHER", "Otro"
+
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pendiente"
+        ACCEPTED = "ACCEPTED", "Aceptado (acción tomada)"
+        REJECTED = "REJECTED", "Rechazado"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="review_reports",
+    )
+    review = models.ForeignKey(
+        "Review",
+        on_delete=models.CASCADE,
+        related_name="reports",
+    )
+    reason = models.CharField(max_length=20, choices=Reason.choices, default=Reason.OTHER)
+    message = models.TextField(blank=True, null=True)
+
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(blank=True, null=True)
+    resolved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="review_reports_resolved",
+    )
+
+    class Meta:
+        unique_together = (("user", "review"),)  # un reporte por usuario por reseña
+        indexes = [
+            models.Index(fields=["review"]),
+            models.Index(fields=["user"]),
+            models.Index(fields=["status"]),
+            models.Index(fields=["created_at"]),
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"🚩 {self.review_id} por {self.user} ({self.reason})"

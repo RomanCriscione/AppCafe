@@ -31,7 +31,7 @@
         <p>{{ review.comment }}</p>
       {% endif %}
 
-      {# Etiquetas de la reseña (usa el conjunto que tengas) #}
+      {# Etiquetas de la reseña #}
       {% if review.sensory_tags.all %}
         <div class="tags-inline">
           {% for t in review.sensory_tags.all %}
@@ -49,13 +49,36 @@
     <div class="review-fade" aria-hidden="true"></div>
   </div>
 
-  <!-- Toggle -->
-  <div class="mt-2">
+  <!-- Acciones -->
+  <div class="flex items-center gap-3 mt-2">
+
+    <!-- ❤️ Like / Unlike -->
+    <form method="post"
+          action="{% url 'toggle_review_like' review.id %}"
+          class="inline-flex items-center gap-1 like-form"
+          data-review="{{ review.id }}">
+      {% csrf_token %}
+      <button type="submit"
+              class="btn btn-sm {% if review.id in liked_ids %}btn-success{% else %}btn-outline{% endif %}"
+              aria-pressed="{% if review.id in liked_ids %}true{% else %}false{% endif %}"
+              aria-label="Me gusta">
+        <span class="like-icon" id="like-icon-{{ review.id }}">{% if review.id in liked_ids %}❤️{% else %}🤍{% endif %}</span>
+        <span class="ml-1" id="likes-count-{{ review.id }}">{{ review.likes_count }}</span>
+      </button>
+    </form>
+
+    <!-- Ver más / Ver menos -->
     <button type="button"
             class="btn btn-outline btn-sm review-toggle"
             data-target="rev-{{ review.id }}"
             hidden>
       Ver más
     </button>
+
+    <!-- Denunciar -->
+    <a href="{% url 'report_review' review.id %}"
+       class="text-xs text-red-500 hover:underline ml-auto">
+      Denunciar
+    </a>
   </div>
 </article>

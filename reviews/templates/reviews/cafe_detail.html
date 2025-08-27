@@ -220,7 +220,7 @@
   <!-- Reseñas -->
   <h3 class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-400">Reseñas:</h3>
 
-  {% cache 600 cafe_reviews_list cafe.id %}
+  {% cache 600 cafe_reviews_list cafe.id user.id %}
     <div id="review-container"
          class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 transition-all duration-300 max-h-[1056px] overflow-hidden relative animate-fade-in-up animate-delay-500">
       {% for review in reviews %}
@@ -406,5 +406,54 @@
     closeBtn.addEventListener("click", closeModal);
     modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
   });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const getCSRFFrom = (form) => form.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+
+  document.querySelectorAll(".like-form").forEach(form => {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const rid = form.dataset.review;
+      const csrf = getCSRFFrom(form);
+
+      try {
+        const resp = await fetch(form.action, {
+          method: "POST",
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": csrf
+          },
+          body: new FormData(form),
+          credentials: "same-origin"
+        });
+
+        const data = await resp.json();
+        if (!data.ok) return;
+
+        const btn = form.querySelector("button");
+        const countEl = document.getElementById(`likes-count-${rid}`);
+        const iconEl  = document.getElementById(`like-icon-${rid}`);
+
+        countEl.textContent = data.count;
+        if (data.liked) {
+          btn.classList.remove("btn-outline");
+          btn.classList.add("btn-success");
+          btn.setAttribute("aria-pressed", "true");
+          iconEl.textContent = "❤️";
+        } else {
+          btn.classList.remove("btn-success");
+          btn.classList.add("btn-outline");
+          btn.setAttribute("aria-pressed", "false");
+          iconEl.textContent = "🤍";
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  });
+});
+
   </script>
+
+
 {% endblock %}

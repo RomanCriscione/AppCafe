@@ -162,3 +162,10 @@ STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
+
+# === Planes / Upgrades ===
+PLAN_UPGRADES_ENABLED = False  # por ahora desactivado
+PAYMENT_LINKS = {
+    1: "https://tu-pasarela.com/checkout/plan-barista",   # TODO: reemplazar
+    2: "https://tu-pasarela.com/checkout/plan-maestro",   # TODO: reemplazar
+}
