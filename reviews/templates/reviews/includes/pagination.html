@@ -1,0 +1,15 @@
+{% if page_obj.has_other_pages %}
+  <nav class="flex items-center justify-center gap-2 mt-4" aria-label="Paginación">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{{ anchor }}" class="px-3 py-1 rounded border hover:bg-gray-50">Anterior</a>
+    {% endif %}
+
+    <span class="px-3 py-1 text-sm text-gray-600">
+      Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{{ anchor }}" class="px-3 py-1 rounded border hover:bg-gray-50">Siguiente</a>
+    {% endif %}
+  </nav>
+{% endif %}

@@ -272,7 +272,7 @@ def cafe_detail(request, cafe_id):
     cafe = get_object_or_404(Cafe, id=cafe_id)
 
     # === Reseñas con conteo de likes ===
-    reviews = (
+    reviews_qs = (
         cafe.reviews
         .select_related("user")
         .prefetch_related("tags")
@@ -280,10 +280,20 @@ def cafe_detail(request, cafe_id):
         .order_by("-created_at")
     )
 
-    # Calcular promedio y mejor reseña
-    ratings = [r.rating for r in reviews]
-    average_rating = round(mean(ratings), 1) if ratings else None
-    best_review = reviews[0] if reviews else None
+    # Totales y promedio (DB-side)
+    total_reviews = reviews_qs.count()
+    agg = reviews_qs.aggregate(avg=Avg("rating"))
+    average_rating = round(agg["avg"], 1) if agg["avg"] is not None else None
+
+    # “Mejor” reseña (por rating luego fecha)
+    best_review = reviews_qs.order_by("-rating", "-created_at").first()
+
+    # Paginación
+    paginator = Paginator(reviews_qs, 8)  # 8 por página
+    page_obj = paginator.get_page(request.GET.get("page") or 1)
+
+    # Reseñas para JSON-LD (siempre primeras 5 del total)
+    schema_reviews = list(reviews_qs[:5])
 
     # Guardar "visto recientemente"
     viewed = request.session.get("recently_viewed", [])
@@ -296,31 +306,29 @@ def cafe_detail(request, cafe_id):
     try:
         today = timezone.localdate()
         session_key = f"viewed_cafe_{cafe.id}_{today.isoformat()}"
-        # no contar vistas del staff ni del dueño
         skip_count = (getattr(request.user, "is_staff", False) or request.user == cafe.owner)
         if not skip_count and not request.session.get(session_key):
             stat, _ = CafeStat.objects.get_or_create(cafe=cafe, date=today)
             CafeStat.objects.filter(pk=stat.pk).update(views=F('views') + 1)
             request.session[session_key] = True
     except Exception:
-        # Nunca romper la ficha por analíticas
-        pass
+        pass  # nunca romper por analíticas
 
-    # Agrupar TODAS las etiquetas por categoría (para el wizard de reseña)
+    # Agrupar TODAS las etiquetas por categoría (para wizard)
     all_tags = Tag.objects.all().order_by("category", "name")
     tag_groups = defaultdict(list)
     for tag in all_tags:
         tag_groups[tag.category].append(tag)
 
-    # === Etiquetas sensoriales ordenadas por uso en reseñas de ESTE café ===
+    # Etiquetas sensoriales ordenadas por uso
     tag_counts_qs = (
         Tag.objects
         .filter(reviews__cafe=cafe)
         .annotate(num=Count('reviews', filter=Q(reviews__cafe=cafe)))
         .order_by('-num', 'name')
     )
-    top_tags = list(tag_counts_qs[:5])   # Top 5 destacadas
-    more_tags = list(tag_counts_qs[5:])  # El resto (para "ver más")
+    top_tags = list(tag_counts_qs[:5])
+    more_tags = list(tag_counts_qs[5:])
 
     # Recomendados por calificación
     recommended_cafes = (
@@ -333,7 +341,7 @@ def cafe_detail(request, cafe_id):
     # URLs absolutas para SEO/OG
     full_page_url = request.build_absolute_uri(reverse("cafe_detail", args=[cafe.id]))
 
-    # Elegimos la mejor imagen disponible o fallback
+    # Mejor imagen disponible o fallback
     if getattr(cafe, "photo1", None):
         og_image_path = cafe.photo1.url
     elif getattr(cafe, "photo2", None):
@@ -345,7 +353,7 @@ def cafe_detail(request, cafe_id):
 
     full_image_url = request.build_absolute_uri(og_image_path)
 
-    # === IDs de reseñas que el usuario actual ya likeó ===
+    # === IDs de reseñas que el usuario actual likeó ===
     liked_ids = set()
     if request.user.is_authenticated:
         liked_ids = set(
@@ -354,30 +362,35 @@ def cafe_detail(request, cafe_id):
             .values_list("review_id", flat=True)
         )
 
-    # Preparar formulario (tu lógica compacta original)
-    form = (
-        ReviewForm(instance=Review.objects.get(user=request.user, cafe=cafe))
-        if request.user.is_authenticated and Review.objects.filter(user=request.user, cafe=cafe).exists()
-        else ReviewForm()
-    )
+    # Form
+    if request.user.is_authenticated and Review.objects.filter(user=request.user, cafe=cafe).exists():
+        form = ReviewForm(instance=Review.objects.get(user=request.user, cafe=cafe))
+    else:
+        form = ReviewForm()
 
     return render(request, "reviews/cafe_detail.html", {
         "cafe": cafe,
-        "reviews": reviews,
+        # 👇 Para la UI: usá page_obj.object_list + paginador
+        "reviews": page_obj.object_list,
+        "page_obj": page_obj,
+
+        # Métricas/SEO
+        "total_reviews": total_reviews,
         "average_rating": average_rating,
         "best_review": best_review,
-        "form": form,
+        "schema_reviews": schema_reviews,
+        "full_page_url": full_page_url,
+        "full_image_url": full_image_url,
+
+        # Wizard / tags / recomendados
         "recommended_cafes": recommended_cafes,
         "tag_choices": dict(tag_groups),
         "top_tags": top_tags,
         "more_tags": more_tags,
-        "full_page_url": full_page_url,
-        "full_image_url": full_image_url,
 
-        # 👇 nuevo para el botón ❤️ en cada card
+        # Likes
         "liked_ids": liked_ids,
     })
-
 
 @login_required
 def create_review(request, cafe_id):

@@ -180,6 +180,7 @@ ACCOUNT_EMAIL_VALIDATORS = ["core.validators.validate_not_disposable"]
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"prompt": "select_account"},  # ← fuerza chooser
         "APP": {
             "client_id": config("GOOGLE_CLIENT_ID", default=""),
             "secret": config("GOOGLE_CLIENT_SECRET", default=""),

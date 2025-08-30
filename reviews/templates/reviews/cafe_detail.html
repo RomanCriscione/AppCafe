@@ -65,10 +65,10 @@
       "ratingValue": "{{ average_rating|floatformat:1 }}",
       "bestRating": "5",
       "worstRating": "1",
-      "reviewCount": "{{ reviews|length }}"
-    }{% endif %}{% if reviews and reviews|length > 0 %},
+      "reviewCount": "{{ total_reviews }}"
+    }{% if schema_reviews and schema_reviews|length > 0 %},
     "review": [
-      {% for r in reviews|slice:":5" %}{
+      {% for r in schema_reviews %}{
         "@type": "Review",
         "author": { "@type": "Person", "name": "{{ r.user.username|default:'Usuario'|escapejs }}" },
         "datePublished": "{{ r.created_at|date:'Y-m-d' }}",
@@ -218,7 +218,7 @@
   </div>
 
   <!-- Reseñas -->
-  <h3 class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-400">Reseñas:</h3>
+  <h3 id="reviews" class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-400">Reseñas:</h3>
 
   {% cache 600 cafe_reviews_list cafe.id user.id %}
     <div id="review-container"
@@ -245,6 +245,7 @@
       </button>
     {% endif %}
   {% endcache %}
+  {% include "reviews/includes/pagination.html" with page_obj=page_obj anchor="#reviews" %}
 
   <!-- Favorito -->
   {% if user.is_authenticated %}
