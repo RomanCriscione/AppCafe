@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="max-w-lg mx-auto mt-12 bg-white p-6 rounded-lg shadow-lg">
+  <h1 class="text-2xl font-bold mb-4 text-center">{% trans "Verificá tu email" %}</h1>
+  <p class="text-gray-700 text-center">
+    {% trans "Te enviamos un correo con un enlace para finalizar el registro." %}
+    {% trans "Si no lo ves en tu bandeja de entrada, revisá Spam o Promociones." %}
+  </p>
+  <div class="text-center mt-6">
+    <a href="{% url 'account_login' %}" class="text-blue-600 hover:underline">{% trans "Volver a iniciar sesión" %}</a>
+    <span class="mx-2 text-gray-300">·</span>
+    <a href="{% url 'account_email' %}" class="text-blue-600 hover:underline">{% trans "Administrar emails / reenviar" %}</a>
+  </div>
+</div>
+{% endblock %}

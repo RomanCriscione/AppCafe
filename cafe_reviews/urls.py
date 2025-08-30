@@ -10,16 +10,17 @@ from cafe_reviews.sitemaps import sitemaps
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # Autenticación (allauth)
+    # --- Autenticación (allauth) ---
+    # Login, logout, signup, social (Google), etc.
     path("accounts/", include("allauth.urls")),
 
-    # Usuarios (acciones personalizadas)
+    # --- Usuarios (tus vistas propias: perfil, registrar dueño, etc.) ---
     path("users/", include("accounts.urls")),
 
-    # Público
+    # --- Público (home, about, contact, etc.) ---
     path("", include("core.urls")),
 
-    # Cafeterías y reseñas
+    # --- Cafeterías y reseñas ---
     path("reviews/", include("reviews.urls")),
 
     # robots.txt (template plano)

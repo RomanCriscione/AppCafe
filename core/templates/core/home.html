@@ -35,13 +35,13 @@
               <div class="flex gap-4 items-start">
                 {% if review.cafe.photo1 %}
                   <img alt="{{ review.cafe.name }}" class="w-20 h-20 object-cover rounded-md" 
-                       loading="lazy" src="{{ review.cafe.photo1.url }}"/>
+                      loading="lazy" src="{{ review.cafe.photo1.url }}"/>
                 {% endif %}
                 <div class="flex flex-col justify-between">
                   <p class="font-semibold leading-snug">
                     {{ review.user.username }} reseñó 
                     <a class="text-blue-600 hover:underline"
-                       href="{% url 'cafe_detail' review.cafe.id %}">{{ review.cafe.name }}</a>
+                      href="{% url 'cafe_detail' review.cafe.id %}">{{ review.cafe.name }}</a>
                   </p>
                   <p class="text-sm">☕ {{ review.rating }}</p>
                   <p class="text-sm text-gray-700">{{ review.comment|truncatewords:20 }}</p>
