@@ -1,7 +1,4 @@
-{# reviews/_review_card.html #}
 <article id="rev-{{ review.id }}" class="review-card p-4">
-
-  <!-- Header -->
   <header class="review-head">
     <div class="review-avatar" aria-hidden="true">
       {{ review.user.username|default:"U" |slice:":1" }}
@@ -9,12 +6,8 @@
     <div class="flex-1">
       <div class="flex items-start justify-between gap-2">
         <div class="review-meta">
-          <div class="review-user">
-            {{ review.user.username|default:"Usuario" }}
-          </div>
-          <div class="review-date">
-            {{ review.created_at|date:"d M Y" }}
-          </div>
+          <div class="review-user">{{ review.user.username|default:"Usuario" }}</div>
+          <div class="review-date">{{ review.created_at|date:"d M Y" }}</div>
         </div>
         <div class="review-rating text-sm">
           <span class="dot" aria-hidden="true"></span>
@@ -24,35 +17,23 @@
     </div>
   </header>
 
-  <!-- Body (colapsable) -->
   <div class="review-body mt-3 collapsed" data-collapsible>
     <div class="review-text">
-      {% if review.comment %}
-        <p>{{ review.comment }}</p>
-      {% endif %}
-
-      {# Etiquetas de la reseña #}
+      {% if review.comment %}<p>{{ review.comment }}</p>{% endif %}
       {% if review.sensory_tags.all %}
         <div class="tags-inline">
-          {% for t in review.sensory_tags.all %}
-            <span class="badge badge-xs">{{ t.name }}</span>
-          {% endfor %}
+          {% for t in review.sensory_tags.all %}<span class="badge badge-xs">{{ t.name }}</span>{% endfor %}
         </div>
       {% elif review.tags.all %}
         <div class="tags-inline">
-          {% for t in review.tags.all %}
-            <span class="badge badge-xs">{{ t.name }}</span>
-          {% endfor %}
+          {% for t in review.tags.all %}<span class="badge badge-xs">{{ t.name }}</span>{% endfor %}
         </div>
       {% endif %}
     </div>
     <div class="review-fade" aria-hidden="true"></div>
   </div>
 
-  <!-- Acciones -->
   <div class="flex items-center gap-3 mt-2">
-
-    <!-- ❤️ Like / Unlike -->
     <form method="post"
           action="{% url 'toggle_review_like' review.id %}"
           class="inline-flex items-center gap-1 like-form"
@@ -67,18 +48,10 @@
       </button>
     </form>
 
-    <!-- Ver más / Ver menos -->
-    <button type="button"
-            class="btn btn-outline btn-sm review-toggle"
-            data-target="rev-{{ review.id }}"
-            hidden>
+    <button type="button" class="btn btn-outline btn-sm review-toggle" data-target="rev-{{ review.id }}" hidden>
       Ver más
     </button>
 
-    <!-- Denunciar -->
-    <a href="{% url 'report_review' review.id %}"
-       class="text-xs text-red-500 hover:underline ml-auto">
-      Denunciar
-    </a>
+    <a href="{% url 'report_review' review.id %}" class="text-xs text-red-500 hover:underline ml-auto">Denunciar</a>
   </div>
 </article>

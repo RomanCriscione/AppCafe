@@ -19,11 +19,7 @@
     "@type": "ItemList",
     "itemListElement": [
       {% for c in cafes %}
-      {
-        "@type": "ListItem",
-        "position": {{ forloop.counter }},
-        "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'cafe_detail' c.id %}"
-      }{% if not forloop.last %},{% endif %}
+      { "@type": "ListItem", "position": {{ forloop.counter }}, "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'cafe_detail' c.id %}" }{% if not forloop.last %},{% endif %}
       {% endfor %}
     ]
   }
@@ -32,15 +28,12 @@
 
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6 relative px-4">
-  <!-- Botón de Filtros para Mobile -->
   <button id="toggle-filtros" class="lg:hidden fixed bottom-4 right-4 z-[1001] btn btn-primary rounded-full shadow-lg">
     🔍 Filtros
   </button>
 
-  <!-- Overlay -->
   <div id="filtros-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[1000] hidden opacity-0 transition-opacity duration-300 lg:hidden"></div>
 
-  <!-- Filtros -->
   <aside id="panel-filtros" class="lg:static fixed top-0 left-0 h-full w-4/5 max-w-xs bg-white p-4 rounded-lg shadow-lg z-[1001] transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:w-1/4 lg:h-auto lg:shadow-none overflow-auto">
     <div class="flex justify-between items-center lg:hidden mb-4">
       <h2 class="text-xl font-semibold">🔍 Filtros</h2>
@@ -78,15 +71,11 @@
         {% endfor %}
       </fieldset>
 
-      <button type="submit" class="mt-4 btn btn-primary rounded-xl w-full">
-        Aplicar filtros
-      </button>
+      <button type="submit" class="mt-4 btn btn-primary rounded-xl w-full">Aplicar filtros</button>
     </form>
   </aside>
 
-  <!-- Lista de Cafés -->
   <section class="lg:w-3/4 max-w-6xl mx-auto relative z-0">
-    <!-- Skip links -->
     <a href="#resultados" class="sr-only">Saltar a resultados</a>
     <a href="#paginacion" class="sr-only">Saltar a paginación</a>
 
@@ -97,21 +86,16 @@
           <input type="hidden" name="orden" value="algoritmo">
           <input type="hidden" name="lat" id="lat">
           <input type="hidden" name="lon" id="lon">
-          <button type="submit" class="btn btn-primary rounded-xl text-sm">
-            📍 Cafés cerca mío
-          </button>
+          <button type="submit" class="btn btn-primary rounded-xl text-sm">📍 Cafés cerca mío</button>
         </form>
         {% if mostrar_boton_reset %}
-          <a href="{% url 'cafe_list' %}" class="btn btn-ghost rounded-xl text-sm">
-            🔄 Ver todos los cafés
-          </a>
+          <a href="{% url 'cafe_list' %}" class="btn btn-ghost rounded-xl text-sm">🔄 Ver todos los cafés</a>
         {% endif %}
       </div>
     </div>
 
     {% include "reviews/includes/mapa_cafe_list.html" %}
 
-    <!-- SKELETON -->
     <div id="grid-skeleton" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {% for _ in "123" %}
         <div class="card">
@@ -129,28 +113,18 @@
       {% endfor %}
     </div>
 
-    <!-- CONTENIDO REAL -->
     <div id="grid-cafes" class="hidden" tabindex="-1" aria-labelledby="titulo-cafeterias">
       <div id="resultados" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
         {% for cafe in cafes %}
-          <article class="card group relative h-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition">
+          <article class="card cafe-card group relative h-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition">
             {% if cafe.photo1 %}
               <a href="{% url 'cafe_detail' cafe.id %}">
-                <img
-                  src="{{ cafe.photo1.url }}"
-                  alt="{{ cafe.name }}"
-                  class="h-44 w-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                  width="800"
-                  height="533"
-                >
+                <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}"
+                     class="h-44 w-full object-cover" loading="lazy" decoding="async" width="800" height="533">
               </a>
             {% else %}
               <a href="{% url 'cafe_detail' cafe.id %}" class="block">
-                <div class="h-44 w-full bg-gray-200 flex items-center justify-center text-gray-500 rounded-md">
-                  Sin foto
-                </div>
+                <div class="h-44 w-full bg-gray-200 flex items-center justify-center text-gray-500 rounded-md">Sin foto</div>
               </a>
             {% endif %}
 
@@ -166,9 +140,7 @@
               </div>
 
               <div class="mt-4">
-                <a href="{% url 'cafe_detail' cafe.id %}" class="btn btn-outline rounded-xl w-full">
-                  Ver detalle
-                </a>
+                <a href="{% url 'cafe_detail' cafe.id %}" class="btn btn-outline rounded-xl w-full">Ver detalle</a>
               </div>
             </div>
           </article>
@@ -198,7 +170,7 @@
 {% block scripts %}
   {{ block.super }}
   <script>
-    // Geolocalización "Cafés cerca mío"
+    // Geolocalización
     (function () {
       const form = document.getElementById('ubicacion-form');
       const latEl = document.getElementById('lat');
@@ -220,7 +192,7 @@
       });
     })();
 
-    // Panel de filtros en mobile
+    // Drawer filtros mobile
     (function () {
       const toggle = document.getElementById('toggle-filtros');
       const overlay = document.getElementById('filtros-overlay');
@@ -228,40 +200,26 @@
       const cerrar = document.getElementById('cerrar-filtros');
       if (!toggle || !overlay || !panel || !cerrar) return;
 
-      function open() {
-        panel.classList.remove('-translate-x-full');
-        overlay.classList.remove('hidden');
-        requestAnimationFrame(() => overlay.classList.add('opacity-100'));
-      }
-      function close() {
-        panel.classList.add('-translate-x-full');
-        overlay.classList.remove('opacity-100');
-        setTimeout(() => overlay.classList.add('hidden'), 200);
-      }
+      function open() { panel.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); requestAnimationFrame(() => overlay.classList.add('opacity-100')); }
+      function close() { panel.classList.add('-translate-x-full'); overlay.classList.remove('opacity-100'); setTimeout(() => overlay.classList.add('hidden'), 200); }
 
       toggle.addEventListener('click', open);
       cerrar.addEventListener('click', close);
       overlay.addEventListener('click', close);
     })();
 
-    // Mostrar grid real cuando termine de cargar
+    // Swap skeleton -> contenido real
     (function () {
       const sk = document.getElementById('grid-skeleton');
       const real = document.getElementById('grid-cafes');
-
       function swap() {
         if (sk) sk.style.display = 'none';
         if (real) real.classList.remove('hidden');
         const resultados = document.getElementById('resultados');
         if (resultados) resultados.focus();
       }
-
-      if (document.readyState === 'complete') {
-        swap();
-      } else {
-        window.addEventListener('load', swap);
-        setTimeout(swap, 2000);
-      }
+      if (document.readyState === 'complete') { swap(); }
+      else { window.addEventListener('load', swap); setTimeout(swap, 2000); }
     })();
   </script>
 {% endblock %}

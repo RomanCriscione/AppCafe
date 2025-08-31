@@ -54,7 +54,7 @@
     html, body { overflow-x: hidden; }
     body { font-family: 'Poppins', sans-serif; }
 
-    /* Header SIEMPRE arriba y con fondo blanco sólido */
+    /* Header fijo */
     header.site-nav {
       position: fixed; top: 0; left: 0; right: 0;
       z-index: 2147483647 !important;
@@ -63,7 +63,7 @@
       backdrop-filter: none !important;
     }
 
-    /* Leaflet por debajo del header */
+    /* Leaflet debajo del header */
     .leaflet-container,
     .leaflet-pane,
     .leaflet-map-pane,
@@ -77,74 +77,52 @@
     .leaflet-bottom,
     .leaflet-control { z-index: 0 !important; }
 
-    /* Panel/overlay de filtros debajo del header pero sobre contenido */
+    /* Panel/overlay de filtros */
     #panel-filtros { z-index: 2000 !important; }
     #filtros-overlay { z-index: 1900 !important; }
     #toggle-filtros { z-index: 1800 !important; }
 
-    /* ========= ✅ CTA OVERRIDES (cargado al final) ========= */
-    :root { --cta-w: 280px; }
+    /* Fade entre páginas */
+    .page { opacity: 0; transition: opacity .18s ease; }
+    .page.page-ready { opacity: 1; }
 
-    /* Se usa junto con id="owner-actions" en owner_dashboard.html */
+    /* CTA owner (compat) */
+    :root { --cta-w: 280px; }
     #owner-actions a.cta{
-      display:inline-flex !important;
-      align-items:center !important;
-      justify-content:center !important;
-      gap:.5rem !important;
-      width: var(--cta-w) !important;   /* mismo ancho */
-      height:48px !important;           /* mismo alto  */
-      padding:0 1.25rem !important;
-      border-radius:12px !important;
-      font-weight:700 !important;
-      letter-spacing:.01em;
-      line-height:1 !important;
-      color:#fff !important;
-      border:1px solid transparent !important;
-      background-color:#2563eb !important; /* fallback azul */
+      display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:.5rem !important;
+      width: var(--cta-w) !important; height:48px !important; padding:0 1.25rem !important;
+      border-radius:12px !important; font-weight:700 !important; letter-spacing:.01em; line-height:1 !important;
+      color:#fff !important; border:1px solid transparent !important; background-color:#2563eb !important;
       box-shadow: 0 10px 25px rgba(2,8,23,.06) !important;
-      transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
-      white-space:nowrap;
-      text-align:center;
+      transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease; white-space:nowrap; text-align:center;
     }
-    #owner-actions a.cta:hover{
-      transform: translateY(-1px);
-      box-shadow: 0 16px 36px rgba(2,8,23,.12) !important;
-      filter: saturate(1.05);
-    }
+    #owner-actions a.cta:hover{ transform: translateY(-1px); box-shadow: 0 16px 36px rgba(2,8,23,.12) !important; filter: saturate(1.05); }
     #owner-actions a.cta:active{ transform: translateY(0); }
     #owner-actions a.cta:focus-visible{ outline:2px solid #1e40af; outline-offset:2px; }
-
-    /* Variantes de color */
     #owner-actions a.cta.cta-blue   { background-color:#2563eb !important; }
     #owner-actions a.cta.cta-blue:hover   { background-color:#1d4ed8 !important; }
-
     #owner-actions a.cta.cta-green  { background-color:#16a34a !important; }
     #owner-actions a.cta.cta-green:hover  { background-color:#15803d !important; }
-
     #owner-actions a.cta.cta-indigo { background-color:#4f46e5 !important; }
     #owner-actions a.cta.cta-indigo:hover { background-color:#4338ca !important; }
-
     #owner-actions a.cta.cta-orange { background-color:#f97316 !important; }
     #owner-actions a.cta.cta-orange:hover { background-color:#ea580c !important; }
-
-    @media (max-width: 639px){
-      #owner-actions a.cta{ width:100% !important; }
-    }
-    /* ========= /CTA OVERRIDES ========= */
+    @media (max-width: 639px){ #owner-actions a.cta{ width:100% !important; } }
   </style>
+
+  <!-- Chart.js para el radar (una sola vez) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 
-<body class="bg-light text-dark">
+<body class="page bg-light text-dark">
   <div class="min-h-screen flex flex-col">
 
     <!-- Navbar -->
     <header class="site-nav shadow">
       <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <!-- Logo + enlaces -->
         <div class="flex items-center gap-8">
           <a href="{% url 'home' %}" class="text-2xl font-bold text-primary">Gota</a>
 
-          <!-- Toggle mobile -->
           <button id="menu-toggle" class="lg:hidden text-gray-700" aria-label="Abrir menú">
             <i class="fas fa-bars text-xl" aria-hidden="true"></i>
           </button>
@@ -161,7 +139,6 @@
           </nav>
         </div>
 
-        <!-- Botones de usuario -->
         <div class="flex items-center gap-3">
           {% if user.is_authenticated %}
             <span class="font-semibold text-gray-800">Hola, {{ user.username }}</span>
@@ -173,8 +150,7 @@
               <a href="{% url 'create_cafe' %}" class="hover:underline">➕ Agregar Café</a>
               <a href="{% url 'owner_dashboard' %}" class="hover:underline">Mis Cafés</a>
             {% else %}
-              <a href="{% url 'register_owner' %}"
-                 class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md font-medium transition flex items-center gap-2">
+              <a href="{% url 'register_owner' %}" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md font-medium transition flex items-center gap-2">
                 <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
               </a>
             {% endif %}
@@ -182,12 +158,10 @@
             <a href="{% url 'account_logout' %}" class="text-red-500 hover:underline text-sm">Cerrar sesión</a>
           {% else %}
             <a href="{% url 'account_login' %}" class="text-primary hover:underline">Iniciar sesión</a>
-            <a href="{% url 'account_signup' %}"
-               class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-md font-medium transition">
+            <a href="{% url 'account_signup' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-md font-medium transition">
               Registrarse
             </a>
-            <a href="{% url 'register_owner' %}"
-               class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md font-medium transition flex items-center gap-2">
+            <a href="{% url 'register_owner' %}" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md font-medium transition flex items-center gap-2">
               <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
             </a>
           {% endif %}
@@ -222,7 +196,6 @@
       {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
     <footer class="bg-white border-t py-4 text-center text-sm text-gray-500">
       © 2025 Gota – Una app de Roma ☕
     </footer>
@@ -235,6 +208,23 @@
   <script defer src="{% static 'js/main.js' %}"></script>
 
   <script>
+    // Fade entre páginas (ignora anclas y externos)
+    (function () {
+      const root = document.body;
+      if (root.classList.contains('page')) root.classList.add('page-ready');
+      document.querySelectorAll('a[href]').forEach(a => {
+        const href = a.getAttribute('href');
+        const isAnchor = href && href.startsWith('#');
+        const isExternal = a.target === '_blank' || a.hasAttribute('download') || (href && /^https?:\/\//.test(href) && !href.includes(location.host));
+        if (isAnchor || isExternal) return;
+        a.addEventListener('click', (e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          root.classList.remove('page-ready');
+        });
+      });
+    })();
+
+    // Swiper básico + desaparecen alerts
     document.addEventListener('DOMContentLoaded', function () {
       if (document.querySelector('.swiper-container')) {
         new Swiper('.swiper-container', {
@@ -252,32 +242,33 @@
       });
     });
 
+    // Botón de upgrade (planes no disponibles)
+    document.addEventListener('click', function (ev) {
+      const btn = ev.target.closest('.btn-upgrade');
+      if (!btn) return;
+      ev.preventDefault();
+      const plan = btn.dataset.plan === 'barista' ? 'Barista' : 'Maestro';
+      const toast = document.createElement('div');
+      toast.setAttribute('role','status');
+      toast.setAttribute('aria-live','polite');
+      toast.className = "px-4 py-2 rounded shadow text-white bg-blue-600 fixed top-4 right-4";
+      toast.style.zIndex = '2147485000';
+      toast.textContent = `El plan ${plan} todavía no está disponible. ¡Próximamente!`;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.transition = 'opacity .5s';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 500);
+      }, 2200);
+    });
 
-document.addEventListener('click', function (ev) {
-  // sirve para <button> o <a>
-  const btn = ev.target.closest('.btn-upgrade');
-  if (!btn) return;
-
-  // evita submits/links accidentales
-  ev.preventDefault();
-
-  const plan = btn.dataset.plan === 'barista' ? 'Barista' : 'Maestro';
-
-  // Toast (encima del header)
-  const toast = document.createElement('div');
-  toast.setAttribute('role','status');
-  toast.setAttribute('aria-live','polite');
-  toast.className = "px-4 py-2 rounded shadow text-white bg-blue-600 fixed top-4 right-4";
-  toast.style.zIndex = '2147485000'; // > header
-  toast.textContent = `El plan ${plan} todavía no está disponible. ¡Próximamente!`;
-  document.body.appendChild(toast);
-
-  setTimeout(() => {
-    toast.style.transition = 'opacity .5s';
-    toast.style.opacity = '0';
-    setTimeout(() => toast.remove(), 500);
-  }, 2200);
-});
+    // Helper global para animar el like (rebote)
+    window.bounceLike = (el) => {
+      if (!el) return;
+      el.classList.remove('like-bounce');
+      void el.offsetWidth; // reflow
+      el.classList.add('like-bounce');
+    };
   </script>
 
   {% block scripts %}{% endblock %}

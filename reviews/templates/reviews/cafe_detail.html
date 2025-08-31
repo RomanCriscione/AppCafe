@@ -3,25 +3,17 @@
 {% load static cache tag_icons %}
 
 {% block meta %}
-  <!-- Canonical -->
   <link rel="canonical" href="{{ full_page_url }}" />
-
-  <!-- Open Graph / Twitter -->
   <meta property="og:type" content="place" />
   <meta property="og:title" content="{{ cafe.name }} - Cafetería en {{ cafe.location }}" />
   <meta property="og:description" content="Reseñas, fotos y ubicación de {{ cafe.name }}." />
-  {% if full_image_url %}
-    <meta property="og:image" content="{{ full_image_url }}" />
-  {% endif %}
+  {% if full_image_url %}<meta property="og:image" content="{{ full_image_url }}" />{% endif %}
   <meta property="og:url" content="{{ full_page_url }}" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="{{ cafe.name }} - Cafetería en {{ cafe.location }}" />
   <meta name="twitter:description" content="Reseñas, fotos y ubicación de {{ cafe.name }}." />
-  {% if full_image_url %}
-    <meta name="twitter:image" content="{{ full_image_url }}" />
-  {% endif %}
+  {% if full_image_url %}<meta name="twitter:image" content="{{ full_image_url }}" />{% endif %}
 
-  {# Meta description dinámica #}
   {% if cafe.description %}
     <meta name="description" content="{{ cafe.description|striptags|truncatechars:155 }}">
   {% elif best_review %}
@@ -30,7 +22,6 @@
     <meta name="description" content="{{ cafe.name }} en {{ cafe.location }}: reseñas, fotos y ubicación.">
   {% endif %}
 
-  <!-- JSON-LD: Breadcrumbs -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -43,7 +34,6 @@
   }
   </script>
 
-  <!-- JSON-LD: Cafe / LocalBusiness -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -83,125 +73,105 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 space-y-8">
 
-  <!-- Título -->
   <h1 class="text-3xl font-bold animate-fade-in-up">{{ cafe.name }}</h1>
 
-  <!-- Tarjeta de contacto (sin mostrar plan) -->
   <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-100">
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div class="flex items-start gap-2">
-          <span aria-hidden="true">📍</span>
-          <div>
-            <div class="font-semibold">Dirección</div>
-            <div class="text-sm text-gray-600">{{ cafe.address }}, {{ cafe.location }}</div>
-          </div>
-        </div>
-
-        <div class="flex items-start gap-2">
-          <span aria-hidden="true">☎</span>
-          <div>
-            <div class="font-semibold">Teléfono</div>
-            <div class="text-sm text-gray-600">{{ cafe.phone|default:"—" }}</div>
-          </div>
-        </div>
-
-        <div class="sm:col-span-2 flex flex-wrap gap-3">
-          <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
-            target="_blank" rel="noopener"
-            class="btn btn-primary rounded-xl">
-            📍 Ver en Google Maps
-          </a>
-
-          {# ✅ Botón de reclamar, solo si NO está verificado #}
-          {% if cafe.claim_status != 'verified' %}
-            <a href="{% url 'claim_start' cafe.id %}" class="cta cta-indigo">
-              🏷️ ¿Sos el dueño? Reclamá este local
-            </a>
-          {% endif %}
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="flex items-start gap-2">
+        <span aria-hidden="true">📍</span>
+        <div>
+          <div class="font-semibold">Dirección</div>
+          <div class="text-sm text-gray-600">{{ cafe.address }}, {{ cafe.location }}</div>
         </div>
       </div>
-    </section>
 
-  <!-- Features (badges) -->
+      <div class="flex items-start gap-2">
+        <span aria-hidden="true">☎</span>
+        <div>
+          <div class="font-semibold">Teléfono</div>
+          <div class="text-sm text-gray-600">{{ cafe.phone|default:"—" }}</div>
+        </div>
+      </div>
+
+      <div class="sm:col-span-2 flex flex-wrap gap-3">
+        <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
+           target="_blank" rel="noopener"
+           class="btn btn-primary rounded-xl">
+          📍 Ver en Google Maps
+        </a>
+
+        {% if cafe.claim_status != 'verified' %}
+          <a href="{% url 'claim_start' cafe.id %}" class="cta cta-indigo">
+            🏷️ ¿Sos el dueño? Reclamá este local
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
   <section class="mt-4 animate-fade-in-up animate-delay-150">
     {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
   </section>
 
-  <!-- Fotos -->
   {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
     <div class="animate-fade-in-up animate-delay-200">
       {% include "reviews/includes/cafe_photos.html" with cafe=cafe %}
     </div>
   {% endif %}
 
-{# === Etiquetas más elegidas por los usuarios (escala de azules + emoji) === #}
-{% if top_tags %}
-  <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-250">
-    <h2 class="text-lg font-semibold text-gray-800 mb-3">🧠 Lo que otros destacan</h2>
-
-    <div class="flex flex-wrap gap-2">
-      {% for t in top_tags %}
-        {% if forloop.counter == 1 %}
-          <span class="px-3 py-1.5 rounded-full text-sm md:text-base font-semibold
-                       bg-blue-100 text-blue-900 border border-blue-300 shadow-sm">
-            {{ t|tag_emoji }} {{ t.name }} <span class="opacity-70">({{ t.num }})</span>
-          </span>
-        {% elif forloop.counter == 2 %}
-          <span class="px-3 py-1.5 rounded-full text-sm font-semibold
-                       bg-blue-50 text-blue-900/90 border border-blue-200">
-            {{ t|tag_emoji }} {{ t.name }} <span class="opacity-60">({{ t.num }})</span>
-          </span>
-        {% elif forloop.counter == 3 %}
-          <span class="px-3 py-1.5 rounded-full text-sm font-medium
-                       bg-sky-50 text-sky-900 border border-sky-200">
-            {{ t|tag_emoji }} {{ t.name }} <span class="opacity-60">({{ t.num }})</span>
-          </span>
-        {% elif forloop.counter == 4 %}
-          <span class="px-3 py-1.5 rounded-full text-xs md:text-sm
-                       bg-indigo-50 text-indigo-900/90 border border-indigo-200">
-            {{ t|tag_emoji }} {{ t.name }} <span class="opacity-60">({{ t.num }})</span>
-          </span>
-        {% else %}
-          <span class="px-3 py-1.5 rounded-full text-xs md:text-sm
-                       bg-slate-50 text-slate-700 border border-slate-200">
-            {{ t|tag_emoji }} {{ t.name }} <span class="opacity-60">({{ t.num }})</span>
-          </span>
-        {% endif %}
-      {% endfor %}
-    </div>
-
-    {% if more_tags %}
-      <button id="btn-ver-mas-tags"
-              class="mt-3 text-sm text-blue-600 hover:underline"
-              type="button">Ver más</button>
-
-      <div id="tags-extra" class="hidden mt-2 flex flex-wrap gap-2">
-        {% for t in more_tags %}
-          <span class="px-3 py-1.5 rounded-full text-xs md:text-sm
-                       bg-slate-50 text-slate-700 border border-slate-200">
-            {{ t|tag_emoji }} {{ t.name }} <span class="opacity-60">({{ t.num }})</span>
-          </span>
+  {% if top_tags %}
+    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-250">
+      <h2 class="text-lg font-semibold text-gray-800 mb-3">🧠 Lo que otros destacan</h2>
+      <div class="flex flex-wrap gap-2">
+        {% for t in top_tags %}
+          {% if forloop.counter == 1 %}
+            <span class="px-3 py-1.5 rounded-full text-sm md:text-base font-semibold bg-blue-100 text-blue-900 border border-blue-300 shadow-sm">
+              {{ t|tag_emoji }} {{ t.name }} <span class="opacity-70">({{ t.num }})</span>
+            </span>
+          {% elif forloop.counter == 2 %}
+            <span class="px-3 py-1.5 rounded-full text-sm font-semibold bg-blue-50 text-blue-900/90 border border-blue-200">
+              {{ t|tag_emoji }} {{ t.name }} <span class="opacity-60">({{ t.num }})</span>
+            </span>
+          {% elif forloop.counter == 3 %}
+            <span class="px-3 py-1.5 rounded-full text-sm font-medium bg-sky-50 text-sky-900 border border-sky-200">
+              {{ t|tag_emoji }} {{ t.name }} <span class="opacity-60">({{ t.num }})</span>
+            </span>
+          {% elif forloop.counter == 4 %}
+            <span class="px-3 py-1.5 rounded-full text-xs md:text-sm bg-indigo-50 text-indigo-900/90 border border-indigo-200">
+              {{ t|tag_emoji }} {{ t.name }} <span class="opacity-60">({{ t.num }})</span>
+            </span>
+          {% else %}
+            <span class="px-3 py-1.5 rounded-full text-xs md:text-sm bg-slate-50 text-slate-700 border border-slate-200">
+              {{ t|tag_emoji }} {{ t.name }} <span class="opacity-60">({{ t.num }})</span>
+            </span>
+          {% endif %}
         {% endfor %}
       </div>
 
-      <script>
-        (function () {
-          const btn = document.getElementById('btn-ver-mas-tags');
-          const extra = document.getElementById('tags-extra');
-          if (!btn || !extra) return;
-          btn.addEventListener('click', () => {
-            extra.classList.toggle('hidden');
-            btn.textContent = extra.classList.contains('hidden') ? 'Ver más' : 'Ver menos';
-          });
-        })();
-      </script>
-    {% endif %}
-  </section>
-{% endif %}
+      {% if more_tags %}
+        <button id="btn-ver-mas-tags" class="mt-3 text-sm text-blue-600 hover:underline" type="button">Ver más</button>
+        <div id="tags-extra" class="hidden mt-2 flex flex-wrap gap-2">
+          {% for t in more_tags %}
+            <span class="px-3 py-1.5 rounded-full text-xs md:text-sm bg-slate-50 text-slate-700 border border-slate-200">
+              {{ t|tag_emoji }} {{ t.name }} <span class="opacity-60">({{ t.num }})</span>
+            </span>
+          {% endfor %}
+        </div>
+        <script>
+          (function () {
+            const btn = document.getElementById('btn-ver-mas-tags');
+            const extra = document.getElementById('tags-extra');
+            if (!btn || !extra) return;
+            btn.addEventListener('click', () => {
+              extra.classList.toggle('hidden');
+              btn.textContent = extra.classList.contains('hidden') ? 'Ver más' : 'Ver menos';
+            });
+          })();
+        </script>
+      {% endif %}
+    </section>
+  {% endif %}
 
-
-
-  <!-- Calificación + reseña destacada -->
   <div class="animate-fade-in-up animate-delay-300">
     {% if average_rating %}
       <p class="mb-4"><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
@@ -217,7 +187,6 @@
     {% endif %}
   </div>
 
-  <!-- Reseñas -->
   <h3 id="reviews" class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-400">Reseñas:</h3>
 
   {% cache 600 cafe_reviews_list cafe.id user.id %}
@@ -226,28 +195,22 @@
       {% for review in reviews %}
         {% include "reviews/_review_card.html" with review=review %}
       {% empty %}
-        <p class="text-gray-500 text-sm col-span-full">
-          {{ ui_messages.no_reviews }}
-        </p>
+        <p class="text-gray-500 text-sm col-span-full">{{ ui_messages.no_reviews }}</p>
       {% endfor %}
       {% if reviews|length > 3 %}
-        <div id="fade-reviews"
-             class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+        <div id="fade-reviews" class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
       {% endif %}
     </div>
 
     {% if reviews|length > 3 %}
-      <button
-        onclick="toggleReviews()" id="btn-reviews"
-        class="btn btn-outline btn-sm mt-2 animate-fade-in-up animate-delay-600"
-      >
+      <button onclick="toggleReviews()" id="btn-reviews" class="btn btn-outline btn-sm mt-2 animate-fade-in-up animate-delay-600">
         Ver todas
       </button>
     {% endif %}
   {% endcache %}
+
   {% include "reviews/includes/pagination.html" with page_obj=page_obj anchor="#reviews" %}
 
-  <!-- Favorito -->
   {% if user.is_authenticated %}
     <form method="post" action="{% url 'toggle_favorite' cafe.id %}" class="mb-4 animate-fade-in-up animate-delay-700">{% csrf_token %}
       <button type="submit" class="btn btn-danger rounded-xl">
@@ -256,52 +219,103 @@
     </form>
   {% endif %}
 
-  <!-- Modal Wizard -->
-  <div id="modal-review"
-       class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm hidden z-50 opacity-0 transition-opacity duration-300 flex items-center justify-center">
-    <div id="modal-content"
-         class="bg-white w-full max-w-xl rounded-2xl shadow-xl p-6 relative transform scale-95 transition-all duration-300">
-      <button id="close-modal-btn"
-              class="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl transition">
-        <i class="fas fa-times"></i>
-      </button>
+  {% if radar_values and radar_labels %}
+    <section class="bg-white rounded-xl shadow p-5">
+      <h2 class="text-lg font-semibold mb-3">🧭 Perfil sensorial</h2>
+      <canvas id="sensor-radar" width="400" height="280"></canvas>
+    </section>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const ctx = document.getElementById('sensor-radar');
+        if (!ctx || !window.Chart) return;
+        const data = {
+          labels: {{ radar_labels|safe }},
+          datasets: [{ label: 'Etiquetas por categoría', data: {{ radar_values|safe }}, fill: true, borderWidth: 2, pointRadius: 3 }]
+        };
+        const opt = { responsive: true, scales: { r: { beginAtZero: true, ticks: { precision:0 } } }, plugins: { legend: { display: false } } };
+        new Chart(ctx, { type: 'radar', data, options: opt });
+      });
+    </script>
+  {% endif %}
 
-      <!-- Contenedor pasos -->
-      <div id="wizard-steps" class="transition-transform duration-500 ease-in-out">
-        {% include "reviews/includes/review_wizard_step1.html" %}
-        {% include "reviews/includes/review_wizard_step2.html" with tag_choices=tag_choices %}
-      </div>
-
-      <!-- Mensaje de confirmación -->
-      <div id="thank-you-message" class="hidden text-center py-6">
-        <h2 class="text-2xl font-semibold text-green-600 mb-4">¡Gracias por tu reseña! ☕</h2>
-        <p class="text-gray-700">Tu opinión nos ayuda a mejorar la experiencia de todos.</p>
-      </div>
+  {% if total_reviews %}
+    <div class="cup-float">
+      <span class="cup-emoji {% if positive_pct >= 50 %}fill{% endif %}">☕</span>
+      <span class="text-sm text-gray-700">Positivas: <strong>{{ positive_pct }}%</strong></span>
     </div>
-  </div>
+  {% endif %}
 
-  <!-- Botón flotante -->
-  <button id="open-modal-btn"
-          class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-primary to-blue-700 text-white font-semibold px-5 py-3 rounded-full shadow-lg hover:scale-110 transition-transform duration-300 flex items-center gap-2">
-    <i class="fas fa-pen"></i>
-    <span class="hidden sm:inline">Dejá tu reseña</span>
-  </button>
+  {# === Ubicación + características dinámicas (dentro del bloque content) === #}
+  {% if cafe.latitude and cafe.longitude %}
+    <section aria-labelledby="ubicacion" class="mt-10">
+      <h3 id="ubicacion" class="text-xl font-semibold mb-2">📍 Ubicación</h3>
 
+      {% if cafe.has_wifi or cafe.has_air_conditioning or cafe.serves_alcohol or cafe.is_pet_friendly
+         or cafe.is_vegan_friendly or cafe.has_outdoor_seating or cafe.has_parking or cafe.is_accessible
+         or cafe.has_vegetarian_options or cafe.has_books_or_games or cafe.serves_breakfast
+         or cafe.has_gluten_free or cafe.has_specialty_coffee or cafe.has_artisanal_pastries %}
+        <div class="mb-4">
+          {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
+        </div>
+      {% endif %}
+
+      <button type="button" id="btn-toggle-map" onclick="toggleMap(this)"
+              class="mb-4 text-sm text-blue-600 hover:underline focus:outline-none">Mostrar mapa</button>
+
+      <div id="map-container" class="hidden">
+        <div id="map"
+             class="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px] rounded-xl overflow-hidden shadow-lg mb-10"></div>
+      </div>
+    </section>
+
+    <script>
+      function toggleMap(btn) {
+        const mapContainer = document.getElementById('map-container');
+        const mapDiv = document.getElementById('map');
+        if (!mapContainer || !mapDiv) return;
+
+        const willShow = mapContainer.classList.contains('hidden');
+
+        if (willShow) {
+          mapContainer.classList.remove('hidden');
+          btn.textContent = 'Ocultar mapa';
+          setTimeout(() => {
+            if (typeof L === 'undefined') return;
+            if (!mapContainer.dataset.mapLoaded) {
+              const lat = parseFloat('{{ cafe.latitude|escapejs }}');
+              const lon = parseFloat('{{ cafe.longitude|escapejs }}');
+              window._cafeMap = L.map('map').setView([lat, lon], 15);
+              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+              }).addTo(window._cafeMap);
+              L.marker([lat, lon]).addTo(window._cafeMap)
+                .bindPopup(`<strong>{{ cafe.name|escapejs }}</strong><br>{{ cafe.address|default:'Sin dirección'|escapejs }}`)
+                .openPopup();
+              mapContainer.dataset.mapLoaded = '1';
+            } else if (window._cafeMap && typeof window._cafeMap.invalidateSize === 'function') {
+              window._cafeMap.invalidateSize();
+            }
+          }, 50);
+        } else {
+          mapContainer.classList.add('hidden');
+          btn.textContent = 'Mostrar mapa';
+        }
+      }
+    </script>
+  {% endif %}
 </div>
 {% endblock %}
 
 {% block scripts %}
   {{ block.super }}
   <script>
-  // ⭐ Estrellas de calificación (si usás el widget de estrellas en el wizard)
+  // ⭐ Estrellas (si usás el widget)
   document.addEventListener("DOMContentLoaded", () => {
     const stars = document.querySelectorAll('#rating-stars label');
     const radios = document.querySelectorAll('#rating-stars input');
     const ratingLabel = document.getElementById('rating-label');
     if (!stars.length || !radios.length || !ratingLabel) return;
-
     const labels = { 5: "Excelente", 4: "Muy bueno", 3: "Bueno", 2: "Regular", 1: "Malo" };
-
     function updateRatingVisual() {
       const selected = Array.from(radios).find(r => r.checked)?.value;
       stars.forEach(star => {
@@ -324,7 +338,6 @@
     const btn = document.getElementById("btn-reviews");
     const fade = document.getElementById("fade-reviews");
     if (!container || !btn) return;
-
     const collapsed = container.classList.contains("max-h-[1056px]");
     container.classList.toggle("max-h-[1056px]", !collapsed);
     container.classList.toggle("overflow-hidden", !collapsed);
@@ -332,13 +345,9 @@
     btn.textContent = collapsed ? "Ver todas" : "Ver menos";
   }
 
-  // “Ver más / Ver menos” dentro de cada tarjeta de reseña (un único bloque)
+  // “Ver más / Ver menos” por tarjeta
   document.addEventListener('DOMContentLoaded', () => {
-    // Si no definiste la variable en tu CSS, por defecto usamos 140px
-    const MAX = parseInt(
-      getComputedStyle(document.documentElement).getPropertyValue('--review-collapsed')
-    ) || 140;
-
+    const MAX = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--review-collapsed')) || 140;
     document.querySelectorAll('.review-card').forEach(card => {
       const body = card.querySelector('.review-body');
       const text = card.querySelector('.review-text');
@@ -370,91 +379,48 @@
     });
   });
 
-  // Modal + Wizard
+  // Likes AJAX + rebote ❤️
   document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("modal-review");
-    const modalContent = document.getElementById("modal-content");
-    const openBtn = document.getElementById("open-modal-btn");
-    const closeBtn = document.getElementById("close-modal-btn");
-    const thankYouMessage = document.getElementById("thank-you-message");
-    const wizardStepsContainer = document.getElementById("wizard-steps");
+    const getCSRFFrom = (form) => form.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+    document.querySelectorAll(".like-form").forEach(form => {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const rid = form.dataset.review;
+        const csrf = getCSRFFrom(form);
+        try {
+          const resp = await fetch(form.action, {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest", "X-CSRFToken": csrf },
+            body: new FormData(form),
+            credentials: "same-origin"
+          });
+          const data = await resp.json();
+          if (!data.ok) return;
 
-    if (!modal || !modalContent || !openBtn || !closeBtn || !wizardStepsContainer || !thankYouMessage) return;
+          const btn = form.querySelector("button");
+          const countEl = document.getElementById(`likes-count-${rid}`);
+          const iconEl  = document.getElementById(`like-icon-${rid}`);
 
-    function openModal() {
-      modal.setAttribute("aria-hidden", "false");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-      setTimeout(() => {
-        modal.classList.replace("opacity-0", "opacity-100");
-        modalContent.classList.replace("scale-95", "scale-100");
-        modalContent.focus();
-      }, 10);
-    }
-    function closeModal() {
-      modal.setAttribute("aria-hidden", "true");
-      modal.classList.replace("opacity-100", "opacity-0");
-      modalContent.classList.replace("scale-100", "scale-95");
-      setTimeout(() => {
-        modal.classList.remove("flex");
-        modal.classList.add("hidden");
-        wizardStepsContainer.classList.remove("hidden");
-        thankYouMessage.classList.add("hidden");
-      }, 300);
-    }
+          countEl.textContent = data.count;
+          if (data.liked) {
+            btn.classList.remove("btn-outline");
+            btn.classList.add("btn-success");
+            btn.setAttribute("aria-pressed", "true");
+            iconEl.textContent = "❤️";
+          } else {
+            btn.classList.remove("btn-success");
+            btn.classList.add("btn-outline");
+            btn.setAttribute("aria-pressed", "false");
+            iconEl.textContent = "🤍";
+          }
 
-    openBtn.addEventListener("click", openModal);
-    closeBtn.addEventListener("click", closeModal);
-    modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
-  });
-
-document.addEventListener("DOMContentLoaded", () => {
-  const getCSRFFrom = (form) => form.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
-
-  document.querySelectorAll(".like-form").forEach(form => {
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const rid = form.dataset.review;
-      const csrf = getCSRFFrom(form);
-
-      try {
-        const resp = await fetch(form.action, {
-          method: "POST",
-          headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "X-CSRFToken": csrf
-          },
-          body: new FormData(form),
-          credentials: "same-origin"
-        });
-
-        const data = await resp.json();
-        if (!data.ok) return;
-
-        const btn = form.querySelector("button");
-        const countEl = document.getElementById(`likes-count-${rid}`);
-        const iconEl  = document.getElementById(`like-icon-${rid}`);
-
-        countEl.textContent = data.count;
-        if (data.liked) {
-          btn.classList.remove("btn-outline");
-          btn.classList.add("btn-success");
-          btn.setAttribute("aria-pressed", "true");
-          iconEl.textContent = "❤️";
-        } else {
-          btn.classList.remove("btn-success");
-          btn.classList.add("btn-outline");
-          btn.setAttribute("aria-pressed", "false");
-          iconEl.textContent = "🤍";
+          if (window.bounceLike) window.bounceLike(btn); // 👈 rebote visual
+        } catch (err) {
+          console.error(err);
         }
-      } catch (err) {
-        console.error(err);
-      }
+      });
     });
   });
-});
-
   </script>
-
-
 {% endblock %}
+

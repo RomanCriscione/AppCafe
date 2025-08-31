@@ -2,9 +2,8 @@
 <article
   role="group"
   aria-labelledby="cafe-{{ cafe.id }}-title"
-  class="card recommended-card group animate-fade-in-up {% cycle '' 'animate-delay-100' 'animate-delay-200' 'animate-delay-300' %} flex flex-col h-full relative"
+  class="card cafe-card recommended-card group animate-fade-in-up {% cycle '' 'animate-delay-100' 'animate-delay-200' 'animate-delay-300' %} flex flex-col h-full relative"
 >
-  {# Favoritos #}
   {% if user.is_authenticated %}
     <form method="POST" action="{% url 'toggle_favorite' cafe.id %}" class="absolute top-3 right-3 z-10">
       {% csrf_token %}
@@ -24,19 +23,12 @@
     </form>
   {% endif %}
 
-  {# Media #}
   <div class="card-media relative">
     {% if cafe.photo1 %}
       <a href="{% url 'cafe_detail' cafe.id %}">
-        <img
-          src="{{ cafe.photo1.url }}"
-          alt="Foto de {{ cafe.name|default:'café sin nombre' }}"
-          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-          decoding="async"
-          width="800"
-          height="600"
-        >
+        <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name|default:'café sin nombre' }}"
+             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+             loading="lazy" decoding="async" width="800" height="600">
       </a>
     {% else %}
       <a href="{% url 'cafe_detail' cafe.id %}" class="block w-full h-full bg-gray-100 flex items-center justify-center text-gray-300 text-5xl" aria-hidden="true">
@@ -46,39 +38,21 @@
     <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
   </div>
 
-  {# Contenido #}
   <div class="card-body flex flex-col gap-2 flex-1">
-    <h2 id="cafe-{{ cafe.id }}-title" class="card-title line-clamp-2">
-      {{ cafe.name|default:"Nombre no disponible" }}
-    </h2>
-
-    {% if cafe.location %}
-      <p class="card-sub line-clamp-1">({{ cafe.location }})</p>
-    {% endif %}
-
-    {% if cafe.address %}
-      <p class="text-sm text-gray-600 line-clamp-1">📍 {{ cafe.address }}</p>
-    {% endif %}
-
-    <p class="text-accent text-sm mt-1">
-      ☕ {{ cafe.average_rating|default_if_none:"–"|floatformat:1 }}/5
-    </p>
+    <h2 id="cafe-{{ cafe.id }}-title" class="card-title line-clamp-2">{{ cafe.name|default:"Nombre no disponible" }}</h2>
+    {% if cafe.location %}<p class="card-sub line-clamp-1">({{ cafe.location }})</p>{% endif %}
+    {% if cafe.address %}<p class="text-sm text-gray-600 line-clamp-1">📍 {{ cafe.address }}</p>{% endif %}
+    <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|default_if_none:"–"|floatformat:1 }}/5</p>
 
     <div class="card-actions mt-2">
-      <a href="{% url 'cafe_detail' cafe.id %}" class="btn btn-outline rounded-xl w-full">
-        Ver detalle
-      </a>
-      <button
-        type="button"
-        class="btn btn-secondary rounded-xl"
-        aria-label="Compartir {{ cafe.name }}"
-        title="Compartir {{ cafe.name }}"
+      <a href="{% url 'cafe_detail' cafe.id %}" class="btn btn-outline rounded-xl w-full">Ver detalle</a>
+      <button type="button" class="btn btn-secondary rounded-xl"
+        aria-label="Compartir {{ cafe.name }}" title="Compartir {{ cafe.name }}"
         onclick="(async ()=>{try{
           const url='{{ request.scheme }}://{{ request.get_host }}{% url 'cafe_detail' cafe.id %}';
           if(navigator.share){ await navigator.share({ title:'{{ cafe.name|escapejs }}', url }); }
           else { await navigator.clipboard.writeText(url); alert('Link copiado'); }
-        }catch(e){}})();"
-      >
+        }catch(e){}})();">
         <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
       </button>
     </div>

@@ -1,39 +1,32 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Avg, Count, F, Q
+from django.db.models import Avg, Count, F, Q, Sum
 from django.views.generic import ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.core.exceptions import PermissionDenied
 from collections import defaultdict
-from .models import Review, Cafe, ReviewLike, ReviewReport
-from .forms import ReviewForm, CafeForm, ReviewReportForm
-import os, json, math
 from django.core.paginator import Paginator
-from .models import Tag, CafeStat  
-from django.http import JsonResponse
-from math import radians, cos, sin, asin, sqrt
+from django.http import JsonResponse, HttpResponseForbidden
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import HttpResponseForbidden
-from reviews.utils.geo import haversine_distance
-from statistics import mean
-from reviews.utils.tags import get_tags_grouped_by_cafe
-from core.messages import MESSAGES
-from django.urls import reverse
 from django.templatetags.static import static
 from django.utils import timezone
 from datetime import timedelta
-from django.db.models import Sum
 from django.views.decorators.http import require_POST
 from django.conf import settings
+import os, json
 
-# ✅ imports para invalidar el caché de fragmentos
+from .models import Review, Cafe, ReviewLike, ReviewReport, Tag, CafeStat
+from .forms import ReviewForm, CafeForm, ReviewReportForm
+from reviews.utils.geo import haversine_distance
+from core.messages import MESSAGES
+
+# ✅ cache fragment
 from django.core.cache.utils import make_template_fragment_key
 from django.core.cache import cache
 
 
-# Listar reseñas agrupadas por zona
 class ReviewListView(ListView):
     model = Review
     template_name = 'reviews/review_list.html'
@@ -47,26 +40,23 @@ class ReviewListView(ListView):
         context = super().get_context_data(**kwargs)
         request = self.request
 
-        # Zonas y orden
         context['zonas_disponibles'] = (
             Cafe.objects.values_list('location', flat=True)
-            .distinct()
-            .order_by('location')
+            .distinct().order_by('location')
         )
         context['zona_seleccionada'] = request.GET.get('zona')
         context['orden_actual'] = request.GET.get('orden')
 
-        # ✅ Booleanos (incluye serves_breakfast)
         boolean_keys = [
             'has_wifi', 'has_air_conditioning', 'serves_alcohol', 'is_pet_friendly',
             'is_vegan_friendly', 'has_outdoor_seating', 'has_parking', 'is_accessible',
-            'has_vegetarian_options', 'has_books_or_games', 'serves_breakfast', "accepts_cards", "gluten_free_options", "has_baby_changing",
+            'has_vegetarian_options', 'has_books_or_games', 'serves_breakfast',
+            "accepts_cards", "gluten_free_options", "has_baby_changing",
             "has_power_outlets", "laptop_friendly", "quiet_space",
             "specialty_coffee", "brunch", "accepts_reservations",
         ]
         context['campos_activos'] = {k: (request.GET.get(k) == 'on') for k in boolean_keys}
 
-        # Mostrar botón “Ver todos”
         context['mostrar_boton_reset'] = any([
             request.GET.get('zona'),
             request.GET.get('orden'),
@@ -75,7 +65,6 @@ class ReviewListView(ListView):
             *[request.GET.get(k) for k in boolean_keys],
         ])
 
-        # Favoritos del usuario
         if request.user.is_authenticated:
             context['favoritos_ids'] = set(
                 request.user.favorite_cafes.values_list('id', flat=True)
@@ -83,12 +72,9 @@ class ReviewListView(ListView):
         else:
             context['favoritos_ids'] = set()
 
-        # Datos para el mapa (Leaflet) — consulta directa, liviana
         cafes = (
-            Cafe.objects
-                .only('id', 'name', 'latitude', 'longitude')
-                .exclude(latitude__isnull=True)
-                .exclude(longitude__isnull=True)
+            Cafe.objects.only('id', 'name', 'latitude', 'longitude')
+            .exclude(latitude__isnull=True).exclude(longitude__isnull=True)
         )
         cafes_data = [
             {
@@ -109,7 +95,7 @@ class CafeListView(ListView):
     model = Cafe
     template_name = 'reviews/cafe_list.html'
     context_object_name = 'cafes'
-    paginate_by = 12  # ✅ paginación
+    paginate_by = 12
 
     def get_queryset(self):
         request = self.request
@@ -139,7 +125,7 @@ class CafeListView(ListView):
             "specialty_coffee": request.GET.get("specialty_coffee") == "on",
             "brunch": request.GET.get("brunch") == "on",
             "accepts_reservations": request.GET.get("accepts_reservations") == "on",
-            }
+        }
 
         cafes = Cafe.objects.all()
 
@@ -209,8 +195,6 @@ class CafeListView(ListView):
             except ValueError:
                 pass
 
-        # ⛔️ OJO: ListView paginará si cafes es QuerySet; si lo convertiste a list() (algoritmo),
-        # igual funciona, pero la paginación es en memoria. Aceptable por ahora.
         self._cafes_finales = cafes
         return cafes
 
@@ -220,8 +204,7 @@ class CafeListView(ListView):
 
         context['zonas_disponibles'] = (
             Cafe.objects.values_list('location', flat=True)
-            .distinct()
-            .order_by('location')
+            .distinct().order_by('location')
         )
         context['zona_seleccionada'] = request.GET.get('zona')
         context['orden_actual'] = request.GET.get('orden')
@@ -229,7 +212,8 @@ class CafeListView(ListView):
         boolean_keys = [
             'has_wifi', 'has_air_conditioning', 'serves_alcohol', 'is_pet_friendly',
             'is_vegan_friendly', 'has_outdoor_seating', 'has_parking', 'is_accessible',
-            'has_vegetarian_options', 'has_books_or_games', "accepts_cards", "gluten_free_options", "has_baby_changing",
+            'has_vegetarian_options', 'has_books_or_games',
+            "accepts_cards", "gluten_free_options", "has_baby_changing",
             "has_power_outlets", "laptop_friendly", "quiet_space",
             "specialty_coffee", "brunch", "accepts_reservations",
         ]
@@ -265,13 +249,9 @@ class CafeListView(ListView):
         return context
 
 
-
-
-# Detalle de cafetería + dejar o editar reseña
 def cafe_detail(request, cafe_id):
     cafe = get_object_or_404(Cafe, id=cafe_id)
 
-    # === Reseñas con conteo de likes ===
     reviews_qs = (
         cafe.reviews
         .select_related("user")
@@ -280,29 +260,41 @@ def cafe_detail(request, cafe_id):
         .order_by("-created_at")
     )
 
-    # Totales y promedio (DB-side)
     total_reviews = reviews_qs.count()
     agg = reviews_qs.aggregate(avg=Avg("rating"))
     average_rating = round(agg["avg"], 1) if agg["avg"] is not None else None
 
-    # “Mejor” reseña (por rating luego fecha)
     best_review = reviews_qs.order_by("-rating", "-created_at").first()
 
-    # Paginación
-    paginator = Paginator(reviews_qs, 8)  # 8 por página
+    # taza: % de reseñas positivas (>=4)
+    positive = reviews_qs.filter(rating__gte=4).count()
+    positive_pct = int((positive / total_reviews) * 100) if total_reviews else 0
+
+    # radar: sumar por categoría de Tag
+    sensor_rows = (
+        Tag.objects
+        .filter(reviews__cafe=cafe)
+        .values("category")
+        .annotate(count=Count("reviews", filter=Q(reviews__cafe=cafe)))
+        .order_by("category")
+    )
+    SENSOR_AXES = ["sensorial", "emocional", "estética", "ambiente", "comida", "bebida", "servicio"]
+    sensor_dict = {row["category"]: row["count"] for row in sensor_rows}
+    radar_labels = SENSOR_AXES
+    radar_values = [sensor_dict.get(k, 0) for k in SENSOR_AXES]
+
+    paginator = Paginator(reviews_qs, 8)
     page_obj = paginator.get_page(request.GET.get("page") or 1)
 
-    # Reseñas para JSON-LD (siempre primeras 5 del total)
     schema_reviews = list(reviews_qs[:5])
 
-    # Guardar "visto recientemente"
     viewed = request.session.get("recently_viewed", [])
     if cafe.id in viewed:
         viewed.remove(cafe.id)
     viewed.insert(0, cafe.id)
     request.session["recently_viewed"] = viewed[:5]
 
-    # ===== Tracking de visita (1 vez por día por sesión) =====
+    # tracking de visita (1 vez por día por sesión)
     try:
         today = timezone.localdate()
         session_key = f"viewed_cafe_{cafe.id}_{today.isoformat()}"
@@ -312,15 +304,13 @@ def cafe_detail(request, cafe_id):
             CafeStat.objects.filter(pk=stat.pk).update(views=F('views') + 1)
             request.session[session_key] = True
     except Exception:
-        pass  # nunca romper por analíticas
+        pass
 
-    # Agrupar TODAS las etiquetas por categoría (para wizard)
     all_tags = Tag.objects.all().order_by("category", "name")
     tag_groups = defaultdict(list)
     for tag in all_tags:
         tag_groups[tag.category].append(tag)
 
-    # Etiquetas sensoriales ordenadas por uso
     tag_counts_qs = (
         Tag.objects
         .filter(reviews__cafe=cafe)
@@ -330,7 +320,6 @@ def cafe_detail(request, cafe_id):
     top_tags = list(tag_counts_qs[:5])
     more_tags = list(tag_counts_qs[5:])
 
-    # Recomendados por calificación
     recommended_cafes = (
         Cafe.objects.annotate(average_rating=Avg("reviews__rating"))
         .filter(average_rating__isnull=False)
@@ -338,10 +327,8 @@ def cafe_detail(request, cafe_id):
         .order_by("-average_rating")[:4]
     )
 
-    # URLs absolutas para SEO/OG
     full_page_url = request.build_absolute_uri(reverse("cafe_detail", args=[cafe.id]))
 
-    # Mejor imagen disponible o fallback
     if getattr(cafe, "photo1", None):
         og_image_path = cafe.photo1.url
     elif getattr(cafe, "photo2", None):
@@ -353,7 +340,6 @@ def cafe_detail(request, cafe_id):
 
     full_image_url = request.build_absolute_uri(og_image_path)
 
-    # === IDs de reseñas que el usuario actual likeó ===
     liked_ids = set()
     if request.user.is_authenticated:
         liked_ids = set(
@@ -362,7 +348,6 @@ def cafe_detail(request, cafe_id):
             .values_list("review_id", flat=True)
         )
 
-    # Form
     if request.user.is_authenticated and Review.objects.filter(user=request.user, cafe=cafe).exists():
         form = ReviewForm(instance=Review.objects.get(user=request.user, cafe=cafe))
     else:
@@ -370,27 +355,24 @@ def cafe_detail(request, cafe_id):
 
     return render(request, "reviews/cafe_detail.html", {
         "cafe": cafe,
-        # 👇 Para la UI: usá page_obj.object_list + paginador
         "reviews": page_obj.object_list,
         "page_obj": page_obj,
-
-        # Métricas/SEO
         "total_reviews": total_reviews,
         "average_rating": average_rating,
         "best_review": best_review,
+        "positive_pct": positive_pct,
+        "radar_labels": radar_labels,
+        "radar_values": radar_values,
         "schema_reviews": schema_reviews,
         "full_page_url": full_page_url,
         "full_image_url": full_image_url,
-
-        # Wizard / tags / recomendados
         "recommended_cafes": recommended_cafes,
         "tag_choices": dict(tag_groups),
         "top_tags": top_tags,
         "more_tags": more_tags,
-
-        # Likes
         "liked_ids": liked_ids,
     })
+
 
 @login_required
 def create_review(request, cafe_id):
@@ -404,12 +386,10 @@ def create_review(request, cafe_id):
             review.user = request.user
             review.save()
 
-            # Guardar etiquetas seleccionadas (tags desde checkboxes)
             selected_tag_ids = request.POST.getlist("tags")
             tags = Tag.objects.filter(id__in=selected_tag_ids)
             review.tags.set(tags)
 
-            # 🧹 invalidar caché del listado de reseñas
             key = make_template_fragment_key("cafe_reviews_list", [cafe.id])
             cache.delete(key)
 
@@ -420,7 +400,6 @@ def create_review(request, cafe_id):
     else:
         form = ReviewForm()
 
-    # Agrupar etiquetas por categoría → mismo formato que cafe_detail
     all_tags = Tag.objects.all().order_by("category", "name")
     tag_groups = defaultdict(list)
     for tag in all_tags:
@@ -429,16 +408,16 @@ def create_review(request, cafe_id):
     context = {
         "form": form,
         "cafe": cafe,
-        "tag_choices": dict(tag_groups),  # <- clave usada en review_wizard_step2.html
+        "tag_choices": dict(tag_groups),
     }
 
     return render(request, "reviews/create_review.html", context)
+
 
 @login_required
 def edit_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
 
-    # Solo el autor (o staff) puede editar
     if request.user != review.user and not request.user.is_staff:
         raise PermissionDenied("No podés editar esta reseña.")
 
@@ -446,14 +425,11 @@ def edit_review(request, review_id):
         form = ReviewForm(request.POST, instance=review)
         if form.is_valid():
             form.save()
-
-            # Si usás checkboxes fuera del M2M del form:
             if "tags" in request.POST:
                 selected_tag_ids = request.POST.getlist("tags")
                 tags = Tag.objects.filter(id__in=selected_tag_ids)
                 review.tags.set(tags)
 
-            # 🧹 invalidar caché del listado de reseñas
             key = make_template_fragment_key("cafe_reviews_list", [review.cafe_id])
             cache.delete(key)
 
@@ -464,7 +440,6 @@ def edit_review(request, review_id):
     else:
         form = ReviewForm(instance=review)
 
-    # Necesitamos las categorías de tags como en create_review
     all_tags = Tag.objects.all().order_by("category", "name")
     tag_groups = defaultdict(list)
     for tag in all_tags:
@@ -472,7 +447,7 @@ def edit_review(request, review_id):
 
     return render(
         request,
-        "reviews/create_review.html",  # reutilizamos el mismo template
+        "reviews/create_review.html",
         {"form": form, "cafe": review.cafe, "tag_choices": dict(tag_groups), "editing": True},
     )
 
@@ -481,7 +456,6 @@ def edit_review(request, review_id):
 def delete_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
 
-    # Solo el autor (o staff) puede eliminar
     if request.user != review.user and not request.user.is_staff:
         raise PermissionDenied("No podés eliminar esta reseña.")
 
@@ -489,19 +463,14 @@ def delete_review(request, review_id):
 
     if request.method == "POST":
         review.delete()
-
-        # 🧹 invalidar caché del listado de reseñas
         key = make_template_fragment_key("cafe_reviews_list", [cafe_id])
         cache.delete(key)
-
         messages.success(request, "Reseña eliminada.")
         return redirect("cafe_detail", cafe_id=cafe_id)
 
-    # Pantalla simple de confirmación
     return render(request, "reviews/delete_review.html", {"review": review, "cafe": review.cafe})
 
 
-# Responder a una reseña (dueño)
 @login_required
 def reply_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
@@ -512,15 +481,12 @@ def reply_review(request, review_id):
     if request.method == 'POST':
         review.owner_reply = request.POST.get('reply')
         review.save()
-
-        # 🧹 invalidar caché del listado de reseñas
         key = make_template_fragment_key("cafe_reviews_list", [review.cafe_id])
         cache.delete(key)
-
         messages.success(request, "Respuesta guardada con éxito.")
         return redirect('cafe_detail', cafe_id=review.cafe.id)
 
-# Crear reseña
+
 class ReviewCreateView(LoginRequiredMixin, CreateView):
     model = Review
     form_class = ReviewForm
@@ -529,41 +495,28 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from reviews.models import Tag
-        from collections import defaultdict
-
-        # Agrupar etiquetas por categoría
         tag_choices = defaultdict(list)
         for tag in Tag.objects.all():
             tag_choices[tag.category].append(tag)
-
         context['tag_choices'] = dict(tag_choices)
         return context
 
     def form_valid(self, form):
         form.instance.user = self.request.user
         response = super().form_valid(form)
-
-        # Asignar las etiquetas desde el formulario
         tags = form.cleaned_data.get('tags')
         if tags:
             self.object.tags.set(tags)
-
-        # 🧹 invalidar caché del listado de reseñas (si tiene café asociado)
         if getattr(self.object, "cafe_id", None):
             key = make_template_fragment_key("cafe_reviews_list", [self.object.cafe_id])
             cache.delete(key)
-
         return response
 
 
-# Panel del dueño de cafeterías
 @login_required
 def owner_dashboard(request):
     owner = request.user
     cafes = Cafe.objects.filter(owner=owner).prefetch_related('reviews__tags')
-
-    # Chequear si no tiene cafés
     no_cafes = not cafes.exists()
 
     for cafe in cafes:
@@ -577,17 +530,12 @@ def owner_dashboard(request):
                 'name': tag['name'],
                 'count': tag['count'],
             })
-
         cafe.tags_summary = grouped_tags
 
-    context = {
-        'cafes': cafes,
-        'no_cafes': no_cafes  # <-- AGREGADO
-    }
+    context = {'cafes': cafes, 'no_cafes': no_cafes}
     return render(request, 'reviews/owner_dashboard.html', context)
 
 
-# Vista nueva: reseñas agrupadas por cafetería del dueño
 @login_required
 def owner_reviews(request):
     if not request.user.is_owner:
@@ -608,7 +556,7 @@ def owner_reviews(request):
         'reseñas_por_cafe': reseñas_por_cafe
     })
 
-# Crear cafetería
+
 class CreateCafeView(LoginRequiredMixin, CreateView):
     model = Cafe
     form_class = CafeForm
@@ -626,7 +574,7 @@ class CreateCafeView(LoginRequiredMixin, CreateView):
         messages.success(self.request, MESSAGES["cafe_added"])
         return response
 
-# Editar cafetería
+
 @login_required
 def edit_cafe(request, cafe_id):
     cafe = get_object_or_404(Cafe, id=cafe_id)
@@ -645,7 +593,7 @@ def edit_cafe(request, cafe_id):
 
     return render(request, 'reviews/edit_cafe.html', {'form': form, 'cafe': cafe})
 
-# Eliminar cafetería y sus fotos
+
 @login_required
 def delete_cafe(request, cafe_id):
     cafe = get_object_or_404(Cafe, id=cafe_id, owner=request.user)
@@ -654,15 +602,17 @@ def delete_cafe(request, cafe_id):
         fotos = [cafe.photo1, cafe.photo2, cafe.photo3]
         cafe.delete()
         for foto in fotos:
-            if foto and os.path.isfile(foto.path):
-                os.remove(foto.path)
-
+            try:
+                if foto and os.path.isfile(foto.path):
+                    os.remove(foto.path)
+            except Exception:
+                pass
         messages.success(request, "Cafetería eliminada junto con sus fotos y reseñas.")
         return redirect('owner_dashboard')
 
     return render(request, 'reviews/delete_cafe.html', {'cafe': cafe})
 
-# Subir fotos
+
 @login_required
 def upload_photos(request, cafe_id):
     cafe = get_object_or_404(Cafe, pk=cafe_id)
@@ -676,10 +626,7 @@ def upload_photos(request, cafe_id):
     else:
         form = CafeForm(instance=cafe)
 
-    return render(request, 'reviews/upload_photos.html', {
-        'form': form,
-        'cafe': cafe
-    })
+    return render(request, 'reviews/upload_photos.html', {'form': form, 'cafe': cafe})
 
 
 @login_required
@@ -704,15 +651,12 @@ def favorite_cafes(request):
     else:
         cafes = cafes.order_by('name')
 
-    # Agregamos la última reseña a cada café
     for cafe in cafes:
         cafe.last_review = cafe.reviews.order_by('-created_at').first()
 
-    # Para dropdown de zonas
     zonas_disponibles = Cafe.objects.filter(favorites=request.user).values_list('location', flat=True).distinct()
 
-    # 🔄 Paginación
-    paginator = Paginator(cafes, 6)  # 6 cafés por página
+    paginator = Paginator(cafes, 6)
     pagina = request.GET.get('page')
     cafes_paginados = paginator.get_page(pagina)
 
@@ -738,7 +682,6 @@ def toggle_favorite(request, cafe_id):
     return redirect(request.META.get('HTTP_REFERER', 'cafe_list'))
 
 
-#Editar comentarios del dueño del café
 @login_required
 def edit_owner_reply(request, review_id):
     review = get_object_or_404(Review, id=review_id)
@@ -749,14 +692,12 @@ def edit_owner_reply(request, review_id):
     if request.method == 'POST':
         review.owner_reply = request.POST.get('reply')
         review.save()
-
-        # 🧹 invalidar caché del listado de reseñas
         key = make_template_fragment_key("cafe_reviews_list", [review.cafe_id])
         cache.delete(key)
-
         messages.success(request, "Respuesta del dueño actualizada correctamente.")
 
     return redirect('owner_reviews')
+
 
 def nearby_cafes(request):
     try:
@@ -766,7 +707,7 @@ def nearby_cafes(request):
         return JsonResponse({'error': 'Coordenadas inválidas'}, status=400)
 
     def haversine(lat1, lon1, lat2, lon2):
-        # Radio de la Tierra en km
+        from math import radians, sin, cos, asin, sqrt
         R = 6371.0
         dlat = radians(lat2 - lat1)
         dlon = radians(lon2 - lon1)
@@ -796,16 +737,12 @@ def nearby_cafes(request):
 
     return JsonResponse(data, safe=False)
 
-# Función reutilizable para asignar plan de visibilidad
+
 def asignar_plan(cafe, nivel: int):
-    """
-    Hoy sólo permitimos el plan gratuito (0).
-    """
     if nivel == 0:
         cafe.visibility_level = 0
         cafe.save(update_fields=["visibility_level"])
         return True
-    # Nada que actualizar para planes pagos (desactivados por ahora)
     return False
 
 
@@ -828,16 +765,15 @@ def cambiar_visibilidad(request, cafe_id):
             messages.success(request, "Se activó el plan gratuito.")
             return redirect('owner_dashboard')
 
-        # Nivel pago → checkout
         link = getattr(settings, "PAYMENT_LINKS", {}).get(nuevo_nivel)
         if not getattr(settings, "PLAN_UPGRADES_ENABLED", False) or not link:
             messages.info(request, "Los planes pagos todavía no están disponibles. Te avisamos pronto.")
             return redirect('planes')
 
-        # Mandamos a la pasarela
         return redirect(f"{link}?cafe={cafe.id}&user={request.user.id}")
 
     return redirect('owner_dashboard')
+
 
 @login_required
 def plan_checkout_redirect(request, cafe_id, nivel):
@@ -881,7 +817,6 @@ def planes_view(request):
             messages.success(request, "Plan gratuito activado.")
             return redirect('planes')
 
-        # Cualquier pago → a checkout / o “pronto”
         return redirect('plan_checkout_redirect', cafe_id=cafe.id, nivel=nivel)
 
     cafes = Cafe.objects.filter(owner=request.user)
@@ -892,26 +827,13 @@ def planes_view(request):
 
 
 def mapa_cafes(request):
-    # Sólo con coordenadas
     cafes_qs = Cafe.objects.exclude(latitude__isnull=True, longitude__isnull=True)
 
-    # Incluir todos los flags que usás en el front
     BOOL_FIELDS = [
-        "is_pet_friendly",
-        "has_wifi",
-        "has_outdoor_seating",
-        "is_vegan_friendly",
-        "has_parking",
-        "is_accessible",
-        "has_vegetarian_options",
-        "serves_breakfast",
-        "serves_alcohol",
-        "has_books_or_games",
-        "has_air_conditioning",
-        # extras opcionales (dejálos si existen en tu modelo)
-        "has_gluten_free",
-        "has_specialty_coffee",
-        "has_artisanal_pastries",
+        "is_pet_friendly", "has_wifi", "has_outdoor_seating", "is_vegan_friendly",
+        "has_parking", "is_accessible", "has_vegetarian_options", "serves_breakfast",
+        "serves_alcohol", "has_books_or_games", "has_air_conditioning",
+        "has_gluten_free", "has_specialty_coffee", "has_artisanal_pastries",
     ]
 
     cafes_data = []
@@ -925,7 +847,6 @@ def mapa_cafes(request):
             "location": c.location,
             "url": reverse("cafe_detail", args=[c.id]),
         }
-        # adjuntar booleanos (si el atributo no existe, False)
         for f in BOOL_FIELDS:
             item[f] = bool(getattr(c, f, False))
         cafes_data.append(item)
@@ -936,12 +857,12 @@ def mapa_cafes(request):
         {"cafes_json": json.dumps(cafes_data, cls=DjangoJSONEncoder)},
     )
 
+
 @login_required
 def analytics_dashboard(request):
     if not request.user.is_owner:
         raise PermissionDenied("Solo los dueños pueden ver analíticas.")
 
-    # Elegimos un café del dueño (o el pasado por ?cafe=)
     cafes_owner = Cafe.objects.filter(owner=request.user).order_by("name")
     if not cafes_owner.exists():
         return render(request, "reviews/analytics_dashboard.html", {
@@ -956,15 +877,12 @@ def analytics_dashboard(request):
     else:
         cafe = cafes_owner.first()
 
-    # Totales
-    from .models import CafeStat  # por si aún no importaste arriba
     totals = {
         "views": CafeStat.objects.filter(cafe=cafe).aggregate(s=Sum("views"))["s"] or 0,
         "favorites": cafe.favorites.count(),
         "reviews": cafe.reviews.count(),
     }
 
-    # Serie últimos 30 días (solo vistas, que es lo que registramos día a día)
     today = timezone.localdate()
     start = today - timedelta(days=29)
     qs = (
@@ -979,7 +897,6 @@ def analytics_dashboard(request):
         labels.append(d.strftime("%d/%m"))
         values.append(by_date.get(d, 0))
 
-    import json
     context = {
         "cafes": cafes_owner,
         "cafe": cafe,
@@ -989,14 +906,11 @@ def analytics_dashboard(request):
     }
     return render(request, "reviews/analytics_dashboard.html", context)
 
+
 @require_POST
 @login_required
 def toggle_review_like(request, review_id):
     review = get_object_or_404(Review, pk=review_id)
-    # Evitamos likes propios si querés (opcional)
-    # if review.user_id == request.user.id:
-    #     messages.info(request, "No podés likear tu propia reseña.")
-    #     return redirect("cafe_detail", cafe_id=review.cafe_id)
 
     obj, created = ReviewLike.objects.get_or_create(review=review, user=request.user)
     if not created:
@@ -1006,11 +920,11 @@ def toggle_review_like(request, review_id):
         liked = True
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
-        # respuesta JSON para AJAX
         count = ReviewLike.objects.filter(review=review).count()
         return JsonResponse({"ok": True, "liked": liked, "count": count})
 
     return redirect("cafe_detail", cafe_id=review.cafe_id)
+
 
 @login_required
 def report_review(request, review_id):
@@ -1019,7 +933,6 @@ def report_review(request, review_id):
     if request.method == "POST":
         form = ReviewReportForm(request.POST)
         if form.is_valid():
-            # Evitá duplicado PENDING del mismo user
             pending_exists = ReviewReport.objects.filter(
                 review=review, user=request.user, status=ReviewReport.Status.PENDING
             ).exists()
@@ -1041,4 +954,3 @@ def report_review(request, review_id):
         "reviews/reports/report_form.html",
         {"review": review, "form": form}
     )
-
