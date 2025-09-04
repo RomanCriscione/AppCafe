@@ -1,10 +1,14 @@
 {# reviews/templates/reviews/includes/cafe_photos.html #}
 <h3 class="text-xl font-semibold mb-4 text-gray-900">📸 Fotos del lugar</h3>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8"
+     data-gallery="cafe-{{ cafe.id }}">
   {% if cafe.photo1 and cafe.photo1.url %}
-    <div class="photo-thumb animate-fade-in-up animate-delay-0 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
-         onclick="currentImageIndex=0; openLightbox(0)">
+    <button type="button"
+            class="photo-thumb animate-fade-in-up animate-delay-0 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
+            data-src="{{ cafe.photo1.url }}"
+            data-alt="{{ cafe.photo1_title|default:cafe.name }}"
+            data-caption="{{ cafe.photo1_title|default:cafe.name }}">
       <img
         src="{{ cafe.photo1.url }}"
         alt="{{ cafe.photo1_title|default:cafe.name }}"
@@ -13,13 +17,16 @@
         fetchpriority="low"
         width="1200" height="800"
         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-      <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
-    </div>
+      <span class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300" aria-hidden="true"></span>
+    </button>
   {% endif %}
 
   {% if cafe.photo2 and cafe.photo2.url %}
-    <div class="photo-thumb animate-fade-in-up animate-delay-100 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
-         onclick="currentImageIndex=1; openLightbox(1)">
+    <button type="button"
+            class="photo-thumb animate-fade-in-up animate-delay-100 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
+            data-src="{{ cafe.photo2.url }}"
+            data-alt="{{ cafe.photo2_title|default:cafe.name }}"
+            data-caption="{{ cafe.photo2_title|default:cafe.name }}">
       <img
         src="{{ cafe.photo2.url }}"
         alt="{{ cafe.photo2_title|default:cafe.name }}"
@@ -28,13 +35,16 @@
         fetchpriority="low"
         width="1200" height="800"
         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-      <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
-    </div>
+      <span class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300" aria-hidden="true"></span>
+    </button>
   {% endif %}
 
   {% if cafe.photo3 and cafe.photo3.url %}
-    <div class="photo-thumb animate-fade-in-up animate-delay-200 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
-         onclick="currentImageIndex=2; openLightbox(2)">
+    <button type="button"
+            class="photo-thumb animate-fade-in-up animate-delay-200 relative w-full h-64 sm:h-52 md:h-60 lg:h-72 overflow-hidden rounded-xl shadow-md group cursor-pointer"
+            data-src="{{ cafe.photo3.url }}"
+            data-alt="{{ cafe.photo3_title|default:cafe.name }}"
+            data-caption="{{ cafe.photo3_title|default:cafe.name }}">
       <img
         src="{{ cafe.photo3.url }}"
         alt="{{ cafe.photo3_title|default:cafe.name }}"
@@ -43,20 +53,121 @@
         fetchpriority="low"
         width="1200" height="800"
         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-      <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
-    </div>
+      <span class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300" aria-hidden="true"></span>
+    </button>
   {% endif %}
 </div>
 
-<!-- Lightbox Modal -->
-<div id="lightbox-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
-  <button id="lightbox-close" class="absolute top-4 right-6 text-white text-4xl cursor-pointer hover:text-gray-300">&times;</button>
-  <div class="flex flex-col items-center">
-    <img id="lightbox-image" src="" alt="" class="max-h-[80%] max-w-[90%] rounded-lg shadow-2xl object-contain">
-    <p id="lightbox-caption" class="text-white mt-4 text-lg text-center opacity-90"></p>
+<!-- Lightbox Modal (id único por café) -->
+<div id="lightbox-modal-{{ cafe.id }}"
+     class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50"
+     role="dialog" aria-modal="true" aria-label="Galería de fotos de {{ cafe.name }}">
+  <button type="button"
+          id="lightbox-close-{{ cafe.id }}"
+          class="absolute top-4 right-6 text-white text-4xl cursor-pointer hover:text-gray-300"
+          aria-label="Cerrar">&times;</button>
+  <div class="flex flex-col items-center px-4">
+    <img id="lightbox-image-{{ cafe.id }}" src="" alt=""
+         class="max-h-[80%] max-w-[90%] rounded-lg shadow-2xl object-contain">
+    <p id="lightbox-caption-{{ cafe.id }}"
+       class="text-white mt-4 text-lg text-center opacity-90"></p>
     <div class="flex gap-4 mt-4">
-      <button onclick="changeLightboxImage(-1)" class="bg-white/20 text-white px-4 py-2 rounded hover:bg-white/30">← Anterior</button>
-      <button onclick="changeLightboxImage(1)" class="bg-white/20 text-white px-4 py-2 rounded hover:bg-white/30">Siguiente →</button>
+      <button type="button" id="lightbox-prev-{{ cafe.id }}"
+              class="bg-white/20 text-white px-4 py-2 rounded hover:bg-white/30">← Anterior</button>
+      <button type="button" id="lightbox-next-{{ cafe.id }}"
+              class="bg-white/20 text-white px-4 py-2 rounded hover:bg-white/30">Siguiente →</button>
     </div>
   </div>
 </div>
+
+<script>
+(function () {
+  const gallerySel = `[data-gallery="cafe-{{ cafe.id }}"]`;
+  const thumbs = Array.from(document.querySelectorAll(`${gallerySel} .photo-thumb`));
+  if (!thumbs.length) return;
+
+  const modal   = document.getElementById('lightbox-modal-{{ cafe.id }}');
+  const imgEl   = document.getElementById('lightbox-image-{{ cafe.id }}');
+  const capEl   = document.getElementById('lightbox-caption-{{ cafe.id }}');
+  const btnPrev = document.getElementById('lightbox-prev-{{ cafe.id }}');
+  const btnNext = document.getElementById('lightbox-next-{{ cafe.id }}');
+  const btnClose= document.getElementById('lightbox-close-{{ cafe.id }}');
+
+  let current = 0;
+  let lastFocused = null;
+
+  function show(index) {
+    current = (index + thumbs.length) % thumbs.length;
+    const t = thumbs[current];
+    const src = t.dataset.src;
+    const alt = t.dataset.alt || '';
+    const cap = t.dataset.caption || '';
+
+    // Preload vecinos
+    const pre1 = new Image(); pre1.src = thumbs[(current+1)%thumbs.length].dataset.src;
+    const pre2 = new Image(); pre2.src = thumbs[(current-1+thumbs.length)%thumbs.length].dataset.src;
+
+    imgEl.src = src;
+    imgEl.alt = alt;
+    capEl.textContent = cap;
+  }
+
+  function open(index) {
+    lastFocused = document.activeElement;
+    show(index);
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    btnClose.focus();
+  }
+
+  function close() {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+    if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+  }
+
+  function next()  { show(current + 1); }
+  function prev()  { show(current - 1); }
+
+  // Eventos
+  thumbs.forEach((btn, i) => {
+    btn.addEventListener('click', () => open(i));
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(i); }
+    });
+  });
+
+  btnNext.addEventListener('click', next);
+  btnPrev.addEventListener('click', prev);
+  btnClose.addEventListener('click', close);
+
+  // Cerrar con clic en fondo
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) close();
+  });
+
+  // Teclado global mientras modal abierto
+  document.addEventListener('keydown', (e) => {
+    if (modal.classList.contains('hidden')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight') next();
+    if (e.key === 'ArrowLeft') prev();
+  });
+
+  // Gestos táctiles básicos (swipe)
+  let sx = 0, sy = 0;
+  modal.addEventListener('touchstart', (e) => {
+    if (!e.touches[0]) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, {passive:true});
+  modal.addEventListener('touchend', (e) => {
+    const dx = (e.changedTouches[0]?.clientX || sx) - sx;
+    const dy = (e.changedTouches[0]?.clientY || sy) - sy;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
+      if (dx < 0) next(); else prev();
+    }
+  });
+})();
+</script>

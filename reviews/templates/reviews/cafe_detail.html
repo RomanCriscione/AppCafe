@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load static cache %}
 {% load static cache tag_icons %}
 
 {% block meta %}
@@ -14,6 +13,7 @@
   <meta name="twitter:description" content="Reseñas, fotos y ubicación de {{ cafe.name }}." />
   {% if full_image_url %}<meta name="twitter:image" content="{{ full_image_url }}" />{% endif %}
 
+  {# Meta description dinámica #}
   {% if cafe.description %}
     <meta name="description" content="{{ cafe.description|striptags|truncatechars:155 }}">
   {% elif best_review %}
@@ -22,6 +22,7 @@
     <meta name="description" content="{{ cafe.name }} en {{ cafe.location }}: reseñas, fotos y ubicación.">
   {% endif %}
 
+  <!-- JSON-LD: Breadcrumbs -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -34,29 +35,42 @@
   }
   </script>
 
+  <!-- JSON-LD: Cafe / LocalBusiness -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "CafeOrCoffeeShop",
     "@id": "{{ full_page_url }}#identity",
     "name": "{{ cafe.name|escapejs }}",
-    {% if full_image_url %}"image": ["{{ full_image_url }}"],{% endif %}
+    {% if full_image_url %}
+    "image": ["{{ full_image_url }}"],
+    {% endif %}
     "url": "{{ full_page_url }}",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "{{ cafe.address|default_if_none:''|escapejs }}",
       "addressLocality": "{{ cafe.location|default_if_none:''|escapejs }}",
       "addressCountry": "AR"
-    }{% if cafe.phone %},
-    "telephone": "{{ cafe.phone|escapejs }}"{% endif %}{% if cafe.latitude and cafe.longitude %},
-    "geo": { "@type": "GeoCoordinates", "latitude": {{ cafe.latitude }}, "longitude": {{ cafe.longitude }} }{% endif %}{% if average_rating %},
+    }
+    {% if cafe.phone %},
+    "telephone": "{{ cafe.phone|escapejs }}"
+    {% endif %}
+    {% if cafe.latitude and cafe.longitude %},
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": {{ cafe.latitude }},
+      "longitude": {{ cafe.longitude }}
+    }
+    {% endif %}
+    {% if average_rating %},
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": "{{ average_rating|floatformat:1 }}",
       "bestRating": "5",
       "worstRating": "1",
       "reviewCount": "{{ total_reviews }}"
-    }{% if schema_reviews and schema_reviews|length > 0 %},
+    }
+    {% if schema_reviews and schema_reviews|length > 0 %},
     "review": [
       {% for r in schema_reviews %}{
         "@type": "Review",
@@ -65,7 +79,9 @@
         "reviewBody": "{{ r.comment|default_if_none:''|truncatechars:300|escapejs }}",
         "reviewRating": { "@type": "Rating", "ratingValue": "{{ r.rating }}", "bestRating": "5", "worstRating": "1" }
       }{% if not forloop.last %},{% endif %}{% endfor %}
-    ]{% endif %}
+    ]
+    {% endif %}
+    {% endif %}
   }
   </script>
 {% endblock %}
@@ -73,8 +89,10 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 space-y-8">
 
+  <!-- Título -->
   <h1 class="text-3xl font-bold animate-fade-in-up">{{ cafe.name }}</h1>
 
+  <!-- Tarjeta contacto -->
   <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-100">
     <div class="grid gap-4 sm:grid-cols-2">
       <div class="flex items-start gap-2">
@@ -84,7 +102,6 @@
           <div class="text-sm text-gray-600">{{ cafe.address }}, {{ cafe.location }}</div>
         </div>
       </div>
-
       <div class="flex items-start gap-2">
         <span aria-hidden="true">☎</span>
         <div>
@@ -92,14 +109,11 @@
           <div class="text-sm text-gray-600">{{ cafe.phone|default:"—" }}</div>
         </div>
       </div>
-
       <div class="sm:col-span-2 flex flex-wrap gap-3">
         <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
-           target="_blank" rel="noopener"
-           class="btn btn-primary rounded-xl">
+           target="_blank" rel="noopener" class="btn btn-primary rounded-xl">
           📍 Ver en Google Maps
         </a>
-
         {% if cafe.claim_status != 'verified' %}
           <a href="{% url 'claim_start' cafe.id %}" class="cta cta-indigo">
             🏷️ ¿Sos el dueño? Reclamá este local
@@ -109,16 +123,19 @@
     </div>
   </section>
 
+  <!-- Features -->
   <section class="mt-4 animate-fade-in-up animate-delay-150">
     {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
   </section>
 
+  <!-- Fotos -->
   {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
     <div class="animate-fade-in-up animate-delay-200">
       {% include "reviews/includes/cafe_photos.html" with cafe=cafe %}
     </div>
   {% endif %}
 
+  <!-- Top tags -->
   {% if top_tags %}
     <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-250">
       <h2 class="text-lg font-semibold text-gray-800 mb-3">🧠 Lo que otros destacan</h2>
@@ -172,6 +189,7 @@
     </section>
   {% endif %}
 
+  <!-- Calificación + destacada -->
   <div class="animate-fade-in-up animate-delay-300">
     {% if average_rating %}
       <p class="mb-4"><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
@@ -187,6 +205,7 @@
     {% endif %}
   </div>
 
+  <!-- Reseñas -->
   <h3 id="reviews" class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-400">Reseñas:</h3>
 
   {% cache 600 cafe_reviews_list cafe.id user.id %}
@@ -211,6 +230,7 @@
 
   {% include "reviews/includes/pagination.html" with page_obj=page_obj anchor="#reviews" %}
 
+  <!-- Favorito -->
   {% if user.is_authenticated %}
     <form method="post" action="{% url 'toggle_favorite' cafe.id %}" class="mb-4 animate-fade-in-up animate-delay-700">{% csrf_token %}
       <button type="submit" class="btn btn-danger rounded-xl">
@@ -219,6 +239,7 @@
     </form>
   {% endif %}
 
+  <!-- Radar -->
   {% if radar_values and radar_labels %}
     <section class="bg-white rounded-xl shadow p-5">
       <h2 class="text-lg font-semibold mb-3">🧭 Perfil sensorial</h2>
@@ -245,19 +266,10 @@
     </div>
   {% endif %}
 
-  {# === Ubicación + características dinámicas (dentro del bloque content) === #}
+  {# === Ubicación: SIN if interno de features (para evitar el conflicto) === #}
   {% if cafe.latitude and cafe.longitude %}
     <section aria-labelledby="ubicacion" class="mt-10">
       <h3 id="ubicacion" class="text-xl font-semibold mb-2">📍 Ubicación</h3>
-
-      {% if cafe.has_wifi or cafe.has_air_conditioning or cafe.serves_alcohol or cafe.is_pet_friendly
-         or cafe.is_vegan_friendly or cafe.has_outdoor_seating or cafe.has_parking or cafe.is_accessible
-         or cafe.has_vegetarian_options or cafe.has_books_or_games or cafe.serves_breakfast
-         or cafe.has_gluten_free or cafe.has_specialty_coffee or cafe.has_artisanal_pastries %}
-        <div class="mb-4">
-          {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
-        </div>
-      {% endif %}
 
       <button type="button" id="btn-toggle-map" onclick="toggleMap(this)"
               class="mb-4 text-sm text-blue-600 hover:underline focus:outline-none">Mostrar mapa</button>
@@ -332,7 +344,7 @@
     updateRatingVisual();
   });
 
-  // Mostrar/Ocultar TODAS las reseñas (botón debajo del grid)
+  // Mostrar/Ocultar TODAS las reseñas
   function toggleReviews() {
     const container = document.getElementById("review-container");
     const btn = document.getElementById("btn-reviews");
@@ -414,7 +426,7 @@
             iconEl.textContent = "🤍";
           }
 
-          if (window.bounceLike) window.bounceLike(btn); // 👈 rebote visual
+          if (window.bounceLike) window.bounceLike(btn);
         } catch (err) {
           console.error(err);
         }
@@ -423,4 +435,3 @@
   });
   </script>
 {% endblock %}
-

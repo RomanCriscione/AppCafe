@@ -166,7 +166,7 @@ PAYMENT_LINKS = {
 #  Django-allauth
 # =======================
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"      # en local, el enlace sale por consola
+ACCOUNT_EMAIL_VERIFICATION = "none"      # en local, el enlace sale por consola
 ACCOUNT_AUTHENTICATION_METHOD = "username_email"
 ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
 ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
