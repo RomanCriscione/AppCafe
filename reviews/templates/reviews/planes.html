@@ -15,7 +15,7 @@
           </p>
         </div>
 
-        <form method="post" action="{% url 'planes' %}">
+        <form method="post" action="{% url 'reviews:planes' %}">
           {% csrf_token %}
           <input type="hidden" name="cafe_id" value="{{ cafe.id }}">
           <input type="hidden" name="nivel" value="0">
@@ -30,7 +30,7 @@
 
           {% if upgrades_enabled %}
             <a class="btn btn-outline mt-2"
-               href="{% url 'plan_checkout_redirect' cafe.id 1 %}">Contratar</a>
+               href="{% url 'reviews:plan_checkout_redirect' cafe.id 1 %}">Contratar</a>
           {% else %}
             <button class="btn btn-outline mt-2" disabled>Próximamente</button>
           {% endif %}
@@ -42,7 +42,7 @@
 
           {% if upgrades_enabled %}
             <a class="btn btn-outline mt-2"
-               href="{% url 'plan_checkout_redirect' cafe.id 2 %}">Contratar</a>
+               href="{% url 'reviews:plan_checkout_redirect' cafe.id 2 %}">Contratar</a>
           {% else %}
             <button class="btn btn-outline mt-2" disabled>Próximamente</button>
           {% endif %}

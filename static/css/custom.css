@@ -1,53 +1,94 @@
+/* =========================================================
+   GOTA · COFFEE THEME — espresso + caramelo (moderno)
+   ========================================================= */
+
 /* === Design tokens (CSS vars) === */
 :root{
+  /* radios / sombras */
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
+  --shadow-soft: 0 10px 25px rgba(43,30,22,.06);
+  --shadow-hover: 0 16px 36px rgba(43,30,22,.12);
 
-  --shadow-soft: 0 10px 25px rgba(2,8,23,.06);
-  --shadow-hover: 0 16px 36px rgba(2,8,23,.12);
+  /* Espresso (brand) */
+  --brand-50:#F7EFE9;
+  --brand-100:#EFE2D7;
+  --brand-200:#E2CCB8;
+  --brand-300:#D4B394;
+  --brand-400:#B98D6E;
+  --brand-500:#8B5E3C;      /* base */
+  --brand-600:#6E4B3B;      /* primary */
+  --brand-700:#553A2F;      /* hover/focus */
+  --brand-800:#3D2B23;
+  --brand-900:#2B1E16;
 
-  --surface: #ffffff;
-  --surface-2: #f8fafc;   /* slate-50 */
-  --border: #e2e8f0;      /* slate-200 */
-  --text-1: #0f172a;      /* slate-900 */
-  --text-2: #475569;      /* slate-600 */
+  /* Caramelo (acento cálido) */
+  --caramel-50:#FFF6EC;
+  --caramel-100:#FDECD9;
+  --caramel-200:#F7D4B5;
+  --caramel-300:#EDB885;
+  --caramel-400:#E19C60;
+  --caramel-500:#C67C48;
+  --caramel-600:#B36D3D;
+  --caramel-700:#8F5330;
 
-  /* (compat) */
-  --brand: #8b5e34;
-  --brand-600: #7a4f2a;
-  --brand-700: #6a4425;
+  /* Neutrales cálidos */
+  --canvas:#FBF7F2;     /* fondo general */
+  --surface:#FFFFFF;    /* tarjetas/surfaces */
+  --surface-2:#F5EEE6;  /* alternativa */
+  --border:#E7DED6;
+  --text-1:#1F130E;
+  --text-2:#6B5E55;
 
-  /* 🎨 Paleta azul */
-  --primary:     #2563eb; /* blue-600 */
-  --primary-600: #1d4ed8;
-  --primary-700: #1e40af;
-  --primary-50:  #eff6ff;
-  --primary-100: #dbeafe;
+  /* Semánticos (compat) */
+  --primary:     var(--brand-600);
+  --primary-600: var(--brand-700);
+  --primary-700: var(--brand-800);
+  --primary-50:  var(--brand-50);
+  --primary-100: var(--brand-100);
 
-  /* Otros */
-  --accent: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+  --accent:  var(--caramel-600);  /* para detalles cálidos */
+  --warning: #B7791F;
+  --danger:  #B5533C;
+  --success: #2E7D32;
 
   /* Alto del preview de reseñas */
   --review-collapsed: 140px;
 }
 
+/* Dark (opcional por sistema) */
+@media (prefers-color-scheme: dark){
+  :root{
+    --canvas:#16110E;
+    --surface:#1F1813;
+    --surface-2:#231C17;
+    --border:#3A2E27;
+    --text-1:#F5EEE6;
+    --text-2:#D2C9C1;
+
+    --primary:#A67858;
+    --primary-600:#8F674C;
+    --primary-700:#7A563F;
+    --accent:#D29061;
+  }
+}
+
 /* === Base tweaks === */
 * { -webkit-tap-highlight-color: transparent; }
 html { scroll-behavior: smooth; }
-body { color: var(--text-1); background: var(--surface); }
+body { color: var(--text-1); background: var(--canvas); }
 img { display:block; max-width:100%; height:auto; }
-a { text-decoration: none; }
+a { text-decoration: none; color: var(--primary-600); }
+a:hover { color: var(--primary); }
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-/* === Utilidades suaves === */
 .container-default { max-width: 1280px; margin: 0 auto; padding: 0 1rem; }
 .text-muted { color: var(--text-2); }
 .surface { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.text-primary{ color: var(--primary) !important; }
 
-/* === Botones genéricos existentes === */
+/* === Botones === */
 .btn{
   display:inline-flex; align-items:center; gap:.5rem;
   padding:.625rem .95rem; border-radius: var(--radius-md);
@@ -57,7 +98,7 @@ a { text-decoration: none; }
 .btn:hover{ transform: translateY(-1px); box-shadow: var(--shadow-hover); }
 .btn:active{ transform: translateY(0); }
 
-.btn-primary{ background: var(--primary) !important; color:#fff !important; }
+.btn-primary{ background: var(--primary) !important; color:#fff !important; border-color: var(--primary-600) !important; }
 .btn-primary:hover{ background: var(--primary-600) !important; }
 .btn-primary:focus-visible{ outline:2px solid var(--primary-700); outline-offset:2px; }
 
@@ -68,15 +109,15 @@ a { text-decoration: none; }
 .btn-ghost:hover{ background: var(--primary-50); }
 
 .btn-danger{ background: var(--danger); color:#fff; }
-.btn-danger:hover{ background:#dc2626; }
-.btn-success{ background: var(--accent); color:#fff; }
+.btn-danger:hover{ filter:brightness(.95); }
+.btn-success{ background: var(--success); color:#fff; }
 .btn-success:hover{ filter:brightness(.95); }
 
-.btn-sm{ padding:.45rem .65rem; font-size:.9rem; border-radius: var(--radius-sm); }
+.btn-sm{ padding:.45rem .65rem; font-size:.9rem; border-radius: var(--radius-sm); height:40px; }
 .btn-block{ width:100%; justify-content:center; }
 .btn-icon{ padding:.5rem; width:2.5rem; height:2.5rem; justify-content:center; }
 
-/* === Enlaces de navegación === */
+/* === Enlaces de navegación / header === */
 .nav-link{
   display:inline-flex; align-items:center;
   padding:.5rem .75rem; border-radius:9999px;
@@ -85,14 +126,31 @@ a { text-decoration: none; }
 }
 .nav-link:hover{ background: var(--surface-2); color: var(--primary); }
 
+header.site-nav{ background:#fff; border-bottom:1px solid var(--border); }
+
 /* === Badges / chips === */
 .badge{
   display:inline-flex; align-items:center; gap:.35rem;
   font-size:.75rem; padding:.25rem .55rem; border-radius:999px;
   background: var(--surface-2); border:1px solid var(--border); color: var(--text-2);
 }
-.badge-success{ background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.25); color:#047857; }
-.badge-warning{ background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.25); color:#92400e; }
+.badge-success{ background: rgba(46,125,50,.12); border-color: rgba(46,125,50,.25); color:#1B5E20; }
+.badge-warning{ background: rgba(183,121,31,.12); border-color: rgba(183,121,31,.25); color:#7C4A0E; }
+
+/* Chips (filtros / etiquetas) */
+.chip{
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.45rem .75rem; border-radius:9999px; font-size:.88rem;
+  background: var(--surface); border:1px solid var(--border);
+  box-shadow: var(--shadow-soft); color: var(--text-1); white-space:nowrap; cursor:pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.chip:hover{ background: var(--surface-2); }
+.chip[data-checked="1"], .chip.active{
+  background: var(--brand-50);
+  border-color: var(--brand-200);
+  color: var(--primary-600);
+}
 
 /* === Cards de café === */
 .card{
@@ -103,7 +161,6 @@ a { text-decoration: none; }
 .card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-hover); }
 .card-media{ aspect-ratio: 4 / 3; overflow:hidden; background: var(--surface-2); }
 .card-media img{ width:100%; height:100%; object-fit:cover; }
-
 .card-body{ padding: .9rem .95rem 1rem; }
 .card-title{ font-size: 1.05rem; font-weight:700; line-height:1.2; }
 .card-sub{ font-size:.85rem; color: var(--text-2); }
@@ -115,18 +172,17 @@ a { text-decoration: none; }
 @media (min-width:1024px){ .grid-cafes{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width:1280px){ .grid-cafes{ grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
-/* === Inputs (forms/wizard) === */
+/* === Inputs / formularios === */
 .input, .select, .textarea{
   width:100%; padding:.6rem .75rem; border-radius: var(--radius-md);
   border:1px solid var(--border); background:#fff; color: var(--text-1);
   transition:border-color .18s ease, box-shadow .18s ease;
 }
 .input:focus, .select:focus, .textarea:focus{
-  border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+  border-color: var(--primary); box-shadow: 0 0 0 3px rgba(142,103,77,.18);
   outline: none;
 }
 
-/* Formularios básicos */
 select,
 input[type="text"], input[type="search"], input[type="email"], input[type="number"],
 input[type="password"], input[type="tel"], textarea {
@@ -136,7 +192,7 @@ input[type="password"], input[type="tel"], textarea {
   border: 1px solid var(--border);
   background: #fff;
   color: var(--text-1);
-  box-shadow: 0 1px 0 rgba(2,8,23,.03) inset;
+  box-shadow: 0 1px 0 rgba(43,30,22,.05) inset;
   transition: border-color .18s ease, box-shadow .18s ease;
   font: inherit;
 }
@@ -146,7 +202,7 @@ input[type="number"]:focus, input[type="password"]:focus, input[type="tel"]:focu
 textarea:focus {
   border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+  box-shadow: 0 0 0 3px rgba(142,103,77,.18);
 }
 
 /* Checkboxes */
@@ -200,7 +256,6 @@ a[href="#panel-filtros"]:hover { background: var(--primary-600); }
 /* Títulos y respiración */
 h2 { margin: .25rem 0 .5rem; }
 h2 + form { margin-top: .25rem; }
-
 main img { max-width: 100%; height: auto; display: block; }
 
 /* Submits en panel filtros / formularios */
@@ -241,33 +296,17 @@ form button:not([type]):hover {
 #panel-filtros form > button:active,
 #panel-filtros form > input[type="submit"]:active,
 form .btn[type="submit"]:not(.btn-secondary):active,
-form button[type="submit"]:active,
+form button[type="submit"] :active,
 form button:not([type]):active { transform: translateY(0); }
 
-/* === Chips (mapa-lista) === */
-.chip{
-  display:inline-flex; align-items:center; gap:.35rem;
-  padding:.4rem .7rem; border-radius:9999px;
-  background: var(--surface); border:1px solid var(--border);
-  box-shadow: var(--shadow-soft); font-size:.85rem; white-space:nowrap;
-}
-.chip:hover{ background: var(--surface-2); }
-.chip.active{
-  background: rgba(16,185,129,.12);
-  border-color: rgba(16,185,129,.25);
-  color:#047857;
-}
-.no-scrollbar::-webkit-scrollbar{ display:none; }
-.no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
-
-/* === Etiquetas sensoriales === */
+/* === Etiquetas sensoriales (listado) === */
 .tag-list{ display:grid; gap:.4rem; grid-template-columns:1fr; }
 @media (min-width:640px){ .tag-list{ grid-template-columns:1fr 1fr; } }
 .tag-item{ display:flex; align-items:flex-start; gap:.55rem; padding:.25rem 0; }
 .tag-dot{
   width:.5rem; height:.5rem; border-radius:999px;
   background: var(--accent);
-  box-shadow: 0 0 0 3px rgba(16,185,129,.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
   margin-top:.45rem; flex:0 0 auto;
 }
 .tag-text{ font-size:.95rem; color: var(--text-1); }
@@ -290,7 +329,7 @@ form button:not([type]):active { transform: translateY(0); }
 .review-date{ font-size:.85rem; color: var(--text-2); }
 
 .review-rating{ display:inline-flex; align-items:center; gap:.4rem; }
-.review-rating .dot{ width:.5rem; height:.5rem; border-radius:999px; background:#f59e0b; }
+.review-rating .dot{ width:.5rem; height:.5rem; border-radius:999px; background: var(--accent); }
 
 .review-body{ position:relative; }
 .review-body.collapsed{ max-height: var(--review-collapsed); overflow:hidden; }
@@ -315,104 +354,23 @@ form button:not([type]):active { transform: translateY(0); }
 @keyframes bounce { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
 @keyframes fadeIn { from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
 @keyframes shimmer { to{ transform: translateX(100%); } }
-
 .animated-bounce{ animation: bounce 1s infinite; }
 .animate-fade-in{ animation: fadeIn .35s ease; }
 
-/* --- Cafe list: micro-fixes --- */
-#grid-cafes .card:hover { transform: none !important; }
-#grid-cafes .btn:focus-visible {
-  box-shadow: none !important;
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}
-
-/* =========================================================
-   ✅ CTAs UNIFICADOS (mismo alto/ancho y sin fondo blanco)
-   ========================================================= */
-a.cta{
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  gap:.5rem !important;
-  height:48px !important;           /* alto consistente */
-  padding:0 1.25rem !important;
-  min-width:280px !important;       /* ancho visual mínimo */
-  border-radius:12px !important;
-  font-weight:700 !important;
-  letter-spacing:.01em;
-  line-height:1 !important;
-  color:#fff !important;
-  border:1px solid transparent !important;
-  background-color:#2563eb !important;   /* fallback azul */
-  box-shadow: var(--shadow-soft) !important;
-  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
-  white-space:nowrap;
-  text-align:center;
-}
-@media (max-width: 639px){
-  a.cta{ width:100% !important; min-width:0 !important; }
-}
-a.cta:hover{ transform: translateY(-1px); box-shadow: var(--shadow-hover) !important; }
-a.cta:active{ transform: translateY(0); }
-a.cta:focus-visible{ outline:2px solid #1e40af; outline-offset:2px; }
-
-/* Variantes de color (se fuerza background-color) */
-a.cta.cta-blue   { background-color: #2563eb !important; } /* blue-600 */
-a.cta.cta-blue:hover   { background-color: #1d4ed8 !important; }
-
-a.cta.cta-green  { background-color: #16a34a !important; } /* green-600 */
-a.cta.cta-green:hover  { background-color: #15803d !important; }
-
-a.cta.cta-indigo { background-color: #4f46e5 !important; } /* indigo-600 */
-a.cta.cta-indigo:hover { background-color: #4338ca !important; }
-
-a.cta.cta-orange { background-color: #f97316 !important; } /* orange-500 */
-a.cta.cta-orange:hover { background-color: #ea580c !important; }
-
-/* === Acciones en tarjeta de dueño (fila uniforme) === */
-.owner-card-actions{ 
-  display:flex; flex-wrap:wrap; align-items:center; gap:.5rem;
-}
-.owner-card-actions .btn{ 
-  min-width:120px;              /* ancho visual parejo */
-  justify-content:center;
-}
-.owner-card-actions form{ display:inline; } /* que el form no rompa la fila */
-
-/* Tamaño chico consistente para acciones */
-.btn-sm{ 
-  height:40px;                  /* alto fijo para todos */
-  padding:.45rem .8rem;
-  font-size:.92rem;
-  border-radius: var(--radius-sm);
-}
-
-/* Variante warning (para “Editar”, opcional) */
-.btn-warning{ background: var(--warning); color:#fff; }
-.btn-warning:hover{ filter:brightness(.95); }
-
 /* Hover suave para cards clickeables */
-.cafe-card {
-  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
-  will-change: transform, box-shadow, filter;
-}
+.cafe-card { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; will-change: transform, box-shadow, filter; }
 .cafe-card:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
 
-/* Botón like: rebote visual */
-@keyframes like-bounce {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.25); }
-  100% { transform: scale(1); }
-}
+/* Botón like: rebote */
+@keyframes like-bounce { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
 .like-bounce { animation: like-bounce .28s ease; }
 
-/* Taza flotante */
+/* Taza flotante (% positivas) */
 .cup-float {
   position: fixed; right: 16px; bottom: 100px; z-index: 40;
   display: flex; align-items: center; gap: 8px;
-  background: rgba(255,255,255,.9);
-  border: 1px solid #e5e7eb; backdrop-filter: blur(4px);
+  background: var(--surface);
+  border: 1px solid var(--border); backdrop-filter: blur(4px);
   padding: 10px 12px; border-radius: 999px; box-shadow: 0 6px 20px rgba(0,0,0,.08);
 }
 .cup-emoji { font-size: 18px; transform-origin: bottom; }
@@ -423,37 +381,159 @@ a.cta.cta-orange:hover { background-color: #ea580c !important; }
 .page { opacity: 0; transition: opacity .18s ease; }
 .page.page-ready { opacity: 1; }
 
-/* === Microinteracciones adicionales === */
+/* === Owner CTA (reusa colores) === */
+.owner-card-actions{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
+.owner-card-actions .btn{ min-width:120px; justify-content:center; }
 
-/* Hover suave para cards que lleven la clase .cafe-card */
-.cafe-card {
-  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
-  will-change: transform, box-shadow, filter;
+/* CTA sueltas (compat con tu HTML actual) */
+a.cta{
+  display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:.5rem !important;
+  height:48px !important; padding:0 1.25rem !important; min-width:280px !important;
+  border-radius:12px !important; font-weight:700 !important; letter-spacing:.01em; line-height:1 !important;
+  color:#fff !important; border:1px solid transparent !important;
+  background-color: var(--primary) !important; box-shadow: var(--shadow-soft) !important;
+  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease; white-space:nowrap; text-align:center;
 }
-.cafe-card:hover {
-  transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 8px 24px rgba(0,0,0,.08);
+a.cta:hover{ transform: translateY(-1px); box-shadow: var(--shadow-hover) !important; background-color: var(--primary-600) !important; }
+a.cta:active{ transform: translateY(0); }
+
+/* === Rating de tazas === */
+.cup-btn{width:36px;height:36px;display:grid;place-items:center;border-radius:.5rem;transition:transform .08s,background .12s}
+.cup-btn:hover{background:var(--surface-2)}
+.cup-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.cup-icon{width:28px;height:28px}
+.cup-outline{stroke:#9b8a80;stroke-width:1.6;fill:none;opacity:.9}
+.cup-fill{fill:var(--accent);opacity:0;transition:opacity .12s}
+.cup-btn.active .cup-fill{opacity:1}
+.cup-btn.dim .cup-outline{opacity:.45}
+
+/* === Pequeños ajustes varios === */
+#grid-cafes .card:hover { transform: none !important; }
+#grid-cafes .btn:focus-visible { box-shadow: none !important; outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Barras de intensidades (si existen utilidades tailwind antiguas) */
+#flavor-bars .bg-blue-500{ background: var(--accent) !important; }
+
+.btn-primary,
+.btn.btn-primary,
+a.btn-primary, button.btn-primary {
+  background: var(--primary) !important;
+  border-color: var(--primary-600) !important;
+  color:#fff !important;
+}
+a.cta.cta-blue, a.cta.cta-indigo { background-color: var(--primary) !important; }
+a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-600) !important; }
+
+/* Tailwind/DaisyUI utilidades comunes mapeadas a la paleta café */
+.bg-blue-50,.bg-blue-100,.bg-blue-200,.bg-blue-300,.bg-blue-400,
+.bg-blue-500,.bg-blue-600,.bg-blue-700,.bg-blue-800,.bg-blue-900,
+.bg-indigo-500,.bg-indigo-600,.bg-indigo-700 { background-color: var(--primary) !important; }
+
+.text-blue-500,.text-blue-600,.text-blue-700,.text-indigo-600,
+.text-indigo-700 { color: var(--primary) !important; }
+
+.border-blue-500,.border-blue-600,.border-indigo-500,.border-indigo-600 {
+  border-color: var(--primary) !important;
 }
 
-/* Botón like: rebote */
-@keyframes like-bounce {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.25); }
-  100% { transform: scale(1); }
+/* estados hover/focus */
+.hover\:bg-blue-600:hover,.hover\:bg-blue-700:hover,
+.hover\:bg-indigo-600:hover,.hover\:bg-indigo-700:hover {
+  background-color: var(--primary-600) !important;
 }
-.like-bounce { animation: like-bounce .28s ease; }
+.focus\:ring-blue-500:focus,.focus\:ring-indigo-500:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent) !important;
+}
 
-/* Taza flotante (indicador de % positivas) */
-.cup-float {
-  position: fixed; right: 16px; bottom: 100px; z-index: 40;
-  display: flex; align-items: center; gap: 8px;
-  background: rgba(255,255,255,.9);
-  border: 1px solid #e5e7eb; backdrop-filter: blur(4px);
-  padding: 10px 12px; border-radius: 999px; box-shadow: 0 6px 20px rgba(0,0,0,.08);
+.leaflet-marker-icon.cup-marker { filter: drop-shadow(0 3px 6px rgba(0,0,0,.25)); }
+
+/* === Navbar scrolled state === */
+header.site-nav {
+  transition: box-shadow .18s ease, background-color .18s ease, backdrop-filter .18s ease;
 }
-.cup-emoji { font-size: 18px; transform-origin: bottom; }
-.cup-emoji.fill { animation: cup-fill 900ms ease forwards; }
-@keyframes cup-fill {
-  from { filter: saturate(.4) brightness(.95); transform: translateY(2px); }
-  to   { filter: saturate(1.05); transform: translateY(0); }
+header.site-nav.is-scrolled{
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 16px rgba(43,30,22,.08);
 }
+
+/* === Skeletons reales === */
+.skeleton{
+  position:relative; overflow:hidden; background: var(--surface-2);
+  border-radius: var(--radius-md);
+}
+.skeleton::after{
+  content:""; position:absolute; inset:0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.35) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: shimmer 1.15s infinite;
+}
+
+/* === Chips: scroll suave + fades laterales === */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.chips-fade{
+  position: relative;
+}
+.chips-fade::before,
+.chips-fade::after{
+  content:""; position:absolute; top:0; bottom:0; width:28px; pointer-events:none; z-index:5;
+}
+.chips-fade::before{ left:0; background: linear-gradient(90deg, var(--surface) 30%, transparent); border-top-left-radius: var(--radius-lg); }
+.chips-fade::after{ right:0; background: linear-gradient(270deg, var(--surface) 30%, transparent); border-top-right-radius: var(--radius-lg); }
+
+/* === Swiper look & feel === */
+.swiper-button-next, .swiper-button-prev{
+  width:38px;height:38px;border-radius:999px;background:#fff;border:1px solid var(--border);
+  box-shadow: var(--shadow-soft); backdrop-filter: blur(4px);
+}
+.swiper-button-next:after, .swiper-button-prev:after{ font-size:16px; color: var(--text-1); }
+.swiper-pagination-bullet{
+  opacity:.6; background: var(--border); width: 8px; height: 8px;
+}
+.swiper-pagination-bullet-active{
+  opacity:1; background: var(--primary);
+}
+
+/* === Cards + focus states consistentes === */
+.card { outline: none; }
+.card:focus-visible{ box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent); }
+
+/* === Map container pulido === */
+#cafes-map, #map{
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+/* === Hero overlay adaptativo === */
+.section-hero::before{
+  content:""; position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.25));
+}
+@media (prefers-color-scheme: dark){
+  .section-hero::before{ background: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,.35)); }
+}
+
+/* === Rating "cups" genérico para el wizard === */
+.rating-cups label{
+  transition: transform .12s ease, filter .12s ease;
+}
+.rating-cups input:checked ~ label,
+.rating-cups label:hover,
+.rating-cups label:hover ~ label{
+  filter: saturate(1.15);
+  transform: translateY(-1px) scale(1.02);
+}
+
+/* === Toasts breves (consistente con tus alerts) === */
+.toast{
+  position:fixed; top:1rem; right:1rem; z-index:2147485000;
+  background: var(--primary); color:#fff; padding:.6rem .9rem;
+  border-radius: var(--radius-md); box-shadow: var(--shadow-soft);
+}
+
+/* === Pequeñas utilidades === */
+.shadow-soft{ box-shadow: var(--shadow-soft); }
+.rounded-blob{ border-radius: 24px; }

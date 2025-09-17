@@ -3,7 +3,8 @@
 <!-- Mapa + chips -->
 <div class="relative mb-6">
   <!-- Chips -->
-  <div class="absolute top-3 left-3 right-3 z-10 flex gap-2 overflow-x-auto no-scrollbar">
+  <div class="chips-fade absolute top-3 left-3 right-3 z-10">
+    <div class="flex gap-2 overflow-x-auto no-scrollbar px-1">
     <button type="button" class="chip" data-filter="nearby" aria-pressed="false">📍 Cerca mío</button>
 
     <!-- Básicos -->
@@ -33,7 +34,7 @@
 <form id="direccion-form" method="get" class="mb-4 flex gap-2 max-w-md">
   <input type="text" id="direccion" name="direccion" placeholder="Buscar cafés cerca de una dirección"
          class="flex-1 px-3 py-2 border rounded w-full text-sm" required>
-  <button type="submit" class="btn btn-primary text-sm">Buscar</button>
+  <button type="submit" class="btn btn-primary text-sm rounded-xl">Buscar</button>
 </form>
 <div id="error-direccion" class="text-red-600 text-sm mb-4 hidden">❗ Dirección no encontrada</div>
 
@@ -49,7 +50,7 @@
     <p class="text-gray-600 text-center mt-4">
       ☕ {{ ui_messages.search_no_results }}
     </p>
-    <a href="{% url 'cafe_list' %}" class="btn btn-secondary">Limpiar filtros</a>
+    <a href="{% url 'reviews:cafe_list' %}" class="btn btn-secondary">Limpiar filtros</a>
   </div>
 {% endif %}
 
@@ -166,7 +167,7 @@
       {% else %}
         const cafes = [
           {% for cafe in cafes %}
-            { id: {{ cafe.id }}, name: "{{ cafe.name|escapejs }}", latitude: {{ cafe.latitude|default:"null" }}, longitude: {{ cafe.longitude|default:"null" }}, url: "{% url 'cafe_detail' cafe.id %}" }
+            { id: {{ cafe.id }}, name: "{{ cafe.name|escapejs }}", latitude: {{ cafe.latitude|default:"null" }}, longitude: {{ cafe.longitude|default:"null" }}, url: "{% url 'reviews:cafe_detail' cafe.id %}" }
             {% if not forloop.last %},{% endif %}
           {% endfor %}
         ];

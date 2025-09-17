@@ -1,3 +1,4 @@
+# file: core/views.py
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.urls import reverse
@@ -9,10 +10,12 @@ from core import messages as core_messages
 
 import json
 
+
 # ✅ Cafés vistos recientemente (desde la sesión)
 def get_recently_viewed_cafes(request):
     cafe_ids = request.session.get("recently_viewed", [])
     return Cafe.objects.filter(id__in=cafe_ids).prefetch_related("tags")
+
 
 # ✅ Home
 def home(request):
@@ -38,7 +41,8 @@ def home(request):
             "location": cafe.location,
             "latitude": cafe.latitude,
             "longitude": cafe.longitude,
-            "url": reverse("cafe_detail", args=[cafe.id]),
+            # 🔧 FIX: usar namespace 'reviews'
+            "url": reverse("reviews:cafe_detail", kwargs={"cafe_id": cafe.id}),
         }
         for cafe in cafes_with_coords
     ]
@@ -83,9 +87,11 @@ def home(request):
     }
     return render(request, "core/home.html", context)
 
+
 # ✅ About
 def about_view(request):
     return render(request, "core/about.html")
+
 
 # ✅ Contacto
 def contact_view(request):
@@ -94,6 +100,7 @@ def contact_view(request):
         # Podés procesar/guardar el mensaje acá si querés
         success = True
     return render(request, "core/contact.html", {"success": success})
+
 
 # ✅ Sitemap dinámico
 def sitemap_xml(request):
@@ -105,3 +112,4 @@ def sitemap_xml(request):
         {"cafes": cafes},
         content_type="application/xml",
     )
+

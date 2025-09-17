@@ -21,7 +21,7 @@ urlpatterns = [
     path("", include("core.urls")),
 
     # --- Cafeterías y reseñas ---
-    path("reviews/", include("reviews.urls")),
+    path("reviews/", include(("reviews.urls", "reviews"), namespace="reviews")),
 
     # robots.txt (template plano)
     path(

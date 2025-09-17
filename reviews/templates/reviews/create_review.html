@@ -1,143 +1,267 @@
 {% extends "base.html" %}
-{% load static %}
-{% load widget_tweaks %}
-{% load custom_filters %}
+{% load static tag_icons %}
+
+{% block head_title %}<title>Dejar reseña — {{ cafe.name }}</title>{% endblock %}
 
 {% block content %}
-<div class="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-md border border-gray-200">
-  <form id="reviewForm" method="post">
+<div class="max-w-3xl mx-auto px-4">
+  <header class="mb-6">
+    <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="text-blue-600 hover:underline text-sm">← Volver a {{ cafe.name }}</a>
+    <h1 class="text-2xl font-bold mt-2">Contanos tu experiencia</h1>
+    <p class="text-gray-600">Primero elegí las etiquetas que mejor describen lo que sentiste. Luego calificá y dejá un comentario.</p>
+  </header>
+
+  <form method="post" class="space-y-8" id="review-form">
     {% csrf_token %}
 
-    <!-- Paso 1: Comentario y puntuación -->
-    <div class="step" id="step-0">
-      <h2 class="text-2xl font-bold mb-4 text-primary">📝 Dejá tu reseña</h2>
-
-      <div class="mb-4">
-        <label class="block font-medium mb-1">Comentario</label>
-        {{ form.comment|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-      </div>
-
-      <div class="mb-4">
-        <label class="block font-medium mb-2">Puntuación</label>
-        <div id="rating-stars" class="flex flex-row-reverse justify-start gap-1 text-2xl">
-          {% for i in "54321" %}
-            <input type="radio"
-                   name="rating"
-                   id="rating{{ i }}"
-                   value="{{ i }}"
-                   class="hidden peer"
-                   {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
-            <label for="rating{{ i }}"
-                   class="cursor-pointer text-gray-300 hover:text-accent transition-all peer-checked:text-accent"
-                   data-value="{{ i }}">☕</label>
-          {% endfor %}
-        </div>
-        <div id="rating-label" class="text-sm text-gray-600 mt-1"></div>
-      </div>
-    </div>
-
-    <!-- Paso 2+: Etiquetas por categoría (usa tag_choices del contexto) -->
-    {% for category, tags in tag_choices.items %}
-      <div class="step hidden" id="step-{{ forloop.counter }}">
-        <h3 class="text-lg font-semibold mb-3 text-gray-800">
-          🧠 ¿Querés agregar alguna etiqueta <span class="text-primary">{{ category }}</span>?
-        </h3>
-
-        <div class="grid grid-cols-1 gap-2">
-          {% for tag in tags %}
-            <label class="flex items-center gap-2 text-sm">
-              <input type="checkbox"
-                     name="tags"
-                     value="{{ tag.id }}"
-                     class="rounded border-gray-300 text-accent focus:ring-accent">
-              {{ tag.name }}
-            </label>
-          {% empty %}
-            <p class="text-sm text-gray-500">No hay etiquetas cargadas para esta categoría.</p>
-          {% endfor %}
+    {# === PASO 1: ETIQUETAS (una categoría por paso) === #}
+    <section id="step-tags" class="surface p-5 rounded-xl border">
+      <div class="flex items-center justify-between gap-3 mb-3">
+        <h2 class="text-lg font-semibold">1) Etiquetas sensoriales</h2>
+        <div class="flex items-center gap-3 text-sm text-gray-500">
+          <input id="tag-search" type="search" placeholder="Buscar etiqueta en esta categoría"
+                 class="rounded-lg border px-3 py-1.5 text-sm" />
+          <span><b id="sel-count">0</b> seleccionadas</span>
+          <span class="hidden sm:inline">·</span>
+          <span><span id="step-index">1</span>/<span id="step-total">{{ tag_choices|length }}</span></span>
         </div>
       </div>
-    {% endfor %}
 
-    <!-- Botones de navegación -->
-    <div class="flex justify-between mt-6">
-      <button type="button" id="prevBtn"
-              class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-xl shadow hidden transition">
-        ← Anterior
-      </button>
+      <style>
+        .chip{--b:#e5e7eb;--bg:#f8fafc;--fg:#0f172a;display:inline-flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border:1px solid var(--b);border-radius:9999px;background:var(--bg);color:var(--fg);cursor:pointer;transition:transform .08s,box-shadow .12s,background .12s;user-select:none;font-size:.925rem}
+        .chip input{display:none}
+        .chip[data-checked="1"]{background:#eef2ff;border-color:#c7d2fe}
+        .chip-grid{display:flex;flex-wrap:wrap;gap:.5rem}
+        .cat-title{font-weight:600;color:#334155;margin:.25rem 0 1rem;display:flex;align-items:center;gap:.5rem}
+        .no-scrollbar::-webkit-scrollbar{display:none}
+        .btn-ghost{padding:.5rem .75rem;border-radius:.5rem}
+      </style>
 
-      <button type="button" id="nextBtn"
-              class="bg-accent hover:bg-[#14b8a6] text-white px-4 py-2 rounded-xl shadow transition">
-        Siguiente →
-      </button>
+      {% if tag_choices %}
+        <div id="tag-steps">
+          {% for category, tags in tag_choices.items %}
+            <div class="tag-step hidden" data-step="{{ forloop.counter0 }}" data-cat="{{ category|slugify }}">
+              <h3 class="cat-title">{{ forloop.counter }}. {{ category|title }}</h3>
+              <div class="chip-grid" data-grid>
+                {% for t in tags %}
+                  <label class="chip" data-checked="0" data-text="{{ t.name|lower }}">
+                    <input type="checkbox" name="tags" value="{{ t.id }}">
+                    <span>{{ t|tag_emoji }} {{ t.name }}</span>
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-sm text-gray-600">Aún no hay etiquetas definidas.</p>
+        <div class="mt-4 text-right">
+          <button type="button" id="btn-go-review" class="btn btn-primary rounded-xl">Ir a comentario →</button>
+        </div>
+      {% endif %}
 
-      <button type="submit" id="submitBtn"
-              class="bg-primary hover:bg-[#172b68] text-white px-4 py-2 rounded-xl shadow hidden transition">
-        ✅ Enviar reseña
-      </button>
-    </div>
+      <div class="mt-5 flex items-center justify-between">
+        <button type="button" id="btn-prev" class="btn-ghost text-gray-600">← Volver</button>
+        <p id="tags-hint" class="text-sm text-gray-500">Podés elegir ninguna, una o varias y continuar.</p>
+        <div class="flex gap-2">
+          <button type="button" id="btn-skip" class="text-sm text-gray-500 underline">Saltar</button>
+          <button type="button" id="btn-next" class="btn btn-primary rounded-xl px-4 py-2">Siguiente →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PASO 2: RATING + COMENTARIO -->
+    <section id="step-review" class="surface p-5 rounded-xl border hidden">
+      <h2 class="text-lg font-semibold mb-3">2) Calificá y dejá tu comentario</h2>
+
+      <!-- RATING A TAZAS (1→5) -->
+      <div class="mb-3">
+        <style>
+          .cup-btn{width:36px;height:36px;display:grid;place-items:center;border-radius:.5rem;transition:transform .08s,background .12s}
+          .cup-btn:hover{background:#f1f5f9}
+          .cup-btn:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
+          .cup-icon{width:28px;height:28px}
+          .cup-outline{stroke:#9aa0a6;stroke-width:1.6;fill:none;opacity:.9}
+          .cup-fill{fill:#f59e0b;opacity:0;transition:opacity .12s}
+          .cup-btn.active .cup-fill{opacity:1}
+          .cup-btn.dim .cup-outline{opacity:.45}
+        </style>
+
+        <div id="rating-cups" tabindex="0" class="flex items-center gap-2 select-none"
+             role="radiogroup" aria-label="Calificación">
+          {% with rv=form.data.rating|default:form.instance.rating %}
+            {% for n in "12345" %}
+              <input type="radio" class="sr-only" id="rating_{{forloop.counter}}" name="rating"
+                     value="{{forloop.counter}}"
+                     {% if rv|stringformat:"s" == forloop.counter|stringformat:"s" %}checked{% endif %}>
+              <label for="rating_{{forloop.counter}}" class="cup-btn" data-value="{{forloop.counter}}" aria-label="{{forloop.counter}}">
+                <svg viewBox="0 0 24 24" class="cup-icon" aria-hidden="true">
+                  <path class="cup-fill" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
+                  <g class="cup-outline">
+                    <path d="M4 8h11v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8z"/>
+                    <path d="M15 9h3a3 3 0 0 1 0 6h-2"/>
+                  </g>
+                </svg>
+              </label>
+            {% endfor %}
+          {% endwith %}
+          <span id="rating-label" class="ml-2 text-sm text-gray-600"></span>
+        </div>
+        <p class="sr-only">1=Malo, 2=Regular, 3=Bueno, 4=Muy bueno, 5=Excelente</p>
+      </div>
+
+      <!-- Comentario -->
+      <div>
+        <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Comentario (opcional)</label>
+        <textarea id="comment" name="comment" rows="5"
+                  class="w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="¿Qué te gustó? ¿Algo para mejorar?"></textarea>
+      </div>
+
+      <div class="mt-4 flex items-center justify-between">
+        <button type="button" id="btn-back" class="text-sm text-blue-600 hover:underline">← Volver a etiquetas</button>
+        <button type="submit" class="btn btn-success rounded-xl px-4 py-2">Enviar reseña</button>
+      </div>
+    </section>
   </form>
 </div>
 
-<!-- Wizard + UX JS -->
+{# === Script ÚNICO del wizard de categorías === #}
 <script>
-  // ------- Estrellas (UI) -------
-  document.addEventListener("DOMContentLoaded", () => {
-    const starsWrap = document.getElementById('rating-stars');
-    const ratingLabel = document.getElementById('rating-label');
-    if (!starsWrap || !ratingLabel) return;
+(function () {
+  const step1      = document.getElementById('step-tags');
+  const step2      = document.getElementById('step-review');
+  const stepWrap   = document.getElementById('tag-steps');
+  const steps      = stepWrap ? Array.from(stepWrap.querySelectorAll('.tag-step')) : [];
+  const btnPrev    = document.getElementById('btn-prev');
+  const btnNext    = document.getElementById('btn-next');
+  const btnSkip    = document.getElementById('btn-skip');
+  const btnGoRev   = document.getElementById('btn-go-review');
+  const selCountEl = document.getElementById('sel-count');
+  const search     = document.getElementById('tag-search');
+  const stepIndex  = document.getElementById('step-index');
+  const stepTotal  = document.getElementById('step-total');
 
-    const radios = starsWrap.querySelectorAll('input[type="radio"]');
-    const stars = starsWrap.querySelectorAll('label[data-value]');
-    const labels = { 5: "Excelente", 4: "Muy bueno", 3: "Bueno", 2: "Regular", 1: "Malo" };
+  function selectedTotal(){ return document.querySelectorAll('input[name="tags"]:checked').length; }
+  function paintCount(){ if (selCountEl) selCountEl.textContent = selectedTotal(); }
 
-    function updateRatingVisual() {
-      const selected = Array.from(radios).find(r => r.checked)?.value;
-      stars.forEach(star => {
-        const v = star.dataset.value;
-        star.classList.toggle('text-accent', selected == v);
-        star.classList.toggle('text-gray-300', selected != v);
-      });
-      ratingLabel.textContent = selected ? labels[selected] : "";
-    }
-    radios.forEach(r => r.addEventListener('change', updateRatingVisual));
-    updateRatingVisual();
+  // Restaurar estado si había checks marcados
+  document.querySelectorAll('.chip input[type="checkbox"]').forEach(inp => {
+    if (inp.checked) inp.closest('.chip').dataset.checked = '1';
+  });
+  paintCount();
+
+  // Si no hay categorías -> ir directo al comentario
+  if (!steps.length) {
+    btnGoRev && btnGoRev.addEventListener('click', () => {
+      step1.classList.add('hidden'); step2.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    return;
+  }
+
+  // Toggle de chips (dentro del contenedor de pasos)
+  stepWrap.querySelectorAll('.chip').forEach(ch => {
+    ch.addEventListener('click', (e) => {
+      e.preventDefault();
+      const input = ch.querySelector('input[type="checkbox"]'); if(!input) return;
+      input.checked = !input.checked;
+      ch.dataset.checked = input.checked ? '1' : '0';
+      paintCount();
+    });
   });
 
-  // ------- Wizard -------
-  const steps = document.querySelectorAll('.step');
-  const nextBtn = document.getElementById('nextBtn');
-  const prevBtn = document.getElementById('prevBtn');
-  const submitBtn = document.getElementById('submitBtn');
-  let currentStep = 0;
+  let i = 0;
 
-  function showStep(index) {
-    steps.forEach((step, i) => step.classList.toggle('hidden', i !== index));
-    if (prevBtn && nextBtn && submitBtn) {
-      prevBtn.classList.toggle('hidden', index === 0);
-      nextBtn.classList.toggle('hidden', index === steps.length - 1);
-      submitBtn.classList.toggle('hidden', index !== steps.length - 1);
+  function filterChips() {
+    const q = (search?.value || '').trim().toLowerCase();
+    const grid = steps[i].querySelector('[data-grid]');
+    grid.querySelectorAll('.chip[data-text]').forEach(ch => {
+      ch.style.display = q && !ch.dataset.text.includes(q) ? 'none' : '';
+    });
+  }
+  search && search.addEventListener('input', filterChips);
+
+  function show(k) {
+    i = Math.max(0, Math.min(k, steps.length - 1));
+    steps.forEach((el, idx) => el.classList.toggle('hidden', idx !== i));
+    if (stepIndex) stepIndex.textContent = i + 1;
+    if (stepTotal) stepTotal.textContent = steps.length;
+    btnPrev.disabled = i === 0;
+    btnNext.textContent = (i === steps.length - 1) ? 'Ir a comentario →' : 'Siguiente →';
+    filterChips();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goToReview(){
+    step1.classList.add('hidden');
+    step2.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  btnPrev.addEventListener('click', () => show(i - 1));
+  btnSkip.addEventListener('click', () => (i < steps.length - 1) ? show(i + 1) : goToReview());
+  btnNext.addEventListener('click', () => (i < steps.length - 1) ? show(i + 1) : goToReview());
+
+  // Botón "volver a etiquetas" en Paso 2
+  document.getElementById('btn-back')?.addEventListener('click', () => {
+    step2.classList.add('hidden');
+    step1.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  show(0);
+})();
+</script>
+
+{# === Paso 2: rating a tazas === #}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const wrap   = document.getElementById('rating-cups');
+  if (!wrap) return;
+  const labels = {1:"Malo", 2:"Regular", 3:"Bueno", 4:"Muy bueno", 5:"Excelente"};
+  const cups   = [...wrap.querySelectorAll('label.cup-btn')];
+  const radios = [...wrap.querySelectorAll('input[name="rating"]')];
+  const out    = document.getElementById('rating-label');
+
+  const selected = () => {
+    const r = radios.find(x => x.checked);
+    return r ? Number(r.value) : 0;
+  };
+
+  function paint(temp) {
+    const s = temp ?? selected();
+    cups.forEach(btn => {
+      const v = Number(btn.dataset.value);
+      btn.classList.toggle('active', s && v <= s);
+      btn.classList.toggle('dim', !(s && v <= s));
+    });
+    out.textContent = s ? labels[s] : "";
+  }
+
+  cups.forEach(btn => {
+    const v = Number(btn.dataset.value);
+    btn.addEventListener('mouseenter', () => paint(v));
+    btn.addEventListener('mouseleave', () => paint());
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const r = radios.find(x => Number(x.value) === v);
+      if (r) { r.checked = true; paint(); }
+    });
+  });
+
+  wrap.addEventListener('keydown', (e) => {
+    let s = selected();
+    if (e.key === 'ArrowRight' && s < 5) {
+      radios.find(x => Number(x.value) === s+1).checked = true; paint(); e.preventDefault();
     }
-  }
+    if (e.key === 'ArrowLeft'  && s > 1) {
+      radios.find(x => Number(x.value) === s-1).checked = true; paint(); e.preventDefault();
+    }
+  });
 
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      if (currentStep < steps.length - 1) {
-        currentStep++;
-        showStep(currentStep);
-      }
-    });
-  }
-
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      if (currentStep > 0) {
-        currentStep--;
-        showStep(currentStep);
-      }
-    });
-  }
-
-  showStep(currentStep);
+  radios.forEach(r => r.addEventListener('change', paint));
+  paint();
+});
 </script>
 {% endblock %}

@@ -5,23 +5,21 @@
 {% block content %}
 
 <!-- Hero Section -->
-<section class="relative bg-no-repeat bg-center bg-cover w-full h-[400px] text-center text-white"
-         style="background-image: url('{% static 'images/coffee-hero.jpg' %}');">
-  <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+<section class="section-hero relative bg-no-repeat bg-center bg-cover w-full h-[400px] text-center text-white"
+          style="background-image: url('{% static 'images/coffee-hero.jpg' %}');">
   <div class="relative max-w-2xl mx-auto z-10 pt-20">
     <h1 class="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">
       ☕ {{ ui_messages.welcome_user|default:"Bienvenido. ¿Qué café descubrimos hoy?" }}
     </h1>
-    <p class="mb-6 text-lg drop-shadow">
+    <p class="mb-6 text-lg/7 opacity-95">
       Descubrí, calificá y compartí tus cafeterías favoritas de Buenos Aires.
     </p>
-    <a href="{% url 'cafe_list' %}" 
-       class="bg-primary text-white font-semibold px-6 py-3 rounded-lg shadow 
-              transition-transform transform hover:scale-105 hover:bg-primary/90">
+    <a href="{% url 'reviews:cafe_list' %}" class="btn btn-primary rounded-xl">
       ✨ Explorá Cafeterías
     </a>
   </div>
 </section>
+
 
 <!-- Últimas Reseñas -->
 <section class="py-12 bg-orange-50 overflow-x-hidden">
@@ -41,7 +39,7 @@
                   <p class="font-semibold leading-snug">
                     {{ review.user.username }} reseñó 
                     <a class="text-blue-600 hover:underline"
-                      href="{% url 'cafe_detail' review.cafe.id %}">{{ review.cafe.name }}</a>
+                      href="{% url 'reviews:cafe_detail' review.cafe.id %}">{{ review.cafe.name }}</a>
                   </p>
                   <p class="text-sm">☕ {{ review.rating }}</p>
                   <p class="text-sm text-gray-700">{{ review.comment|truncatewords:20 }}</p>
@@ -66,7 +64,7 @@
   <div class="max-w-xl mx-auto">
     <h3 class="text-xl font-semibold mb-4">✨ ¿Todavía no calificaste tu café favorito?</h3>
     <p class="mb-6 text-gray-700">Animate a dejar tu primera reseña y ayudá a otros a descubrir buenos lugares.</p>
-    <a href="{% url 'cafe_list' %}" 
+    <a href="{% url 'reviews:cafe_list' %}" 
        class="bg-primary text-white font-semibold px-6 py-3 rounded-lg shadow 
               transition-transform transform hover:scale-105 hover:bg-primary/90">
        Dejar una reseña
@@ -89,7 +87,7 @@
             <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-2xl rounded-md mb-3">📷</div>
           {% endif %}
           <h3 class="text-lg font-semibold mb-1">
-            <a class="hover:underline text-primary" href="{% url 'cafe_detail' cafe.id %}">
+            <a class="hover:underline text-primary" href="{% url 'reviews:cafe_detail' cafe.id %}">
               {{ cafe.name }}
             </a>
           </h3>
@@ -126,7 +124,7 @@
       {% endfor %}
     </div>
     <div class="mt-8">
-      <a href="{% url 'cafe_list' %}" 
+      <a href="{% url 'reviews:cafe_list' %}" 
          class="bg-primary text-white font-semibold px-6 py-3 rounded-full shadow 
                 transition-transform transform hover:scale-105 hover:bg-primary/90">
         Ver más cafeterías →
@@ -144,7 +142,7 @@
   <p class="text-gray-700 mb-6">Filtrá las mejores cafeterías por barrio o cercanía.</p>
   <div class="flex flex-wrap justify-center gap-4">
     {% for zona in home_zones %}
-      <a href="{% url 'cafe_list' %}?zona={{ zona }}" 
+      <a href="{% url 'reviews:cafe_list' %}?zona={{ zona }}" 
          class="bg-white border border-primary text-primary px-4 py-2 rounded 
                 hover:bg-primary hover:text-white transition">
          {{ zona }}

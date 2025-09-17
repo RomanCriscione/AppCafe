@@ -35,7 +35,7 @@
 
   <div class="flex items-center gap-3 mt-2">
     <form method="post"
-          action="{% url 'toggle_review_like' review.id %}"
+          action="{% url 'reviews:toggle_review_like' review.id %}"
           class="inline-flex items-center gap-1 like-form"
           data-review="{{ review.id }}">
       {% csrf_token %}
@@ -52,6 +52,6 @@
       Ver más
     </button>
 
-    <a href="{% url 'report_review' review.id %}" class="text-xs text-red-500 hover:underline ml-auto">Denunciar</a>
+    <a href="{% url 'reviews:report_review' review.id %}" class="text-xs text-red-500 hover:underline ml-auto">Denunciar</a>
   </div>
 </article>

@@ -19,7 +19,7 @@
     "@type": "ItemList",
     "itemListElement": [
       {% for c in cafes %}
-      { "@type": "ListItem", "position": {{ forloop.counter }}, "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'cafe_detail' c.id %}" }{% if not forloop.last %},{% endif %}
+      { "@type": "ListItem", "position": {{ forloop.counter }}, "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'reviews:cafe_detail' c.id %}" }{% if not forloop.last %},{% endif %}
       {% endfor %}
     ]
   }
@@ -89,7 +89,7 @@
           <button type="submit" class="btn btn-primary rounded-xl text-sm">📍 Cafés cerca mío</button>
         </form>
         {% if mostrar_boton_reset %}
-          <a href="{% url 'cafe_list' %}" class="btn btn-ghost rounded-xl text-sm">🔄 Ver todos los cafés</a>
+          <a href="{% url 'reviews:cafe_list' %}" class="btn btn-ghost rounded-xl text-sm">🔄 Ver todos los cafés</a>
         {% endif %}
       </div>
     </div>
@@ -118,19 +118,19 @@
         {% for cafe in cafes %}
           <article class="card cafe-card group relative h-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition">
             {% if cafe.photo1 %}
-              <a href="{% url 'cafe_detail' cafe.id %}">
+              <a href="{% url 'reviews:cafe_detail' cafe.id %}">
                 <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}"
                      class="h-44 w-full object-cover" loading="lazy" decoding="async" width="800" height="533">
               </a>
             {% else %}
-              <a href="{% url 'cafe_detail' cafe.id %}" class="block">
+              <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block">
                 <div class="h-44 w-full bg-gray-200 flex items-center justify-center text-gray-500 rounded-md">Sin foto</div>
               </a>
             {% endif %}
 
             <div class="p-4">
               <h3 class="text-lg font-semibold tracking-tight line-clamp-1">
-                <a href="{% url 'cafe_detail' cafe.id %}" class="hover:underline">{{ cafe.name }}</a>
+                <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="hover:underline">{{ cafe.name }}</a>
               </h3>
               <p class="text-sm text-gray-600 line-clamp-1">{{ cafe.location }}</p>
               <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
@@ -140,7 +140,7 @@
               </div>
 
               <div class="mt-4">
-                <a href="{% url 'cafe_detail' cafe.id %}" class="btn btn-outline rounded-xl w-full">Ver detalle</a>
+                <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="btn btn-outline rounded-xl w-full">Ver detalle</a>
               </div>
             </div>
           </article>

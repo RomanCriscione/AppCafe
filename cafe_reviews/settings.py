@@ -1,4 +1,3 @@
-# settings.py
 from pathlib import Path
 import os
 import dj_database_url
@@ -23,7 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.sitemaps',
 
-    # --- Tus apps primero (para que sus plantillas tengan prioridad) ---
+    # Apps propias
     'core',
     'accounts',
     'reviews.apps.ReviewsConfig',
@@ -44,7 +43,7 @@ AUTHENTICATION_BACKENDS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # <- Whitenoise
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -59,8 +58,7 @@ ROOT_URLCONF = 'cafe_reviews.urls'
 
 TEMPLATES = [{
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    # ✅ carpeta global de plantillas (recomendado tener /templates/account/login.html y signup.html aquí)
-    'DIRS': [os.path.join(BASE_DIR, 'templates')],
+    'DIRS': [os.path.join(BASE_DIR, 'templates')],  # /templates global
     'APP_DIRS': True,
     'OPTIONS': {
         'context_processors': [
@@ -78,7 +76,8 @@ WSGI_APPLICATION = 'cafe_reviews.wsgi.application'
 # --- DB ---
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}", conn_max_age=600
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600
     )
 }
 
@@ -94,7 +93,6 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'es'
 TIME_ZONE = 'America/Argentina/Buenos_Aires'
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 LOCALE_PATHS = [BASE_DIR / 'locale']
 
@@ -104,13 +102,22 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 if DEBUG:
     STATICFILES_DIRS = [BASE_DIR / "static"]
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 else:
     STATICFILES_DIRS = []
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Django 5: usar solo STORAGES (sin STATICFILES_STORAGE redundante)
+if DEBUG:
+    static_backend = "whitenoise.storage.CompressedStaticFilesStorage"
+else:
+    static_backend = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": static_backend},
+}
 
 # --- User model ---
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -122,8 +129,40 @@ ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # --- Email ---
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "no-reply@gota.local"
+EMAIL_BACKEND = config(
+    'EMAIL_BACKEND',
+    default="django.core.mail.backends.console.EmailBackend"
+)
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default="no-reply@gota.local")
+
+# --- allauth ---
+
+ACCOUNT_EMAIL_VERIFICATION = config('ACCOUNT_EMAIL_VERIFICATION', default="optional")  # "none" para desactivar verificación
+ACCOUNT_LOGIN_METHODS = {"username", "email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
+ACCOUNT_RATE_LIMITS = {
+    "login_failed": "5/5m",
+}
+
+
+ACCOUNT_FORMS = {
+    'signup': 'accounts.forms.CustomSignupForm',
+}
+
+ACCOUNT_EMAIL_VALIDATORS = ["core.validators.validate_not_disposable"]
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"prompt": "select_account"},
+        "APP": {
+            "client_id": config("GOOGLE_CLIENT_ID", default=""),
+            "secret": config("GOOGLE_CLIENT_SECRET", default=""),
+            "key": "",
+        },
+    }
+}
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # --- Seguridad extra ---
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -150,43 +189,9 @@ CACHES = {
     }
 }
 
-STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
-}
-
 # --- Planes / Upgrades ---
 PLAN_UPGRADES_ENABLED = False
 PAYMENT_LINKS = {
     1: "https://tu-pasarela.com/checkout/plan-barista",
     2: "https://tu-pasarela.com/checkout/plan-maestro",
 }
-
-# =======================
-#  Django-allauth
-# =======================
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = "none"      # en local, el enlace sale por consola
-ACCOUNT_AUTHENTICATION_METHOD = "username_email"
-ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
-ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
-
-ACCOUNT_FORMS = {
-    'signup': 'accounts.forms.CustomSignupForm',
-}
-
-ACCOUNT_EMAIL_VALIDATORS = ["core.validators.validate_not_disposable"]
-
-SOCIALACCOUNT_PROVIDERS = {
-    "google": {
-        "SCOPE": ["profile", "email"],
-        "AUTH_PARAMS": {"prompt": "select_account"},  # ← fuerza chooser
-        "APP": {
-            "client_id": config("GOOGLE_CLIENT_ID", default=""),
-            "secret": config("GOOGLE_CLIENT_SECRET", default=""),
-            "key": "",
-        },
-    }
-}
-
-SOCIALACCOUNT_LOGIN_ON_GET = True

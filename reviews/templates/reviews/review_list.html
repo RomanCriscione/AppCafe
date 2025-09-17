@@ -7,7 +7,7 @@
 
   {% if user.is_authenticated and user.is_owner %}
     <p class="mb-4">
-      <a href="{% url 'create_cafe' %}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow transition-all">
+      <a href="{% url 'reviews:create_cafe' %}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow transition-all">
         ➕ Agregar nueva cafetería
       </a>
     </p>
@@ -24,7 +24,7 @@
         {% endif %}
         <div>
           <p class="font-semibold">{{ review.user.first_name }} dijo sobre
-            <a href="{% url 'cafe_detail' review.cafe.id %}" class="text-blue-600 hover:underline">{{ review.cafe.name }}</a>:
+            <a href="{% url 'reviews:cafe_detail' review.cafe.id %}" class="text-blue-600 hover:underline">{{ review.cafe.name }}</a>:
           </p>
           <p class="text-sm">☕ {{ review.rating }}</p>
           <p class="mt-1">{{ review.comment }}</p>

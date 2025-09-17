@@ -2,7 +2,7 @@
   <h3 class="text-2xl font-bold text-center mb-4 text-brown-800">Paso 1: Comentario y puntuación</h3>
   <form id="review-form-step-1" 
     method="post"
-    action="{% url 'create_review' cafe.id %}"
+    action="{% url 'reviews:create_review' cafe.id %}"
     class="space-y-4">
     {% csrf_token %}
     <div>
@@ -11,12 +11,12 @@
     </div>
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">☕ Calificación</label>
-      <div class="flex flex-row-reverse justify-end gap-1" id="rating-stars">
+      <div class="flex flex-row-reverse justify-end gap-1 rating-cups" id="rating-stars">
         {% for i in "54321" %}
           <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" class="sr-only"
-                 {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
+                  {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
           <label for="star{{ i }}" class="text-2xl cursor-pointer transition-transform duration-150 text-gray-300 hover:scale-110"
-                 data-value="{{ i }}">☕</label>
+                  data-value="{{ i }}">☕</label>
         {% endfor %}
       </div>
       <p id="rating-label" class="text-sm text-center mt-1 text-gray-600"></p>
@@ -28,3 +28,17 @@
     </div>
   </form>
 </div>
+
+<script>
+  // Feedback de rating (texto/animación sutil)
+  (function(){
+    const wrap = document.getElementById('rating-stars');
+    const label = document.getElementById('rating-label');
+    if(!wrap || !label) return;
+    wrap.addEventListener('change', (e)=>{
+      const v = parseInt(new FormData(wrap.closest('form')).get('rating') || 0, 10);
+      const desc = {1:"Malo",2:"Regular",3:"Bueno",4:"Muy bueno",5:"Excelente"}[v] || "";
+      label.textContent = desc ? `Elegiste: ${v} — ${desc}` : "";
+    });
+  })();
+</script>

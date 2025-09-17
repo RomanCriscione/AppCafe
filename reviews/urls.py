@@ -1,7 +1,9 @@
+# reviews/urls.py
 from django.urls import path
 from . import views
-from django.views.generic import TemplateView
 from . import views_claims
+
+app_name = "reviews"
 
 urlpatterns = [
     # Reseñas y cafés
@@ -33,12 +35,15 @@ urlpatterns = [
     # Mapa
     path('mapa/', views.mapa_cafes, name='mapa_cafes'),
 
+    # Claim
     path("cafes/<int:cafe_id>/claim/", views_claims.claim_start, name="claim_start"),
     path("cafes/<int:cafe_id>/claim/<int:claim_id>/verify/", views_claims.claim_verify_email, name="claim_verify_email"),
     path("cafes/<int:cafe_id>/claim/<int:claim_id>/evidence/", views_claims.claim_upload_evidence, name="claim_upload_evidence"),
 
+    # Likes / Reportes
     path("reviews/<int:review_id>/like/", views.toggle_review_like, name="toggle_review_like"),
     path("reviews/<int:review_id>/report/", views.report_review, name="report_review"),
-    path('planes/checkout/<int:cafe_id>/<int:nivel>/', views.plan_checkout_redirect, name='plan_checkout_redirect'),
 
+    # Checkout plan
+    path('planes/checkout/<int:cafe_id>/<int:nivel>/', views.plan_checkout_redirect, name='plan_checkout_redirect'),
 ]

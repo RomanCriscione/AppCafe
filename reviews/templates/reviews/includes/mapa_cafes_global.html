@@ -79,10 +79,10 @@
           markers.push(marker);
 
           const card = `
-            <div class="border rounded p-3 shadow hover:shadow-lg transition">
+            <div class="card p-3">
               <h3 class="text-lg font-semibold mb-1">${cafe.name}</h3>
               <p class="text-sm text-gray-600 mb-1">${cafe.address ?? ''}</p>
-              <a href="${cafe.url}" class="text-blue-600 text-sm underline">Ver más</a>
+              <a href="${cafe.url}" class="btn btn-outline btn-sm rounded-xl">Ver más</a>
             </div>`;
           listaDIV.insertAdjacentHTML('beforeend', card);
         }

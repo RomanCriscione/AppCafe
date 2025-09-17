@@ -5,11 +5,11 @@
   class="card cafe-card recommended-card group animate-fade-in-up {% cycle '' 'animate-delay-100' 'animate-delay-200' 'animate-delay-300' %} flex flex-col h-full relative"
 >
   {% if user.is_authenticated %}
-    <form method="POST" action="{% url 'toggle_favorite' cafe.id %}" class="absolute top-3 right-3 z-10">
+    <form method="POST" action="{% url 'reviews:toggle_favorite' cafe.id %}" class="absolute top-3 right-3 z-10">
       {% csrf_token %}
       <button
         type="submit"
-        class="w-10 h-10 flex items-center justify-center rounded-full bg-white/90 backdrop-blur shadow hover:scale-110 transition"
+        class="w-10 h-10 flex items-center justify-center rounded-full bg-white/90 backdrop-blur shadow hover:scale-110 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[color:var(--primary)]"
         aria-label="{% if cafe.id in favoritos_ids %}Quitar {{ cafe.name }} de favoritos{% else %}Agregar {{ cafe.name }} a favoritos{% endif %}"
         aria-pressed="{% if cafe.id in favoritos_ids %}true{% else %}false{% endif %}"
         title="{% if cafe.id in favoritos_ids %}Quitar {{ cafe.name }} de favoritos{% else %}Agregar {{ cafe.name }} a favoritos{% endif %}"
@@ -25,13 +25,13 @@
 
   <div class="card-media relative">
     {% if cafe.photo1 %}
-      <a href="{% url 'cafe_detail' cafe.id %}">
+      <a href="{% url 'reviews:cafe_detail' cafe.id %}">
         <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name|default:'café sin nombre' }}"
              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
              loading="lazy" decoding="async" width="800" height="600">
       </a>
     {% else %}
-      <a href="{% url 'cafe_detail' cafe.id %}" class="block w-full h-full bg-gray-100 flex items-center justify-center text-gray-300 text-5xl" aria-hidden="true">
+      <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block w-full h-full bg-gray-100 flex items-center justify-center text-gray-300 text-5xl" aria-hidden="true">
         📷
       </a>
     {% endif %}
@@ -45,13 +45,13 @@
     <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|default_if_none:"–"|floatformat:1 }}/5</p>
 
     <div class="card-actions mt-2">
-      <a href="{% url 'cafe_detail' cafe.id %}" class="btn btn-outline rounded-xl w-full">Ver detalle</a>
-      <button type="button" class="btn btn-secondary rounded-xl"
+      <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="btn btn-outline rounded-xl w-full">Ver detalle</a>
+      <button type="button" class="btn btn-ghost btn-icon rounded-xl"
         aria-label="Compartir {{ cafe.name }}" title="Compartir {{ cafe.name }}"
         onclick="(async ()=>{try{
-          const url='{{ request.scheme }}://{{ request.get_host }}{% url 'cafe_detail' cafe.id %}';
+          const url='{{ request.scheme }}://{{ request.get_host }}{% url 'reviews:cafe_detail' cafe.id %}';
           if(navigator.share){ await navigator.share({ title:'{{ cafe.name|escapejs }}', url }); }
-          else { await navigator.clipboard.writeText(url); alert('Link copiado'); }
+          else { await navigator.clipboard.writeText(url); const t=document.createElement('div'); t.className='toast'; t.textContent='Link copiado'; document.body.appendChild(t); setTimeout(()=>{t.style.transition='opacity .4s'; t.style.opacity='0'; setTimeout(()=>t.remove(),400)},1400); }
         }catch(e){}})();">
         <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
       </button>

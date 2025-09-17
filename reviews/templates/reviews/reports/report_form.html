@@ -23,7 +23,7 @@
       {% if form.comment.errors %}<p class="text-red-600 text-sm">{{ form.comment.errors }}</p>{% endif %}
     </div>
     <button type="submit" class="btn btn-primary">Enviar denuncia</button>
-    <a href="{% url 'cafe_detail' review.cafe_id %}" class="btn btn-ghost">Cancelar</a>
+    <a href="{% url 'reviews:cafe_detail' review.cafe_id %}" class="btn btn-ghost">Cancelar</a>
   </form>
 </div>
 {% endblock %}

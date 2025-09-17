@@ -1,0 +1,85 @@
+<div class="space-y-3" x-data="{ q:'', max: {{ max_select|default:5 }}, sel: 0 }" x-init="
+  sel = [...document.querySelectorAll('input[name=&quot;tags&quot;]:checked')].length
+">
+  <div class="flex items-center justify-between">
+    <label class="font-semibold">Etiquetas sensoriales</label>
+    <span class="text-sm text-gray-500"><span x-text="sel"></span>/<span x-text="max"></span> seleccionadas</span>
+  </div>
+
+  <!-- Buscar -->
+  <input type="search" x-model="q" placeholder="Buscar sabores, aroma, notas..."
+         class="w-full rounded-md border px-3 py-2 text-sm"/>
+
+  <!-- Sugeridas -->
+  {% if top_tags %}
+  <div class="mt-2">
+    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Sugeridas</div>
+    <div class="flex flex-wrap gap-2">
+      {% for t in top_tags %}
+        <label class="cursor-pointer">
+          <input type="checkbox" name="tags" value="{{ t.id }}" class="sr-only peer"
+                 onchange="window._tp_onToggle(this)">
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm
+                       peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600
+                       hover:shadow transition">
+            {{ t|tag_emoji }} {{ t.name }}
+            {% if t.num %}<span class="text-xs opacity-70">({{ t.num }})</span>{% endif %}
+          </span>
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Todas -->
+  <div class="mt-3">
+    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Todas</div>
+    <div id="tag-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      {% for t in all_tags %}
+        <label class="cursor-pointer" data-name="{{ t.name|lower }}">
+          <input type="checkbox" name="tags" value="{{ t.id }}" class="sr-only peer"
+                 onchange="window._tp_onToggle(this)">
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm
+                       peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600
+                       hover:shadow transition">
+            {{ t|tag_emoji }} {{ t.name }}
+          </span>
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Límite y contador
+  (function () {
+    const max = {{ max_select|default:5 }};
+    const root = document.currentScript.closest('[x-data]');
+    function updateCount() {
+      const count = document.querySelectorAll('input[name="tags"]:checked').length;
+      root.__x.$data.sel = count; // Alpine opcional: se ignora si no está
+    }
+    window._tp_onToggle = (cb) => {
+      const checked = document.querySelectorAll('input[name="tags"]:checked').length;
+      if (checked > max) {
+        cb.checked = false;
+        return;
+      }
+      updateCount();
+    };
+    updateCount();
+
+    // Filtro por búsqueda (sin dependencias)
+    const grid = document.getElementById('tag-grid');
+    const input = root.querySelector('input[type="search"]');
+    if (grid && input) {
+      input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        grid.querySelectorAll('label[data-name]').forEach(el => {
+          const hit = !q || el.dataset.name.includes(q);
+          el.style.display = hit ? '' : 'none';
+        });
+      });
+    }
+  })();
+</script>

@@ -9,19 +9,19 @@
 
   <!-- CTAs unificados -->
   <div id="owner-actions" class="actions flex flex-col sm:flex-row flex-wrap justify-center gap-4 mb-10">
-    <a href="{% url 'create_cafe' %}" class="cta cta-green">
+    <a href="{% url 'reviews:create_cafe' %}" class="cta cta-green">
       ➕ <span>Agregar nueva cafetería</span>
     </a>
 
-    <a href="{% url 'owner_reviews' %}" class="cta cta-blue">
+    <a href="{% url 'reviews:owner_reviews' %}" class="cta cta-blue">
       📝 <span>Ver todas las reseñas</span>
     </a>
 
-    <a href="{% url 'analytics_dashboard' %}" class="cta cta-indigo">
+    <a href="{% url 'reviews:analytics_dashboard' %}" class="cta cta-indigo">
       📊 <span>Ver analíticas</span>
     </a>
 
-    <a href="{% url 'planes' %}" class="cta cta-orange">
+    <a href="{% url 'reviews:planes' %}" class="cta cta-orange">
       💼 <span>Planes para crecer</span>
     </a>
   </div>
@@ -29,7 +29,7 @@
   {% if no_cafes %}
     <div class="text-center py-12 animate-fade-in-up">
       <p class="text-gray-600 text-lg">{{ ui_messages.owner_no_cafes }}</p>
-      <a href="{% url 'create_cafe' %}" 
+      <a href="{% url 'reviews:create_cafe' %}" 
          class="mt-4 inline-block bg-green-600 hover:bg-green-700 hover:scale-105 text-white px-4 py-2 rounded shadow transition-all duration-200">
         Agregar mi primer café
       </a>
@@ -102,7 +102,7 @@
 
   <div class="flex flex-wrap gap-2 mt-2 items-center">
     {# ✅ cambia el plan a gratuito (POST real) #}
-    <form method="post" action="{% url 'cambiar_visibilidad' cafe.id %}">
+    <form method="post" action="{% url 'reviews:cambiar_visibilidad' cafe.id %}">
       {% csrf_token %}
       <input type="hidden" name="visibility_level" value="0">
       <button type="submit" class="btn btn-primary btn-sm">
@@ -127,15 +127,15 @@
                   Aplicar
                 </button>
 
-                <a href="{% url 'cafe_detail' cafe.id %}" class="btn btn-outline btn-sm">
+                <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="btn btn-outline btn-sm">
                   🔍 Ver detalles
                 </a>
 
-                <a href="{% url 'edit_cafe' cafe.id %}" class="btn btn-warning btn-sm">
+                <a href="{% url 'reviews:edit_cafe' cafe.id %}" class="btn btn-warning btn-sm">
                   ✏️ Editar
                 </a>
 
-                <form action="{% url 'delete_cafe' cafe.id %}" method="post"
+                <form action="{% url 'reviews:delete_cafe' cafe.id %}" method="post"
                       onsubmit="return confirm('¿Estás seguro de eliminar esta cafetería?')">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-danger btn-sm">
