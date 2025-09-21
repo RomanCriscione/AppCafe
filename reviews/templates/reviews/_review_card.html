@@ -1,7 +1,7 @@
 <article id="rev-{{ review.id }}" class="review-card p-4">
   <header class="review-head">
     <div class="review-avatar" aria-hidden="true">
-      {{ review.user.username|default:"U" |slice:":1" }}
+      {{ review.user.username|default:"U"|slice:":1" }}
     </div>
     <div class="flex-1">
       <div class="flex items-start justify-between gap-2">
@@ -19,14 +19,21 @@
 
   <div class="review-body mt-3 collapsed" data-collapsible>
     <div class="review-text">
-      {% if review.comment %}<p>{{ review.comment }}</p>{% endif %}
+      {% if review.comment %}
+        <p>{{ review.comment|linebreaksbr }}</p>
+      {% endif %}
+
       {% if review.sensory_tags.all %}
         <div class="tags-inline">
-          {% for t in review.sensory_tags.all %}<span class="badge badge-xs">{{ t.name }}</span>{% endfor %}
+          {% for t in review.sensory_tags.all %}
+            <span class="badge badge-xs">{{ t.name }}</span>
+          {% endfor %}
         </div>
       {% elif review.tags.all %}
         <div class="tags-inline">
-          {% for t in review.tags.all %}<span class="badge badge-xs">{{ t.name }}</span>{% endfor %}
+          {% for t in review.tags.all %}
+            <span class="badge badge-xs">{{ t.name }}</span>
+          {% endfor %}
         </div>
       {% endif %}
     </div>

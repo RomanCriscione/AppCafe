@@ -11,7 +11,12 @@
     <p class="text-gray-600">Primero elegí las etiquetas que mejor describen lo que sentiste. Luego calificá y dejá un comentario.</p>
   </header>
 
-  <form method="post" class="space-y-8" id="review-form">
+  {# Errores globales del form (si usás Form en la vista) #}
+  {% if form.non_field_errors %}
+    <div class="toast" role="alert" aria-live="polite">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  <form method="post" class="space-y-8" id="review-form" {% if form.photo or form.photos or form.images %}enctype="multipart/form-data"{% endif %}>
     {% csrf_token %}
 
     {# === PASO 1: ETIQUETAS (una categoría por paso) === #}
@@ -39,15 +44,23 @@
 
       {% if tag_choices %}
         <div id="tag-steps">
+          {% comment %}
+            Podés pasar opcionalmente selected_tag_ids desde la vista (lista de IDs) para pre-seleccionar.
+          {% endcomment %}
           {% for category, tags in tag_choices.items %}
             <div class="tag-step hidden" data-step="{{ forloop.counter0 }}" data-cat="{{ category|slugify }}">
               <h3 class="cat-title">{{ forloop.counter }}. {{ category|title }}</h3>
               <div class="chip-grid" data-grid>
                 {% for t in tags %}
-                  <label class="chip" data-checked="0" data-text="{{ t.name|lower }}">
-                    <input type="checkbox" name="tags" value="{{ t.id }}">
-                    <span>{{ t|tag_emoji }} {{ t.name }}</span>
-                  </label>
+                  {% with is_checked=False %}
+                    {% if selected_tag_ids and t.id in selected_tag_ids %}
+                      {% with is_checked=True %}{% endwith %}
+                    {% endif %}
+                    <label class="chip" data-checked="{{ is_checked|yesno:'1,0' }}" data-text="{{ t.name|lower }}">
+                      <input type="checkbox" name="tags" value="{{ t.id }}" {% if is_checked %}checked{% endif %}>
+                      <span>{{ t|tag_emoji }} {{ t.name }}</span>
+                    </label>
+                  {% endwith %}
                 {% endfor %}
               </div>
             </div>
@@ -88,12 +101,12 @@
         </style>
 
         <div id="rating-cups" tabindex="0" class="flex items-center gap-2 select-none"
-             role="radiogroup" aria-label="Calificación">
-          {% with rv=form.data.rating|default:form.instance.rating %}
+             role="radiogroup" aria-label="Calificación" aria-required="true">
+          {% with rv=form.rating.value|default:form.instance.rating|default:initial_rating|default:'' %}
             {% for n in "12345" %}
               <input type="radio" class="sr-only" id="rating_{{forloop.counter}}" name="rating"
                      value="{{forloop.counter}}"
-                     {% if rv|stringformat:"s" == forloop.counter|stringformat:"s" %}checked{% endif %}>
+                     {% if rv|stringformat:"s" == forloop.counter|stringformat:"s" %}checked{% endif %} required>
               <label for="rating_{{forloop.counter}}" class="cup-btn" data-value="{{forloop.counter}}" aria-label="{{forloop.counter}}">
                 <svg viewBox="0 0 24 24" class="cup-icon" aria-hidden="true">
                   <path class="cup-fill" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
@@ -107,20 +120,46 @@
           {% endwith %}
           <span id="rating-label" class="ml-2 text-sm text-gray-600"></span>
         </div>
-        <p class="sr-only">1=Malo, 2=Regular, 3=Bueno, 4=Muy bueno, 5=Excelente</p>
+
+        {% if form.rating.errors %}
+          <p class="text-red-600 text-sm mt-1" aria-live="polite">{{ form.rating.errors|striptags }}</p>
+        {% endif %}
       </div>
 
       <!-- Comentario -->
       <div>
         <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Comentario (opcional)</label>
-        <textarea id="comment" name="comment" rows="5"
-                  class="w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="¿Qué te gustó? ¿Algo para mejorar?"></textarea>
+        {% if form.comment %}
+          {{ form.comment }}
+        {% else %}
+          <textarea id="comment" name="comment" rows="5" maxlength="600"
+                    class="w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="¿Qué te gustó? ¿Algo para mejorar?"></textarea>
+        {% endif %}
+        {% if form.comment.errors %}
+          <p class="text-red-600 text-sm mt-1" aria-live="polite">{{ form.comment.errors|striptags }}</p>
+        {% endif %}
+        <div class="flex justify-end mt-1 text-xs text-gray-500">
+          <span><span id="char-now">0</span>/600</span>
+        </div>
       </div>
+
+      {# Fotos opcionales si tu Form expone campos #}
+      {% if form.photo or form.photos or form.images %}
+      <div class="mt-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Fotos (opcional)</label>
+        {% if form.photo %} <div class="mb-2">{{ form.photo }}</div> {% endif %}
+        {% if form.photos %} <div class="mb-2">{{ form.photos }}</div> {% endif %}
+        {% if form.images %} <div class="mb-2">{{ form.images }}</div> {% endif %}
+        {% if form.photo.errors %}<p class="text-red-600 text-sm mt-1">{{ form.photo.errors|striptags }}</p>{% endif %}
+        {% if form.photos.errors %}<p class="text-red-600 text-sm mt-1">{{ form.photos.errors|striptags }}</p>{% endif %}
+        {% if form.images.errors %}<p class="text-red-600 text-sm mt-1">{{ form.images.errors|striptags }}</p>{% endif %}
+      </div>
+      {% endif %}
 
       <div class="mt-4 flex items-center justify-between">
         <button type="button" id="btn-back" class="text-sm text-blue-600 hover:underline">← Volver a etiquetas</button>
-        <button type="submit" class="btn btn-success rounded-xl px-4 py-2">Enviar reseña</button>
+        <button type="submit" class="btn btn-success rounded-xl px-4 py-2" id="submit-btn">Enviar reseña</button>
       </div>
     </section>
   </form>
@@ -145,7 +184,7 @@
   function selectedTotal(){ return document.querySelectorAll('input[name="tags"]:checked').length; }
   function paintCount(){ if (selCountEl) selCountEl.textContent = selectedTotal(); }
 
-  // Restaurar estado si había checks marcados
+  // Restaurar estado visual si hay checks marcados (pre-selección desde el server)
   document.querySelectorAll('.chip input[type="checkbox"]').forEach(inp => {
     if (inp.checked) inp.closest('.chip').dataset.checked = '1';
   });
@@ -160,9 +199,11 @@
     return;
   }
 
-  // Toggle de chips (dentro del contenedor de pasos)
+  // Toggle de chips
   stepWrap.querySelectorAll('.chip').forEach(ch => {
     ch.addEventListener('click', (e) => {
+      // Evitá doble toggle si se clickea el <input>
+      if (e.target.tagName === 'INPUT') return;
       e.preventDefault();
       const input = ch.querySelector('input[type="checkbox"]'); if(!input) return;
       input.checked = !input.checked;
@@ -214,54 +255,85 @@
 })();
 </script>
 
-{# === Paso 2: rating a tazas === #}
+{# === Paso 2: rating a tazas + contador de caracteres + validaciones suaves === #}
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const wrap   = document.getElementById('rating-cups');
-  if (!wrap) return;
-  const labels = {1:"Malo", 2:"Regular", 3:"Bueno", 4:"Muy bueno", 5:"Excelente"};
-  const cups   = [...wrap.querySelectorAll('label.cup-btn')];
-  const radios = [...wrap.querySelectorAll('input[name="rating"]')];
-  const out    = document.getElementById('rating-label');
+  if (wrap) {
+    const labels = {1:"Malo", 2:"Regular", 3:"Bueno", 4:"Muy bueno", 5:"Excelente"};
+    const cups   = [...wrap.querySelectorAll('label.cup-btn')];
+    const radios = [...wrap.querySelectorAll('input[name="rating"]')];
+    const out    = document.getElementById('rating-label');
 
-  const selected = () => {
-    const r = radios.find(x => x.checked);
-    return r ? Number(r.value) : 0;
-  };
+    const selected = () => {
+      const r = radios.find(x => x.checked);
+      return r ? Number(r.value) : 0;
+    };
 
-  function paint(temp) {
-    const s = temp ?? selected();
+    function paint(temp) {
+      const s = temp ?? selected();
+      cups.forEach(btn => {
+        const v = Number(btn.dataset.value);
+        btn.classList.toggle('active', s && v <= s);
+        btn.classList.toggle('dim', !(s && v <= s));
+      });
+      out.textContent = s ? labels[s] : "";
+    }
+
     cups.forEach(btn => {
       const v = Number(btn.dataset.value);
-      btn.classList.toggle('active', s && v <= s);
-      btn.classList.toggle('dim', !(s && v <= s));
+      btn.addEventListener('mouseenter', () => paint(v));
+      btn.addEventListener('mouseleave', () => paint());
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const r = radios.find(x => Number(x.value) === v);
+        if (r) { r.checked = true; paint(); }
+      });
     });
-    out.textContent = s ? labels[s] : "";
+
+    wrap.addEventListener('keydown', (e) => {
+      let s = selected();
+      if (e.key === 'ArrowRight' && s < 5) {
+        const nxt = radios.find(x => Number(x.value) === s+1);
+        if (nxt) nxt.checked = true; paint(); e.preventDefault();
+      }
+      if (e.key === 'ArrowLeft'  && s > 1) {
+        const prv = radios.find(x => Number(x.value) === s-1);
+        if (prv) prv.checked = true; paint(); e.preventDefault();
+      }
+    });
+
+    radios.forEach(r => r.addEventListener('change', paint));
+    paint();
   }
 
-  cups.forEach(btn => {
-    const v = Number(btn.dataset.value);
-    btn.addEventListener('mouseenter', () => paint(v));
-    btn.addEventListener('mouseleave', () => paint());
-    btn.addEventListener('click', (e) => {
+  // Contador de caracteres (600)
+  const ta  = document.getElementById('comment');
+  const now = document.getElementById('char-now');
+  if (ta && now) {
+    const MAX = 600;
+    ta.maxLength = MAX;
+    const sync = () => { now.textContent = (ta.value || '').length; };
+    ta.addEventListener('input', sync);
+    sync();
+  }
+
+  // Validación suave en submit (rating requerido)
+  const form = document.getElementById('review-form');
+  form?.addEventListener('submit', (e) => {
+    const anyRating = !!document.querySelector('input[name="rating"]:checked');
+    if (!anyRating) {
       e.preventDefault();
-      const r = radios.find(x => Number(x.value) === v);
-      if (r) { r.checked = true; paint(); }
-    });
-  });
-
-  wrap.addEventListener('keydown', (e) => {
-    let s = selected();
-    if (e.key === 'ArrowRight' && s < 5) {
-      radios.find(x => Number(x.value) === s+1).checked = true; paint(); e.preventDefault();
-    }
-    if (e.key === 'ArrowLeft'  && s > 1) {
-      radios.find(x => Number(x.value) === s-1).checked = true; paint(); e.preventDefault();
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = 'Elegí una calificación (1 a 5 tazas).';
+      toast.setAttribute('role','alert');
+      toast.setAttribute('aria-live','polite');
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.style.transition='opacity .3s'; toast.style.opacity='0'; setTimeout(() => toast.remove(), 300); }, 1600);
+      wrap?.focus();
     }
   });
-
-  radios.forEach(r => r.addEventListener('change', paint));
-  paint();
 });
 </script>
 {% endblock %}

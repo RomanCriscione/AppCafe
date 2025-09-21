@@ -1,0 +1,15 @@
+¡Hola!
+
+Alguien denunció una reseña en {{ cafe.name }}.
+
+Reseña:
+- Usuario: {{ review.user.username }}
+- Puntaje: ☕ {{ review.rating|floatformat:1 }}
+- Comentario: {{ review.comment|default:"(sin comentario)" }}
+
+Motivo: {{ report.get_reason_display }}
+Comentario extra: {{ report.comment|default:"(sin comentario)" }}
+
+Ver el café: {{ detail_url }}
+
+— El equipo de Gota

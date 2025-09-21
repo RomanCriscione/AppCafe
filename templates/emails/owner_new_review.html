@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es">
+  <body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;line-height:1.5">
+    <h2>☕ Nueva reseña en {{ cafe.name }}</h2>
+    <p><strong>Usuario:</strong> {{ review.user.username }}</p>
+    <p><strong>Puntaje:</strong> ☕ {{ review.rating|floatformat:1 }}</p>
+    {% if review.comment %}
+      <p><strong>Comentario:</strong><br>{{ review.comment }}</p>
+    {% else %}
+      <p><em>(sin comentario)</em></p>
+    {% endif %}
+    <p>
+      <a href="{{ detail_url }}">Ver el café</a> ·
+      <a href="{{ owner_reply_url }}">Responder desde tu panel</a>
+    </p>
+    <hr>
+    <small>Enviado por Gota</small>
+  </body>
+</html>

@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="max-w-xl mx-auto mt-6 px-4 py-6 bg-gray-100 rounded-lg shadow">
-<h1 class="text-2xl font-semibold mb-4 text-center">📷 Subir fotos a {{ cafe.name }}</h1>
+  <h1 class="text-2xl font-semibold mb-4 text-center">📷 Subir fotos a {{ cafe.name }}</h1>
 
   {% if messages %}
     <ul class="mb-4 space-y-2">
@@ -19,37 +19,41 @@
     {% csrf_token %}
 
     <!-- Foto 1 -->
-<div>
-<label class="block font-medium text-gray-700 mb-1" for="id_photo1">Foto principal:</label>
+    <div>
+      <label class="block font-medium text-gray-700 mb-1" for="id_photo1">Foto principal:</label>
       {{ form.photo1 }}
       {% if cafe.photo1 %}
         <img alt="Foto 1" class="w-32 mt-2 rounded shadow" loading="lazy" src="{{ cafe.photo1.url }}"/>
       {% endif %}
     </div>
-<!-- Foto 2 -->
-<div>
-<label class="block font-medium text-gray-700 mb-1" for="id_photo2">Foto adicional 1:</label>
+
+    <!-- Foto 2 -->
+    <div>
+      <label class="block font-medium text-gray-700 mb-1" for="id_photo2">Foto adicional 1:</label>
       {{ form.photo2 }}
       {% if cafe.photo2 %}
         <img alt="Foto 2" class="w-32 mt-2 rounded shadow" loading="lazy" src="{{ cafe.photo2.url }}"/>
       {% endif %}
     </div>
-<!-- Foto 3 -->
-<div>
-<label class="block font-medium text-gray-700 mb-1" for="id_photo3">Foto adicional 2:</label>
+
+    <!-- Foto 3 -->
+    <div>
+      <label class="block font-medium text-gray-700 mb-1" for="id_photo3">Foto adicional 2:</label>
       {{ form.photo3 }}
       {% if cafe.photo3 %}
         <img alt="Foto 3" class="w-32 mt-2 rounded shadow" loading="lazy" src="{{ cafe.photo3.url }}"/>
       {% endif %}
     </div>
-<button class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition font-semibold" type="submit">
+
+    <button class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition font-semibold" type="submit">
       Guardar fotos
     </button>
-</form>
-<p class="mt-4 text-center">
-<a class="text-blue-600 hover:underline text-sm" href="{% url 'reviews:cafe_detail' cafe.id %}">
+  </form>
+
+  <p class="mt-4 text-center">
+    <a class="text-blue-600 hover:underline text-sm" href="{% url 'reviews:cafe_detail' cafe.id %}">
       ← Volver al detalle de la cafetería
     </a>
-</p>
+  </p>
 </div>
 {% endblock %}

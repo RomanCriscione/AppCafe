@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es">
+  <body style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;line-height:1.5">
+    <h2>⚠️ Denuncia recibida en una reseña de {{ cafe.name }}</h2>
+    <p><strong>Reseña denunciada</strong></p>
+    <ul>
+      <li>Usuario: {{ review.user.username }}</li>
+      <li>Puntaje: ☕ {{ review.rating|floatformat:1 }}</li>
+      <li>Comentario: {{ review.comment|default:"(sin comentario)" }}</li>
+    </ul>
+    <p><strong>Motivo:</strong> {{ report.get_reason_display }}</p>
+    <p><strong>Comentario extra:</strong> {{ report.comment|default:"(sin comentario)" }}</p>
+    <p><a href="{{ detail_url }}">Ver el café</a></p>
+    <hr>
+    <small>Enviado por Gota</small>
+  </body>
+</html>

@@ -1,5 +1,3 @@
-
-# file: reviews/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -30,7 +28,6 @@ def _invalidate_reviews_cache(cafe_id, user_id=None):
     from django.core.cache import cache
 
     # El template usa: {% cache 600 cafe_reviews_list cafe.id user.id %}
-    # Para anónimos, user.id suele renderizar vacío, y a veces 'None'.
     posibles = [
         make_template_fragment_key("cafe_reviews_list", [cafe_id, ""]),
         make_template_fragment_key("cafe_reviews_list", [cafe_id, "None"]),
@@ -41,10 +38,16 @@ def _invalidate_reviews_cache(cafe_id, user_id=None):
     for k in posibles:
         cache.delete(k)
 
-
 # ✅ cache fragment
 from django.core.cache.utils import make_template_fragment_key
 from django.core.cache import cache
+
+
+_UI_MSG = {
+    "no_results": "No encontramos cafés con esos filtros.",
+    "search_no_results": "No encontramos cafés en esa zona.",
+    "no_reviews": "Todavía no hay reseñas.",
+}
 
 
 class ReviewListView(ListView):
@@ -102,13 +105,12 @@ class ReviewListView(ListView):
                 'name': c.name,
                 'latitude': float(c.latitude),
                 'longitude': float(c.longitude),
-                # 🔧 FIX namespace
                 'url': reverse('reviews:cafe_detail', kwargs={'cafe_id': c.id}),
             }
             for c in cafes
         ]
         context['cafes_json'] = json.dumps(cafes_data, cls=DjangoJSONEncoder)
-
+        context['ui_messages'] = _UI_MSG
         return context
 
 
@@ -157,9 +159,12 @@ class CafeListView(ListView):
             if value:
                 cafes = cafes.filter(**{key: True})
 
+        # Alias para que la tarjeta lea avg_rating / num_reviews
         cafes = cafes.annotate(
             average_rating=Avg('reviews__rating'),
-            total_reviews=Count('reviews')
+            avg_rating=Avg('reviews__rating'),
+            total_reviews=Count('reviews'),
+            num_reviews=Count('reviews'),
         ).prefetch_related('favorites')
 
         if orden == 'rating':
@@ -263,11 +268,10 @@ class CafeListView(ListView):
                 'name': c.name,
                 'latitude': float(c.latitude) if c.latitude is not None else None,
                 'longitude': float(c.longitude) if c.longitude is not None else None,
-                # 🔧 FIX namespace
                 'url': reverse('reviews:cafe_detail', kwargs={'cafe_id': c.id}),
             })
         context['cafes_json'] = json.dumps(cafes_data, cls=DjangoJSONEncoder)
-
+        context['ui_messages'] = _UI_MSG
         return context
 
 
@@ -291,7 +295,7 @@ def cafe_detail(request, cafe_id):
     positive = reviews_qs.filter(rating__gte=4).count()
     positive_pct = int((positive / total_reviews) * 100) if total_reviews else 0
 
-    # radar por categoría
+    # radar por categoría (conteo simple)
     sensor_rows = (
         Tag.objects.filter(reviews__cafe=cafe)
         .values("category")
@@ -307,7 +311,7 @@ def cafe_detail(request, cafe_id):
     paginator = Paginator(reviews_qs, 8)
     page_obj = paginator.get_page(request.GET.get("page") or 1)
 
-    # schema.org
+    # schema.org (opcional)
     schema_reviews = list(reviews_qs[:5])
 
     # vistos recientemente
@@ -348,62 +352,10 @@ def cafe_detail(request, cafe_id):
 
     # URLs para OG
     full_page_url = request.build_absolute_uri(
-        # 🔧 FIX namespace
         reverse("reviews:cafe_detail", kwargs={"cafe_id": cafe.id})
     )
     if getattr(cafe, "photo1", None):
-        og_image_path = cafe.photo1.url
-    elif getattr(cafe, "photo2", None):
-        og_image_path = cafe.photo2.url
-    elif getattr(cafe, "photo3", None):
-        og_image_path = cafe.photo3.url
-    else:
-        og_image_path = static("images/og-default.jpg")
-    full_image_url = request.build_absolute_uri(og_image_path)
-
-    # likes del usuario + mi última reseña
-    liked_ids = set()
-    if request.user.is_authenticated:
-        liked_ids = set(
-            ReviewLike.objects.filter(user=request.user, review__cafe=cafe)
-            .values_list("review_id", flat=True)
-        )
-        my_review = (
-            Review.objects.filter(user=request.user, cafe=cafe)
-            .order_by('-created_at', '-id')
-            .first()
-        )
-    else:
-        my_review = None
-
-    # 👉 One-liner emocional para el popup del mapa
-    one_liner = None
-    if top_tags:
-        one_liner = f"Ideal: {top_tags[0].name}"
-    elif best_review and best_review.comment:
-        txt = best_review.comment.strip()
-        one_liner = txt[:90] + ("…" if len(txt) > 90 else "")
-
-    return render(request, "reviews/cafe_detail.html", {
-        "cafe": cafe,
-        "reviews": page_obj.object_list,
-        "page_obj": page_obj,
-        "total_reviews": total_reviews,
-        "average_rating": average_rating,
-        "best_review": best_review,
-        "positive_pct": positive_pct,
-        "radar_labels": radar_labels,
-        "radar_values": radar_values,
-        "schema_reviews": schema_reviews,
-        "full_page_url": full_page_url,
-        "full_image_url": full_image_url,
-        "recommended_cafes": recommended_cafes,
-        "top_tags": top_tags,
-        "more_tags": more_tags,
-        "liked_ids": liked_ids,
-        "my_review": my_review,
-        "one_liner": one_liner,   # <<—— usado por el popup del mapa
-    })
+        o
 
 
 @login_required
@@ -418,11 +370,16 @@ def create_review(request, cafe_id):
     )
     if request.method == "GET" and existing:
         messages.info(request, "Ya dejaste una reseña en este café. Podés editarla si querés.")
-        # 🔧 FIX namespace
         return redirect("reviews:edit_review", review_id=existing.id)
 
     if request.method == "POST":
         form = ReviewForm(request.POST)
+        # initial_rating también en POST inválido
+        try:
+            initial_rating = int(request.POST.get("rating") or 0)
+        except (TypeError, ValueError):
+            initial_rating = 0
+
         if form.is_valid():
             review = form.save(commit=False)
             review.cafe = cafe
@@ -435,19 +392,22 @@ def create_review(request, cafe_id):
                 tags = Tag.objects.filter(id__in=selected_tag_ids)
                 review.tags.set(tags)
 
-            # Invalidar el fragment cache de la lista de reseñas en el detalle
             try:
                 _invalidate_reviews_cache(cafe.id, user_id=request.user.id)
             except Exception:
                 pass
 
             messages.success(request, "¡Gracias por tu reseña! ☕️")
-            # 🔧 FIX namespace
             return redirect("reviews:cafe_detail", cafe_id=cafe.id)
         else:
             messages.error(request, "Por favor corregí los errores.")
     else:
-        form = ReviewForm()
+        # Permite precargar rating con ?rating=3
+        try:
+            initial_rating = int(request.GET.get("rating") or 0)
+        except (TypeError, ValueError):
+            initial_rating = 0
+        form = ReviewForm(initial={"rating": initial_rating})
 
     # Agrupar tags por categoría para el PASO 1
     all_tags = Tag.objects.all().order_by("category", "name")
@@ -455,7 +415,7 @@ def create_review(request, cafe_id):
     for tag in all_tags:
         tag_groups[tag.category].append(tag)
 
-    # Sugerencias: top del café y “usadas por vos”
+    # Sugerencias
     tag_counts_qs = (
         Tag.objects.filter(reviews__cafe=cafe)
         .annotate(num=Count('reviews', filter=Q(reviews__cafe=cafe)))
@@ -474,6 +434,7 @@ def create_review(request, cafe_id):
         "tag_choices": dict(tag_groups),
         "top_tags": top_tags,
         "my_tags": my_tags,
+        "initial_rating": initial_rating,   # ★ clave para el template
     }
     return render(request, "reviews/create_review.html", context)
 
@@ -487,6 +448,12 @@ def edit_review(request, review_id):
 
     if request.method == "POST":
         form = ReviewForm(request.POST, instance=review)
+        # Si POST inválido, tomamos lo que vino o el valor actual
+        try:
+            initial_rating = int(request.POST.get("rating") or review.rating or 0)
+        except (TypeError, ValueError):
+            initial_rating = int(review.rating or 0)
+
         if form.is_valid():
             form.save()
             if "tags" in request.POST:
@@ -498,12 +465,15 @@ def edit_review(request, review_id):
             cache.delete(key)
 
             messages.success(request, "Reseña actualizada correctamente.")
-            # 🔧 FIX namespace
             return redirect("reviews:cafe_detail", cafe_id=review.cafe_id)
         else:
             messages.error(request, "Por favor corregí los errores.")
     else:
         form = ReviewForm(instance=review)
+        try:
+            initial_rating = int(review.rating or 0)
+        except (TypeError, ValueError):
+            initial_rating = 0
 
     all_tags = Tag.objects.all().order_by("category", "name")
     tag_groups = defaultdict(list)
@@ -513,7 +483,13 @@ def edit_review(request, review_id):
     return render(
         request,
         "reviews/create_review.html",
-        {"form": form, "cafe": review.cafe, "tag_choices": dict(tag_groups), "editing": True},
+        {
+            "form": form,
+            "cafe": review.cafe,
+            "tag_choices": dict(tag_groups),
+            "editing": True,
+            "initial_rating": initial_rating,  # ★ clave para el template
+        },
     )
 
 
@@ -531,7 +507,6 @@ def delete_review(request, review_id):
         key = make_template_fragment_key("cafe_reviews_list", [cafe_id])
         cache.delete(key)
         messages.success(request, "Reseña eliminada.")
-        # 🔧 FIX namespace
         return redirect("reviews:cafe_detail", cafe_id=cafe_id)
 
     return render(request, 'reviews/delete_review.html', {"review": review, "cafe": review.cafe})
@@ -550,7 +525,6 @@ def reply_review(request, review_id):
         key = make_template_fragment_key("cafe_reviews_list", [review.cafe_id])
         cache.delete(key)
         messages.success(request, "Respuesta guardada con éxito.")
-        # 🔧 FIX namespace
         return redirect('reviews:cafe_detail', cafe_id=review.cafe.id)
 
 
@@ -558,7 +532,6 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
     model = Review
     form_class = ReviewForm
     template_name = 'reviews/create_review.html'
-    # 🔧 FIX namespace
     success_url = reverse_lazy('reviews:review_list')
 
     def get_context_data(self, **kwargs):
@@ -629,7 +602,6 @@ class CreateCafeView(LoginRequiredMixin, CreateView):
     model = Cafe
     form_class = CafeForm
     template_name = 'reviews/create_cafe.html'
-    # 🔧 FIX namespace
     success_url = reverse_lazy('reviews:cafe_list')
 
     def dispatch(self, request, *args, **kwargs):
@@ -656,7 +628,6 @@ def edit_cafe(request, cafe_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Cafetería actualizada con éxito.")
-            # 🔧 FIX namespace
             return redirect('reviews:owner_dashboard')
     else:
         form = CafeForm(instance=cafe)
@@ -678,7 +649,6 @@ def delete_cafe(request, cafe_id):
             except Exception:
                 pass
         messages.success(request, "Cafetería eliminada junto con sus fotos y reseñas.")
-        # 🔧 FIX namespace
         return redirect('reviews:owner_dashboard')
 
     return render(request, 'reviews/delete_cafe.html', {'cafe': cafe})
@@ -693,7 +663,6 @@ def upload_photos(request, cafe_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Fotos actualizadas correctamente.')
-            # 🔧 FIX namespace
             return redirect('reviews:cafe_detail', cafe_id=cafe.id)
     else:
         form = CafeForm(instance=cafe)
@@ -751,8 +720,8 @@ def toggle_favorite(request, cafe_id):
         cafe.favorites.add(request.user)
         messages.success(request, f"{cafe.name} agregado a favoritos. ❤️")
 
-    # 🔧 FIX fallback namespace
-    return redirect(request.META.get('HTTP_REFERER', 'reviews:cafe_list'))
+    # Redirect seguro (preferer o lista)
+    return redirect(request.META.get('HTTP_REFERER') or reverse('reviews:cafe_list'))
 
 
 @login_required
@@ -769,7 +738,6 @@ def edit_owner_reply(request, review_id):
         cache.delete(key)
         messages.success(request, "Respuesta del dueño actualizada correctamente.")
 
-    # 🔧 FIX namespace
     return redirect('reviews:owner_reviews')
 
 
@@ -804,7 +772,6 @@ def nearby_cafes(request):
             'address': c.address,
             'location': c.location,
             'distance_km': round(dist, 2),
-            # 🔧 FIX namespace
             'url': reverse('reviews:cafe_detail', kwargs={'cafe_id': c.id}),
         }
         for c, dist in cafes_ordenados
@@ -833,24 +800,20 @@ def cambiar_visibilidad(request, cafe_id):
             nuevo_nivel = int(request.POST.get('visibility_level'))
         except (TypeError, ValueError):
             messages.error(request, "Nivel inválido.")
-            # 🔧 FIX namespace
             return redirect('reviews:owner_dashboard')
 
         if nuevo_nivel == 0:
             asignar_plan(cafe, 0)
             messages.success(request, "Se activó el plan gratuito.")
-            # 🔧 FIX namespace
             return redirect('reviews:owner_dashboard')
 
         link = getattr(settings, "PAYMENT_LINKS", {}).get(nuevo_nivel)
         if not getattr(settings, "PLAN_UPGRADES_ENABLED", False) or not link:
             messages.info(request, "Los planes pagos todavía no están disponibles. Te avisamos pronto.")
-            # 🔧 FIX namespace
             return redirect('reviews:planes')
 
         return redirect(f"{link}?cafe={cafe.id}&user={request.user.id}")
 
-    # 🔧 FIX namespace
     return redirect('reviews:owner_dashboard')
 
 
@@ -861,18 +824,15 @@ def plan_checkout_redirect(request, cafe_id, nivel):
         nivel = int(nivel)
     except (TypeError, ValueError):
         messages.error(request, "Nivel inválido.")
-        # 🔧 FIX namespace
         return redirect('reviews:planes')
 
     if nivel == 0:
         messages.info(request, "El plan gratuito ya está activo.")
-        # 🔧 FIX namespace
         return redirect('reviews:planes')
 
     link = getattr(settings, "PAYMENT_LINKS", {}).get(nivel)
     if not getattr(settings, "PLAN_UPGRADES_ENABLED", False) or not link:
         messages.info(request, "Los planes pagos estarán disponibles pronto.")
-        # 🔧 FIX namespace
         return redirect('reviews:planes')
 
     return redirect(f"{link}?cafe={cafe.id}&user={request.user.id}")
@@ -892,16 +852,13 @@ def planes_view(request):
             nivel = int(nivel)
         except (TypeError, ValueError):
             messages.error(request, "Nivel inválido.")
-            # 🔧 FIX namespace
             return redirect('reviews:planes')
 
         if nivel == 0:
             asignar_plan(cafe, 0)
             messages.success(request, "Plan gratuito activado.")
-            # 🔧 FIX namespace
             return redirect('reviews:planes')
 
-        # 🔧 FIX namespace
         return redirect('reviews:plan_checkout_redirect', cafe_id=cafe.id, nivel=nivel)
 
     cafes = Cafe.objects.filter(owner=request.user)
@@ -930,7 +887,6 @@ def mapa_cafes(request):
             "longitude": float(c.longitude) if c.longitude is not None else None,
             "address": c.address,
             "location": c.location,
-            # 🔧 FIX namespace
             "url": reverse("reviews:cafe_detail", kwargs={"cafe_id": c.id}),
         }
         for f in BOOL_FIELDS:
@@ -1009,7 +965,6 @@ def toggle_review_like(request, review_id):
         count = ReviewLike.objects.filter(review=review).count()
         return JsonResponse({"ok": True, "liked": liked, "count": count})
 
-    # 🔧 FIX namespace
     return redirect("reviews:cafe_detail", cafe_id=review.cafe_id)
 
 
@@ -1025,7 +980,6 @@ def report_review(request, review_id):
             ).exists()
             if pending_exists:
                 messages.info(request, "Ya enviaste un reporte para esta reseña. Está en revisión.")
-                # 🔧 FIX namespace
                 return redirect("reviews:cafe_detail", cafe_id=review.cafe_id)
 
             rep = form.save(commit=False)
@@ -1033,7 +987,6 @@ def report_review(request, review_id):
             rep.user = request.user
             rep.save()
             messages.success(request, "¡Gracias! Recibimos tu denuncia y la revisaremos.")
-            # 🔧 FIX namespace
             return redirect("reviews:cafe_detail", cafe_id=review.cafe_id)
     else:
         form = ReviewReportForm()

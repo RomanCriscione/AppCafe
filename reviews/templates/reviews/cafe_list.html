@@ -28,12 +28,15 @@
 
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6 relative px-4">
+  <!-- Botón filtros (mobile) -->
   <button id="toggle-filtros" class="lg:hidden fixed bottom-4 right-4 z-[1001] btn btn-primary rounded-full shadow-lg">
     🔍 Filtros
   </button>
 
+  <!-- Overlay filtros (mobile) -->
   <div id="filtros-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[1000] hidden opacity-0 transition-opacity duration-300 lg:hidden"></div>
 
+  <!-- Panel filtros -->
   <aside id="panel-filtros" class="lg:static fixed top-0 left-0 h-full w-4/5 max-w-xs bg-white p-4 rounded-lg shadow-lg z-[1001] transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:w-1/4 lg:h-auto lg:shadow-none overflow-auto">
     <div class="flex justify-between items-center lg:hidden mb-4">
       <h2 class="text-xl font-semibold">🔍 Filtros</h2>
@@ -43,7 +46,7 @@
     <form method="get" class="space-y-4">
       <div>
         <label for="zona" class="block font-medium">Zona:</label>
-        <select name="zona" id="zona" class="w-full mt-1 p-2 border rounded">
+        <select name="zona" id="zona" class="select mt-1">
           <option value="">Todas</option>
           {% for z in zonas_disponibles %}
             <option value="{{ z }}" {% if zona_seleccionada == z %}selected{% endif %}>{{ z }}</option>
@@ -53,7 +56,7 @@
 
       <div>
         <label for="orden" class="block font-medium">Orden:</label>
-        <select name="orden" id="orden" class="w-full mt-1 p-2 border rounded">
+        <select name="orden" id="orden" class="select mt-1">
           <option value="algoritmo" {% if orden_actual == 'algoritmo' or not orden_actual %}selected{% endif %}>✨ Recomendadas</option>
           <option value="rating" {% if orden_actual == 'rating' %}selected{% endif %}>Puntuación</option>
           <option value="reviews" {% if orden_actual == 'reviews' %}selected{% endif %}>Más reseñas</option>
@@ -75,6 +78,7 @@
     </form>
   </aside>
 
+  <!-- Columna resultados -->
   <section class="lg:w-3/4 max-w-6xl mx-auto relative z-0">
     <a href="#resultados" class="sr-only">Saltar a resultados</a>
     <a href="#paginacion" class="sr-only">Saltar a paginación</a>
@@ -94,8 +98,10 @@
       </div>
     </div>
 
+    {# Mapa arriba de la grilla (tu include actual) #}
     {% include "reviews/includes/mapa_cafe_list.html" %}
 
+    {# Skeleton de carga #}
     <div id="grid-skeleton" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {% for _ in "123" %}
         <div class="card">
@@ -113,39 +119,15 @@
       {% endfor %}
     </div>
 
+    {# Grilla real (usa componente de tarjeta) #}
     <div id="grid-cafes" class="hidden" tabindex="-1" aria-labelledby="titulo-cafeterias">
-      <div id="resultados" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+      <div id="resultados" class="grid-cafes">
         {% for cafe in cafes %}
-          <article class="card cafe-card group relative h-full bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition">
-            {% if cafe.photo1 %}
-              <a href="{% url 'reviews:cafe_detail' cafe.id %}">
-                <img src="{{ cafe.photo1.url }}" alt="{{ cafe.name }}"
-                     class="h-44 w-full object-cover" loading="lazy" decoding="async" width="800" height="533">
-              </a>
-            {% else %}
-              <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block">
-                <div class="h-44 w-full bg-gray-200 flex items-center justify-center text-gray-500 rounded-md">Sin foto</div>
-              </a>
-            {% endif %}
-
-            <div class="p-4">
-              <h3 class="text-lg font-semibold tracking-tight line-clamp-1">
-                <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="hover:underline">{{ cafe.name }}</a>
-              </h3>
-              <p class="text-sm text-gray-600 line-clamp-1">{{ cafe.location }}</p>
-              <p class="text-accent text-sm mt-1">☕ {{ cafe.average_rating|floatformat:1 }}/5</p>
-
-              <div class="mt-3">
-                {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
-              </div>
-
-              <div class="mt-4">
-                <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="btn btn-outline rounded-xl w-full">Ver detalle</a>
-              </div>
-            </div>
-          </article>
+          {% include "reviews/_cafe_card.html" with cafe=cafe %}
         {% empty %}
-          <p class="text-center text-gray-600 mt-10">{{ ui_messages.no_results }}</p>
+          <div class="surface p-6 rounded-blob">
+            <p class="text-muted text-center">{{ ui_messages.no_results }}</p>
+          </div>
         {% endfor %}
       </div>
 
@@ -153,12 +135,18 @@
         <nav id="paginacion" class="mt-8 flex items-center justify-center gap-2" aria-label="Paginación de cafeterías">
           {% if page_obj.has_previous %}
             <a rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}"
-               class="px-3 py-2 rounded bg-gray-100 hover:bg-gray-200">Anterior</a>
+               class="btn btn-outline btn-sm">← Anterior</a>
+          {% else %}
+            <span class="btn btn-ghost btn-sm" aria-disabled="true">← Anterior</span>
           {% endif %}
-          <span class="px-3 py-2 text-sm text-gray-700">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+          <span class="text-muted text-sm px-2">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
           {% if page_obj.has_next %}
             <a rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}"
-               class="px-3 py-2 rounded bg-gray-100 hover:bg-gray-200">Siguiente</a>
+               class="btn btn-outline btn-sm">Siguiente →</a>
+          {% else %}
+            <span class="btn btn-ghost btn-sm" aria-disabled="true">Siguiente →</span>
           {% endif %}
         </nav>
       {% endif %}

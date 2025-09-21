@@ -1,4 +1,3 @@
-# cafe_reviews/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -11,10 +10,9 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
     # --- Autenticación (allauth) ---
-    # Login, logout, signup, social (Google), etc.
     path("accounts/", include("allauth.urls")),
 
-    # --- Usuarios (tus vistas propias: perfil, registrar dueño, etc.) ---
+    # --- Usuarios (vistas propias) ---
     path("users/", include("accounts.urls")),
 
     # --- Público (home, about, contact, etc.) ---

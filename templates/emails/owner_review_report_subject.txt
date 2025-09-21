@@ -1,0 +1,1 @@
+Denuncia recibida en una reseña de {{ cafe.name }}

@@ -61,7 +61,7 @@
       </div>
     </div>
 
-    <!-- Fotos (custom, prolijo) -->
+    <!-- Fotos -->
     <div class="bg-blue-50 p-6 rounded-xl shadow-sm space-y-6">
       <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
         <i class="fas fa-camera"></i> Fotos
@@ -69,11 +69,9 @@
       <p class="text-xs text-gray-600 -mt-2">Formatos: JPG o PNG. Máx 3 MB por foto.</p>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        {# ---------- FOTO 1 ---------- #}
+        {# FOTO 1 #}
         <div class="space-y-2">
           <p class="text-sm font-medium text-gray-700">Foto 1</p>
-
           {% if cafe.photo1 %}
             <img src="{{ cafe.photo1.url }}" alt="Foto 1" class="w-36 h-36 object-cover rounded-lg shadow" loading="lazy">
             <label for="id_photo1-clear" class="inline-flex items-center gap-2 text-sm text-red-600">
@@ -81,32 +79,21 @@
               Eliminar foto
             </label>
           {% else %}
-            <div class="w-36 h-36 rounded-lg bg-white/70 border border-dashed grid place-items-center text-xs text-gray-500">
-              Sin imagen
-            </div>
+            <div class="w-36 h-36 rounded-lg bg-white/70 border border-dashed grid place-items-center text-xs text-gray-500">Sin imagen</div>
           {% endif %}
-
           <label class="block text-sm text-gray-700">Cambiar:</label>
-          <input
-            type="file"
-            name="{{ form.photo1.html_name }}"
-            id="{{ form.photo1.id_for_label }}"
-            accept="image/jpeg,image/png"
-            class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg
-                   file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700
-                   border rounded-lg bg-white/80"
-          >
-          {% if form.photo1.errors %}
-            <p class="text-xs text-red-600">{{ form.photo1.errors.0 }}</p>
-          {% endif %}
-
+          <input type="file" name="{{ form.photo1.html_name }}" id="{{ form.photo1.id_for_label }}"
+                 accept="image/jpeg,image/png"
+                 class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg
+                        file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700
+                        border rounded-lg bg-white/80">
+          {% if form.photo1.errors %}<p class="text-xs text-red-600">{{ form.photo1.errors.0 }}</p>{% endif %}
           {{ form.photo1_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
         </div>
 
-        {# ---------- FOTO 2 ---------- #}
+        {# FOTO 2 #}
         <div class="space-y-2">
           <p class="text-sm font-medium text-gray-700">Foto 2</p>
-
           {% if cafe.photo2 %}
             <img src="{{ cafe.photo2.url }}" alt="Foto 2" class="w-36 h-36 object-cover rounded-lg shadow" loading="lazy">
             <label for="id_photo2-clear" class="inline-flex items-center gap-2 text-sm text-red-600">
@@ -114,32 +101,21 @@
               Eliminar foto
             </label>
           {% else %}
-            <div class="w-36 h-36 rounded-lg bg-white/70 border border-dashed grid place-items-center text-xs text-gray-500">
-              Sin imagen
-            </div>
+            <div class="w-36 h-36 rounded-lg bg-white/70 border border-dashed grid place-items-center text-xs text-gray-500">Sin imagen</div>
           {% endif %}
-
           <label class="block text-sm text-gray-700">Cambiar:</label>
-          <input
-            type="file"
-            name="{{ form.photo2.html_name }}"
-            id="{{ form.photo2.id_for_label }}"
-            accept="image/jpeg,image/png"
-            class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg
-                   file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700
-                   border rounded-lg bg-white/80"
-          >
-          {% if form.photo2.errors %}
-            <p class="text-xs text-red-600">{{ form.photo2.errors.0 }}</p>
-          {% endif %}
-
+          <input type="file" name="{{ form.photo2.html_name }}" id="{{ form.photo2.id_for_label }}"
+                 accept="image/jpeg,image/png"
+                 class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg
+                        file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700
+                        border rounded-lg bg-white/80">
+          {% if form.photo2.errors %}<p class="text-xs text-red-600">{{ form.photo2.errors.0 }}</p>{% endif %}
           {{ form.photo2_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
         </div>
 
-        {# ---------- FOTO 3 ---------- #}
+        {# FOTO 3 #}
         <div class="space-y-2">
           <p class="text-sm font-medium text-gray-700">Foto 3</p>
-
           {% if cafe.photo3 %}
             <img src="{{ cafe.photo3.url }}" alt="Foto 3" class="w-36 h-36 object-cover rounded-lg shadow" loading="lazy">
             <label for="id_photo3-clear" class="inline-flex items-center gap-2 text-sm text-red-600">
@@ -147,28 +123,17 @@
               Eliminar foto
             </label>
           {% else %}
-            <div class="w-36 h-36 rounded-lg bg-white/70 border border-dashed grid place-items-center text-xs text-gray-500">
-              Sin imagen
-            </div>
+            <div class="w-36 h-36 rounded-lg bg-white/70 border border-dashed grid place-items-center text-xs text-gray-500">Sin imagen</div>
           {% endif %}
-
           <label class="block text-sm text-gray-700">Cambiar:</label>
-          <input
-            type="file"
-            name="{{ form.photo3.html_name }}"
-            id="{{ form.photo3.id_for_label }}"
-            accept="image/jpeg,image/png"
-            class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg
-                   file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700
-                   border rounded-lg bg-white/80"
-          >
-          {% if form.photo3.errors %}
-            <p class="text-xs text-red-600">{{ form.photo3.errors.0 }}</p>
-          {% endif %}
-
+          <input type="file" name="{{ form.photo3.html_name }}" id="{{ form.photo3.id_for_label }}"
+                 accept="image/jpeg,image/png"
+                 class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg
+                        file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700
+                        border rounded-lg bg-white/80">
+          {% if form.photo3.errors %}<p class="text-xs text-red-600">{{ form.photo3.errors.0 }}</p>{% endif %}
           {{ form.photo3_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
         </div>
-
       </div>
     </div>
 

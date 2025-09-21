@@ -25,13 +25,14 @@
   {% block head_description %}<meta name="description" content="{{ meta_description|default:'Descubrí cafeterías, reseñas reales y mapas.' }}">{% endblock %}
   {% block meta %}{% endblock %}
 
-  <!-- CSS -->
+  <!-- CSS (orden recomendado) -->
   <link rel="stylesheet" href="{% static 'css/animations.css' %}?v=20250906">
   <link rel="stylesheet" href="{% static 'css/tailwind.css' %}?v=20250906">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <!-- Tu theme, siempre último -->
   <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=20250906">
 
   <!-- PWA / Icons -->
@@ -42,8 +43,7 @@
   <link rel="apple-touch-icon" href="{% static 'img/icon-192.png' %}">
   <link rel="canonical" href="{{ request.build_absolute_uri }}">
 
-
-  <!-- Social defaults (las páginas pueden sobreescribir en el bloque "meta") -->
+  <!-- Open Graph defaults -->
   <meta property="og:title" content="{{ page_title|default:'Gota — Descubrí tu próximo café' }}">
   <meta property="og:description" content="{{ page_description|default:'Encontrá cafés por zona, estilo y experiencia.' }}">
   {% if og_image_url %}
@@ -55,75 +55,15 @@
   <meta property="og:url" content="{{ request.build_absolute_uri }}">
   <meta name="twitter:card" content="summary_large_image">
 
-  <style>
-    html, body { overflow-x: hidden; }
-    body { font-family: 'Poppins', sans-serif; }
-
-    /* Header fijo */
-    header.site-nav {
-      position: fixed; top: 0; left: 0; right: 0;
-      z-index: 2147483647 !important;
-      background: #ffffff !important;
-      -webkit-backdrop-filter: none !important;
-      backdrop-filter: none !important;
-    }
-
-    /* Leaflet debajo del header */
-    .leaflet-container,
-    .leaflet-pane,
-    .leaflet-map-pane,
-    .leaflet-tile-pane,
-    .leaflet-overlay-pane,
-    .leaflet-marker-pane,
-    .leaflet-shadow-pane,
-    .leaflet-tooltip-pane,
-    .leaflet-popup-pane,
-    .leaflet-top,
-    .leaflet-bottom,
-    .leaflet-control { z-index: 0 !important; }
-
-    /* Panel/overlay de filtros */
-    #panel-filtros { z-index: 2000 !important; }
-    #filtros-overlay { z-index: 1900 !important; }
-    #toggle-filtros { z-index: 1800 !important; }
-
-    /* Fade entre páginas */
-    .page { opacity: 0; transition: opacity .18s ease; }
-    .page.page-ready { opacity: 1; }
-
-    /* CTA owner (compat) */
-    :root { --cta-w: 280px; }
-    #owner-actions a.cta{
-      display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:.5rem !important;
-      width: var(--cta-w) !important; height:48px !important; padding:0 1.25rem !important;
-      border-radius:12px !important; font-weight:700 !important; letter-spacing:.01em; line-height:1 !important;
-      color:#fff !important; border:1px solid transparent !important; background-color:#2563eb !important;
-      box-shadow: 0 10px 25px rgba(2,8,23,.06) !important;
-      transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease; white-space:nowrap; text-align:center;
-    }
-    #owner-actions a.cta:hover{ transform: translateY(-1px); box-shadow: 0 16px 36px rgba(2,8,23,.12) !important; filter: saturate(1.05); }
-    #owner-actions a.cta:active{ transform: translateY(0); }
-    #owner-actions a.cta:focus-visible{ outline:2px solid #1e40af; outline-offset:2px; }
-    #owner-actions a.cta.cta-blue   { background-color:#2563eb !important; }
-    #owner-actions a.cta.cta-blue:hover   { background-color:#1d4ed8 !important; }
-    #owner-actions a.cta.cta-green  { background-color:#16a34a !important; }
-    #owner-actions a.cta.cta-green:hover  { background-color:#15803d !important; }
-    #owner-actions a.cta.cta-indigo { background-color:#4f46e5 !important; }
-    #owner-actions a.cta.cta-indigo:hover { background-color:#4338ca !important; }
-    #owner-actions a.cta.cta-orange { background-color:#f97316 !important; }
-    #owner-actions a.cta.cta-orange:hover { background-color:#ea580c !important; }
-    @media (max-width: 639px){ #owner-actions a.cta{ width:100% !important; } }
-  </style>
-
-  <!-- Chart.js para el radar (una sola vez) -->
+  <!-- Chart.js (si lo usás en alguna vista) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 
-<body class="page bg-light text-dark">
+<body class="page">
   <div class="min-h-screen flex flex-col">
 
     <!-- Navbar -->
-    <header class="site-nav shadow">
+    <header class="site-nav">
       <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-8">
           <a href="{% url 'home' %}" class="text-2xl font-bold text-primary">Gota</a>
@@ -191,10 +131,10 @@
         const scrolled = window.scrollY > 6;
         nav.classList.toggle('is-scrolled', scrolled);
       }, { passive: true });
-    </script>    
+    </script>
 
     <!-- Contenido principal -->
-    <main class="flex-1 container mx-auto px-4 py-6 pt-24 relative z-0">
+    <main class="flex-1 container mx-auto px-4 py-6 pt-20 sm:pt-24 relative z-0">
       {% if messages %}
         <div class="fixed top-4 right-4 z-[2147483000] space-y-2">
           {% for message in messages %}
@@ -217,7 +157,6 @@
   </div>
 
   <!-- JS externos (defer) -->
-  <script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script defer src="{% static 'js/main.js' %}"></script>
@@ -239,7 +178,7 @@
       });
     })();
 
-    // Swiper básico + desaparecen alerts
+    // Swiper básico + desaparecer alerts
     document.addEventListener('DOMContentLoaded', function () {
       if (document.querySelector('.swiper-container')) {
         new Swiper('.swiper-container', {
@@ -257,7 +196,7 @@
       });
     });
 
-    // Botón de upgrade (planes no disponibles)
+    // Botón de upgrade (placeholder)
     document.addEventListener('click', function (ev) {
       const btn = ev.target.closest('.btn-upgrade');
       if (!btn) return;

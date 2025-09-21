@@ -1,0 +1,13 @@
+¡Hola!
+
+Recibiste una nueva reseña en {{ cafe.name }}:
+
+Usuario: {{ review.user.username }}
+Puntaje: ☕ {{ review.rating|floatformat:1 }}
+Comentario:
+{{ review.comment|default:"(sin comentario)" }}
+
+Ver el café: {{ detail_url }}
+Responder desde tu panel: {{ owner_reply_url }}
+
+— El equipo de Gota

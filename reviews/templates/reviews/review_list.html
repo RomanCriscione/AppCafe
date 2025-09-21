@@ -23,7 +23,7 @@
                class="w-32 h-auto rounded mr-4 mb-4 sm:mb-0 sm:mr-6">
         {% endif %}
         <div>
-          <p class="font-semibold">{{ review.user.first_name }} dijo sobre
+          <p class="font-semibold">{{ review.user.first_name|default:review.user.username }} dijo sobre
             <a href="{% url 'reviews:cafe_detail' review.cafe.id %}" class="text-blue-600 hover:underline">{{ review.cafe.name }}</a>:
           </p>
           <p class="text-sm">☕ {{ review.rating }}</p>
@@ -66,27 +66,29 @@
           ${cafe.photo1 ? `<img src="${cafe.photo1}" alt="${cafe.name}" class="w-20 h-20 object-cover rounded-md" loading="lazy">` : ""}
           <div class="flex flex-col justify-between">
             <p class="font-semibold leading-snug">
-              <a href="/reviews/${cafe.id}/" class="text-blue-600 hover:underline">${cafe.name}</a>
+              <a href="/reviews/cafes/${cafe.id}/" class="text-blue-600 hover:underline">${cafe.name}</a>
             </p>
-            <p class="text-sm text-gray-700">${cafe.location}</p>
-            <p class="text-xs text-gray-500">${cafe.address}</p>
+            <p class="text-sm text-gray-700">${cafe.location || ""}</p>
+            <p class="text-xs text-gray-500">${cafe.address || ""}</p>
           </div>
         </div>`;
       container.appendChild(card);
     });
 
-    new Swiper('#recently-viewed-container', {
-      slidesPerView: 'auto',
-      spaceBetween: 16,
-      navigation: {
-        nextEl: '.swiper-button-next',
-        prevEl: '.swiper-button-prev',
-      },
-      pagination: {
-        el: '.swiper-pagination',
-        clickable: true,
-      },
-    });
+    if (window.Swiper) {
+      new Swiper('#recently-viewed-container', {
+        slidesPerView: 'auto',
+        spaceBetween: 16,
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true,
+        },
+      });
+    }
   });
 </script>
 {% endblock %}

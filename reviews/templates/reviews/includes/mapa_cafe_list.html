@@ -2,28 +2,29 @@
 
 <!-- Mapa + chips -->
 <div class="relative mb-6">
-  <!-- Chips -->
-  <div class="chips-fade absolute top-3 left-3 right-3 z-10">
-    <div class="flex gap-2 overflow-x-auto no-scrollbar px-1">
-    <button type="button" class="chip" data-filter="nearby" aria-pressed="false">📍 Cerca mío</button>
+  <!-- Chips (EN FLUJO, no absolute) -->
+  <div class="chips-fade px-1 mb-3">
+    <div class="flex gap-2 overflow-x-auto no-scrollbar">
+      <button type="button" class="chip" data-filter="nearby" aria-pressed="false">📍 Cerca mío</button>
 
-    <!-- Básicos -->
-    <button type="button" class="chip" data-filter="has_wifi" aria-pressed="false">Wi-Fi</button>
-    <button type="button" class="chip" data-filter="has_air_conditioning" aria-pressed="false">Aire acondicionado</button>
-    <button type="button" class="chip" data-filter="serves_alcohol" aria-pressed="false">Bebidas alcohólicas</button>
-    <button type="button" class="chip" data-filter="is_pet_friendly" aria-pressed="false">Pet-friendly</button>
-    <button type="button" class="chip" data-filter="is_vegan_friendly" aria-pressed="false">Opciones veganas</button>
-    <button type="button" class="chip" data-filter="has_outdoor_seating" aria-pressed="false">Mesas afuera</button>
-    <button type="button" class="chip" data-filter="has_parking" aria-pressed="false">Estacionamiento</button>
-    <button type="button" class="chip" data-filter="is_accessible" aria-pressed="false">Accesible</button>
-    <button type="button" class="chip" data-filter="has_vegetarian_options" aria-pressed="false">Vegetariano</button>
-    <button type="button" class="chip" data-filter="has_books_or_games" aria-pressed="false">Libros/Juegos</button>
-    <button type="button" class="chip" data-filter="serves_breakfast" aria-pressed="false">Desayuno</button>
+      <!-- Básicos -->
+      <button type="button" class="chip" data-filter="has_wifi" aria-pressed="false">Wi-Fi</button>
+      <button type="button" class="chip" data-filter="has_air_conditioning" aria-pressed="false">Aire acondicionado</button>
+      <button type="button" class="chip" data-filter="serves_alcohol" aria-pressed="false">Bebidas alcohólicas</button>
+      <button type="button" class="chip" data-filter="is_pet_friendly" aria-pressed="false">Pet-friendly</button>
+      <button type="button" class="chip" data-filter="is_vegan_friendly" aria-pressed="false">Opciones veganas</button>
+      <button type="button" class="chip" data-filter="has_outdoor_seating" aria-pressed="false">Mesas afuera</button>
+      <button type="button" class="chip" data-filter="has_parking" aria-pressed="false">Estacionamiento</button>
+      <button type="button" class="chip" data-filter="is_accessible" aria-pressed="false">Accesible</button>
+      <button type="button" class="chip" data-filter="has_vegetarian_options" aria-pressed="false">Vegetariano</button>
+      <button type="button" class="chip" data-filter="has_books_or_games" aria-pressed="false">Libros/Juegos</button>
+      <button type="button" class="chip" data-filter="serves_breakfast" aria-pressed="false">Desayuno</button>
 
-    <!-- Extras -->
-    <button type="button" class="chip" data-filter="has_gluten_free" aria-pressed="false">Sin TACC</button>
-    <button type="button" class="chip" data-filter="has_specialty_coffee" aria-pressed="false">Café de especialidad</button>
-    <button type="button" class="chip" data-filter="has_artisanal_pastries" aria-pressed="false">Pastelería artesanal</button>
+      <!-- Extras -->
+      <button type="button" class="chip" data-filter="has_gluten_free" aria-pressed="false">Sin TACC</button>
+      <button type="button" class="chip" data-filter="has_specialty_coffee" aria-pressed="false">Café de especialidad</button>
+      <button type="button" class="chip" data-filter="has_artisanal_pastries" aria-pressed="false">Pastelería artesanal</button>
+    </div>
   </div>
 
   <!-- Mapa -->
@@ -47,9 +48,7 @@
   </div>
 {% else %}
   <div class="text-center text-lg text-gray-600 mt-8 space-y-4">
-    <p class="text-gray-600 text-center mt-4">
-      ☕ {{ ui_messages.search_no_results }}
-    </p>
+    <p class="text-gray-600 text-center mt-4">☕ {{ ui_messages.search_no_results }}</p>
     <a href="{% url 'reviews:cafe_list' %}" class="btn btn-secondary">Limpiar filtros</a>
   </div>
 {% endif %}
@@ -66,32 +65,21 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    // ==== Chips ====
+    // ==== Chips (filtros) ====
     (function () {
       const params = new URLSearchParams(location.search);
-
-      // Alias para compatibilidad con la vista (algunas esperan nombres cortos)
-      // Si activás has_wifi, también seteamos wifi=on, etc.
       const aliasMap = {
         has_wifi: ["wifi"],
         is_pet_friendly: ["pet"],
         is_vegan_friendly: ["vegan"],
         has_outdoor_seating: ["outdoor"]
       };
-
       function isParamActive(u, key) {
-        // activo si existe y no es "0" ni "false"
         const val = u.get(key);
         return val !== null && val !== "0" && val !== "false";
       }
-
-      function setParamOn(u, key) {
-        u.set(key, "on"); // lo que esperan tus vistas
-      }
-
-      function removeParam(u, key) {
-        u.delete(key);
-      }
+      function setParamOn(u, key) { u.set(key, "on"); }
+      function removeParam(u, key) { u.delete(key); }
 
       document.querySelectorAll('[data-filter]').forEach(chip => {
         const key = chip.getAttribute('data-filter');
@@ -125,7 +113,6 @@
           return;
         }
 
-        // Estado inicial (si cualquiera de key o sus alias está activo)
         let active = isParamActive(params, key) ||
                      (aliasMap[key] || []).some(a => isParamActive(params, a));
         if (active) { chip.classList.add('active'); chip.setAttribute('aria-pressed', 'true'); }

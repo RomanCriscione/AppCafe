@@ -34,9 +34,9 @@
   --caramel-700:#8F5330;
 
   /* Neutrales cálidos */
-  --canvas:#FBF7F2;     /* fondo general */
-  --surface:#FFFFFF;    /* tarjetas/surfaces */
-  --surface-2:#F5EEE6;  /* alternativa */
+  --canvas:#FBF7F2;
+  --surface:#FFFFFF;
+  --surface-2:#F5EEE6;
   --border:#E7DED6;
   --text-1:#1F130E;
   --text-2:#6B5E55;
@@ -48,7 +48,7 @@
   --primary-50:  var(--brand-50);
   --primary-100: var(--brand-100);
 
-  --accent:  var(--caramel-600);  /* para detalles cálidos */
+  --accent:  var(--caramel-600);
   --warning: #B7791F;
   --danger:  #B5533C;
   --success: #2E7D32;
@@ -74,10 +74,16 @@
   }
 }
 
-/* === Base tweaks === */
+/* === Base === */
 * { -webkit-tap-highlight-color: transparent; }
 html { scroll-behavior: smooth; }
-body { color: var(--text-1); background: var(--canvas); }
+body {
+  color: var(--text-1);
+  background: var(--canvas);
+  font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+               Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+               'Apple Color Emoji', 'Segoe UI Emoji';
+}
 img { display:block; max-width:100%; height:auto; }
 a { text-decoration: none; color: var(--primary-600); }
 a:hover { color: var(--primary); }
@@ -87,6 +93,39 @@ a:hover { color: var(--primary); }
 .text-muted { color: var(--text-2); }
 .surface { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
 .text-primary{ color: var(--primary) !important; }
+
+/* === Header fijo + estado scrolleado === */
+header.site-nav{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 2147483647;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  transition: box-shadow .18s ease, background-color .18s ease, backdrop-filter .18s ease;
+}
+header.site-nav.is-scrolled{
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 16px rgba(43,30,22,.08);
+}
+
+/* Leaflet por debajo del header */
+.leaflet-container,
+.leaflet-pane,
+.leaflet-map-pane,
+.leaflet-tile-pane,
+.leaflet-overlay-pane,
+.leaflet-marker-pane,
+.leaflet-shadow-pane,
+.leaflet-tooltip-pane,
+.leaflet-popup-pane,
+.leaflet-top,
+.leaflet-bottom,
+.leaflet-control { z-index: 0 !important; }
+
+/* Fade entre páginas */
+.page { opacity: 0; transition: opacity .18s ease; }
+.page.page-ready { opacity: 1; }
 
 /* === Botones === */
 .btn{
@@ -117,7 +156,7 @@ a:hover { color: var(--primary); }
 .btn-block{ width:100%; justify-content:center; }
 .btn-icon{ padding:.5rem; width:2.5rem; height:2.5rem; justify-content:center; }
 
-/* === Enlaces de navegación / header === */
+/* === Nav links === */
 .nav-link{
   display:inline-flex; align-items:center;
   padding:.5rem .75rem; border-radius:9999px;
@@ -125,8 +164,6 @@ a:hover { color: var(--primary); }
   transition: background-color .15s ease, color .15s ease;
 }
 .nav-link:hover{ background: var(--surface-2); color: var(--primary); }
-
-header.site-nav{ background:#fff; border-bottom:1px solid var(--border); }
 
 /* === Badges / chips === */
 .badge{
@@ -137,7 +174,7 @@ header.site-nav{ background:#fff; border-bottom:1px solid var(--border); }
 .badge-success{ background: rgba(46,125,50,.12); border-color: rgba(46,125,50,.25); color:#1B5E20; }
 .badge-warning{ background: rgba(183,121,31,.12); border-color: rgba(183,121,31,.25); color:#7C4A0E; }
 
-/* Chips (filtros / etiquetas) */
+/* Chips */
 .chip{
   display:inline-flex; align-items:center; gap:.4rem;
   padding:.45rem .75rem; border-radius:9999px; font-size:.88rem;
@@ -371,21 +408,17 @@ form button:not([type]):active { transform: translateY(0); }
   display: flex; align-items: center; gap: 8px;
   background: var(--surface);
   border: 1px solid var(--border); backdrop-filter: blur(4px);
-  padding: 10px 12px; border-radius: 999px; box-shadow: 0 6px 20px rgba(0,0,0,.08);
+  padding: 10px 12px; border-radius: 999px; box-shadow: var(--shadow-soft);
 }
 .cup-emoji { font-size: 18px; transform-origin: bottom; }
 .cup-emoji.fill { animation: cup-fill 900ms ease forwards; }
 @keyframes cup-fill { from { filter: saturate(.4) brightness(.95); transform: translateY(2px); } to { filter: saturate(1.05); transform: translateY(0); } }
 
-/* Fade entre páginas */
-.page { opacity: 0; transition: opacity .18s ease; }
-.page.page-ready { opacity: 1; }
-
-/* === Owner CTA (reusa colores) === */
+/* === Owner CTA (genérica) === */
 .owner-card-actions{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
 .owner-card-actions .btn{ min-width:120px; justify-content:center; }
 
-/* CTA sueltas (compat con tu HTML actual) */
+/* CTA sueltas */
 a.cta{
   display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:.5rem !important;
   height:48px !important; padding:0 1.25rem !important; min-width:280px !important;
@@ -396,23 +429,6 @@ a.cta{
 }
 a.cta:hover{ transform: translateY(-1px); box-shadow: var(--shadow-hover) !important; background-color: var(--primary-600) !important; }
 a.cta:active{ transform: translateY(0); }
-
-/* === Rating de tazas === */
-.cup-btn{width:36px;height:36px;display:grid;place-items:center;border-radius:.5rem;transition:transform .08s,background .12s}
-.cup-btn:hover{background:var(--surface-2)}
-.cup-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
-.cup-icon{width:28px;height:28px}
-.cup-outline{stroke:#9b8a80;stroke-width:1.6;fill:none;opacity:.9}
-.cup-fill{fill:var(--accent);opacity:0;transition:opacity .12s}
-.cup-btn.active .cup-fill{opacity:1}
-.cup-btn.dim .cup-outline{opacity:.45}
-
-/* === Pequeños ajustes varios === */
-#grid-cafes .card:hover { transform: none !important; }
-#grid-cafes .btn:focus-visible { box-shadow: none !important; outline: 2px solid var(--primary); outline-offset: 2px; }
-
-/* Barras de intensidades (si existen utilidades tailwind antiguas) */
-#flavor-bars .bg-blue-500{ background: var(--accent) !important; }
 
 .btn-primary,
 .btn.btn-primary,
@@ -445,19 +461,10 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent) !important;
 }
 
+/* Leaflet marker extra */
 .leaflet-marker-icon.cup-marker { filter: drop-shadow(0 3px 6px rgba(0,0,0,.25)); }
 
-/* === Navbar scrolled state === */
-header.site-nav {
-  transition: box-shadow .18s ease, background-color .18s ease, backdrop-filter .18s ease;
-}
-header.site-nav.is-scrolled{
-  background: color-mix(in srgb, var(--surface) 85%, transparent);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 6px 16px rgba(43,30,22,.08);
-}
-
-/* === Skeletons reales === */
+/* Skeletons */
 .skeleton{
   position:relative; overflow:hidden; background: var(--surface-2);
   border-radius: var(--radius-md);
@@ -469,12 +476,10 @@ header.site-nav.is-scrolled{
   animation: shimmer 1.15s infinite;
 }
 
-/* === Chips: scroll suave + fades laterales === */
+/* Chips: scroll suave + fades laterales */
 .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
-.chips-fade{
-  position: relative;
-}
+.chips-fade{ position: relative; }
 .chips-fade::before,
 .chips-fade::after{
   content:""; position:absolute; top:0; bottom:0; width:28px; pointer-events:none; z-index:5;
@@ -482,7 +487,7 @@ header.site-nav.is-scrolled{
 .chips-fade::before{ left:0; background: linear-gradient(90deg, var(--surface) 30%, transparent); border-top-left-radius: var(--radius-lg); }
 .chips-fade::after{ right:0; background: linear-gradient(270deg, var(--surface) 30%, transparent); border-top-right-radius: var(--radius-lg); }
 
-/* === Swiper look & feel === */
+/* Swiper look & feel */
 .swiper-button-next, .swiper-button-prev{
   width:38px;height:38px;border-radius:999px;background:#fff;border:1px solid var(--border);
   box-shadow: var(--shadow-soft); backdrop-filter: blur(4px);
@@ -495,19 +500,28 @@ header.site-nav.is-scrolled{
   opacity:1; background: var(--primary);
 }
 
-/* === Cards + focus states consistentes === */
+/* Cards + focus */
 .card { outline: none; }
 .card:focus-visible{ box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent); }
 
-/* === Map container pulido === */
+/* Map container pulido */
 #cafes-map, #map{
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   overflow: hidden;
   box-shadow: var(--shadow-soft);
+  /* FIX solapamiento: que el mapa quede en su propio plano por debajo */
+  position: relative;
+  z-index: 0;
+}
+/* FIX solapamiento: el buscador de dirección por encima del mapa */
+.map-search{
+  position: relative;
+  z-index: 2;
+  margin-top: .75rem;
 }
 
-/* === Hero overlay adaptativo === */
+/* Hero overlay adaptativo */
 .section-hero::before{
   content:""; position:absolute; inset:0;
   background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.25));
@@ -516,10 +530,8 @@ header.site-nav.is-scrolled{
   .section-hero::before{ background: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,.35)); }
 }
 
-/* === Rating "cups" genérico para el wizard === */
-.rating-cups label{
-  transition: transform .12s ease, filter .12s ease;
-}
+/* Rating "cups" (wizard) */
+.rating-cups label{ transition: transform .12s ease, filter .12s ease; }
 .rating-cups input:checked ~ label,
 .rating-cups label:hover,
 .rating-cups label:hover ~ label{
@@ -527,13 +539,13 @@ header.site-nav.is-scrolled{
   transform: translateY(-1px) scale(1.02);
 }
 
-/* === Toasts breves (consistente con tus alerts) === */
+/* Toasts */
 .toast{
   position:fixed; top:1rem; right:1rem; z-index:2147485000;
   background: var(--primary); color:#fff; padding:.6rem .9rem;
   border-radius: var(--radius-md); box-shadow: var(--shadow-soft);
 }
 
-/* === Pequeñas utilidades === */
+/* Utilidades */
 .shadow-soft{ box-shadow: var(--shadow-soft); }
 .rounded-blob{ border-radius: 24px; }

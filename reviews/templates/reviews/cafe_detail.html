@@ -1,8 +1,22 @@
 {% extends "base.html" %}
 {% load static cache tag_icons %}
 
+{# Título de la página (base.html lo usa) #}
+{% block head_title %}
+  <title>{{ cafe.name }} - Cafetería en {{ cafe.location }}</title>
+{% endblock %}
+
 {% block meta %}
   <link rel="canonical" href="{{ full_page_url }}" />
+
+  {# prev/next de paginación #}
+  {% if page_obj and page_obj.has_previous %}
+    <link rel="prev" href="?page={{ page_obj.previous_page_number }}#reviews" />
+  {% endif %}
+  {% if page_obj and page_obj.has_next %}
+    <link rel="next" href="?page={{ page_obj.next_page_number }}#reviews" />
+  {% endif %}
+
   <meta property="og:type" content="place" />
   <meta property="og:title" content="{{ cafe.name }} - Cafetería en {{ cafe.location }}" />
   <meta property="og:description" content="Reseñas, fotos y ubicación de {{ cafe.name }}." />
@@ -20,6 +34,82 @@
   {% else %}
     <meta name="description" content="{{ cafe.name }} en {{ cafe.location }}: reseñas, fotos y ubicación.">
   {% endif %}
+
+  {# === JSON-LD: Café + Rating + Reviews === #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CafeOrCoffeeShop",
+    "@id": "{{ full_page_url }}#place",
+    "name": "{{ cafe.name|escapejs }}",
+    "url": "{{ full_page_url|escapejs }}",
+    {% if full_image_url %}"image": "{{ full_image_url|escapejs }}",{% endif %}
+    {% if cafe.address or cafe.location %}
+    "address": {
+      "@type": "PostalAddress",
+      {% if cafe.address %}"streetAddress": "{{ cafe.address|escapejs }}",{% endif %}
+      {% if cafe.location %}"addressLocality": "{{ cafe.location|escapejs }}",{% endif %}
+      "addressCountry": "AR"
+    },
+    {% endif %}
+    {% if cafe.latitude and cafe.longitude %}
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": {{ cafe.latitude|floatformat:"3" }},
+      "longitude": {{ cafe.longitude|floatformat:"3" }}
+    },
+    {% endif %}
+    {% if cafe.phone %}"telephone": "{{ cafe.phone|escapejs }}",{% endif %}
+    {% if average_rating and total_reviews %}
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "{{ average_rating|floatformat:1 }}",
+      "reviewCount": "{{ total_reviews }}"
+    },
+    {% endif %}
+    {% if schema_reviews %}
+    "review": [
+      {% for r in schema_reviews %}
+      {
+        "@type": "Review",
+        "author": { "@type": "Person", "name": "{{ r.user.username|default:'Usuario'|escapejs }}" },
+        "datePublished": "{{ r.created_at|date:'c' }}",
+        "reviewBody": "{{ r.comment|striptags|truncatechars:400|escapejs }}",
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": "{{ r.rating|floatformat:1 }}",
+          "bestRating": "5",
+          "worstRating": "1"
+        }
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ],
+    {% endif %}
+    "sameAs": [{% if cafe.google_maps_url %}"{{ cafe.google_maps_url|escapejs }}"{% endif %}]
+  }
+  </script>
+
+  {# === JSON-LD: Breadcrumbs (Home/Listado -> Café) === #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Cafés",
+        "item": "{{ cafe_list_abs }}"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "{{ cafe.name|escapejs }}",
+        "item": "{{ full_page_url }}"
+      }
+    ]
+  }
+  </script>
 {% endblock %}
 
 {% block content %}
@@ -45,7 +135,7 @@
         <span aria-hidden="true">📍</span>
         <div>
           <div class="font-semibold">Dirección</div>
-          <div class="text-sm text-gray-600">{{ cafe.address }}, {{ cafe.location }}</div>
+          <div class="text-sm text-gray-600">{{ cafe.address }}{% if cafe.location %}, {{ cafe.location }}{% endif %}</div>
         </div>
       </div>
       <div class="flex items-start gap-2">
@@ -56,7 +146,7 @@
         </div>
       </div>
       <div class="sm:col-span-2 flex flex-wrap gap-3">
-        <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
+        <a href="https://www.google.com/maps/search/?api=1{% if cafe.latitude and cafe.longitude %}&query={{ cafe.latitude }},{{ cafe.longitude }}{% else %}&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}{% endif %}"
            target="_blank" rel="noopener" class="btn btn-primary rounded-xl">
           📍 Ver en Google Maps
         </a>
@@ -164,7 +254,7 @@
     </div>
   {% endif %}
 
-  <!-- Ubicación -->
+  <!-- Ubicación (con Leaflet y toggle) -->
   {% if cafe.latitude and cafe.longitude %}
     <section aria-labelledby="ubicacion" class="mt-10">
       <h3 id="ubicacion" class="text-xl font-semibold mb-2">📍 Ubicación</h3>
@@ -177,7 +267,6 @@
     </section>
 
     <style>
-      /* Sombra suave del marcador */
       .leaflet-marker-icon.cup-marker { filter: drop-shadow(0 3px 6px rgba(0,0,0,.25)); }
     </style>
 
@@ -230,6 +319,29 @@
 {% block scripts %}
   {{ block.super }}
 
+  {# Grabar en localStorage para "Vistos recientemente" (home) #}
+  <script>
+    (function(){
+      try {
+        const item = {
+          id: {{ cafe.id }},
+          name: "{{ cafe.name|escapejs }}",
+          location: "{{ cafe.location|default_if_none:''|escapejs }}",
+          address: "{{ cafe.address|default_if_none:''|escapejs }}",
+          photo1: "{% if cafe.photo1 %}{{ cafe.photo1.url|escapejs }}{% else %}{% endif %}"
+        };
+        const key = "recently_viewed_cafes";
+        const max = 12;
+        let arr = [];
+        try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch(e) { arr = []; }
+        arr = arr.filter(x => x && x.id !== item.id);
+        arr.push(item);
+        if (arr.length > max) arr = arr.slice(arr.length - max);
+        localStorage.setItem(key, JSON.stringify(arr));
+      } catch(e) {}
+    })();
+  </script>
+
   <!-- Chart.js para el radar -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-0t4c6q0m3O1z0V2C7g2p4m6Kk2t7pV9oP0zE5bYv3S3X5lSK4rF0M8xv4zvN8HKe" crossorigin="anonymous"></script>
   {% if radar_values and radar_labels %}
@@ -251,7 +363,7 @@
             backgroundColor: 'rgba(128, 90, 70, .12)',
             borderColor: '#7A4F2A',
             pointBackgroundColor: '#7A4F2A',
-            pointBorderColor: '#7A4F2A',
+            pointBorderColor: '#7A4F2A'
           }]
         },
         options: {
