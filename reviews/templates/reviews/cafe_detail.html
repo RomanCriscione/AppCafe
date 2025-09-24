@@ -196,10 +196,18 @@
   <!-- Radar sensorial -->
   {% if radar_values and radar_labels %}
     <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-225">
-      <h2 class="text-lg font-semibold mb-3">📊 Perfil sensorial del lugar</h2>
-      <canvas id="radar-sensorial" height="240"></canvas>
+      <div class="flex items-center gap-2 mb-2">
+        <span>📊</span>
+        <h2 class="text-lg font-semibold">Perfil sensorial del lugar</h2>
+      </div>
+
+      {# Alto controlado y responsive #}
+      <div class="h-48 sm:h-44 md:h-52">
+        <canvas id="sensor-bars"></canvas>
+      </div>
     </section>
   {% endif %}
+
 
   <!-- Calificación + destacada -->
   <div class="animate-fade-in-up animate-delay-300">
@@ -347,42 +355,71 @@
   {% if radar_values and radar_labels %}
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const el = document.getElementById('radar-sensorial');
-      if (!el || typeof Chart === 'undefined') return;
       const labels = {{ radar_labels|safe }};
-      const raw    = {{ radar_values|safe }};
-      const values = raw.map(v => Number(v||0));
-      const maxVal = Math.max(5, ...values);
-      new Chart(el, {
-        type: 'radar',
+      const values = {{ radar_values|safe }};
+      const maxVal = Math.max(1, ...values);
+
+      // Paleta suave “café” (combina con tonos del sitio)
+      const palette = [
+        '#F1E8E3', // crema
+        '#E7D7C9', // latte
+        '#E6CCB2', // avellana
+        '#DDB892', // caramelo
+        '#B08968', // moka
+        '#996B53', // espresso suave
+        '#7A4F2A'  // espresso (accent del sitio)
+      ];
+      const bg = labels.map((_, i) => palette[i % palette.length]);
+
+      const el = document.getElementById('sensor-bars');
+      if (!el) return;
+
+      new Chart(el.getContext('2d'), {
+        type: 'bar',
         data: {
-          labels,
+          // Etiquetas con el conteo al lado
+          labels: labels.map((l, i) => `${l} (${values[i]})`),
           datasets: [{
             data: values,
-            fill: true,
-            backgroundColor: 'rgba(128, 90, 70, .12)',
-            borderColor: '#7A4F2A',
-            pointBackgroundColor: '#7A4F2A',
-            pointBorderColor: '#7A4F2A'
+            backgroundColor: bg,
+            borderWidth: 0,
+            borderRadius: 10,
+            barThickness: 16,     // grosor de barra
+            maxBarThickness: 18
           }]
         },
         options: {
-          plugins: { legend: { display:false } },
-          scales: {
-            r: {
-              suggestedMin: 0,
-              suggestedMax: maxVal,
-              ticks: { stepSize: Math.ceil(maxVal/5), backdropColor: 'transparent' },
-              grid: { color: 'rgba(0,0,0,.08)' },
-              angleLines: { color: 'rgba(0,0,0,.08)' },
-              pointLabels: { color: '#334155', font: { size: 12 } }
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,  // respeta el alto del contenedor
+          layout: { padding: { top: 2, right: 8, bottom: 2, left: 0 } },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` ${ctx.raw} mencione${ctx.raw === 1 ? '': 's'}`
+              }
             }
-          }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              suggestedMax: maxVal,
+              grid: { color: 'rgba(0,0,0,.06)' },
+              ticks: { precision: 0, color: '#475569' } // slate-600
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: '#334155' } // slate-700
+            }
+          },
+          animation: { duration: 300 }
         }
       });
     });
   </script>
   {% endif %}
+
 
   <script>
   // Mostrar/Ocultar TODAS las reseñas

@@ -295,7 +295,7 @@ def cafe_detail(request, cafe_id):
     positive = reviews_qs.filter(rating__gte=4).count()
     positive_pct = int((positive / total_reviews) * 100) if total_reviews else 0
 
-    # radar por categoría (conteo simple)
+    # Radar por categoría (conteo simple)
     sensor_rows = (
         Tag.objects.filter(reviews__cafe=cafe)
         .values("category")
@@ -307,21 +307,21 @@ def cafe_detail(request, cafe_id):
     radar_labels = SENSOR_AXES
     radar_values = [sensor_dict.get(k, 0) for k in SENSOR_AXES]
 
-    # paginado
+    # Paginado
     paginator = Paginator(reviews_qs, 8)
     page_obj = paginator.get_page(request.GET.get("page") or 1)
 
     # schema.org (opcional)
     schema_reviews = list(reviews_qs[:5])
 
-    # vistos recientemente
+    # Vistos recientemente
     viewed = request.session.get("recently_viewed", [])
     if cafe.id in viewed:
         viewed.remove(cafe.id)
     viewed.insert(0, cafe.id)
     request.session["recently_viewed"] = viewed[:5]
 
-    # tracking de visita (1/día/sesión)
+    # Tracking de visita (1/día/sesión)
     try:
         today = timezone.localdate()
         session_key = f"viewed_cafe_{cafe.id}_{today.isoformat()}"
@@ -333,7 +333,7 @@ def cafe_detail(request, cafe_id):
     except Exception:
         pass
 
-    # tags más usadas en este café
+    # Tags más usadas en este café
     tag_counts_qs = (
         Tag.objects.filter(reviews__cafe=cafe)
         .annotate(num=Count('reviews', filter=Q(reviews__cafe=cafe)))
@@ -342,7 +342,7 @@ def cafe_detail(request, cafe_id):
     top_tags = list(tag_counts_qs[:5])
     more_tags = list(tag_counts_qs[5:])
 
-    # recomendados
+    # Recomendados
     recommended_cafes = (
         Cafe.objects.annotate(average_rating=Avg("reviews__rating"))
         .filter(average_rating__isnull=False)
@@ -355,7 +355,63 @@ def cafe_detail(request, cafe_id):
         reverse("reviews:cafe_detail", kwargs={"cafe_id": cafe.id})
     )
     if getattr(cafe, "photo1", None):
-        o
+        og_image_path = cafe.photo1.url
+    elif getattr(cafe, "photo2", None):
+        og_image_path = cafe.photo2.url
+    elif getattr(cafe, "photo3", None):
+        og_image_path = cafe.photo3.url
+    else:
+        og_image_path = static("images/og-default.jpg")
+    full_image_url = request.build_absolute_uri(og_image_path)
+
+    # URL absoluta del listado (para Breadcrumb JSON-LD)
+    cafe_list_abs = request.build_absolute_uri(reverse("reviews:cafe_list"))
+
+    # Likes del usuario + mi última reseña
+    liked_ids = set()
+    if request.user.is_authenticated:
+        liked_ids = set(
+            ReviewLike.objects.filter(user=request.user, review__cafe=cafe)
+            .values_list("review_id", flat=True)
+        )
+        my_review = (
+            Review.objects.filter(user=request.user, cafe=cafe)
+            .order_by('-created_at', '-id')
+            .first()
+        )
+    else:
+        my_review = None
+
+    # One-liner emocional para el popup del mapa
+    one_liner = None
+    if top_tags:
+        one_liner = f"Ideal: {top_tags[0].name}"
+    elif best_review and best_review.comment:
+        txt = best_review.comment.strip()
+        one_liner = txt[:90] + ("…" if len(txt) > 90 else "")
+
+    return render(request, "reviews/cafe_detail.html", {
+        "cafe": cafe,
+        "reviews": page_obj.object_list,
+        "page_obj": page_obj,
+        "total_reviews": total_reviews,
+        "average_rating": average_rating,
+        "best_review": best_review,
+        "positive_pct": positive_pct,
+        "radar_labels": radar_labels,
+        "radar_values": radar_values,
+        "schema_reviews": schema_reviews,
+        "full_page_url": full_page_url,
+        "full_image_url": full_image_url,
+        "recommended_cafes": recommended_cafes,
+        "top_tags": top_tags,
+        "more_tags": more_tags,
+        "liked_ids": liked_ids,
+        "my_review": my_review,
+        "one_liner": one_liner,
+        "cafe_list_abs": cafe_list_abs,
+    })
+
 
 
 @login_required
