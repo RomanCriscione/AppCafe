@@ -1,0 +1,52 @@
+# .gitignore (añadido node_modules y algunos extras)
+# Entorno virtual
+env/
+venv/
+.venv/
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Bases de datos locales
+*.sqlite3
+*.db
+
+# Config local
+.env
+.env.*
+
+# Migrations compiladas
+**/migrations/__pycache__/
+
+# Logs
+*.log
+
+# SO
+.DS_Store
+Thumbs.db
+*.lnk
+
+# Editores
+.vscode/
+*.swp
+*~
+
+# i18n y cache de Django
+*.pot
+*.pyc
+
+# Subidas de usuarios
+media/
+
+# Cobertura / estáticos generados
+htmlcov/
+staticfiles/
+
+# Node / build
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+.yarn/*
+.pnp.*
