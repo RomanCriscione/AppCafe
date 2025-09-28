@@ -1,3 +1,4 @@
+<!-- templates/base.html -->
 <!DOCTYPE html>
 <html lang="es">
 {% load static %}
@@ -37,7 +38,8 @@
   <link rel="manifest" href="{% static 'site.webmanifest' %}">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#553A2F">
-  <link rel="icon" href="{% static 'img/favicon.ico' %}">
+  <!-- Usamos PNG como favicon para evitar 404 de /favicon.ico (además hay ruta en urls.py) -->
+  <link rel="icon" type="image/png" href="{% static 'img/icon-192.png' %}">
   <link rel="apple-touch-icon" href="{% static 'img/icon-192.png' %}">
   <link rel="canonical" href="{{ request.build_absolute_uri }}">
 
@@ -154,7 +156,6 @@
 
   <!-- Helpers UI: fade entre páginas, init swiper, toasts y efecto like -->
   <script>
-    // Fade entre páginas (ignora anclas y externos)
     (function () {
       const root = document.body;
       if (root.classList.contains('page')) root.classList.add('page-ready');
@@ -170,7 +171,6 @@
       });
     })();
 
-    // Swiper básico + desaparecer alerts
     document.addEventListener('DOMContentLoaded', function () {
       if (document.querySelector('.swiper-container')) {
         new Swiper('.swiper-container', {
@@ -188,7 +188,6 @@
       });
     });
 
-    // Botón de upgrade (placeholder)
     document.addEventListener('click', function (ev) {
       const btn = ev.target.closest('.btn-upgrade');
       if (!btn) return;
@@ -208,11 +207,10 @@
       }, 2200);
     });
 
-    // Helper global para animar el like (rebote)
     window.bounceLike = (el) => {
       if (!el) return;
       el.classList.remove('like-bounce');
-      void el.offsetWidth; // reflow
+      void el.offsetWidth;
       el.classList.add('like-bounce');
     };
   </script>

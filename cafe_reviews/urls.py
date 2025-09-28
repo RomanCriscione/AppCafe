@@ -1,8 +1,9 @@
+# cafe_reviews/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 from django.contrib.sitemaps.views import sitemap
 from cafe_reviews.sitemaps import sitemaps
 
@@ -30,6 +31,13 @@ urlpatterns = [
 
     # Sitemap (framework de Django)
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django_sitemap"),
+
+    # Favicon: redirigimos a un PNG existente para evitar 404 (sirve como favicon)
+    path(
+        "favicon.ico",
+        RedirectView.as_view(url=f"{settings.STATIC_URL}img/icon-192.png", permanent=False),
+        name="favicon",
+    ),
 ]
 
 if settings.DEBUG:

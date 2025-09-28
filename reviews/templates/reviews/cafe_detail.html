@@ -1,15 +1,13 @@
+<!-- templates/reviews/cafe_detail.html -->
 {% extends "base.html" %}
 {% load static cache tag_icons %}
 
-{# Título de la página (base.html lo usa) #}
 {% block head_title %}
   <title>{{ cafe.name }} - Cafetería en {{ cafe.location }}</title>
 {% endblock %}
 
 {% block meta %}
   <link rel="canonical" href="{{ full_page_url }}" />
-
-  {# prev/next de paginación #}
   {% if page_obj and page_obj.has_previous %}
     <link rel="prev" href="?page={{ page_obj.previous_page_number }}#reviews" />
   {% endif %}
@@ -35,7 +33,6 @@
     <meta name="description" content="{{ cafe.name }} en {{ cafe.location }}: reseñas, fotos y ubicación.">
   {% endif %}
 
-  {# === JSON-LD: Café + Rating + Reviews === #}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -89,7 +86,6 @@
   }
   </script>
 
-  {# === JSON-LD: Breadcrumbs (Home/Listado -> Café) === #}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -114,11 +110,8 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 space-y-8">
-
-  <!-- Título -->
   <h1 class="text-3xl font-bold animate-fade-in-up">{{ cafe.name }}</h1>
 
-  <!-- CTA -->
   <div class="mt-3 flex flex-wrap items-center gap-3 animate-fade-in-up animate-delay-125">
     {% if user.is_authenticated %}
       <a href="{% url 'reviews:create_review' cafe.id %}" class="btn btn-primary rounded-xl">✍️ Dejar reseña</a>
@@ -128,7 +121,6 @@
     <a href="#reviews" class="btn btn-outline rounded-xl">Ver reseñas</a>
   </div>
 
-  <!-- Tarjeta contacto -->
   <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-100">
     <div class="grid gap-4 sm:grid-cols-2">
       <div class="flex items-start gap-2">
@@ -150,26 +142,23 @@
            target="_blank" rel="noopener" class="btn btn-primary rounded-xl">
           📍 Ver en Google Maps
         </a>
-        {% if cafe.claim_status != 'verified' %}
+        {% if cafe.claim_status != 'VERIFIED' %}
           <a href="{% url 'reviews:claim_start' cafe.id %}" class="cta cta-indigo">🏷️ ¿Sos el dueño? Reclamá este local</a>
         {% endif %}
       </div>
     </div>
   </section>
 
-  <!-- Features -->
   <section class="mt-4 animate-fade-in-up animate-delay-150">
     {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
   </section>
 
-  <!-- Fotos -->
   {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
     <div class="animate-fade-in-up animate-delay-200">
       {% include "reviews/includes/cafe_photos.html" with cafe=cafe %}
     </div>
   {% endif %}
 
-  <!-- Top tags -->
   {% if top_tags %}
     <section aria-labelledby="destacan" class="surface p-4 rounded-xl">
       <h2 id="destacan" class="text-lg font-semibold text-gray-800 mb-3">🧠 Lo que otros destacan</h2>
@@ -193,23 +182,18 @@
     </section>
   {% endif %}
 
-  <!-- Radar sensorial -->
   {% if radar_values and radar_labels %}
     <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-225">
       <div class="flex items-center gap-2 mb-2">
         <span>📊</span>
         <h2 class="text-lg font-semibold">Perfil sensorial del lugar</h2>
       </div>
-
-      {# Alto controlado y responsive #}
       <div class="h-48 sm:h-44 md:h-52">
         <canvas id="sensor-bars"></canvas>
       </div>
     </section>
   {% endif %}
 
-
-  <!-- Calificación + destacada -->
   <div class="animate-fade-in-up animate-delay-300">
     {% if average_rating %}
       <p class="mb-4"><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
@@ -225,7 +209,6 @@
     {% endif %}
   </div>
 
-  <!-- Reseñas -->
   <h3 id="reviews" class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-400">Reseñas:</h3>
 
   {% cache 600 cafe_reviews_list cafe.id user.id %}
@@ -246,7 +229,6 @@
 
   {% include "reviews/includes/pagination.html" with page_obj=page_obj anchor="#reviews" %}
 
-  <!-- Favorito -->
   {% if user.is_authenticated %}
     <form method="post" action="{% url 'reviews:toggle_favorite' cafe.id %}" class="mb-4 animate-fade-in-up animate-delay-700">{% csrf_token %}
       <button type="submit" class="btn btn-danger rounded-xl">
@@ -262,7 +244,6 @@
     </div>
   {% endif %}
 
-  <!-- Ubicación (con Leaflet y toggle) -->
   {% if cafe.latitude and cafe.longitude %}
     <section aria-labelledby="ubicacion" class="mt-10">
       <h3 id="ubicacion" class="text-xl font-semibold mb-2">📍 Ubicación</h3>
@@ -327,30 +308,6 @@
 {% block scripts %}
   {{ block.super }}
 
-  {# Grabar en localStorage para "Vistos recientemente" (home) #}
-  <script>
-    (function(){
-      try {
-        const item = {
-          id: {{ cafe.id }},
-          name: "{{ cafe.name|escapejs }}",
-          location: "{{ cafe.location|default_if_none:''|escapejs }}",
-          address: "{{ cafe.address|default_if_none:''|escapejs }}",
-          photo1: "{% if cafe.photo1 %}{{ cafe.photo1.url|escapejs }}{% else %}{% endif %}"
-        };
-        const key = "recently_viewed_cafes";
-        const max = 12;
-        let arr = [];
-        try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch(e) { arr = []; }
-        arr = arr.filter(x => x && x.id !== item.id);
-        arr.push(item);
-        if (arr.length > max) arr = arr.slice(arr.length - max);
-        localStorage.setItem(key, JSON.stringify(arr));
-      } catch(e) {}
-    })();
-  </script>
-
-  <!-- Chart.js para el radar -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-0t4c6q0m3O1z0V2C7g2p4m6Kk2t7pV9oP0zE5bYv3S3X5lSK4rF0M8xv4zvN8HKe" crossorigin="anonymous"></script>
   {% if radar_values and radar_labels %}
   <script>
@@ -359,16 +316,7 @@
       const values = {{ radar_values|safe }};
       const maxVal = Math.max(1, ...values);
 
-      // Paleta suave “café” (combina con tonos del sitio)
-      const palette = [
-        '#F1E8E3', // crema
-        '#E7D7C9', // latte
-        '#E6CCB2', // avellana
-        '#DDB892', // caramelo
-        '#B08968', // moka
-        '#996B53', // espresso suave
-        '#7A4F2A'  // espresso (accent del sitio)
-      ];
+      const palette = ['#F1E8E3','#E7D7C9','#E6CCB2','#DDB892','#B08968','#996B53','#7A4F2A'];
       const bg = labels.map((_, i) => palette[i % palette.length]);
 
       const el = document.getElementById('sensor-bars');
@@ -377,41 +325,21 @@
       new Chart(el.getContext('2d'), {
         type: 'bar',
         data: {
-          // Etiquetas con el conteo al lado
           labels: labels.map((l, i) => `${l} (${values[i]})`),
-          datasets: [{
-            data: values,
-            backgroundColor: bg,
-            borderWidth: 0,
-            borderRadius: 10,
-            barThickness: 16,     // grosor de barra
-            maxBarThickness: 18
-          }]
+          datasets: [{ data: values, backgroundColor: bg, borderWidth: 0, borderRadius: 10, barThickness: 16, maxBarThickness: 18 }]
         },
         options: {
           indexAxis: 'y',
           responsive: true,
-          maintainAspectRatio: false,  // respeta el alto del contenedor
+          maintainAspectRatio: false,
           layout: { padding: { top: 2, right: 8, bottom: 2, left: 0 } },
           plugins: {
             legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => ` ${ctx.raw} mencione${ctx.raw === 1 ? '': 's'}`
-              }
-            }
+            tooltip: { callbacks: { label: (ctx) => ` ${ctx.raw} mencione${ctx.raw === 1 ? '': 's'}` } }
           },
           scales: {
-            x: {
-              beginAtZero: true,
-              suggestedMax: maxVal,
-              grid: { color: 'rgba(0,0,0,.06)' },
-              ticks: { precision: 0, color: '#475569' } // slate-600
-            },
-            y: {
-              grid: { display: false },
-              ticks: { color: '#334155' } // slate-700
-            }
+            x: { beginAtZero: true, suggestedMax: maxVal, grid: { color: 'rgba(0,0,0,.06)' }, ticks: { precision: 0, color: '#475569' } },
+            y: { grid: { display: false }, ticks: { color: '#334155' } }
           },
           animation: { duration: 300 }
         }
@@ -420,9 +348,7 @@
   </script>
   {% endif %}
 
-
   <script>
-  // Mostrar/Ocultar TODAS las reseñas
   function toggleReviews() {
     const container = document.getElementById("review-container");
     const btn = document.getElementById("btn-reviews");
@@ -435,7 +361,6 @@
     btn.textContent = collapsed ? "Ver todas" : "Ver menos";
   }
 
-  // “Ver más / Ver menos” por tarjeta
   document.addEventListener('DOMContentLoaded', () => {
     const MAX = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--review-collapsed')) || 140;
     document.querySelectorAll('.review-card').forEach(card => {
@@ -466,7 +391,6 @@
     });
   });
 
-  // Likes AJAX + rebote ❤️
   document.addEventListener("DOMContentLoaded", () => {
     const getCSRFFrom = (form) => form.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
     document.querySelectorAll(".like-form").forEach(form => {

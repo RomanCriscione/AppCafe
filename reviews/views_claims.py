@@ -2,10 +2,10 @@
 from __future__ import annotations
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.mail import send_mail
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from reviews.models import Cafe
@@ -36,25 +36,41 @@ def claim_start(request, cafe_id):
 
     if cafe.claim_status == ClaimStatus.VERIFIED:
         messages.info(request, "Este local ya está verificado.")
-        return redirect("cafe_detail", cafe_id=cafe.id)
+        return redirect("reviews:cafe_detail", cafe_id=cafe.id)
 
     if request.method == "POST":
         if _rate_limit(request.user):
             messages.error(request, "Demasiados intentos hoy. Probá de nuevo mañana.")
-            return redirect("cafe_detail", cafe_id=cafe.id)
+            return redirect("reviews:cafe_detail", cafe_id=cafe.id)
 
         form = ClaimStartForm(request.POST, cafe=cafe)
         if form.is_valid():
-            claim: ClaimRequest = form.save(commit=False)
-            claim.cafe = cafe
-            claim.user = request.user
-            claim.status = ClaimStatus.PENDING
+            # Reusar un claim PENDING existente para evitar IntegrityError (unique constraint)
+            claim = ClaimRequest.objects.filter(
+                cafe=cafe, user=request.user, status=ClaimStatus.PENDING
+            ).first()
+
+            if not claim:
+                claim = form.save(commit=False)
+                claim.cafe = cafe
+                claim.user = request.user
+                claim.status = ClaimStatus.PENDING
+            else:
+                # Si ya existe, actualizamos método/datos con lo del form
+                form_claim = form.save(commit=False)
+                claim.method = form_claim.method
 
             # Si es email, seteamos email_to
             if claim.method == ClaimMethod.EMAIL_DOMAIN and getattr(cafe, "email", None):
                 claim.email_to = cafe.email
 
-            claim.save()
+            try:
+                claim.save()
+            except IntegrityError:
+                # En caso de carrera, recuperamos el existente
+                claim = ClaimRequest.objects.get(
+                    cafe=cafe, user=request.user, status=ClaimStatus.PENDING
+                )
 
             if claim.method == ClaimMethod.EMAIL_DOMAIN and claim.email_to:
                 code = claim.issue_email_code()
@@ -66,15 +82,15 @@ def claim_start(request, cafe_id):
                     fail_silently=True,
                 )
                 messages.success(request, f"Te enviamos un código a {claim.email_to}.")
-                return redirect("claim_verify_email", cafe_id=cafe.id, claim_id=claim.id)
+                return redirect("reviews:claim_verify_email", cafe_id=cafe.id, claim_id=claim.id)
 
             elif claim.method == ClaimMethod.PHOTO_CODE:
                 messages.info(request, "Subí las evidencias para que podamos verificarte.")
-                return redirect("claim_upload_evidence", cafe_id=cafe.id, claim_id=claim.id)
+                return redirect("reviews:claim_upload_evidence", cafe_id=cafe.id, claim_id=claim.id)
 
             else:  # PHONE
                 messages.info(request, "Recibimos tu solicitud. Te contactaremos para verificar por teléfono.")
-                return redirect("cafe_detail", cafe_id=cafe.id)
+                return redirect("reviews:cafe_detail", cafe_id=cafe.id)
     else:
         form = ClaimStartForm(cafe=cafe)
 
@@ -87,7 +103,7 @@ def claim_verify_email(request, cafe_id, claim_id):
     claim  = get_object_or_404(ClaimRequest, pk=claim_id, cafe=cafe, user=request.user)
 
     if claim.method != ClaimMethod.EMAIL_DOMAIN:
-        return redirect("claim_start", cafe_id=cafe.id)
+        return redirect("reviews:claim_start", cafe_id=cafe.id)
 
     if request.method == "POST":
         form = ClaimVerifyEmailForm(request.POST)
@@ -100,7 +116,7 @@ def claim_verify_email(request, cafe_id, claim_id):
                     claim.approved_by = request.user  # auto-aprobado por verificación
                     claim.save(update_fields=["status", "approved_by", "updated_at"])
                 messages.success(request, "¡Listo! Ya sos dueño/verificado de este local.")
-                return redirect("cafe_detail", cafe_id=cafe.id)
+                return redirect("reviews:cafe_detail", cafe_id=cafe.id)
             messages.error(request, "Código inválido o vencido.")
     else:
         form = ClaimVerifyEmailForm()
@@ -114,7 +130,7 @@ def claim_upload_evidence(request, cafe_id, claim_id):
     claim = get_object_or_404(ClaimRequest, pk=claim_id, cafe=cafe, user=request.user)
 
     if claim.method != ClaimMethod.PHOTO_CODE:
-        return redirect("claim_start", cafe_id=cafe.id)
+        return redirect("reviews:claim_start", cafe_id=cafe.id)
 
     if request.method == "POST":
         form = ClaimEvidenceForm(request.POST, request.FILES)
@@ -123,7 +139,7 @@ def claim_upload_evidence(request, cafe_id, claim_id):
             for f in files:
                 ClaimEvidence.objects.create(claim=claim, file=f)
             messages.success(request, "Recibimos tus evidencias. Un moderador las revisará pronto.")
-            return redirect("cafe_detail", cafe_id=cafe.id)
+            return redirect("reviews:cafe_detail", cafe_id=cafe.id)
     else:
         form = ClaimEvidenceForm()
 
