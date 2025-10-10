@@ -7,6 +7,12 @@ from django.views.generic import TemplateView, RedirectView
 from django.contrib.sitemaps.views import sitemap
 from cafe_reviews.sitemaps import sitemaps
 
+from rest_framework.routers import DefaultRouter
+from reviews.api import CafeViewSet
+
+router = DefaultRouter()
+router.register(r"cafes", CafeViewSet, basename="cafe")
+
 urlpatterns = [
     path("admin/", admin.site.urls),
 
@@ -19,8 +25,11 @@ urlpatterns = [
     # --- Público (home, about, contact, etc.) ---
     path("", include("core.urls")),
 
-    # --- Cafeterías y reseñas ---
+    # --- Cafeterías y reseñas (HTML) ---
     path("reviews/", include(("reviews.urls", "reviews"), namespace="reviews")),
+
+    # --- API (JSON) ---
+    path("api/", include(router.urls)),  
 
     # robots.txt (template plano)
     path(

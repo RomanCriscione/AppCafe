@@ -1,4 +1,3 @@
-<!-- templates/base.html -->
 <!DOCTYPE html>
 <html lang="es">
 {% load static %}
@@ -38,8 +37,7 @@
   <link rel="manifest" href="{% static 'site.webmanifest' %}">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#553A2F">
-  <!-- Usamos PNG como favicon para evitar 404 de /favicon.ico (además hay ruta en urls.py) -->
-  <link rel="icon" type="image/png" href="{% static 'img/icon-192.png' %}">
+  <link rel="icon" href="{% static 'img/favicon.ico' %}">
   <link rel="apple-touch-icon" href="{% static 'img/icon-192.png' %}">
   <link rel="canonical" href="{{ request.build_absolute_uri }}">
 
@@ -65,10 +63,22 @@
     <!-- Navbar -->
     <header class="site-nav bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-8">
+        <div class="flex items-center gap-3 sm:gap-6">
           <a href="{% url 'home' %}" class="text-2xl font-bold text-brand-800">Gota</a>
 
-          <button id="menu-toggle" class="lg:hidden text-slate-700" aria-label="Abrir menú">
+          <!-- Botón Volver -->
+          <a
+            id="back-link"
+            href="{% url 'reviews:cafe_list' %}"
+            data-fallback="{% url 'reviews:cafe_list' %}"
+            data-no-fade="1"
+            class="btn btn-ghost rounded-xl text-sm hidden"
+          >
+            ← Volver
+          </a>
+
+          <!-- Menú móvil -->
+          <button id="menu-toggle" class="lg:hidden text-slate-700 ml-1" aria-label="Abrir menú">
             <i class="fas fa-bars text-xl" aria-hidden="true"></i>
           </button>
 
@@ -112,18 +122,55 @@
       </div>
     </header>
 
-    <!-- JS: toggle menú móvil y estado scrolleado -->
+    <!-- JS: toggle menú móvil, estado scrolleado y botón Volver -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const toggle = document.getElementById("menu-toggle");
         const menu = document.getElementById("navbar-menu");
         if (toggle && menu) toggle.addEventListener("click", () => menu.classList.toggle("hidden"));
+
+        document.addEventListener('scroll', () => {
+          const nav = document.querySelector('header.site-nav');
+          if (!nav) return;
+          nav.classList.toggle('is-scrolled', window.scrollY > 6);
+        }, { passive: true });
+
+          // --- Botón Volver ---
+          const back = document.getElementById('back-link');
+          if (back) {
+            const homePath = "{% url 'home' %}";
+            const isHome = (location.pathname === homePath) || (location.pathname === "/");
+            const ref = document.referrer || "";
+            let sameOrigin = false;
+            try { sameOrigin = ref && new URL(ref, location.origin).origin === location.origin; } catch (e) {}
+
+            if (!isHome) back.classList.remove('hidden');
+
+            back.addEventListener('click', (e) => {
+              // Evitar fade-out en este enlace (lo marca data-no-fade)
+              if (sameOrigin && window.history.length > 1) {
+                e.preventDefault();
+                history.back();
+              }
+              // Si no hay historial válido, navega al fallback del href
+            });
+          }
+
+          // Mostramos en todas las páginas salvo Home
+          if (!isHome) back.classList.remove('hidden');
+
+          back.addEventListener('click', (e) => {
+            // Si hay historial y venimos de la misma app → history.back()
+            if (sameOrigin && window.history.length > 1) {
+              e.preventDefault();
+              window.history.back();
+              return;
+            }
+            // Si no, dejamos que el <a> navegue al fallback
+            // (href y data-fallback ya apuntan a la lista de cafés)
+          });
+        }
       });
-      document.addEventListener('scroll', () => {
-        const nav = document.querySelector('header.site-nav');
-        if (!nav) return;
-        nav.classList.toggle('is-scrolled', window.scrollY > 6);
-      }, { passive: true });
     </script>
 
     <!-- Contenido principal -->
@@ -156,21 +203,42 @@
 
   <!-- Helpers UI: fade entre páginas, init swiper, toasts y efecto like -->
   <script>
+    // Fade entre páginas (ignora anclas, externos y enlaces con data-no-fade)
     (function () {
       const root = document.body;
-      if (root.classList.contains('page')) root.classList.add('page-ready');
+      function markReady() {
+        if (root.classList.contains('page')) root.classList.add('page-ready');
+      }
+
+      // Asegurá visibilidad al cargar o al volver desde bfcache
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        markReady();
+      } else {
+        document.addEventListener('DOMContentLoaded', markReady, { once: true });
+      }
+      // Clave: cuando se muestra desde bfcache (back/forward), re-agregar la clase
+      window.addEventListener('pageshow', function () { markReady(); });
+
+      // Al navegar: sacamos la clase para hacer el fade, excepto cuando no corresponde
       document.querySelectorAll('a[href]').forEach(a => {
         const href = a.getAttribute('href');
-        const isAnchor = href && href.startsWith('#');
-        const isExternal = a.target === '_blank' || a.hasAttribute('download') || (href && /^https?:\/\//.test(href) && !href.includes(location.host));
-        if (isAnchor || isExternal) return;
+        const isAnchor   = href && href.startsWith('#');
+        const isExternal = a.target === '_blank'
+                        || a.hasAttribute('download')
+                        || (href && /^https?:\/\//.test(href) && !href.includes(location.host));
+        const noFade = a.hasAttribute('data-no-fade'); // ← respeta el botón Volver
+
+        if (isAnchor || isExternal || noFade) return;
+
         a.addEventListener('click', (e) => {
+          // En nuevas navegaciones internas aplicamos fade-out
           if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
           root.classList.remove('page-ready');
         });
       });
     })();
 
+    // Swiper básico + desaparecer alerts
     document.addEventListener('DOMContentLoaded', function () {
       if (document.querySelector('.swiper-container')) {
         new Swiper('.swiper-container', {
@@ -188,6 +256,7 @@
       });
     });
 
+    // Botón de upgrade (placeholder)
     document.addEventListener('click', function (ev) {
       const btn = ev.target.closest('.btn-upgrade');
       if (!btn) return;
@@ -207,10 +276,11 @@
       }, 2200);
     });
 
+    // Helper global para animar el like (rebote)
     window.bounceLike = (el) => {
       if (!el) return;
       el.classList.remove('like-bounce');
-      void el.offsetWidth;
+      void el.offsetWidth; // reflow
       el.classList.add('like-bounce');
     };
   </script>

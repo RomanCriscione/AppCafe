@@ -9,10 +9,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # === Seguridad / Entorno ===
 DEBUG = config('DEBUG', default=False, cast=bool)
 
+# 1) ALLOWED_HOSTS base desde .env
 ALLOWED_HOSTS = [
     h.strip() for h in config('ALLOWED_HOSTS', default='127.0.0.1,localhost').split(',')
     if h.strip()
 ]
+
+# 2) Agregar host de Render automáticamente (si existe)
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 SECRET_KEY = config('SECRET_KEY', default=None)
 
@@ -28,7 +34,8 @@ if not SECRET_KEY:
 elif not DEBUG and not _is_strong_secret(SECRET_KEY):
     raise RuntimeError("SECRET_KEY débil. Generá una clave larga/aleatoria (>=50 chars).")
 
-# CSRF Trusted Origins (si no se provee env, se derivan de ALLOWED_HOSTS)
+# CSRF Trusted Origins
+# Si hay variable explícita, se respeta. Si no, se derivan de ALLOWED_HOSTS (incluye onrender si existe).
 _csrf_from_env = config('CSRF_TRUSTED_ORIGINS', default=None)
 if _csrf_from_env:
     CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_from_env.split(',') if o.strip()]
@@ -37,6 +44,11 @@ else:
     CSRF_TRUSTED_ORIGINS = [
         f"{scheme}://{host}" for scheme in schemes for host in ALLOWED_HOSTS if host and host != '*'
     ]
+    # Asegurar explícitamente el https:// para Render (por si DEBUG=True en algún momento)
+    if RENDER_EXTERNAL_HOSTNAME:
+        render_https = f"https://{RENDER_EXTERNAL_HOSTNAME}"
+        if render_https not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(render_https)
 
 # Detrás de proxy (Heroku/Render/Nginx con X-Forwarded-Proto)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -82,6 +94,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'widget_tweaks',
+    'corsheaders',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -91,8 +104,9 @@ AUTHENTICATION_BACKENDS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # estático en prod
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',   # recomendado antes de CommonMiddleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -219,4 +233,13 @@ PLAN_UPGRADES_ENABLED = False
 PAYMENT_LINKS = {
     1: "https://tu-pasarela.com/checkout/plan-barista",
     2: "https://tu-pasarela.com/checkout/plan-maestro",
+}
+
+# === CORS ===
+CORS_ALLOW_ALL_ORIGINS = True
+
+# === DRF ===
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 12,
 }

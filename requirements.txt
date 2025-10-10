@@ -6,6 +6,7 @@ Django==5.2.4
 django-allauth==65.9.0
 django-widget-tweaks==1.5.0
 djangorestframework==3.16.0
+django-cors-headers>=4.0
 iniconfig==2.1.0
 packaging==25.0
 pillow==11.3.0
@@ -19,3 +20,4 @@ sqlparse==0.5.3
 tzdata==2025.2
 gunicorn==23.0.0
 whitenoise>=6.6
+python-decouple>=3.8

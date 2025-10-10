@@ -42,3 +42,4 @@ media/
 # Reportes de cobertura y estáticos generados
 htmlcov/    # <- NUEVO
 staticfiles/ # <- opcional, si generás staticfiles con collectstatic
+node_modules/
