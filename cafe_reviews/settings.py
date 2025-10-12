@@ -1,3 +1,4 @@
+# cafe_reviews/settings.py
 from pathlib import Path
 import os
 import dj_database_url
@@ -9,13 +10,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # === Seguridad / Entorno ===
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-# 1) ALLOWED_HOSTS base desde .env
+# HOSTS base desde env + wildcard de Render
 ALLOWED_HOSTS = [
-    h.strip() for h in config('ALLOWED_HOSTS', default='127.0.0.1,localhost').split(',')
+    h.strip() for h in config('ALLOWED_HOSTS', default='127.0.0.1,localhost,.onrender.com').split(',')
     if h.strip()
 ]
 
-# 2) Agregar host de Render automáticamente (si existe)
+# Agregar host concreto que inyecta Render
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -27,7 +28,6 @@ def _is_strong_secret(key: str) -> bool:
 
 if not SECRET_KEY:
     if DEBUG:
-        # Dev fallback (no usar en prod)
         SECRET_KEY = get_random_secret_key()
     else:
         raise RuntimeError("SECRET_KEY no configurada. Definila en el entorno para producción.")
@@ -35,35 +35,30 @@ elif not DEBUG and not _is_strong_secret(SECRET_KEY):
     raise RuntimeError("SECRET_KEY débil. Generá una clave larga/aleatoria (>=50 chars).")
 
 # CSRF Trusted Origins
-# Si hay variable explícita, se respeta. Si no, se derivan de ALLOWED_HOSTS (incluye onrender si existe).
 _csrf_from_env = config('CSRF_TRUSTED_ORIGINS', default=None)
 if _csrf_from_env:
     CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_from_env.split(',') if o.strip()]
 else:
-    schemes = ['https'] if not DEBUG else ['http', 'https']
-    CSRF_TRUSTED_ORIGINS = [
-        f"{scheme}://{host}" for scheme in schemes for host in ALLOWED_HOSTS if host and host != '*'
-    ]
-    # Asegurar explícitamente el https:// para Render (por si DEBUG=True en algún momento)
+    # Siempre incluir el wildcard de Render en https
+    CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+    # Y el host concreto si lo conocemos
     if RENDER_EXTERNAL_HOSTNAME:
-        render_https = f"https://{RENDER_EXTERNAL_HOSTNAME}"
-        if render_https not in CSRF_TRUSTED_ORIGINS:
-            CSRF_TRUSTED_ORIGINS.append(render_https)
+        CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+    # En dev, permitir http en hosts locales
+    if DEBUG:
+        CSRF_TRUSTED_ORIGINS += [f"http://{h}" for h in ['localhost', '127.0.0.1']]
 
-# Detrás de proxy (Heroku/Render/Nginx con X-Forwarded-Proto)
+# Detrás de proxy (Render)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# HSTS/SSL (configurable por env para testear)
+SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', cast=bool, default=not DEBUG)
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-
-    # HSTS (activá esto solo si todo el sitio va 100% por HTTPS)
-    SECURE_HSTS_SECONDS = int(config('SECURE_HSTS_SECONDS', default=31536000))  # 1 año
+    SECURE_HSTS_SECONDS = int(config('SECURE_HSTS_SECONDS', default=31536000))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-
-    # Endurecimiento adicional recomendado
     SECURE_REFERRER_POLICY = "same-origin"
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
@@ -82,7 +77,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.sitemaps',
 
-    # Apps propias
+    # Propias
     'core',
     'accounts',
     'reviews.apps.ReviewsConfig',
@@ -106,7 +101,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',   # recomendado antes de CommonMiddleware
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -125,7 +120,7 @@ TEMPLATES = [{
     'OPTIONS': {
         'context_processors': [
             'django.template.context_processors.debug',
-            'django.template.context_processors.request',  # requerido por allauth
+            'django.template.context_processors.request',
             'django.contrib.auth.context_processors.auth',
             'django.contrib.messages.context_processors.messages',
             'core.context_processors.ui_messages',
@@ -138,8 +133,10 @@ WSGI_APPLICATION = 'cafe_reviews.wsgi.application'
 # === DB ===
 DATABASES = {
     'default': dj_database_url.config(
+        # si no hay DATABASE_URL, usar sqlite local
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600
+        conn_max_age=600,
+        ssl_require=not DEBUG,  # Render Postgres con SSL en prod
     )
 }
 
@@ -169,15 +166,13 @@ else:
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Django 5: STORAGES (sin STATICFILES_STORAGE legacy)
-if DEBUG:
-    static_backend = "whitenoise.storage.CompressedStaticFilesStorage"
-else:
-    static_backend = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
+# Django 5: STORAGES
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": static_backend},
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage" if not DEBUG
+        else "whitenoise.storage.CompressedStaticFilesStorage"
+    },
 }
 
 # === User model ===
@@ -190,18 +185,15 @@ ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # === Email ===
-EMAIL_BACKEND = config(
-    'EMAIL_BACKEND',
-    default="django.core.mail.backends.console.EmailBackend"
-)
+EMAIL_BACKEND = config('EMAIL_BACKEND', default="django.core.mail.backends.console.EmailBackend")
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default="no-reply@gota.local")
 
 # === allauth ===
 ACCOUNT_EMAIL_VERIFICATION = config('ACCOUNT_EMAIL_VERIFICATION', default="optional")
-ACCOUNT_LOGIN_METHODS = {"username", "email"}
+# Nota: en allauth recientes, preferir ACCOUNT_AUTHENTICATION_METHOD = "username" | "email" | "username_email"
+ACCOUNT_AUTHENTICATION_METHOD = config('ACCOUNT_AUTHENTICATION_METHOD', default="username")
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_RATE_LIMITS = {"login_failed": "5/5m"}
-
 ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
 ACCOUNT_EMAIL_VALIDATORS = ["core.validators.validate_not_disposable"]
 
@@ -242,4 +234,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 12,
+}
+
+# === Logging útil para 500 en Render ===
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": "INFO"},
 }
