@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -------- BASE MÍNIMA (sin pisar tu custom.css) -------- */
+@layer base {
+  html { @apply scroll-smooth; }
+  body { @apply font-sans; }
+  main { @apply relative z-0; }
+}
+
+/* -------- PEQUEÑOS HELPERS QUE NO CHOCAN -------- */
+@layer components {
+  /* media de tarjeta con proporción (lo usás en varias vistas) */
+  .card-media { @apply block w-full overflow-hidden; aspect-ratio: 16/10; }
+  .card-media > img,
+  .card-media > picture,
+  .card-media > video { @apply w-full h-full object-cover; }
+}

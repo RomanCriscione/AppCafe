@@ -7,6 +7,7 @@ from django.views.generic import TemplateView, RedirectView
 from django.contrib.sitemaps.views import sitemap
 from cafe_reviews.sitemaps import sitemaps
 
+from django.templatetags.static import static as static_url  # para URL de static
 from rest_framework.routers import DefaultRouter
 from reviews.api import CafeViewSet
 
@@ -29,25 +30,25 @@ urlpatterns = [
     path("reviews/", include(("reviews.urls", "reviews"), namespace="reviews")),
 
     # --- API (JSON) ---
-    path("api/", include(router.urls)),  
+    path("api/", include(router.urls)),
 
-    # robots.txt (template plano)
+    # robots.txt
     path(
         "robots.txt",
         TemplateView.as_view(template_name="core/robots.txt", content_type="text/plain"),
         name="robots_txt",
     ),
 
-    # Sitemap (framework de Django)
+    # Sitemap
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django_sitemap"),
 
-    # Favicon: redirigimos a un PNG existente para evitar 404 (sirve como favicon)
+    # Favicon (apunta a un archivo que existe en /static/images/)
     path(
         "favicon.ico",
-        RedirectView.as_view(url=f"{settings.STATIC_URL}img/icon-192.png", permanent=False),
+        RedirectView.as_view(url=static_url("images/coffee-icon.png"), permanent=False),
         name="favicon",
     ),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# ⚠️ Provisorio: servir MEDIA también en producción (Render) hasta moverlo a disco/bucket
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
