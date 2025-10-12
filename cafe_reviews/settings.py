@@ -10,13 +10,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # === Seguridad / Entorno ===
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-# HOSTS base desde env + wildcard de Render
 ALLOWED_HOSTS = [
     h.strip() for h in config('ALLOWED_HOSTS', default='127.0.0.1,localhost,.onrender.com').split(',')
     if h.strip()
 ]
-
-# Agregar host concreto que inyecta Render
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -39,19 +36,13 @@ _csrf_from_env = config('CSRF_TRUSTED_ORIGINS', default=None)
 if _csrf_from_env:
     CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_from_env.split(',') if o.strip()]
 else:
-    # Siempre incluir el wildcard de Render en https
     CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
-    # Y el host concreto si lo conocemos
     if RENDER_EXTERNAL_HOSTNAME:
         CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
-    # En dev, permitir http en hosts locales
     if DEBUG:
         CSRF_TRUSTED_ORIGINS += [f"http://{h}" for h in ['localhost', '127.0.0.1']]
 
-# Detrás de proxy (Render)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-# HSTS/SSL (configurable por env para testear)
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', cast=bool, default=not DEBUG)
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
@@ -135,7 +126,7 @@ DATABASES = {
     "default": dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
-        ssl_require=not DEBUG, 
+        ssl_require=not DEBUG,
     )
 }
 
@@ -157,10 +148,15 @@ LOCALE_PATHS = [BASE_DIR / 'locale']
 # === Static/Media ===
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-if DEBUG:
-    STATICFILES_DIRS = [BASE_DIR / "static"]
-else:
-    STATICFILES_DIRS = []
+
+# SIEMPRE incluir la carpeta /static de raíz (también en prod)
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+# Aseguramos buscadores explícitos
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",     # usa STATICFILES_DIRS
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder", # usa app/static
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -169,8 +165,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage" if not DEBUG
-        else "whitenoise.storage.CompressedStaticFilesStorage"
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if not DEBUG else
+            "whitenoise.storage.CompressedStaticFilesStorage"
+        )
     },
 }
 
@@ -189,8 +188,7 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default="no-reply@gota.local")
 
 # === allauth ===
 ACCOUNT_EMAIL_VERIFICATION = config('ACCOUNT_EMAIL_VERIFICATION', default="optional")
-# Nota: en allauth recientes, preferir ACCOUNT_AUTHENTICATION_METHOD = "username" | "email" | "username_email"
-ACCOUNT_AUTHENTICATION_METHOD = config('ACCOUNT_AUTHENTICATION_METHOD', default="username")
+ACCOUNT_LOGIN_METHODS = {"username", "email"}  # reemplaza ACCOUNT_AUTHENTICATION_METHOD
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_RATE_LIMITS = {"login_failed": "5/5m"}
 ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
@@ -219,13 +217,6 @@ CACHES = {
     }
 }
 
-# === Planes / Upgrades ===
-PLAN_UPGRADES_ENABLED = False
-PAYMENT_LINKS = {
-    1: "https://tu-pasarela.com/checkout/plan-barista",
-    2: "https://tu-pasarela.com/checkout/plan-maestro",
-}
-
 # === CORS ===
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -235,7 +226,7 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 12,
 }
 
-# === Logging útil para 500 en Render ===
+# Logging útil
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
