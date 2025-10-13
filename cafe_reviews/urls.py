@@ -7,7 +7,7 @@ from django.views.generic import TemplateView, RedirectView
 from django.contrib.sitemaps.views import sitemap
 from cafe_reviews.sitemaps import sitemaps
 
-from django.templatetags.static import static as static_url  # para URL de static
+from django.templatetags.static import static as static_url 
 from rest_framework.routers import DefaultRouter
 from reviews.api import CafeViewSet
 
@@ -52,3 +52,7 @@ urlpatterns = [
 
 # ⚠️ Provisorio: servir MEDIA también en producción (Render) hasta moverlo a disco/bucket
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += [
+    re_path(r"^media/(?P<path>.*)$", media_serve, {"document_root": settings.MEDIA_ROOT}),
+]
