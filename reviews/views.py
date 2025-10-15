@@ -766,17 +766,24 @@ def favorite_cafes(request):
 
 
 @login_required
+@require_POST
 def toggle_favorite(request, cafe_id):
     cafe = get_object_or_404(Cafe, id=cafe_id)
 
     if request.user in cafe.favorites.all():
         cafe.favorites.remove(request.user)
+        liked = False
         messages.info(request, f"{cafe.name} eliminado de favoritos.")
     else:
         cafe.favorites.add(request.user)
+        liked = True
         messages.success(request, f"{cafe.name} agregado a favoritos. ❤️")
 
-    # Redirect seguro (preferer o lista)
+    # AJAX (fetch)
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"ok": True, "liked": liked})
+
+    # Fallback sin JS
     return redirect(request.META.get('HTTP_REFERER') or reverse('reviews:cafe_list'))
 
 

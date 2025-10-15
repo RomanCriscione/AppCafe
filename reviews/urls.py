@@ -1,3 +1,4 @@
+# reviews/urls.py
 from django.urls import path
 from . import views
 from . import views_claims
@@ -14,7 +15,10 @@ urlpatterns = [
     path('cafes/<int:cafe_id>/eliminar/', views.delete_cafe, name='delete_cafe'),
     path('cafes/<int:cafe_id>/fotos/', views.upload_photos, name='upload_photos'),
     path('cafes/<int:cafe_id>/review/', views.create_review, name='create_review'),
+
+    # ✅ endpoint usado por los botones .fav-btn
     path('cafes/<int:cafe_id>/toggle-favorite/', views.toggle_favorite, name='toggle_favorite'),
+
     path('cafes/cercanos/', views.nearby_cafes, name='nearby_cafes'),
     path("owner/analytics/", views.analytics_dashboard, name="analytics_dashboard"),
 

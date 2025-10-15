@@ -91,18 +91,8 @@
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Cafés",
-        "item": "{{ cafe_list_abs }}"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "{{ cafe.name|escapejs }}",
-        "item": "{{ full_page_url }}"
-      }
+      { "@type": "ListItem", "position": 1, "name": "Cafés", "item": "{{ cafe_list_abs }}" },
+      { "@type": "ListItem", "position": 2, "name": "{{ cafe.name|escapejs }}", "item": "{{ full_page_url }}" }
     ]
   }
   </script>
@@ -230,11 +220,23 @@
   {% include "reviews/includes/pagination.html" with page_obj=page_obj anchor="#reviews" %}
 
   {% if user.is_authenticated %}
-    <form method="post" action="{% url 'reviews:toggle_favorite' cafe.id %}" class="mb-4 animate-fade-in-up animate-delay-700">{% csrf_token %}
-      <button type="submit" class="btn btn-danger rounded-xl">
+    <div class="mb-4 animate-fade-in-up animate-delay-700">
+      <button
+        id="fav-toggle"
+        type="button"
+        class="btn btn-danger rounded-xl fav-btn {% if user in cafe.favorites.all %}is-fav{% endif %}"
+        aria-pressed="{% if user in cafe.favorites.all %}true{% else %}false{% endif %}"
+        data-fav-url="{% url 'reviews:toggle_favorite' cafe.id %}">
         {% if user in cafe.favorites.all %} 💔 Quitar de favoritos {% else %} ❤️ Agregar a favoritos {% endif %}
       </button>
-    </form>
+
+      <noscript>
+        <form method="post" action="{% url 'reviews:toggle_favorite' cafe.id %}" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger rounded-xl">❤️</button>
+        </form>
+      </noscript>
+    </div>
   {% endif %}
 
   {% if total_reviews %}
@@ -308,7 +310,7 @@
 {% block scripts %}
   {{ block.super }}
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-0t4c6q0m3O1z0V2C7g2p4m6Kk2t7pV9oP0zE5bYv3S3X5lSK4rF0M8xv4zvN8HKe" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
   {% if radar_values and radar_labels %}
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -361,36 +363,7 @@
     btn.textContent = collapsed ? "Ver todas" : "Ver menos";
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const MAX = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--review-collapsed')) || 140;
-    document.querySelectorAll('.review-card').forEach(card => {
-      const body = card.querySelector('.review-body');
-      const text = card.querySelector('.review-text');
-      const btn  = card.querySelector('.review-toggle');
-      const fade = card.querySelector('.review-fade');
-      if (!body || !text || !btn) return;
-
-      function sync(){
-        const needs = text.scrollHeight > MAX + 8;
-        body.classList.toggle('collapsible', needs);
-        body.classList.toggle('collapsed', needs);
-        btn.hidden = !needs;
-        if (fade) fade.style.display = needs ? 'block' : 'none';
-        if (!needs) btn.textContent = 'Ver más';
-      }
-
-      btn.addEventListener('click', () => {
-        const collapsed = body.classList.contains('collapsed');
-        body.classList.toggle('collapsed', !collapsed);
-        btn.textContent = collapsed ? 'Ver menos' : 'Ver más';
-      });
-
-      sync();
-      let rto;
-      window.addEventListener('resize', () => { clearTimeout(rto); rto = setTimeout(sync, 120); });
-    });
-  });
-
+  // Likes en reseñas (ya lo tenías)
   document.addEventListener("DOMContentLoaded", () => {
     const getCSRFFrom = (form) => form.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
     document.querySelectorAll(".like-form").forEach(form => {

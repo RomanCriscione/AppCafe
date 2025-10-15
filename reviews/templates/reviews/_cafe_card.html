@@ -20,7 +20,6 @@
     <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block hover:underline">
       <h3 class="card-title">{{ cafe.name }}</h3>
 
-      {# Ubicación sin usar 'city' #}
       {% if cafe.location %}
         <p class="card-sub">{{ cafe.location }}</p>
       {% elif cafe.neighborhood %}
@@ -43,13 +42,25 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <button type="button"
-                class="btn btn-outline btn-sm"
-                aria-pressed="{{ cafe.is_favorite|yesno:'true,false' }}"
-                onclick="bounceLike(this)">
-          <span aria-hidden="true">❤️</span>
-          <span class="sr-only">Marcar como favorito</span>
-        </button>
+        {% if user.is_authenticated %}
+          <button
+            type="button"
+            class="btn btn-outline btn-sm fav-btn {% if cafe.is_favorite %}is-fav{% endif %}"
+            aria-pressed="{{ cafe.is_favorite|yesno:'true,false' }}"
+            data-fav-url="{% url 'reviews:toggle_favorite' cafe.id %}">
+            <span class="fav-icon" aria-hidden="true">{% if cafe.is_favorite %}❤️{% else %}🤍{% endif %}</span>
+            <span class="sr-only">
+              {% if cafe.is_favorite %}Quitar de favoritos{% else %}Agregar a favoritos{% endif %}
+            </span>
+          </button>
+
+          <noscript>
+            <form action="{% url 'reviews:toggle_favorite' cafe.id %}" method="post" class="inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline btn-sm">❤️</button>
+            </form>
+          </noscript>
+        {% endif %}
 
         <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="btn btn-primary btn-sm">
           Ver
