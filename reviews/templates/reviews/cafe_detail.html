@@ -220,23 +220,38 @@
   {% include "reviews/includes/pagination.html" with page_obj=page_obj anchor="#reviews" %}
 
   {% if user.is_authenticated %}
-    <div class="mb-4 animate-fade-in-up animate-delay-700">
-      <button
-        id="fav-toggle"
-        type="button"
-        class="btn btn-danger rounded-xl fav-btn {% if user in cafe.favorites.all %}is-fav{% endif %}"
-        aria-pressed="{% if user in cafe.favorites.all %}true{% else %}false{% endif %}"
-        data-fav-url="{% url 'reviews:toggle_favorite' cafe.id %}">
-        {% if user in cafe.favorites.all %} 💔 Quitar de favoritos {% else %} ❤️ Agregar a favoritos {% endif %}
-      </button>
-
-      <noscript>
-        <form method="post" action="{% url 'reviews:toggle_favorite' cafe.id %}" class="inline">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger rounded-xl">❤️</button>
-        </form>
-      </noscript>
-    </div>
+    <!-- Favoritos: fallback POST + mejora con JS -->
+    <form method="post"
+          action="{% url 'reviews:toggle_favorite' cafe.id %}"
+          class="mb-4 animate-fade-in-up animate-delay-700 fav-form js-ajax-post"
+          data-cafe="{{ cafe.id }}">
+      {% csrf_token %}
+      {% if user in cafe.favorites.all %}
+        <button type="submit"
+                class="btn btn-danger rounded-xl js-fav-btn"
+                aria-pressed="true"
+                data-icon="❤️"
+                data-icon-off="🤍"
+                data-label-on="Quitar de favoritos"
+                data-label-off="Agregar a favoritos">
+          <span class="js-fav-icon" aria-hidden="true">❤️</span>
+          Quitar de favoritos
+        </button>
+      {% else %}
+        <button type="submit"
+                class="btn btn-outline rounded-xl js-fav-btn"
+                aria-pressed="false"
+                data-icon="❤️"
+                data-icon-off="🤍"
+                data-label-on="Quitar de favoritos"
+                data-label-off="Agregar a favoritos">
+          <span class="js-fav-icon" aria-hidden="true">🤍</span>
+          Agregar a favoritos
+        </button>
+      {% endif %}
+    </form>
+  {% else %}
+    <a class="btn btn-outline rounded-xl" href="{% url 'account_login' %}?next={{ request.path }}">🤍 Agregar a favoritos</a>
   {% endif %}
 
   {% if total_reviews %}
@@ -363,7 +378,7 @@
     btn.textContent = collapsed ? "Ver todas" : "Ver menos";
   }
 
-  // Likes en reseñas (ya lo tenías)
+  // Likes en reseñas (AJAX)
   document.addEventListener("DOMContentLoaded", () => {
     const getCSRFFrom = (form) => form.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
     document.querySelectorAll(".like-form").forEach(form => {

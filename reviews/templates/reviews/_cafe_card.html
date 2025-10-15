@@ -1,4 +1,3 @@
-{# reviews/templates/reviews/includes/_cafe_card.html #}
 {% load static %}
 
 <article class="card cafe-card focus:outline-none" tabindex="0">
@@ -43,23 +42,42 @@
 
       <div class="flex items-center gap-2">
         {% if user.is_authenticated %}
-          <button
-            type="button"
-            class="btn btn-outline btn-sm fav-btn {% if cafe.is_favorite %}is-fav{% endif %}"
-            aria-pressed="{{ cafe.is_favorite|yesno:'true,false' }}"
-            data-fav-url="{% url 'reviews:toggle_favorite' cafe.id %}">
-            <span class="fav-icon" aria-hidden="true">{% if cafe.is_favorite %}❤️{% else %}🤍{% endif %}</span>
-            <span class="sr-only">
-              {% if cafe.is_favorite %}Quitar de favoritos{% else %}Agregar a favoritos{% endif %}
-            </span>
-          </button>
-
-          <noscript>
-            <form action="{% url 'reviews:toggle_favorite' cafe.id %}" method="post" class="inline">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-outline btn-sm">❤️</button>
-            </form>
-          </noscript>
+          {# Fallback HTML normal + mejora con JS si está disponible #}
+          <form
+            method="post"
+            action="{% url 'reviews:toggle_favorite' cafe.id %}"
+            class="fav-form js-ajax-post"
+            data-cafe="{{ cafe.id }}"
+          >
+            {% csrf_token %}
+            {% if cafe.is_favorite or user in cafe.favorites.all %}
+              <button type="submit"
+                      class="btn btn-success btn-sm js-fav-btn"
+                      aria-pressed="true"
+                      data-icon="❤️"
+                      data-icon-off="🤍"
+                      data-label-on="Quitar"
+                      data-label-off="Favorito">
+                <span class="js-fav-icon" aria-hidden="true">❤️</span>
+                <span class="sr-only">Quitar de favoritos</span>
+              </button>
+            {% else %}
+              <button type="submit"
+                      class="btn btn-outline btn-sm js-fav-btn"
+                      aria-pressed="false"
+                      data-icon="❤️"
+                      data-icon-off="🤍"
+                      data-label-on="Quitar"
+                      data-label-off="Favorito">
+                <span class="js-fav-icon" aria-hidden="true">🤍</span>
+                <span class="sr-only">Agregar a favoritos</span>
+              </button>
+            {% endif %}
+          </form>
+        {% else %}
+          <a href="{% url 'account_login' %}?next={% url 'reviews:cafe_list' %}"
+             class="btn btn-outline btn-sm"
+             title="Iniciar sesión para guardar favoritos">🤍</a>
         {% endif %}
 
         <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="btn btn-primary btn-sm">
