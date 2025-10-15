@@ -125,49 +125,37 @@
     <!-- JS: toggle menú móvil, estado scrolleado y botón Volver -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        // --- Menú móvil ---
         const toggle = document.getElementById("menu-toggle");
-        const menu = document.getElementById("navbar-menu");
-        if (toggle && menu) toggle.addEventListener("click", () => menu.classList.toggle("hidden"));
+        const menu   = document.getElementById("navbar-menu");
+        if (toggle && menu) {
+          toggle.addEventListener("click", () => menu.classList.toggle("hidden"));
+        }
 
-        document.addEventListener('scroll', () => {
-          const nav = document.querySelector('header.site-nav');
-          if (!nav) return;
-          nav.classList.toggle('is-scrolled', window.scrollY > 6);
-        }, { passive: true });
+        // --- Navbar scrolleada ---
+        const nav = document.querySelector("header.site-nav");
+        const onScroll = () => {
+          if (nav) nav.classList.toggle("is-scrolled", window.scrollY > 6);
+        };
+        onScroll();
+        document.addEventListener("scroll", onScroll, { passive: true });
 
-          // --- Botón Volver ---
-          const back = document.getElementById('back-link');
-          if (back) {
-            const homePath = "{% url 'home' %}";
-            const isHome = (location.pathname === homePath) || (location.pathname === "/");
-            const ref = document.referrer || "";
-            let sameOrigin = false;
-            try { sameOrigin = ref && new URL(ref, location.origin).origin === location.origin; } catch (e) {}
+        // --- Botón Volver ---
+        const back = document.getElementById("back-link");
+        if (back) {
+          const homePath = "{% url 'home' %}";
+          const isHome   = (location.pathname === homePath) || (location.pathname === "/");
+          const ref      = document.referrer || "";
+          let sameOrigin = false;
+          try { sameOrigin = ref && new URL(ref, location.origin).origin === location.origin; } catch (e) {}
 
-            if (!isHome) back.classList.remove('hidden');
+          if (!isHome) back.classList.remove("hidden");
 
-            back.addEventListener('click', (e) => {
-              // Evitar fade-out en este enlace (lo marca data-no-fade)
-              if (sameOrigin && window.history.length > 1) {
-                e.preventDefault();
-                history.back();
-              }
-              // Si no hay historial válido, navega al fallback del href
-            });
-          }
-
-          // Mostramos en todas las páginas salvo Home
-          if (!isHome) back.classList.remove('hidden');
-
-          back.addEventListener('click', (e) => {
-            // Si hay historial y venimos de la misma app → history.back()
+          back.addEventListener("click", (e) => {
             if (sameOrigin && window.history.length > 1) {
               e.preventDefault();
               window.history.back();
-              return;
             }
-            // Si no, dejamos que el <a> navegue al fallback
-            // (href y data-fallback ya apuntan a la lista de cafés)
           });
         }
       });
@@ -216,22 +204,20 @@
       } else {
         document.addEventListener('DOMContentLoaded', markReady, { once: true });
       }
-      // Clave: cuando se muestra desde bfcache (back/forward), re-agregar la clase
+      // Cuando se muestra desde bfcache (back/forward), re-agregar la clase
       window.addEventListener('pageshow', function () { markReady(); });
 
-      // Al navegar: sacamos la clase para hacer el fade, excepto cuando no corresponde
+      // Al navegar: fade-out en enlaces internos (salvo anclas/externos/no-fade)
       document.querySelectorAll('a[href]').forEach(a => {
         const href = a.getAttribute('href');
         const isAnchor   = href && href.startsWith('#');
         const isExternal = a.target === '_blank'
                         || a.hasAttribute('download')
                         || (href && /^https?:\/\//.test(href) && !href.includes(location.host));
-        const noFade = a.hasAttribute('data-no-fade'); // ← respeta el botón Volver
-
+        const noFade = a.hasAttribute('data-no-fade'); // respeta el botón Volver
         if (isAnchor || isExternal || noFade) return;
 
         a.addEventListener('click', (e) => {
-          // En nuevas navegaciones internas aplicamos fade-out
           if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
           root.classList.remove('page-ready');
         });
@@ -254,26 +240,6 @@
           setTimeout(() => alert.remove(), 500);
         }, 2000);
       });
-    });
-
-    // Botón de upgrade (placeholder)
-    document.addEventListener('click', function (ev) {
-      const btn = ev.target.closest('.btn-upgrade');
-      if (!btn) return;
-      ev.preventDefault();
-      const plan = btn.dataset.plan === 'barista' ? 'Barista' : 'Maestro';
-      const toast = document.createElement('div');
-      toast.setAttribute('role','status');
-      toast.setAttribute('aria-live','polite');
-      toast.className = "px-4 py-2 rounded shadow text-white bg-blue-600 fixed top-4 right-4";
-      toast.style.zIndex = '2147485000';
-      toast.textContent = `El plan ${plan} todavía no está disponible. ¡Próximamente!`;
-      document.body.appendChild(toast);
-      setTimeout(() => {
-        toast.style.transition = 'opacity .5s';
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 500);
-      }, 2200);
     });
 
     // Helper global para animar el like (rebote)
