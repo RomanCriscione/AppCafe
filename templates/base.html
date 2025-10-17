@@ -63,103 +63,130 @@
     <!-- Navbar -->
     <header class="site-nav bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3 sm:gap-6">
+        <!-- Izquierda: marca + Volver (solo ≥ sm) -->
+        <div class="flex items-center gap-2 sm:gap-4">
           <a href="{% url 'home' %}" class="text-2xl font-bold text-brand-800">Gota</a>
 
-          <!-- Botón Volver -->
-          <a
-            id="back-link"
+          <!-- Volver: oculto en mobile, visible fuera de Home -->
+          <a id="back-link"
             href="{% url 'reviews:cafe_list' %}"
             data-fallback="{% url 'reviews:cafe_list' %}"
-            data-no-fade="1"
-            class="btn btn-ghost rounded-xl text-sm hidden"
-          >
+            class="btn btn-ghost rounded-xl text-sm hidden sm:inline-flex">
             ← Volver
           </a>
-
-          <!-- Menú móvil -->
-          <button id="menu-toggle" class="lg:hidden text-slate-700 ml-1" aria-label="Abrir menú">
-            <i class="fas fa-bars text-xl" aria-hidden="true"></i>
-          </button>
-
-          <nav id="navbar-menu" class="hidden lg:flex lg:items-center lg:gap-1">
-            <a href="{% url 'home' %}" class="nav-link">Inicio</a>
-            <a href="{% url 'reviews:cafe_list' %}" class="nav-link">Cafés</a>
-            <a href="{% url 'reviews:mapa_cafes' %}" class="nav-link">📍 Mapa</a>
-            <a href="{% url 'about' %}" class="nav-link">Acerca de</a>
-            <a href="{% url 'contact' %}" class="nav-link">Contacto</a>
-            {% if user.is_authenticated %}
-              <a href="{% url 'reviews:favorite_cafes' %}" class="nav-link">❤️ Favoritos</a>
-            {% endif %}
-          </nav>
         </div>
 
-        <div class="flex items-center gap-3">
-          {% if user.is_authenticated %}
-            <span class="font-semibold text-slate-800">Hola, {{ user.username }}</span>
-            {% if user.avatar %}
-              <img src="{{ user.avatar.url }}" alt="Avatar de {{ user.username }}" class="w-8 h-8 rounded-full border object-cover" />
-            {% endif %}
+        <!-- Botón menú (solo mobile) -->
+        <button id="menu-toggle"
+                class="lg:hidden p-2 rounded-xl text-slate-700"
+                aria-label="Abrir menú" aria-expanded="false" aria-controls="nav-mobile">
+          <i class="fas fa-bars text-xl" aria-hidden="true"></i>
+        </button>
 
+        <!-- Navegación desktop -->
+        <nav id="nav-desktop" class="hidden lg:flex items-center gap-2">
+          <a href="{% url 'home' %}" class="nav-link">Inicio</a>
+          <a href="{% url 'reviews:cafe_list' %}" class="nav-link">Cafés</a>
+          <a href="{% url 'reviews:mapa_cafes' %}" class="nav-link">📍 Mapa</a>
+          <a href="{% url 'about' %}" class="nav-link">Acerca de</a>
+          <a href="{% url 'contact' %}" class="nav-link">Contacto</a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'reviews:favorite_cafes' %}" class="nav-link">❤️ Favoritos</a>
             {% if user.is_owner %}
               <a href="{% url 'reviews:create_cafe' %}" class="btn btn-ghost">➕ Agregar Café</a>
               <a href="{% url 'reviews:owner_dashboard' %}" class="btn btn-ghost">Mis Cafés</a>
             {% else %}
               <a href="{% url 'register_owner' %}" class="btn btn-success">
-                <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
+                <i class="fas fa-coffee text-sm"></i> Registrar tu café
               </a>
             {% endif %}
-
             <a href="{% url 'account_logout' %}" class="btn btn-danger btn-sm">Cerrar sesión</a>
           {% else %}
             <a href="{% url 'account_login' %}" class="btn btn-ghost">Iniciar sesión</a>
             <a href="{% url 'account_signup' %}" class="btn btn-primary">Registrarse</a>
             <a href="{% url 'register_owner' %}" class="btn btn-success">
-              <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
+              <i class="fas fa-coffee text-sm"></i> Registrar tu café
             </a>
           {% endif %}
-        </div>
+        </nav>
       </div>
+
+      <!-- Overlay + menú móvil -->
+      <div id="nav-overlay" class="hidden lg:hidden fixed inset-0 bg-black/30 z-40"></div>
+
+      <nav id="nav-mobile"
+          class="hidden lg:hidden fixed inset-x-0 top-[56px] z-50 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 grid gap-3">
+          <a href="{% url 'home' %}" class="nav-link block py-2">Inicio</a>
+          <a href="{% url 'reviews:cafe_list' %}" class="nav-link block py-2">Cafés</a>
+          <a href="{% url 'reviews:mapa_cafes' %}" class="nav-link block py-2">📍 Mapa</a>
+          <a href="{% url 'about' %}" class="nav-link block py-2">Acerca de</a>
+          <a href="{% url 'contact' %}" class="nav-link block py-2">Contacto</a>
+
+          <hr class="my-2">
+
+          {% if user.is_authenticated %}
+            <a href="{% url 'reviews:favorite_cafes' %}" class="block py-2">❤️ Favoritos</a>
+            {% if user.is_owner %}
+              <a href="{% url 'reviews:create_cafe' %}" class="block py-2">➕ Agregar Café</a>
+              <a href="{% url 'reviews:owner_dashboard' %}" class="block py-2">Mis Cafés</a>
+            {% else %}
+              <a href="{% url 'register_owner' %}" class="block py-2">☕ Registrar tu café</a>
+            {% endif %}
+            <a href="{% url 'account_logout' %}" class="block py-2">Cerrar sesión</a>
+          {% else %}
+            <a href="{% url 'account_login' %}" class="block py-2">Iniciar sesión</a>
+            <a href="{% url 'account_signup' %}" class="block py-2">Registrarse</a>
+            <a href="{% url 'register_owner' %}" class="block py-2">☕ Registrar tu café</a>
+          {% endif %}
+        </div>
+      </nav>
     </header>
 
-    <!-- JS: toggle menú móvil, estado scrolleado y botón Volver -->
+
+        <!-- JS: toggle menú móvil, estado scrolleado y botón Volver -->
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // --- Menú móvil ---
-        const toggle = document.getElementById("menu-toggle");
-        const menu   = document.getElementById("navbar-menu");
-        if (toggle && menu) {
-          toggle.addEventListener("click", () => menu.classList.toggle("hidden"));
-        }
+    document.addEventListener("DOMContentLoaded", function () {
+      const toggle = document.getElementById("menu-toggle");
+      const mobile = document.getElementById("nav-mobile");
+      const overlay = document.getElementById("nav-overlay");
 
-        // --- Navbar scrolleada ---
-        const nav = document.querySelector("header.site-nav");
-        const onScroll = () => {
-          if (nav) nav.classList.toggle("is-scrolled", window.scrollY > 6);
-        };
-        onScroll();
-        document.addEventListener("scroll", onScroll, { passive: true });
-
-        // --- Botón Volver ---
-        const back = document.getElementById("back-link");
-        if (back) {
-          const homePath = "{% url 'home' %}";
-          const isHome   = (location.pathname === homePath) || (location.pathname === "/");
-          const ref      = document.referrer || "";
-          let sameOrigin = false;
-          try { sameOrigin = ref && new URL(ref, location.origin).origin === location.origin; } catch (e) {}
-
-          if (!isHome) back.classList.remove("hidden");
-
-          back.addEventListener("click", (e) => {
-            if (sameOrigin && window.history.length > 1) {
-              e.preventDefault();
-              window.history.back();
-            }
-          });
-        }
+      function openMenu() {
+        mobile.classList.remove("hidden");
+        overlay.classList.remove("hidden");
+        toggle.setAttribute("aria-expanded", "true");
+      }
+      function closeMenu() {
+        mobile.classList.add("hidden");
+        overlay.classList.add("hidden");
+        toggle.setAttribute("aria-expanded", "false");
+      }
+      toggle?.addEventListener("click", () => {
+        const isOpen = !mobile.classList.contains("hidden");
+        isOpen ? closeMenu() : openMenu();
       });
+      overlay?.addEventListener("click", closeMenu);
+      window.addEventListener("resize", () => {
+        if (window.innerWidth >= 1024) closeMenu(); // auto-cierra al pasar a desktop
+      });
+
+      // ---- Botón Volver: oculto en Home y en xs
+      const back = document.getElementById("back-link");
+      if (back) {
+        const homePath = "{% url 'home' %}";
+        const isHome = (location.pathname === homePath) || (location.pathname === "/");
+        if (!isHome && window.innerWidth >= 640) back.classList.remove("hidden");
+
+        back.addEventListener("click", (e) => {
+          const ref = document.referrer || "";
+          let sameOrigin = false;
+          try { sameOrigin = ref && new URL(ref, location.origin).origin === location.origin; } catch {}
+          if (sameOrigin && history.length > 1) { e.preventDefault(); history.back(); }
+        });
+      }
+    });
     </script>
+
 
     <!-- Contenido principal -->
     <main class="flex-1 container mx-auto px-4 py-6">
