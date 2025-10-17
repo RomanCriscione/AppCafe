@@ -21,17 +21,14 @@
   {% block head_description %}<meta name="description" content="{{ meta_description|default:'Descubrí cafeterías, reseñas reales y mapas.' }}">{% endblock %}
   {% block meta %}{% endblock %}
 
-  <!-- CSS (orden recomendado) -->
+  <!-- CSS -->
   <link rel="stylesheet" href="{% static 'css/animations.css' %}?v=1">
-  <!-- Tailwind compilado por npm (NO usar CDN) -->
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=1">
-  <!-- Fuentes y libs de terceros -->
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=1"><!-- tu Tailwind compilado -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-  <!-- Tu theme, siempre último para poder sobreescribir -->
-  <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=1">
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=1"><!-- tu tema, último -->
 
   <!-- PWA / Icons -->
   <link rel="manifest" href="{% static 'site.webmanifest' %}">
@@ -41,7 +38,7 @@
   <link rel="apple-touch-icon" sizes="192x192" href="{% static 'images/coffee-icon.png' %}">
   <link rel="canonical" href="{{ request.build_absolute_uri }}">
 
-  <!-- Open Graph defaults -->
+  <!-- Open Graph -->
   <meta property="og:title" content="{{ page_title|default:'Gota — Descubrí tu próximo café' }}">
   <meta property="og:description" content="{{ page_description|default:'Encontrá cafés por zona, estilo y experiencia.' }}">
   {% if og_image_url %}
@@ -53,37 +50,37 @@
   <meta property="og:url" content="{{ request.build_absolute_uri }}">
   <meta name="twitter:card" content="summary_large_image">
 
-  <!-- Chart.js (si lo usás en alguna vista) -->
+  <!-- Chart.js si lo usás -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 
 <body class="page">
   <div class="min-h-screen flex flex-col">
 
-    <!-- Navbar -->
+    <!-- NAVBAR -->
     <header class="site-nav bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
-      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <!-- Marca + Volver (solo ≥ md) -->
+      <div class="max-w-7xl mx-auto px-4 py-2 sm:py-3 flex items-center justify-between">
+        <!-- Marca + Volver (Volver solo >= md) -->
         <div class="flex items-center gap-2 sm:gap-4">
           <a href="{% url 'home' %}" class="text-2xl font-bold text-brand-800">Gota</a>
 
           <a id="back-link"
-            href="{% url 'reviews:cafe_list' %}"
-            data-fallback="{% url 'reviews:cafe_list' %}"
-            class="btn btn-ghost rounded-xl text-sm hidden md:inline-flex">
+             href="{% url 'reviews:cafe_list' %}"
+             data-fallback="{% url 'reviews:cafe_list' %}"
+             class="btn btn-ghost rounded-xl text-sm hidden md:inline-flex">
             ← Volver
           </a>
         </div>
 
-        <!-- Botón menú (solo mobile) -->
+        <!-- Botón menú (mobile) -->
         <button id="menu-toggle"
                 class="lg:hidden p-2 rounded-xl text-slate-700"
-                aria-label="Abrir menú" aria-expanded="false" aria-controls="nav-drawer">
+                aria-label="Abrir menú" aria-expanded="false" aria-controls="nav-panel">
           <i class="fas fa-bars text-xl" aria-hidden="true"></i>
         </button>
 
         <!-- Navegación desktop -->
-        <nav id="nav-desktop" class="hidden lg:flex items-center gap-2">
+        <nav class="hidden lg:flex items-center gap-2">
           <a href="{% url 'home' %}" class="nav-link">Inicio</a>
           <a href="{% url 'reviews:cafe_list' %}" class="nav-link">Cafés</a>
           <a href="{% url 'reviews:mapa_cafes' %}" class="nav-link">📍 Mapa</a>
@@ -96,7 +93,7 @@
               <a href="{% url 'reviews:owner_dashboard' %}" class="btn btn-ghost">Mis Cafés</a>
             {% else %}
               <a href="{% url 'register_owner' %}" class="btn btn-success">
-                <i class="fas fa-coffee text-sm"></i> Registrar tu café
+                <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
               </a>
             {% endif %}
             <a href="{% url 'account_logout' %}" class="btn btn-danger btn-sm">Cerrar sesión</a>
@@ -104,31 +101,30 @@
             <a href="{% url 'account_login' %}" class="btn btn-ghost">Iniciar sesión</a>
             <a href="{% url 'account_signup' %}" class="btn btn-primary">Registrarse</a>
             <a href="{% url 'register_owner' %}" class="btn btn-success">
-              <i class="fas fa-coffee text-sm"></i> Registrar tu café
+              <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
             </a>
           {% endif %}
         </nav>
       </div>
 
-      <!-- Overlay -->
+      <!-- Overlay (oscurece fondo en mobile) -->
       <div id="nav-overlay" class="hidden fixed inset-0 bg-black/40 z-40"></div>
 
-      <!-- Drawer lateral -->
-      <nav id="nav-drawer"
-          class="fixed inset-y-0 right-0 z-50 w-80 max-w-[85vw] bg-white/95 backdrop-blur shadow-xl
-                  border-l border-slate-200 translate-x-full transition-transform duration-200 lg:hidden">
+      <!-- Panel full-screen (mobile) -->
+      <nav id="nav-panel"
+           class="fixed inset-0 z-50 bg-white overflow-y-auto hidden lg:hidden">
         <div class="px-5 py-4 flex items-center justify-between border-b">
           <span class="font-semibold">Menú</span>
           <button id="menu-close" class="p-2 rounded-xl" aria-label="Cerrar menú">
             <i class="fas fa-times text-lg"></i>
           </button>
         </div>
-        <div class="p-5 grid gap-3">
-          <a href="{% url 'home' %}" class="nav-link block py-2">Inicio</a>
-          <a href="{% url 'reviews:cafe_list' %}" class="nav-link block py-2">Cafés</a>
-          <a href="{% url 'reviews:mapa_cafes' %}" class="nav-link block py-2">📍 Mapa</a>
-          <a href="{% url 'about' %}" class="nav-link block py-2">Acerca de</a>
-          <a href="{% url 'contact' %}" class="nav-link block py-2">Contacto</a>
+        <div class="p-5 grid gap-3 text-lg">
+          <a href="{% url 'home' %}" class="block py-2">Inicio</a>
+          <a href="{% url 'reviews:cafe_list' %}" class="block py-2">Cafés</a>
+          <a href="{% url 'reviews:mapa_cafes' %}" class="block py-2">📍 Mapa</a>
+          <a href="{% url 'about' %}" class="block py-2">Acerca de</a>
+          <a href="{% url 'contact' %}" class="block py-2">Contacto</a>
           <hr class="my-2">
           {% if user.is_authenticated %}
             <a href="{% url 'reviews:favorite_cafes' %}" class="block py-2">❤️ Favoritos</a>
@@ -148,60 +144,62 @@
       </nav>
     </header>
 
-
-
-        <!-- JS: toggle menú móvil, estado scrolleado y botón Volver -->
+    <!-- JS: menú mobile + Volver -->
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const toggle  = document.getElementById("menu-toggle");
-      const drawer  = document.getElementById("nav-drawer");
-      const overlay = document.getElementById("nav-overlay");
-      const closeBtn= document.getElementById("menu-close");
+      document.addEventListener("DOMContentLoaded", function () {
+        const toggle  = document.getElementById("menu-toggle");
+        const panel   = document.getElementById("nav-panel");
+        const overlay = document.getElementById("nav-overlay");
+        const closeBt = document.getElementById("menu-close");
 
-      const openMenu = () => {
-        drawer.classList.remove("translate-x-full");
-        overlay.classList.remove("hidden");
-        document.body.classList.add("overflow-hidden");
-        toggle?.setAttribute("aria-expanded", "true");
-      };
-      const closeMenu = () => {
-        drawer.classList.add("translate-x-full");
-        overlay.classList.add("hidden");
-        document.body.classList.remove("overflow-hidden");
-        toggle?.setAttribute("aria-expanded", "false");
-      };
-
-      toggle?.addEventListener("click", openMenu);
-      closeBtn?.addEventListener("click", closeMenu);
-      overlay?.addEventListener("click", closeMenu);
-      window.addEventListener("resize", () => { if (window.innerWidth >= 1024) closeMenu(); });
-
-      // ---- Botón Volver: oculto en Home y en < md
-      const back = document.getElementById("back-link");
-      if (back) {
-        const homePath = "{% url 'home' %}";
-        const isHome = (location.pathname === homePath) || (location.pathname === "/");
-
-        const setBackVisibility = () => {
-          const wide = window.matchMedia("(min-width: 768px)").matches; // md
-          back.classList.toggle("hidden", isHome || !wide);
+        const openMenu = () => {
+          panel.classList.remove("hidden");
+          overlay.classList.remove("hidden");
+          document.body.classList.add("overflow-hidden");
+          toggle?.setAttribute("aria-expanded","true");
         };
-        setBackVisibility();
-        window.addEventListener("resize", setBackVisibility);
+        const closeMenu = () => {
+          panel.classList.add("hidden");
+          overlay.classList.add("hidden");
+          document.body.classList.remove("overflow-hidden");
+          toggle?.setAttribute("aria-expanded","false");
+        };
 
-        back.addEventListener("click", (e) => {
-          const ref = document.referrer || "";
-          let sameOrigin = false;
-          try { sameOrigin = ref && new URL(ref, location.origin).origin === location.origin; } catch {}
-          if (sameOrigin && history.length > 1) { e.preventDefault(); history.back(); }
+        toggle?.addEventListener("click", openMenu);
+        closeBt?.addEventListener("click", closeMenu);
+        overlay?.addEventListener("click", closeMenu);
+        // Cerrar al navegar dentro del panel
+        panel?.addEventListener("click", (e) => {
+          const a = e.target.closest("a[href]");
+          if (a) closeMenu();
         });
-      }
-    });
+        // Al pasar a desktop, asegurar cerrado
+        window.addEventListener("resize", () => { if (window.innerWidth >= 1024) closeMenu(); });
+
+        // ---- Botón Volver: oculto en Home y en < md
+        const back = document.getElementById("back-link");
+        if (back) {
+          const homePath = "{% url 'home' %}";
+          const isHome = (location.pathname === homePath) || (location.pathname === "/");
+
+          const setBackVisibility = () => {
+            const wide = window.matchMedia("(min-width: 768px)").matches; // md
+            back.classList.toggle("hidden", isHome || !wide);
+          };
+          setBackVisibility();
+          window.addEventListener("resize", setBackVisibility);
+
+          back.addEventListener("click", (e) => {
+            const ref = document.referrer || "";
+            let sameOrigin = false;
+            try { sameOrigin = ref && new URL(ref, location.origin).origin === location.origin; } catch {}
+            if (sameOrigin && history.length > 1) { e.preventDefault(); history.back(); }
+          });
+        }
+      });
     </script>
 
-
-
-    <!-- Contenido principal -->
+    <!-- CONTENIDO -->
     <main class="flex-1 container mx-auto px-4 py-6">
       {% if messages %}
         <div class="fixed top-4 right-4 z-[2147483000] space-y-2">
@@ -229,34 +227,24 @@
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script defer src="{% static 'js/main.js' %}"></script>
 
-  <!-- Helpers UI: fade entre páginas, init swiper, toasts y efecto like -->
+  <!-- Helpers UI: fade entre páginas, init swiper y toasts -->
   <script>
-    // Fade entre páginas (ignora anclas, externos y enlaces con data-no-fade)
+    // Fade entre páginas (ignora anclas/externos/no-fade)
     (function () {
       const root = document.body;
-      function markReady() {
-        if (root.classList.contains('page')) root.classList.add('page-ready');
-      }
+      function markReady() { if (root.classList.contains('page')) root.classList.add('page-ready'); }
+      if (document.readyState === 'complete' || document.readyState === 'interactive') { markReady(); }
+      else { document.addEventListener('DOMContentLoaded', markReady, { once: true }); }
+      window.addEventListener('pageshow', markReady);
 
-      // Asegurá visibilidad al cargar o al volver desde bfcache
-      if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        markReady();
-      } else {
-        document.addEventListener('DOMContentLoaded', markReady, { once: true });
-      }
-      // Cuando se muestra desde bfcache (back/forward), re-agregar la clase
-      window.addEventListener('pageshow', function () { markReady(); });
-
-      // Al navegar: fade-out en enlaces internos (salvo anclas/externos/no-fade)
       document.querySelectorAll('a[href]').forEach(a => {
         const href = a.getAttribute('href');
         const isAnchor   = href && href.startsWith('#');
         const isExternal = a.target === '_blank'
                         || a.hasAttribute('download')
                         || (href && /^https?:\/\//.test(href) && !href.includes(location.host));
-        const noFade = a.hasAttribute('data-no-fade'); // respeta el botón Volver
+        const noFade = a.hasAttribute('data-no-fade');
         if (isAnchor || isExternal || noFade) return;
-
         a.addEventListener('click', (e) => {
           if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
           root.classList.remove('page-ready');
@@ -264,7 +252,7 @@
       });
     })();
 
-    // Swiper básico + desaparecer alerts
+    // Swiper + autocierre de toasts
     document.addEventListener('DOMContentLoaded', function () {
       if (document.querySelector('.swiper-container')) {
         new Swiper('.swiper-container', {
@@ -282,7 +270,7 @@
       });
     });
 
-    // Helper global para animar el like (rebote)
+    // Helper global para animar el "like"
     window.bounceLike = (el) => {
       if (!el) return;
       el.classList.remove('like-bounce');
