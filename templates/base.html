@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Preconnect / DNS-Prefetch (perf) -->
+  <!-- Preconnect / DNS-Prefetch -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="dns-prefetch" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,12 +23,12 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="{% static 'css/animations.css' %}?v=1">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=1"><!-- tu Tailwind compilado -->
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=1">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-  <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=1"><!-- tu tema, último -->
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=1">
 
   <!-- PWA / Icons -->
   <link rel="manifest" href="{% static 'site.webmanifest' %}">
@@ -50,7 +50,7 @@
   <meta property="og:url" content="{{ request.build_absolute_uri }}">
   <meta name="twitter:card" content="summary_large_image">
 
-  <!-- Chart.js si lo usás -->
+  <!-- Chart.js (si se usa en alguna vista) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 
@@ -60,14 +60,15 @@
     <!-- NAVBAR -->
     <header class="site-nav bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 py-2 sm:py-3 flex items-center justify-between">
-        <!-- Marca + Volver (Volver solo >= md) -->
+        <!-- Marca + Volver (Volver solo >= md; oculto por estilo inline también) -->
         <div class="flex items-center gap-2 sm:gap-4">
           <a href="{% url 'home' %}" class="text-2xl font-bold text-brand-800">Gota</a>
 
           <a id="back-link"
              href="{% url 'reviews:cafe_list' %}"
              data-fallback="{% url 'reviews:cafe_list' %}"
-             class="btn btn-ghost rounded-xl text-sm hidden md:inline-flex">
+             class="btn btn-ghost rounded-xl text-sm hidden md:inline-flex"
+             style="display:none">
             ← Volver
           </a>
         </div>
@@ -75,7 +76,7 @@
         <!-- Botón menú (mobile) -->
         <button id="menu-toggle"
                 class="lg:hidden p-2 rounded-xl text-slate-700"
-                aria-label="Abrir menú" aria-expanded="false" aria-controls="nav-panel">
+                aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-panel">
           <i class="fas fa-bars text-xl" aria-hidden="true"></i>
         </button>
 
@@ -106,50 +107,50 @@
           {% endif %}
         </nav>
       </div>
+    </header>
 
-      <!-- Overlay (oscurece fondo en mobile) -->
-      <div id="nav-overlay" class="hidden fixed inset-0 bg-black/40 z-40"></div>
+    <!-- OVERLAY + PANEL MÓVIL (fuera del header para evitar stacking raros) -->
+    <div id="mobile-overlay" class="hidden fixed inset-0 bg-black/45 z-[9998]"></div>
 
-      <!-- Panel full-screen (mobile) -->
-      <nav id="nav-panel"
-           class="fixed inset-0 z-50 bg-white overflow-y-auto hidden lg:hidden">
-        <div class="px-5 py-4 flex items-center justify-between border-b">
-          <span class="font-semibold">Menú</span>
-          <button id="menu-close" class="p-2 rounded-xl" aria-label="Cerrar menú">
-            <i class="fas fa-times text-lg"></i>
-          </button>
-        </div>
-        <div class="p-5 grid gap-3 text-lg">
-          <a href="{% url 'home' %}" class="block py-2">Inicio</a>
-          <a href="{% url 'reviews:cafe_list' %}" class="block py-2">Cafés</a>
-          <a href="{% url 'reviews:mapa_cafes' %}" class="block py-2">📍 Mapa</a>
-          <a href="{% url 'about' %}" class="block py-2">Acerca de</a>
-          <a href="{% url 'contact' %}" class="block py-2">Contacto</a>
-          <hr class="my-2">
-          {% if user.is_authenticated %}
-            <a href="{% url 'reviews:favorite_cafes' %}" class="block py-2">❤️ Favoritos</a>
-            {% if user.is_owner %}
-              <a href="{% url 'reviews:create_cafe' %}" class="block py-2">➕ Agregar Café</a>
-              <a href="{% url 'reviews:owner_dashboard' %}" class="block py-2">Mis Cafés</a>
-            {% else %}
-              <a href="{% url 'register_owner' %}" class="block py-2">☕ Registrar tu café</a>
-            {% endif %}
-            <a href="{% url 'account_logout' %}" class="block py-2">Cerrar sesión</a>
+    <nav id="mobile-panel"
+         class="hidden fixed inset-0 z-[9999] bg-white overflow-y-auto lg:hidden"
+         aria-hidden="true">
+      <div class="px-5 py-4 flex items-center justify-between border-b">
+        <span class="font-semibold">Menú</span>
+        <button id="menu-close" class="p-2 rounded-xl" aria-label="Cerrar menú">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+      <div class="p-5 grid gap-3 text-lg">
+        <a href="{% url 'home' %}" class="block py-2">Inicio</a>
+        <a href="{% url 'reviews:cafe_list' %}" class="block py-2">Cafés</a>
+        <a href="{% url 'reviews:mapa_cafes' %}" class="block py-2">📍 Mapa</a>
+        <a href="{% url 'about' %}" class="block py-2">Acerca de</a>
+        <a href="{% url 'contact' %}" class="block py-2">Contacto</a>
+        <hr class="my-2">
+        {% if user.is_authenticated %}
+          <a href="{% url 'reviews:favorite_cafes' %}" class="block py-2">❤️ Favoritos</a>
+          {% if user.is_owner %}
+            <a href="{% url 'reviews:create_cafe' %}" class="block py-2">➕ Agregar Café</a>
+            <a href="{% url 'reviews:owner_dashboard' %}" class="block py-2">Mis Cafés</a>
           {% else %}
-            <a href="{% url 'account_login' %}" class="block py-2">Iniciar sesión</a>
-            <a href="{% url 'account_signup' %}" class="block py-2">Registrarse</a>
             <a href="{% url 'register_owner' %}" class="block py-2">☕ Registrar tu café</a>
           {% endif %}
-        </div>
-      </nav>
-    </header>
+          <a href="{% url 'account_logout' %}" class="block py-2">Cerrar sesión</a>
+        {% else %}
+          <a href="{% url 'account_login' %}" class="block py-2">Iniciar sesión</a>
+          <a href="{% url 'account_signup' %}" class="block py-2">Registrarse</a>
+          <a href="{% url 'register_owner' %}" class="block py-2">☕ Registrar tu café</a>
+        {% endif %}
+      </div>
+    </nav>
 
     <!-- JS: menú mobile + Volver -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const toggle  = document.getElementById("menu-toggle");
-        const panel   = document.getElementById("nav-panel");
-        const overlay = document.getElementById("nav-overlay");
+        const panel   = document.getElementById("mobile-panel");
+        const overlay = document.getElementById("mobile-overlay");
         const closeBt = document.getElementById("menu-close");
 
         const openMenu = () => {
@@ -157,12 +158,14 @@
           overlay.classList.remove("hidden");
           document.body.classList.add("overflow-hidden");
           toggle?.setAttribute("aria-expanded","true");
+          panel.setAttribute("aria-hidden","false");
         };
         const closeMenu = () => {
           panel.classList.add("hidden");
           overlay.classList.add("hidden");
           document.body.classList.remove("overflow-hidden");
           toggle?.setAttribute("aria-expanded","false");
+          panel.setAttribute("aria-hidden","true");
         };
 
         toggle?.addEventListener("click", openMenu);
@@ -176,7 +179,7 @@
         // Al pasar a desktop, asegurar cerrado
         window.addEventListener("resize", () => { if (window.innerWidth >= 1024) closeMenu(); });
 
-        // ---- Botón Volver: oculto en Home y en < md
+        // ---- Botón Volver: oculto en Home y en < md (forzado)
         const back = document.getElementById("back-link");
         if (back) {
           const homePath = "{% url 'home' %}";
@@ -184,7 +187,9 @@
 
           const setBackVisibility = () => {
             const wide = window.matchMedia("(min-width: 768px)").matches; // md
-            back.classList.toggle("hidden", isHome || !wide);
+            const show = wide && !isHome;
+            back.style.display = show ? "inline-flex" : "none";
+            back.classList.toggle("hidden", !show);
           };
           setBackVisibility();
           window.addEventListener("resize", setBackVisibility);
@@ -227,9 +232,9 @@
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script defer src="{% static 'js/main.js' %}"></script>
 
-  <!-- Helpers UI: fade entre páginas, init swiper y toasts -->
+  <!-- Helpers UI -->
   <script>
-    // Fade entre páginas (ignora anclas/externos/no-fade)
+    // Fade entre páginas
     (function () {
       const root = document.body;
       function markReady() { if (root.classList.contains('page')) root.classList.add('page-ready'); }
