@@ -3,12 +3,7 @@
 {% load static %}
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Preconnect -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   {% block head_title %}<title>{{ meta_title|default:"Gota - Reseñas de Cafés" }}</title>{% endblock %}
   {% block head_description %}<meta name="description" content="{{ meta_description|default:'Descubrí cafeterías, reseñas reales y mapas.' }}">{% endblock %}
@@ -16,62 +11,60 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="{% static 'css/animations.css' %}?v=1">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=1">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=1"><!-- Tailwind -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=1">
 
-  <!-- Icons / PWA -->
-  <link rel="icon" href="{% static 'images/coffee-icon.png' %}">
+  <!-- PWA / OG -->
+  <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#553A2F">
+  <link rel="icon" href="{% static 'images/coffee-icon.png' %}">
+  <link rel="apple-touch-icon" sizes="192x192" href="{% static 'images/coffee-icon.png' %}">
   <link rel="canonical" href="{{ request.build_absolute_uri }}">
-
-  <!-- OG -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
   <meta property="og:title" content="{{ page_title|default:'Gota — Descubrí tu próximo café' }}">
   <meta property="og:description" content="{{ page_description|default:'Encontrá cafés por zona, estilo y experiencia.' }}">
   <meta property="og:image" content="{% if og_image_url %}{{ og_image_url }}{% else %}{% static 'images/og-default.jpg' %}{% endif %}">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="{{ request.build_absolute_uri }}">
   <meta name="twitter:card" content="summary_large_image">
 
-  <!-- (Opcional) Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-
-  <!-- Anti-scroll cuando el menú está abierto -->
+  <!-- Fuerza: ocultar "Volver" en mobile -->
   <style>
-    .no-scroll { overflow: hidden; }
-    /* Evita parpadeos: el panel empieza hidden sin transiciones */
-    #mobile-panel { display: none; }
-    #mobile-overlay { display: none; }
-    .mobile-open #mobile-panel { display: block; }
-    .mobile-open #mobile-overlay { display: block; }
+    @media (max-width: 767.98px){ #back-link{ display:none !important; } }
+    /* Asegura visibilidad/ocultación del panel sin depender de reglas globales */
+    #mobile-panel{ display:block; }
+    #mobile-panel.hidden{ display:none; }
   </style>
+
+  <!-- Chart.js si lo necesitás -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 
 <body class="page">
   <div class="min-h-screen flex flex-col">
 
     <!-- NAVBAR -->
-    <header class="bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
+    <header class="site-nav bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 py-2 sm:py-3 flex items-center justify-between">
         <div class="flex items-center gap-2 sm:gap-4">
           <a href="{% url 'home' %}" class="text-2xl font-bold text-brand-800">Gota</a>
 
-          <!-- Volver: oculto por defecto; solo ≥768px y fuera de Home -->
+          <!-- Volver: sólo ≥ md y fuera de Home (JS define cuándo mostrar) -->
           <a id="back-link"
              href="{% url 'reviews:cafe_list' %}"
-             class="btn btn-ghost rounded-xl text-sm hidden md:inline-flex"
-             style="display:none">← Volver</a>
+             data-fallback="{% url 'reviews:cafe_list' %}"
+             class="btn btn-ghost rounded-xl text-sm hidden md:inline-flex">
+            ← Volver
+          </a>
         </div>
 
-        <!-- Hamburguesa -->
+        <!-- Botón menú (mobile) -->
         <button id="menu-toggle"
                 class="lg:hidden p-2 rounded-xl text-slate-700"
-                type="button" aria-label="Abrir menú" aria-expanded="false">
-          <!-- ícono simple (sin fontawesome para evitar cargas extra) -->
-          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+                aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-panel">
+          <i class="fas fa-bars text-xl" aria-hidden="true"></i>
         </button>
 
         <!-- Navegación desktop -->
@@ -87,28 +80,32 @@
               <a href="{% url 'reviews:create_cafe' %}" class="btn btn-ghost">➕ Agregar Café</a>
               <a href="{% url 'reviews:owner_dashboard' %}" class="btn btn-ghost">Mis Cafés</a>
             {% else %}
-              <a href="{% url 'register_owner' %}" class="btn btn-success">Registrar tu café</a>
+              <a href="{% url 'register_owner' %}" class="btn btn-success">
+                <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
+              </a>
             {% endif %}
             <a href="{% url 'account_logout' %}" class="btn btn-danger btn-sm">Cerrar sesión</a>
           {% else %}
             <a href="{% url 'account_login' %}" class="btn btn-ghost">Iniciar sesión</a>
             <a href="{% url 'account_signup' %}" class="btn btn-primary">Registrarse</a>
-            <a href="{% url 'register_owner' %}" class="btn btn-success">Registrar tu café</a>
+            <a href="{% url 'register_owner' %}" class="btn btn-success">
+              <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
+            </a>
           {% endif %}
         </nav>
       </div>
     </header>
 
-    <!-- OVERLAY + PANEL MOBILE (full screen, fuera del header) -->
-    <div id="mobile-overlay" class="fixed inset-0 bg-black/45 z-[9998]"></div>
+    <!-- Overlay + Panel móvil (fuera del header) -->
+    <div id="mobile-overlay" class="hidden fixed inset-0 bg-black/45 z-[9998]"></div>
 
-    <nav id="mobile-panel" class="fixed inset-0 z-[9999] bg-white overflow-y-auto lg:hidden" aria-hidden="true">
+    <aside id="mobile-panel"
+           class="hidden fixed inset-0 z-[9999] bg-white overflow-y-auto lg:hidden min-h-screen border-l border-slate-200 shadow-2xl"
+           role="dialog" aria-modal="true" aria-hidden="true">
       <div class="px-5 py-4 flex items-center justify-between border-b">
         <span class="font-semibold">Menú</span>
-        <button id="menu-close" class="p-2 rounded-xl" type="button" aria-label="Cerrar menú">
-          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+        <button id="menu-close" class="p-2 rounded-xl" aria-label="Cerrar menú">
+          <i class="fas fa-times text-lg"></i>
         </button>
       </div>
       <div class="p-5 grid gap-3 text-lg">
@@ -133,57 +130,59 @@
           <a href="{% url 'register_owner' %}" class="block py-2">☕ Registrar tu café</a>
         {% endif %}
       </div>
-    </nav>
+    </aside>
 
-    <!-- JS: menú mobile + Volver (a prueba de reentradas) -->
+    <!-- JS menú + Volver -->
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const body    = document.body;
-        const toggle  = document.getElementById("menu-toggle");
-        const panel   = document.getElementById("mobile-panel");
-        const overlay = document.getElementById("mobile-overlay");
-        const closeBt = document.getElementById("menu-close");
-        let busy = false;   // evita abrir/cerrar múltiples veces
+      (function () {
+        const $ = (id) => document.getElementById(id);
+        const toggle  = $("menu-toggle");
+        const panel   = $("mobile-panel");
+        const overlay = $("mobile-overlay");
+        const closeBt = $("menu-close");
 
-        function openMenu() {
-          if (busy || body.classList.contains("mobile-open")) return;
-          busy = true;
-          body.classList.add("mobile-open","no-scroll");
+        let isOpen = false;
+        function openMenu(){
+          if (isOpen) return;
+          isOpen = true;
+          panel.classList.remove("hidden");
+          overlay.classList.remove("hidden");
+          document.body.classList.add("overflow-hidden");
           toggle?.setAttribute("aria-expanded","true");
           panel.setAttribute("aria-hidden","false");
-          busy = false;
         }
-        function closeMenu() {
-          if (busy || !body.classList.contains("mobile-open")) return;
-          busy = true;
-          body.classList.remove("mobile-open","no-scroll");
+        function closeMenu(){
+          if (!isOpen) return;
+          isOpen = false;
+          panel.classList.add("hidden");
+          overlay.classList.add("hidden");
+          document.body.classList.remove("overflow-hidden");
           toggle?.setAttribute("aria-expanded","false");
           panel.setAttribute("aria-hidden","true");
-          busy = false;
         }
 
-        toggle?.addEventListener("click", openMenu);
-        closeBt?.addEventListener("click", closeMenu);
-        overlay?.addEventListener("click", closeMenu);
+        toggle?.addEventListener("click", openMenu, { passive:true });
+        closeBt?.addEventListener("click", closeMenu, { passive:true });
+        overlay?.addEventListener("click", closeMenu, { passive:true });
         panel?.addEventListener("click", (e) => {
           const a = e.target.closest("a[href]");
           if (a) closeMenu();
-        });
+        }, { passive:true });
+
+        // Al pasar a desktop, asegurar cerrado
         window.addEventListener("resize", () => { if (window.innerWidth >= 1024) closeMenu(); });
 
-        // ---- Botón Volver (solo ≥768px y no Home)
+        // Botón Volver: visible sólo ≥ md y fuera de Home
         const back = document.getElementById("back-link");
         if (back) {
           const homePath = "{% url 'home' %}";
           const isHome = (location.pathname === homePath) || (location.pathname === "/");
-          function syncBack() {
-            const wide = window.matchMedia("(min-width: 768px)").matches;
-            const show = wide && !isHome;
-            back.style.display = show ? "inline-flex" : "none";
-            back.classList.toggle("hidden", !show);
-          }
-          syncBack();
-          window.addEventListener("resize", syncBack);
+          const setBackVisibility = () => {
+            const wide = window.matchMedia("(min-width: 768px)").matches; // md
+            back.classList.toggle("hidden", isHome || !wide);
+          };
+          setBackVisibility();
+          window.addEventListener("resize", setBackVisibility);
           back.addEventListener("click", (e) => {
             const ref = document.referrer || "";
             let sameOrigin = false;
@@ -191,7 +190,7 @@
             if (sameOrigin && history.length > 1) { e.preventDefault(); history.back(); }
           });
         }
-      });
+      })();
     </script>
 
     <!-- CONTENIDO -->
@@ -208,7 +207,6 @@
           {% endfor %}
         </div>
       {% endif %}
-
       {% block content %}{% endblock %}
     </main>
 
@@ -217,38 +215,51 @@
     </footer>
   </div>
 
-  <!-- JS externos -->
+  <!-- JS externos (defer) -->
   <script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script defer src="{% static 'js/main.js' %}"></script>
 
-  <!-- Helpers (fade + toasts) -->
+  <!-- Helpers UI -->
   <script>
     (function () {
       const root = document.body;
       function markReady(){ if (root.classList.contains('page')) root.classList.add('page-ready'); }
-      if (document.readyState === 'complete' || document.readyState === 'interactive') markReady();
-      else document.addEventListener('DOMContentLoaded', markReady, { once:true });
+      if (document.readyState === 'complete' || document.readyState === 'interactive') { markReady(); }
+      else { document.addEventListener('DOMContentLoaded', markReady, { once:true }); }
       window.addEventListener('pageshow', markReady);
 
-      document.querySelectorAll('a[href]').forEach(a=>{
-        const href=a.getAttribute('href');
+      document.querySelectorAll('a[href]').forEach(a => {
+        const href = a.getAttribute('href');
         const isAnchor = href && href.startsWith('#');
-        const isExternal = a.target==='_blank'||a.hasAttribute('download')||(href&&/^https?:\/\//.test(href)&&!href.includes(location.host));
+        const isExternal = a.target === '_blank'
+          || a.hasAttribute('download')
+          || (href && /^https?:\/\//.test(href) && !href.includes(location.host));
         const noFade = a.hasAttribute('data-no-fade');
-        if (isAnchor||isExternal||noFade) return;
-        a.addEventListener('click', (e)=>{ if(!(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)) root.classList.remove('page-ready'); });
+        if (isAnchor || isExternal || noFade) return;
+        a.addEventListener('click', (e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          root.classList.remove('page-ready');
+        });
       });
     })();
 
     document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('.alert-message').forEach(alert => {
-        setTimeout(()=>{ alert.classList.add('opacity-0','transition-opacity','duration-500'); setTimeout(()=>alert.remove(),500); }, 2000);
+        setTimeout(() => {
+          alert.classList.add('opacity-0','transition-opacity','duration-500');
+          setTimeout(() => alert.remove(), 500);
+        }, 2000);
       });
     });
 
-    // Rebote like
-    window.bounceLike = (el) => { if (!el) return; el.classList.remove('like-bounce'); void el.offsetWidth; el.classList.add('like-bounce'); };
+    // Rebote para likes
+    window.bounceLike = (el) => {
+      if (!el) return;
+      el.classList.remove('like-bounce');
+      void el.offsetWidth;
+      el.classList.add('like-bounce');
+    };
   </script>
 
   {% block scripts %}{% endblock %}
