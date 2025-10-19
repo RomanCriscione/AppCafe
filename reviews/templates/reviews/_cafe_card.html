@@ -1,7 +1,7 @@
 {% load static %}
 
-<article class="card cafe-card focus:outline-none" tabindex="0">
-  <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block">
+<article class="card cafe-card focus:outline-none min-w-0" tabindex="0">
+  <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block min-w-0">
     <div class="card-media">
       {% if cafe.photo1 and cafe.photo1.url %}
         <img src="{{ cafe.photo1.url }}"
@@ -42,13 +42,10 @@
 
       <div class="flex items-center gap-2">
         {% if user.is_authenticated %}
-          {# Fallback HTML normal + mejora con JS si está disponible #}
-          <form
-            method="post"
-            action="{% url 'reviews:toggle_favorite' cafe.id %}"
-            class="fav-form js-ajax-post"
-            data-cafe="{{ cafe.id }}"
-          >
+          <form method="post"
+                action="{% url 'reviews:toggle_favorite' cafe.id %}"
+                class="fav-form js-ajax-post"
+                data-cafe="{{ cafe.id }}">
             {% csrf_token %}
             {% if cafe.is_favorite or user in cafe.favorites.all %}
               <button type="submit"

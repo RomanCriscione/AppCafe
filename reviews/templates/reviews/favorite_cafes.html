@@ -25,11 +25,10 @@
   {% if cafes %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {% for cafe in cafes %}
-        <div class="relative bg-white rounded-xl shadow p-4 hover:shadow-lg transition-all animate-fade-in">
+        <div class="relative bg-white rounded-xl shadow p-4 hover:shadow-lg transition-all animate-fade-in min-w-0">
           {% if cafe.photo1 %}
             <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}"
-                 loading="lazy"
-                 class="w-full h-48 object-cover rounded-lg mb-4">
+                 loading="lazy" class="fav-card-img mb-4">
           {% endif %}
 
           <form action="{% url 'reviews:toggle_favorite' cafe.id %}" method="post" class="absolute top-2 right-2 z-10">
