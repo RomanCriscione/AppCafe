@@ -3,7 +3,19 @@
 {% load static %}
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Preconnect / DNS-Prefetch -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+  <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
+  <link rel="dns-prefetch" href="https://tile.openstreetmap.org">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
   {% block head_title %}<title>{{ meta_title|default:"Gota - Reseñas de Cafés" }}</title>{% endblock %}
   {% block head_description %}<meta name="description" content="{{ meta_description|default:'Descubrí cafeterías, reseñas reales y mapas.' }}">{% endblock %}
@@ -12,33 +24,34 @@
   <!-- CSS -->
   <link rel="stylesheet" href="{% static 'css/animations.css' %}?v=1">
   <link rel="stylesheet" href="{% static 'css/app.css' %}?v=1"><!-- Tailwind -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-  <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=1">
+  <!-- ¡custom.css al final para sobreescribir, con nueva versión para bust de caché! -->
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=2">
 
-  <!-- PWA / OG -->
+  <!-- PWA / Icons -->
+  <link rel="manifest" href="{% static 'site.webmanifest' %}">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#553A2F">
   <link rel="icon" href="{% static 'images/coffee-icon.png' %}">
   <link rel="apple-touch-icon" sizes="192x192" href="{% static 'images/coffee-icon.png' %}">
   <link rel="canonical" href="{{ request.build_absolute_uri }}">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+
+  <!-- Open Graph -->
   <meta property="og:title" content="{{ page_title|default:'Gota — Descubrí tu próximo café' }}">
   <meta property="og:description" content="{{ page_description|default:'Encontrá cafés por zona, estilo y experiencia.' }}">
-  <meta property="og:image" content="{% if og_image_url %}{{ og_image_url }}{% else %}{% static 'images/og-default.jpg' %}{% endif %}">
+  {% if og_image_url %}
+    <meta property="og:image" content="{{ og_image_url }}">
+  {% else %}
+    <meta property="og:image" content="{% static 'images/og-default.jpg' %}">
+  {% endif %}
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
   <meta name="twitter:card" content="summary_large_image">
 
-  <!-- Fuerza: ocultar "Volver" en mobile -->
-  <style>
-    @media (max-width: 767.98px){ #back-link{ display:none !important; } }
-    /* Asegura visibilidad/ocultación del panel sin depender de reglas globales */
-    #mobile-panel{ display:block; }
-    #mobile-panel.hidden{ display:none; }
-  </style>
-
-  <!-- Chart.js si lo necesitás -->
+  <!-- Chart.js (si lo usás) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 
@@ -46,12 +59,12 @@
   <div class="min-h-screen flex flex-col">
 
     <!-- NAVBAR -->
-    <header class="site-nav bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-40">
+    <header class="site-nav bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-30">
       <div class="max-w-7xl mx-auto px-4 py-2 sm:py-3 flex items-center justify-between">
+        <!-- Marca + Volver (Volver solo >= md) -->
         <div class="flex items-center gap-2 sm:gap-4">
           <a href="{% url 'home' %}" class="text-2xl font-bold text-brand-800">Gota</a>
 
-          <!-- Volver: sólo ≥ md y fuera de Home (JS define cuándo mostrar) -->
           <a id="back-link"
              href="{% url 'reviews:cafe_list' %}"
              data-fallback="{% url 'reviews:cafe_list' %}"
@@ -96,12 +109,12 @@
       </div>
     </header>
 
-    <!-- Overlay + Panel móvil (fuera del header) -->
-    <div id="mobile-overlay" class="hidden fixed inset-0 bg-black/45 z-[9998]"></div>
+    <!-- OVERLAY + PANEL MÓVIL (fuera del header) -->
+    <div id="mobile-overlay" class="hidden fixed inset-0 bg-black/45 z-40"></div>
 
-    <aside id="mobile-panel"
-           class="hidden fixed inset-0 z-[9999] bg-white overflow-y-auto lg:hidden min-h-screen border-l border-slate-200 shadow-2xl"
-           role="dialog" aria-modal="true" aria-hidden="true">
+    <nav id="mobile-panel"
+         class="hidden fixed inset-0 z-50 bg-white overflow-y-auto lg:hidden"
+         aria-hidden="true">
       <div class="px-5 py-4 flex items-center justify-between border-b">
         <span class="font-semibold">Menú</span>
         <button id="menu-close" class="p-2 rounded-xl" aria-label="Cerrar menú">
@@ -130,73 +143,54 @@
           <a href="{% url 'register_owner' %}" class="block py-2">☕ Registrar tu café</a>
         {% endif %}
       </div>
-    </aside>
+    </nav>
 
-    <!-- JS menú + Volver -->
+    <!-- JS: menú mobile + Volver -->
     <script>
-      (function () {
-        const $ = (id) => document.getElementById(id);
-        const toggle  = $("menu-toggle");
-        const panel   = $("mobile-panel");
-        const overlay = $("mobile-overlay");
-        const closeBt = $("menu-close");
+      document.addEventListener("DOMContentLoaded", function () {
+        const toggle  = document.getElementById("menu-toggle");
+        const panel   = document.getElementById("mobile-panel");
+        const overlay = document.getElementById("mobile-overlay");
+        const closeBt = document.getElementById("menu-close");
 
-        let isOpen = false;
-        function openMenu(){
-          if (isOpen) return;
-          isOpen = true;
+        const openMenu = () => {
           panel.classList.remove("hidden");
           overlay.classList.remove("hidden");
           document.body.classList.add("overflow-hidden");
           toggle?.setAttribute("aria-expanded","true");
           panel.setAttribute("aria-hidden","false");
-        }
-        function closeMenu(){
-          if (!isOpen) return;
-          isOpen = false;
+        };
+        const closeMenu = () => {
           panel.classList.add("hidden");
           overlay.classList.add("hidden");
           document.body.classList.remove("overflow-hidden");
           toggle?.setAttribute("aria-expanded","false");
           panel.setAttribute("aria-hidden","true");
-        }
+        };
 
-        toggle?.addEventListener("click", openMenu, { passive:true });
-        closeBt?.addEventListener("click", closeMenu, { passive:true });
-        overlay?.addEventListener("click", closeMenu, { passive:true });
+        toggle?.addEventListener("click", openMenu);
+        closeBt?.addEventListener("click", closeMenu);
+        overlay?.addEventListener("click", closeMenu);
         panel?.addEventListener("click", (e) => {
           const a = e.target.closest("a[href]");
           if (a) closeMenu();
-        }, { passive:true });
-
-        // Al pasar a desktop, asegurar cerrado
+        });
         window.addEventListener("resize", () => { if (window.innerWidth >= 1024) closeMenu(); });
 
-        // Botón Volver: visible sólo ≥ md y fuera de Home
+        // Botón Volver: oculto en Home (en móvil ya está oculto por 'hidden md:inline-flex')
         const back = document.getElementById("back-link");
         if (back) {
           const homePath = "{% url 'home' %}";
           const isHome = (location.pathname === homePath) || (location.pathname === "/");
-          const setBackVisibility = () => {
-            const wide = window.matchMedia("(min-width: 768px)").matches; // md
-            back.classList.toggle("hidden", isHome || !wide);
-          };
-          setBackVisibility();
-          window.addEventListener("resize", setBackVisibility);
-          back.addEventListener("click", (e) => {
-            const ref = document.referrer || "";
-            let sameOrigin = false;
-            try { sameOrigin = ref && new URL(ref, location.origin).origin === location.origin; } catch {}
-            if (sameOrigin && history.length > 1) { e.preventDefault(); history.back(); }
-          });
+          if (isHome) back.classList.add("hidden");
         }
-      })();
+      });
     </script>
 
     <!-- CONTENIDO -->
     <main class="flex-1 container mx-auto px-4 py-6">
       {% if messages %}
-        <div class="fixed top-4 right-4 z-[2147483000] space-y-2">
+        <div class="fixed top-4 right-4 z-50 space-y-2">
           {% for message in messages %}
             <div class="px-4 py-2 rounded shadow text-white alert-message
                         {% if message.tags == 'success' %} bg-green-600
@@ -207,6 +201,7 @@
           {% endfor %}
         </div>
       {% endif %}
+
       {% block content %}{% endblock %}
     </main>
 
@@ -224,17 +219,17 @@
   <script>
     (function () {
       const root = document.body;
-      function markReady(){ if (root.classList.contains('page')) root.classList.add('page-ready'); }
+      function markReady() { if (root.classList.contains('page')) root.classList.add('page-ready'); }
       if (document.readyState === 'complete' || document.readyState === 'interactive') { markReady(); }
-      else { document.addEventListener('DOMContentLoaded', markReady, { once:true }); }
+      else { document.addEventListener('DOMContentLoaded', markReady, { once: true }); }
       window.addEventListener('pageshow', markReady);
 
       document.querySelectorAll('a[href]').forEach(a => {
         const href = a.getAttribute('href');
-        const isAnchor = href && href.startsWith('#');
+        const isAnchor   = href && href.startsWith('#');
         const isExternal = a.target === '_blank'
-          || a.hasAttribute('download')
-          || (href && /^https?:\/\//.test(href) && !href.includes(location.host));
+                        || a.hasAttribute('download')
+                        || (href && /^https?:\/\//.test(href) && !href.includes(location.host));
         const noFade = a.hasAttribute('data-no-fade');
         if (isAnchor || isExternal || noFade) return;
         a.addEventListener('click', (e) => {
@@ -245,15 +240,22 @@
     })();
 
     document.addEventListener('DOMContentLoaded', function () {
+      if (document.querySelector('.swiper-container')) {
+        new Swiper('.swiper-container', {
+          slidesPerView: 'auto',
+          spaceBetween: 16,
+          navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+          pagination: { el: '.swiper-pagination', clickable: true },
+        });
+      }
       document.querySelectorAll('.alert-message').forEach(alert => {
         setTimeout(() => {
-          alert.classList.add('opacity-0','transition-opacity','duration-500');
+          alert.classList.add('opacity-0', 'transition-opacity', 'duration-500');
           setTimeout(() => alert.remove(), 500);
         }, 2000);
       });
     });
 
-    // Rebote para likes
     window.bounceLike = (el) => {
       if (!el) return;
       el.classList.remove('like-bounce');
