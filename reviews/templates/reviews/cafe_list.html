@@ -27,7 +27,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="flex flex-col lg:flex-row gap-6 relative px-4">
+<div class="flex flex-col lg:flex-row gap-6 relative px-4 min-w-0">
   <!-- Botón filtros (mobile) -->
   <button id="toggle-filtros" class="lg:hidden fixed bottom-4 right-4 z-[1001] btn btn-primary rounded-full shadow-lg">
     🔍 Filtros
@@ -79,7 +79,7 @@
   </aside>
 
   <!-- Columna resultados -->
-  <section class="lg:w-3/4 max-w-6xl mx-auto relative z-0">
+  <section class="lg:w-3/4 max-w-6xl mx-auto relative z-0 min-w-0">
     <a href="#resultados" class="sr-only">Saltar a resultados</a>
     <a href="#paginacion" class="sr-only">Saltar a paginación</a>
 
@@ -98,11 +98,9 @@
       </div>
     </div>
 
-    {# Mapa arriba de la grilla (tu include actual) #}
     {% include "reviews/includes/mapa_cafe_list.html" %}
 
-    {# Skeleton de carga #}
-    <div id="grid-skeleton" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div id="grid-skeleton" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0">
       {% for _ in "123" %}
         <div class="card">
           <div class="skeleton h-44 w-full"></div>
@@ -119,9 +117,8 @@
       {% endfor %}
     </div>
 
-    {# Grilla real (usa componente de tarjeta) #}
-    <div id="grid-cafes" class="hidden" tabindex="-1" aria-labelledby="titulo-cafeterias">
-      <div id="resultados" class="grid-cafes">
+    <div id="grid-cafes" class="hidden min-w-0" tabindex="-1" aria-labelledby="titulo-cafeterias">
+      <div id="resultados" class="grid-cafes min-w-0">
         {% for cafe in cafes %}
           {% include "reviews/_cafe_card.html" with cafe=cafe %}
         {% empty %}

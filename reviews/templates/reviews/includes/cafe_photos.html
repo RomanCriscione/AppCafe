@@ -1,39 +1,43 @@
-{# reviews/templates/reviews/includes/cafe_photos.html #}
+{% load static %}
+
 <h3 class="text-xl font-semibold mb-4 text-gray-900">📸 Fotos del lugar</h3>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 min-w-0"
-     data-gallery="cafe-{{ cafe.id }}">
-  {% for i in "123" %}
-    {% with p=:"photo"|add:i t=:"photo"|add:i|add:"_title" %}
-      {% if cafe|attr:p and cafe|attr:p.url %}
-        <button type="button"
-                class="photo-thumb relative w-full aspect-[4/3] overflow-hidden rounded-xl shadow-md group cursor-pointer"
-                data-src="{{ cafe|attr:p.url }}"
-                data-alt="{{ cafe|attr:t|default:cafe.name }}"
-                data-caption="{{ cafe|attr:t|default:cafe.name }}">
+{# ahora vamos a usar la lista "photos" que le va a mandar la vista #}
+{% if photos %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 min-w-0"
+       data-gallery="cafe-{{ cafe.id }}">
+
+    {% for photo in photos %}
+      <button type="button"
+              class="photo-thumb group cursor-pointer rounded-xl shadow-md overflow-hidden bg-slate-100"
+              data-src="{{ photo.url }}"
+              data-alt="{{ photo.title }}"
+              data-caption="{{ photo.title }}">
+        <div class="cafe-photo-box">
           <img
-            src="{{ cafe|attr:p.url }}"
-            alt="{{ cafe|attr:t|default:cafe.name }}"
+            src="{{ photo.url }}"
+            alt="{{ photo.title }}"
             loading="lazy"
             decoding="async"
             fetchpriority="low"
-            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-          <span class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"
-                aria-hidden="true"></span>
-        </button>
-      {% endif %}
-    {% endwith %}
-  {% endfor %}
-</div>
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+        </div>
+        <span class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300"
+              aria-hidden="true"></span>
+      </button>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-sm text-slate-500">Este café todavía no tiene fotos.</p>
+{% endif %}
 
-{# Lightbox Modal #}
-<div id="lightbox-modal-{{ cafe.id }}"
-     class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50"
-     role="dialog" aria-modal="true" aria-label="Galería de fotos de {{ cafe.name }}">
+{# modal/lightbox #}
+<div id="cafe-{{ cafe.id }}-modal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
   <button type="button"
-          id="lightbox-close-{{ cafe.id }}"
-          class="absolute top-4 right-6 text-white text-4xl cursor-pointer hover:text-gray-300"
-          aria-label="Cerrar">&times;</button>
+          class="absolute top-4 right-4 text-white text-3xl leading-none"
+          data-close="true"
+          aria-label="Cerrar">×</button>
   <div class="flex flex-col items-center px-4">
     <img id="lightbox-image-{{ cafe.id }}" src="" alt=""
          class="max-h-[80vh] max-w-[92vw] rounded-lg shadow-2xl object-contain">
@@ -50,75 +54,72 @@
   </div>
 </div>
 
-<script>
-(function () {
-  const gallerySel = `[data-gallery="cafe-{{ cafe.id }}"]`;
-  const thumbs = Array.from(document.querySelectorAll(`${gallerySel} .photo-thumb`));
-  if (!thumbs.length) return;
+<style>
+  /* forzamos el ratio sin depender de Tailwind JIT */
+  .cafe-photo-box {
+    position: relative;
+    width: 100%;
+    padding-top: 75%; /* 4:3 */
+  }
+  .cafe-photo-box img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  @media (min-width: 768px) {
+    .cafe-photo-box {
+      padding-top: 66%; /* un poco más apaisado en pantallas más grandes */
+    }
+  }
+</style>
 
-  const modal   = document.getElementById('lightbox-modal-{{ cafe.id }}');
+<script>
+(function() {
+  const gallery = document.querySelector('[data-gallery="cafe-{{ cafe.id }}"]');
+  const modal   = document.getElementById('cafe-{{ cafe.id }}-modal');
+  if (!gallery || !modal) return;
+
+  const slides  = Array.from(gallery.querySelectorAll('.photo-thumb'));
   const imgEl   = document.getElementById('lightbox-image-{{ cafe.id }}');
   const capEl   = document.getElementById('lightbox-caption-{{ cafe.id }}');
-  const btnPrev = document.getElementById('lightbox-prev-{{ cafe.id }}');
-  const btnNext = document.getElementById('lightbox-next-{{ cafe.id }}');
-  const btnClose= document.getElementById('lightbox-close-{{ cafe.id }}');
+  const prevBtn = document.getElementById('lightbox-prev-{{ cafe.id }}');
+  const nextBtn = document.getElementById('lightbox-next-{{ cafe.id }}');
+  const closeBtn= modal.querySelector('[data-close="true"]');
+  let current   = 0;
 
-  let current = 0;
-  let lastFocused = null;
-
-  const preload = (idx) => {
-    const n = thumbs.length;
-    [ (idx+1)%n, (idx-1+n)%n ].forEach(i => { const im = new Image(); im.src = thumbs[i].dataset.src; });
-  };
-
-  function show(index) {
-    current = (index + thumbs.length) % thumbs.length;
-    const t = thumbs[current];
-    imgEl.src = t.dataset.src;
-    imgEl.alt = t.dataset.alt || '';
-    capEl.textContent = t.dataset.caption || '';
-    preload(current);
-  }
-
-  function open(index) {
-    lastFocused = document.activeElement;
-    show(index);
+  function show(idx) {
+    const slide = slides[idx];
+    if (!slide) return;
+    imgEl.src = slide.dataset.src;
+    imgEl.alt = slide.dataset.alt;
+    capEl.textContent = slide.dataset.caption || '';
+    current = idx;
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-    document.body.style.overflow = 'hidden';
-    btnClose.focus();
   }
-  function close() {
+  function hide() {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
-    document.body.style.overflow = '';
-    if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
   }
-  const next = () => show(current + 1);
-  const prev = () => show(current - 1);
+  function prev() { show((current - 1 + slides.length) % slides.length); }
+  function next() { show((current + 1) % slides.length); }
 
-  thumbs.forEach((btn, i) => btn.addEventListener('click', () => open(i)));
-  btnNext.addEventListener('click', next);
-  btnPrev.addEventListener('click', prev);
-  btnClose.addEventListener('click', close);
-
-  modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+  slides.forEach((btn, idx) => {
+    btn.addEventListener('click', () => show(idx));
+  });
+  closeBtn.addEventListener('click', hide);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) hide();
+  });
+  prevBtn.addEventListener('click', prev);
+  nextBtn.addEventListener('click', next);
   document.addEventListener('keydown', (e) => {
     if (modal.classList.contains('hidden')) return;
-    if (e.key === 'Escape') close();
+    if (e.key === 'Escape') hide();
     if (e.key === 'ArrowRight') next();
-    if (e.key === 'ArrowLeft')  prev();
-  });
-
-  let sx = 0, sy = 0;
-  modal.addEventListener('touchstart', (e) => {
-    if (!e.touches[0]) return;
-    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
-  }, {passive:true});
-  modal.addEventListener('touchend', (e) => {
-    const dx = (e.changedTouches[0]?.clientX || sx) - sx;
-    const dy = (e.changedTouches[0]?.clientY || sy) - sy;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) (dx < 0 ? next() : prev());
+    if (e.key === 'ArrowLeft') prev();
   });
 })();
 </script>

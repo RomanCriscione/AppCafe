@@ -4,6 +4,7 @@ module.exports = {
     "./templates/**/*.html",
     "./**/templates/**/*.html",
     "./static/**/*.js",
+    "./static/src/**/*.{js,ts,jsx,tsx}",   // 👈 por si tenés JS ahí
     "./reviews/**/*.py",
     "./core/**/*.py"
   ],
@@ -16,7 +17,19 @@ module.exports = {
     // transforms usados por el drawer móvil
     '-translate-x-full', 'translate-x-0',
     // opacidades del overlay
-    'opacity-0', 'opacity-100'
+    'opacity-0', 'opacity-100',
+
+    // 👇👇👇 LO QUE TE FALTABA
+    // ratios que usás en las fotos del café
+    'aspect-[4/3]',
+    'aspect-[3/2]',
+    'aspect-square',
+
+    // imágenes que tienen que ajustarse sí o sí
+    'object-cover',
+    'object-center',
+    'w-full',
+    'h-full',
   ],
   theme: {
     extend: {
@@ -38,7 +51,7 @@ module.exports = {
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
-    require("@tailwindcss/aspect-ratio"),
+    require("@tailwindcss/aspect-ratio"),   // 👈 ya lo tenías, bien
     require("@tailwindcss/line-clamp")
   ]
 };

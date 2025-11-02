@@ -278,6 +278,7 @@ class CafeListView(ListView):
 def cafe_detail(request, cafe_id):
     cafe = get_object_or_404(Cafe, id=cafe_id)
 
+    # --- reseñas del café ---
     reviews_qs = (
         cafe.reviews
         .select_related("user")
@@ -295,7 +296,7 @@ def cafe_detail(request, cafe_id):
     positive = reviews_qs.filter(rating__gte=4).count()
     positive_pct = int((positive / total_reviews) * 100) if total_reviews else 0
 
-    # Radar por categoría (conteo simple)
+    # radar por categoría
     sensor_rows = (
         Tag.objects.filter(reviews__cafe=cafe)
         .values("category")
@@ -307,21 +308,21 @@ def cafe_detail(request, cafe_id):
     radar_labels = SENSOR_AXES
     radar_values = [sensor_dict.get(k, 0) for k in SENSOR_AXES]
 
-    # Paginado
+    # paginado de reseñas
     paginator = Paginator(reviews_qs, 8)
     page_obj = paginator.get_page(request.GET.get("page") or 1)
 
-    # schema.org (opcional)
+    # schema (un poquito)
     schema_reviews = list(reviews_qs[:5])
 
-    # Vistos recientemente
+    # vistos recientemente
     viewed = request.session.get("recently_viewed", [])
     if cafe.id in viewed:
         viewed.remove(cafe.id)
     viewed.insert(0, cafe.id)
     request.session["recently_viewed"] = viewed[:5]
 
-    # Tracking de visita (1/día/sesión)
+    # tracking de visita (si hay tabla en la DB)
     try:
         today = timezone.localdate()
         session_key = f"viewed_cafe_{cafe.id}_{today.isoformat()}"
@@ -331,9 +332,24 @@ def cafe_detail(request, cafe_id):
             CafeStat.objects.filter(pk=stat.pk).update(views=F('views') + 1)
             request.session[session_key] = True
     except Exception:
+        # en Render no nos queremos morir por esto
         pass
 
-    # Tags más usadas en este café
+    # --- FOTOS SEGURAS ---
+    safe_photos = []
+    for idx in (1, 2, 3):
+        photo = getattr(cafe, f"photo{idx}", None)
+        title = getattr(cafe, f"photo{idx}_title", "") or cafe.name
+        if not photo:
+            continue
+        # acá es donde en Render puede romper:
+        try:
+            url = photo.url  # si el archivo no está, Django tira ValueError
+        except Exception:
+            continue
+        safe_photos.append({"url": url, "title": title})
+
+    # tags más usadas
     tag_counts_qs = (
         Tag.objects.filter(reviews__cafe=cafe)
         .annotate(num=Count('reviews', filter=Q(reviews__cafe=cafe)))
@@ -342,7 +358,7 @@ def cafe_detail(request, cafe_id):
     top_tags = list(tag_counts_qs[:5])
     more_tags = list(tag_counts_qs[5:])
 
-    # Recomendados
+    # recomendados
     recommended_cafes = (
         Cafe.objects.annotate(average_rating=Avg("reviews__rating"))
         .filter(average_rating__isnull=False)
@@ -350,24 +366,20 @@ def cafe_detail(request, cafe_id):
         .order_by("-average_rating")[:4]
     )
 
-    # URLs para OG
+    # urls para OG
     full_page_url = request.build_absolute_uri(
         reverse("reviews:cafe_detail", kwargs={"cafe_id": cafe.id})
     )
-    if getattr(cafe, "photo1", None):
-        og_image_path = cafe.photo1.url
-    elif getattr(cafe, "photo2", None):
-        og_image_path = cafe.photo2.url
-    elif getattr(cafe, "photo3", None):
-        og_image_path = cafe.photo3.url
+    if safe_photos:
+        og_image_path = safe_photos[0]["url"]
     else:
         og_image_path = static("images/og-default.jpg")
     full_image_url = request.build_absolute_uri(og_image_path)
 
-    # URL absoluta del listado (para Breadcrumb JSON-LD)
+    # url absoluta del listado (breadcrumbs)
     cafe_list_abs = request.build_absolute_uri(reverse("reviews:cafe_list"))
 
-    # Likes del usuario + mi última reseña
+    # likes del user + su última reseña
     liked_ids = set()
     if request.user.is_authenticated:
         liked_ids = set(
@@ -382,7 +394,7 @@ def cafe_detail(request, cafe_id):
     else:
         my_review = None
 
-    # One-liner emocional para el popup del mapa
+    # one-liner
     one_liner = None
     if top_tags:
         one_liner = f"Ideal: {top_tags[0].name}"
@@ -410,7 +422,7 @@ def cafe_detail(request, cafe_id):
         "my_review": my_review,
         "one_liner": one_liner,
         "cafe_list_abs": cafe_list_abs,
-    })
+        "photos": safe_photos, 
 
 
 
