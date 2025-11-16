@@ -2,14 +2,13 @@
 
 <h3 class="text-xl font-semibold mb-4 text-gray-900">📸 Fotos del lugar</h3>
 
-{# ahora vamos a usar la lista "photos" que le va a mandar la vista #}
 {% if photos %}
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 min-w-0"
        data-gallery="cafe-{{ cafe.id }}">
 
     {% for photo in photos %}
       <button type="button"
-              class="photo-thumb group cursor-pointer rounded-xl shadow-md overflow-hidden bg-slate-100"
+              class="photo-thumb group relative cursor-pointer rounded-xl shadow-md overflow-hidden bg-slate-100"
               data-src="{{ photo.url }}"
               data-alt="{{ photo.title }}"
               data-caption="{{ photo.title }}">
@@ -31,9 +30,8 @@
   <p class="text-sm text-slate-500">Este café todavía no tiene fotos.</p>
 {% endif %}
 
-{# modal/lightbox #}
 <div id="cafe-{{ cafe.id }}-modal"
-     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+     class="cafe-lightbox fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
   <button type="button"
           class="absolute top-4 right-4 text-white text-3xl leading-none"
           data-close="true"
@@ -55,7 +53,6 @@
 </div>
 
 <style>
-  /* forzamos el ratio sin depender de Tailwind JIT */
   .cafe-photo-box {
     position: relative;
     width: 100%;
@@ -69,9 +66,7 @@
     object-fit: cover;
   }
   @media (min-width: 768px) {
-    .cafe-photo-box {
-      padding-top: 66%; /* un poco más apaisado en pantallas más grandes */
-    }
+    .cafe-photo-box { padding-top: 66%; }
   }
 </style>
 
@@ -93,7 +88,7 @@
     const slide = slides[idx];
     if (!slide) return;
     imgEl.src = slide.dataset.src;
-    imgEl.alt = slide.dataset.alt;
+    imgEl.alt = slide.dataset.alt || '';
     capEl.textContent = slide.dataset.caption || '';
     current = idx;
     modal.classList.remove('hidden');

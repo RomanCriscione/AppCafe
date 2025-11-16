@@ -2,20 +2,20 @@
 
 <article class="card cafe-card focus:outline-none min-w-0" tabindex="0">
   <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block min-w-0">
-    <!-- RATIO BOX 16:9, 100% fiable -->
-    <div class="card-media ratio-16-9 w-full overflow-hidden rounded-t-[16px]">
+    <!-- Caja fija -->
+    <div
+      class="card-media w-full overflow-hidden rounded-t-[16px]"
+      style="height: 210px; max-height: 210px; position: relative; background: #eee;">
       {% if cafe.photo1 and cafe.photo1.url %}
         <img
           src="{{ cafe.photo1.url }}"
           alt="{{ cafe.photo1_title|default:cafe.name }}"
-          loading="lazy" decoding="async" fetchpriority="low"
-          class="absolute inset-0 w-full h-full object-cover block">
+          loading="lazy" decoding="async" fetchpriority="low">
       {% else %}
         <img
           src="{% static 'images/coffee-hero.jpg' %}"
           alt="Foto no disponible — {{ cafe.name }}"
-          loading="lazy" decoding="async" fetchpriority="low"
-          class="absolute inset-0 w-full h-full object-cover block">
+          loading="lazy" decoding="async" fetchpriority="low">
       {% endif %}
     </div>
   </a>
@@ -53,24 +53,14 @@
             {% if cafe.is_favorite or user in cafe.favorites.all %}
               <button type="submit"
                       class="btn btn-success btn-sm js-fav-btn"
-                      aria-pressed="true"
-                      data-icon="❤️"
-                      data-icon-off="🤍"
-                      data-label-on="Quitar"
-                      data-label-off="Favorito">
-                <span class="js-fav-icon" aria-hidden="true">❤️</span>
-                <span class="sr-only">Quitar de favoritos</span>
+                      aria-pressed="true">
+                ❤️
               </button>
             {% else %}
               <button type="submit"
                       class="btn btn-outline btn-sm js-fav-btn"
-                      aria-pressed="false"
-                      data-icon="❤️"
-                      data-icon-off="🤍"
-                      data-label-on="Quitar"
-                      data-label-off="Favorito">
-                <span class="js-fav-icon" aria-hidden="true">🤍</span>
-                <span class="sr-only">Agregar a favoritos</span>
+                      aria-pressed="false">
+                🤍
               </button>
             {% endif %}
           </form>

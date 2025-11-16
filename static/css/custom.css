@@ -290,7 +290,6 @@ form a.button-reset, form a[type="reset"] {
   text-decoration: none;
 }
 
-/* Títulos y respiración */
 h2 { margin: .25rem 0 .5rem; }
 h2 + form { margin-top: .25rem; }
 main img { max-width: 100%; height: auto; display: block; }
@@ -356,15 +355,12 @@ main img { max-width: 100%; height: auto; display: block; }
 .animated-bounce{ animation: bounce 1s infinite; }
 .animate-fade-in{ animation: fadeIn .35s ease; }
 
-/* Hover suave para cards clickeables */
 .cafe-card { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; will-change: transform, box-shadow, filter; }
 .cafe-card:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
 
-/* Botón like: rebote */
 @keyframes like-bounce { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
 .like-bounce { animation: like-bounce .28s ease; }
 
-/* Taza flotante */
 .cup-float {
   position: fixed; right: 16px; bottom: 100px; z-index: 40;
   display: flex; align-items: center; gap: 8px;
@@ -376,7 +372,6 @@ main img { max-width: 100%; height: auto; display: block; }
 .cup-emoji.fill { animation: cup-fill 900ms ease forwards; }
 @keyframes cup-fill { from { filter: saturate(.4) brightness(.95); transform: translateY(2px); } to { filter: saturate(1.05); transform: translateY(0); } }
 
-/* === CTA === */
 .owner-card-actions{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
 .owner-card-actions .btn{ min-width:120px; justify-content:center; }
 
@@ -401,7 +396,6 @@ a.btn-primary, button.btn-primary {
 a.cta.cta-blue, a.cta.cta-indigo { background-color: var(--primary) !important; }
 a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-600) !important; }
 
-/* Daisy/Tailwind colores mapeados */
 .bg-blue-50,.bg-blue-100,.bg-blue-200,.bg-blue-300,.bg-blue-400,
 .bg-blue-500,.bg-blue-600,.bg-blue-700,.bg-blue-800,.bg-blue-900,
 .bg-indigo-500,.bg-indigo-600,.bg-indigo-700 { background-color: var(--primary) !important; }
@@ -410,10 +404,8 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
 .hover\:bg-blue-600:hover,.hover\:bg-blue-700:hover,.hover\:bg-indigo-600:hover,.hover\:bg-indigo-700:hover { background-color: var(--primary-600) !important; }
 .focus\:ring-blue-500:focus,.focus\:ring-indigo-500:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent) !important; }
 
-/* Leaflet marker extra */
 .leaflet-marker-icon.cup-marker { filter: drop-shadow(0 3px 6px rgba(0,0,0,.25)); }
 
-/* Skeletons */
 .skeleton{ position:relative; overflow:hidden; background: var(--surface-2); border-radius: var(--radius-md); }
 .skeleton::after{
   content:""; position:absolute; inset:0;
@@ -421,7 +413,6 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
   transform: translateX(-100%); animation: shimmer 1.15s infinite;
 }
 
-/* Chips: scroll suave + fades laterales */
 .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .chips-fade{ position: relative; }
@@ -432,7 +423,6 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
 .chips-fade::before{ left:0; background: linear-gradient(90deg, var(--surface) 30%, transparent); border-top-left-radius: var(--radius-lg); }
 .chips-fade::after{ right:0; background: linear-gradient(270deg, var(--surface) 30%, transparent); border-top-right-radius: var(--radius-lg); }
 
-/* Swiper – evitar overflow lateral y limitar ancho */
 .swiper-container { overflow: hidden; max-width: 100vw; }
 .swiper-wrapper { max-width: 100%; }
 .swiper-slide { min-width: 0; }
@@ -445,11 +435,9 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
 .swiper-pagination-bullet{ opacity:.6; background: var(--border); width: 8px; height: 8px; }
 .swiper-pagination-bullet-active{ opacity:1; background: var(--primary); }
 
-/* Cards + focus */
 .card { outline: none; }
 .card:focus-visible{ box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent); }
 
-/* Map container pulido */
 #cafes-map, #map{
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
@@ -460,7 +448,6 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
 }
 .map-search{ position: relative; z-index: 2; margin-top: .75rem; }
 
-/* Hero – adaptable */
 .section-hero { width: 100%; background-size: cover; background-position: center; }
 .section-hero::before{
   content:""; position:absolute; inset:0;
@@ -470,27 +457,22 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
   .section-hero::before{ background: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,.35)); }
 }
 
-/* Rating "cups" */
 .rating-cups label{ transition: transform .12s ease, filter .12s ease; }
 .rating-cups input:checked ~ label,
 .rating-cups label:hover,
 .rating-cups label:hover ~ label{ filter: saturate(1.15); transform: translateY(-1px) scale(1.02); }
 
-/* Toasts */
 .toast{
   position:fixed; top:1rem; right:1rem; z-index:2147485000;
   background: var(--primary); color:#fff; padding:.6rem .9rem;
   border-radius: var(--radius-md); box-shadow: var(--shadow-soft);
 }
 
-/* --- GALERÍA DEL DETALLE: evitar desbordes --- */
 .photo-thumb { min-width: 0; }
 .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-/* --- FAVORITES: asegurar imágenes contenidas --- */
 .fav-card-img { width: 100%; height: 12rem; object-fit: cover; border-radius: 12px; }
 
-/* --- DETALLE: foto grande segura en mobile --- */
 .cafe-main-photo,
 .cafe-hero,
 .cafe-photo-lg {
@@ -519,8 +501,6 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
   border-top-left-radius: var(--radius-lg);
   border-top-right-radius: var(--radius-lg);
 }
-
-/* La imagen se posiciona absoluta y llena el contenedor */
 .ratio-16-9 > img {
   position: absolute;
   inset: 0;
@@ -530,25 +510,64 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
   display: block;
 }
 
-/* ===== FIX DEFINITIVO PARA LA CARD DE CAFÉ (16:9) ===== */
+/* =========================================================
+   MOBILE FIX PARA LAS CARDS DE CAFÉ
+   ========================================================= */
+@media (max-width: 768px) {
 
-/* Fuerza el ratio-box clásico: altura = 0 y se define por padding-top */
-.card.cafe-card .card-media.ratio-16-9 {
-  position: relative !important;
-  width: 100% !important;
-  height: 0 !important;
-  padding-top: 56.25% !important; /* 9 / 16 */
-  overflow: hidden !important;
-  border-top-left-radius: var(--radius-lg) !important;
-  border-top-right-radius: var(--radius-lg) !important;
+  /* la caja queda como la que te gustó: altura fija */
+  .card.cafe-card .card-media,
+  .grid-cafes .card.cafe-card .card-media {
+    height: 210px !important;
+    max-height: 210px !important;
+    overflow: hidden !important;
+  }
+
+  /* y la foto OBEDECE a la caja: le saco el absolute del template */
+  .card.cafe-card .card-media img,
+  .grid-cafes .card.cafe-card .card-media img {
+    position: static !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    display: block !important;
+  }
+
+  /* y ya que estamos: form del buscador que no se salga */
+  .map-search form,
+  .map-search .flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+  .map-search input {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
 }
 
-/* La imagen ocupa todo el contenedor y se recorta correctamente */
-.card.cafe-card .card-media.ratio-16-9 > img {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  display: block !important;
+/* --- FIX: que el lightbox solo reciba clics en la imagen --- */
+.cafe-hero,
+.cafe-main-photo,
+.cafe-photos-grid { position: relative; }
+
+/* Desactiva clicks por defecto en los contenedores grandes... */
+.cafe-hero,
+.cafe-main-photo,
+.cafe-photos-grid { pointer-events: none; }
+
+/* ...y re-habilitalos SOLO en las imágenes/enlaces de la galería */
+.cafe-hero a, .cafe-hero img,
+.cafe-main-photo a, .cafe-main-photo img,
+.cafe-photos-grid a, .cafe-photos-grid img {
+  pointer-events: auto;
 }
+
+/* Por si hay algún link de “cover” mal dimensionado, acótalo al bloque de foto */
+.cafe-hero a, .cafe-main-photo a {
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+

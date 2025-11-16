@@ -278,7 +278,7 @@ class CafeListView(ListView):
 def cafe_detail(request, cafe_id):
     cafe = get_object_or_404(Cafe, id=cafe_id)
 
-    # --- reseñas del café ---
+    # todas las reseñas de ese café
     reviews_qs = (
         cafe.reviews
         .select_related("user")
@@ -292,59 +292,46 @@ def cafe_detail(request, cafe_id):
     average_rating = round(agg["avg"], 1) if agg["avg"] is not None else None
     best_review = reviews_qs.order_by("-rating", "-created_at").first()
 
-    # % positivas (>=4)
-    positive = reviews_qs.filter(rating__gte=4).count()
-    positive_pct = int((positive / total_reviews) * 100) if total_reviews else 0
+    # % positivas
+    positives = reviews_qs.filter(rating__gte=4).count()
+    positive_pct = int((positives / total_reviews) * 100) if total_reviews else 0
 
-    # radar por categoría
+    # radar por categorías a partir de tags
+    SENSOR_AXES = ["sensorial", "emocional", "estética", "ambiente", "comida", "bebida", "servicio"]
     sensor_rows = (
         Tag.objects.filter(reviews__cafe=cafe)
         .values("category")
         .annotate(count=Count("reviews", filter=Q(reviews__cafe=cafe)))
-        .order_by("category")
     )
-    SENSOR_AXES = ["sensorial", "emocional", "estética", "ambiente", "comida", "bebida", "servicio"]
     sensor_dict = {row["category"]: row["count"] for row in sensor_rows}
     radar_labels = SENSOR_AXES
     radar_values = [sensor_dict.get(k, 0) for k in SENSOR_AXES]
 
-    # paginado de reseñas
+    # paginado
     paginator = Paginator(reviews_qs, 8)
     page_obj = paginator.get_page(request.GET.get("page") or 1)
 
-    # schema (un poquito)
-    schema_reviews = list(reviews_qs[:5])
-
-    # vistos recientemente
-    viewed = request.session.get("recently_viewed", [])
-    if cafe.id in viewed:
-        viewed.remove(cafe.id)
-    viewed.insert(0, cafe.id)
-    request.session["recently_viewed"] = viewed[:5]
-
-    # tracking de visita (si hay tabla en la DB)
+    # registrar visita (si existe el modelo, no romper si no está)
     try:
+        from .models import CafeStat  # podría no existir en tu DB
         today = timezone.localdate()
         session_key = f"viewed_cafe_{cafe.id}_{today.isoformat()}"
-        skip_count = (getattr(request.user, "is_staff", False) or request.user == cafe.owner)
-        if not skip_count and not request.session.get(session_key):
+        if not request.session.get(session_key):
             stat, _ = CafeStat.objects.get_or_create(cafe=cafe, date=today)
-            CafeStat.objects.filter(pk=stat.pk).update(views=F('views') + 1)
+            CafeStat.objects.filter(pk=stat.pk).update(views=F("views") + 1)
             request.session[session_key] = True
     except Exception:
-        # en Render no nos queremos morir por esto
         pass
 
-    # --- FOTOS SEGURAS ---
+    # fotos seguras: solo las que realmente tienen .url
     safe_photos = []
     for idx in (1, 2, 3):
         photo = getattr(cafe, f"photo{idx}", None)
         title = getattr(cafe, f"photo{idx}_title", "") or cafe.name
         if not photo:
             continue
-        # acá es donde en Render puede romper:
         try:
-            url = photo.url  # si el archivo no está, Django tira ValueError
+            url = photo.url
         except Exception:
             continue
         safe_photos.append({"url": url, "title": title})
@@ -366,7 +353,7 @@ def cafe_detail(request, cafe_id):
         .order_by("-average_rating")[:4]
     )
 
-    # urls para OG
+    # urls absolutas
     full_page_url = request.build_absolute_uri(
         reverse("reviews:cafe_detail", kwargs={"cafe_id": cafe.id})
     )
@@ -375,12 +362,11 @@ def cafe_detail(request, cafe_id):
     else:
         og_image_path = static("images/og-default.jpg")
     full_image_url = request.build_absolute_uri(og_image_path)
-
-    # url absoluta del listado (breadcrumbs)
     cafe_list_abs = request.build_absolute_uri(reverse("reviews:cafe_list"))
 
-    # likes del user + su última reseña
+    # likes del usuario + su review
     liked_ids = set()
+    my_review = None
     if request.user.is_authenticated:
         liked_ids = set(
             ReviewLike.objects.filter(user=request.user, review__cafe=cafe)
@@ -388,43 +374,44 @@ def cafe_detail(request, cafe_id):
         )
         my_review = (
             Review.objects.filter(user=request.user, cafe=cafe)
-            .order_by('-created_at', '-id')
+            .order_by("-created_at", "-id")
             .first()
         )
-    else:
-        my_review = None
 
-    # one-liner
-    one_liner = None
+    # texto de cabecera
     if top_tags:
         one_liner = f"Ideal: {top_tags[0].name}"
     elif best_review and best_review.comment:
         txt = best_review.comment.strip()
         one_liner = txt[:90] + ("…" if len(txt) > 90 else "")
+    else:
+        one_liner = None
 
-    return render(request, "reviews/cafe_detail.html", {
-        "cafe": cafe,
-        "reviews": page_obj.object_list,
-        "page_obj": page_obj,
-        "total_reviews": total_reviews,
-        "average_rating": average_rating,
-        "best_review": best_review,
-        "positive_pct": positive_pct,
-        "radar_labels": radar_labels,
-        "radar_values": radar_values,
-        "schema_reviews": schema_reviews,
-        "full_page_url": full_page_url,
-        "full_image_url": full_image_url,
-        "recommended_cafes": recommended_cafes,
-        "top_tags": top_tags,
-        "more_tags": more_tags,
-        "liked_ids": liked_ids,
-        "my_review": my_review,
-        "one_liner": one_liner,
-        "cafe_list_abs": cafe_list_abs,
-        "photos": safe_photos, 
-
-
+    return render(
+        request,
+        "reviews/cafe_detail.html",
+        {
+            "cafe": cafe,
+            "reviews": page_obj.object_list,
+            "page_obj": page_obj,
+            "total_reviews": total_reviews,
+            "average_rating": average_rating,
+            "best_review": best_review,
+            "positive_pct": positive_pct,
+            "radar_labels": radar_labels,
+            "radar_values": radar_values,
+            "recommended_cafes": recommended_cafes,
+            "top_tags": top_tags,
+            "more_tags": more_tags,
+            "liked_ids": liked_ids,
+            "my_review": my_review,
+            "one_liner": one_liner,
+            "full_page_url": full_page_url,
+            "full_image_url": full_image_url,
+            "cafe_list_abs": cafe_list_abs,
+            "photos": safe_photos,
+        },
+    )
 
 @login_required
 def create_review(request, cafe_id):
