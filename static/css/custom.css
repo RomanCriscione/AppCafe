@@ -202,28 +202,31 @@ header.site-nav.is-scrolled{
   transition: transform .18s ease, box-shadow .18s ease;
 }
 .card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-hover); }
-
-/* Imagen de card: relación 16:9 estable y recorte correcto */
-.aspect-16-9 { aspect-ratio: 16 / 9; }
-
-.card-media {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
-}
-.card-media > img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
 .card-body{ padding: .9rem .95rem 1rem; }
 .card-title{ font-size: 1.05rem; font-weight:700; line-height:1.2; }
 .card-sub{ font-size:.85rem; color: var(--text-2); }
 .card-actions{ display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-top:.75rem; }
+
+.page-cafe-list #grid-cafes,
+.page-cafe-list #grid-cafes #resultados {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Cada card ocupa el ancho disponible del grid, sin comportamiento de slider */
+.page-cafe-list .cafe-card {
+  width: 100%;
+  max-width: 100%;
+  flex: 0 0 auto; /* cancela cualquier flex-basis raro de sliders */
+}
+
+/* Imagen siempre dentro del box, recortada */
+.page-cafe-list .cafe-card img {
+  display: block;
+  width: 100%;
+  height: 12rem;          /* similar a h-48 de Tailwind */
+  object-fit: cover;
+}
 
 /* === Grid de cards === */
 .grid-cafes{ display:grid; gap:1rem; grid-template-columns: repeat(1, minmax(0, 1fr)); }
@@ -490,26 +493,6 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
   height: auto;
   max-height: 60vh;
   object-fit: cover;
-}
-
-/* --- FOTO CARD: ratio 16:9 estable y solo afecta a la foto principal --- */
-.ratio-16-9 {
-  position: relative;
-  width: 100%;
-  padding-top: 56.25%;   /* 9/16 */
-  overflow: hidden;
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
-}
-
-/* SOLO la imagen directa dentro del contenedor de foto */
-.ratio-16-9 > img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
 /* Buscador del mapa y layout mobile sin overflow */
