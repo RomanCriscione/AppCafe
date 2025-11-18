@@ -516,3 +516,42 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
     background-color: var(--brand-700, #593d2d);
   }
 }
+
+/* === FIXES FINAL PARA OVERFLOW === */
+
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container {
+  max-width: 100%;
+  overflow-x: hidden;
+  min-width: 0;
+}
+
+#toggle-filtros {
+  max-width: 90vw;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* === FIJAR CONTENEDOR DE IMAGENES DE TARJETAS === */
+
+.cafe-card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10; /* podés ajustar a 4/3 si preferís */
+  overflow: hidden;
+}
+
+.cafe-card-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
