@@ -207,27 +207,6 @@ header.site-nav.is-scrolled{
 .card-sub{ font-size:.85rem; color: var(--text-2); }
 .card-actions{ display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-top:.75rem; }
 
-.page-cafe-list #grid-cafes,
-.page-cafe-list #grid-cafes #resultados {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-/* Cada card ocupa el ancho disponible del grid, sin comportamiento de slider */
-.page-cafe-list .cafe-card {
-  width: 100%;
-  max-width: 100%;
-  flex: 0 0 auto; /* cancela cualquier flex-basis raro de sliders */
-}
-
-/* Imagen siempre dentro del box, recortada */
-.page-cafe-list .cafe-card img {
-  display: block;
-  width: 100%;
-  height: 12rem;          /* similar a h-48 de Tailwind */
-  object-fit: cover;
-}
-
 /* === Grid de cards === */
 .grid-cafes{ display:grid; gap:1rem; grid-template-columns: repeat(1, minmax(0, 1fr)); }
 @media (min-width:640px){ .grid-cafes{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -295,7 +274,7 @@ form a.button-reset, form a[type="reset"] {
 
 h2 { margin: .25rem 0 .5rem; }
 h2 + form { margin-top: .25rem; }
-main img { max-width: 100%; height: auto; display: block; }
+main img { max-width: 100%; display: block; }
 
 /* === Etiquetas sensoriales === */
 .tag-list{ display:grid; gap:.4rem; grid-template-columns:1fr; }
@@ -495,31 +474,45 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
   object-fit: cover;
 }
 
-/* Buscador del mapa y layout mobile sin overflow */
+/* === CAFÉ LISTA: FILTROS MOBILE Y MAPA === */
+
+/* Contenedor de filtros móvil */
 @media (max-width: 768px) {
-  .map-search form,
-  .map-search .flex {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .5rem;
-    width: 100%;
-    max-width: 100%;
+  #filtrosMobile {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 70%;
+    overflow-y: auto;
+    z-index: 50;
+    background-color: white;
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    padding: 1rem;
+    border-radius: 16px 16px 0 0;
   }
 
-  .map-search form > *,
-  .map-search input {
-    flex: 1 1 100%;
-    min-width: 0;
+  #filtrosMobile.open {
+    transform: translateY(0%);
   }
 
-  .map-search form button {
-    width: 100%;
+  .filtros-toggle-btn {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 60;
+    background-color: var(--brand-500, #7a553c);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    font-weight: 600;
+    box-shadow: var(--shadow-hover);
   }
 
-  /* FIX MOBILE: evitar que el hover rompa el tamaño de la card */
-  .cafe-card:hover {
-    transform: none !important;
-    box-shadow: var(--shadow-soft) !important;
-    filter: none !important;
+  .filtros-toggle-btn:hover {
+    background-color: var(--brand-700, #593d2d);
   }
 }

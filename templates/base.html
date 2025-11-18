@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <!-- ¡custom.css al final para sobreescribir, con nueva versión para bust de caché! -->
-  <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=3">
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=4">
 
   <!-- PWA / Icons -->
   <link rel="manifest" href="{% static 'site.webmanifest' %}">
@@ -188,7 +188,7 @@
     </script>
 
     <!-- CONTENIDO -->
-    <main class="flex-1 container mx-auto px-4 py-6">
+    <main class="flex-1 w-full max-w-screen-xl mx-auto px-4 py-6">
       {% if messages %}
         <div class="fixed top-4 right-4 z-50 space-y-2">
           {% for message in messages %}

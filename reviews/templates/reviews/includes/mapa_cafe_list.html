@@ -32,12 +32,13 @@
 </div>
 
 <!-- Formulario de búsqueda por dirección -->
-<form id="direccion-form" method="get" class="mb-4 flex gap-2 max-w-md">
-  <input type="text" id="direccion" name="direccion" placeholder="Buscar cafés cerca de una dirección"
-         class="flex-1 px-3 py-2 border rounded w-full text-sm" required>
-  <button type="submit" class="btn btn-primary text-sm rounded-xl">Buscar</button>
-</form>
-<div id="error-direccion" class="text-red-600 text-sm mb-4 hidden">❗ Dirección no encontrada</div>
+<div class="map-search mb-4 w-full max-w-xl">
+  <form id="direccion-form" method="get" class="flex gap-2 flex-wrap w-full">
+    <input type="text" id="direccion" name="direccion" placeholder="Buscar cafés cerca de una dirección"
+           class="flex-1 px-3 py-2 border rounded w-full text-sm" required>
+    <button type="submit" class="btn btn-primary text-sm rounded-xl">Buscar</button>
+  </form>
+</div>
 
 <!-- Lista de cafés -->
 {% if cafes %}

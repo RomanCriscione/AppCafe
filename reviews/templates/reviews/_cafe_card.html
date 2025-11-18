@@ -2,20 +2,24 @@
 
 <article class="card cafe-card focus:outline-none min-w-0" tabindex="0">
   <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block min-w-0">
-    <!-- FOTO: alto fijo por breakpoint, simple y 100% responsive -->
-    <div class="w-full h-48 sm:h-56 lg:h-64 overflow-hidden rounded-t-[16px]">
+    <!-- CONTENEDOR FIJO PARA LA FOTO -->
+    <div class="cafe-card-media rounded-t-[16px]">
       {% if cafe.photo1 and cafe.photo1.url %}
         <img
           src="{{ cafe.photo1.url }}"
           alt="{{ cafe.photo1_title|default:cafe.name }}"
-          loading="lazy" decoding="async" fetchpriority="low"
-          class="w-full h-full object-cover block">
+          loading="lazy"
+          decoding="async"
+          fetchpriority="low"
+        >
       {% else %}
         <img
           src="{% static 'images/coffee-hero.jpg' %}"
           alt="Foto no disponible — {{ cafe.name }}"
-          loading="lazy" decoding="async" fetchpriority="low"
-          class="w-full h-full object-cover block">
+          loading="lazy"
+          decoding="async"
+          fetchpriority="low"
+        >
       {% endif %}
     </div>
   </a>

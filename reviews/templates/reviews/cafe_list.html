@@ -100,6 +100,7 @@
 
     {% include "reviews/includes/mapa_cafe_list.html" %}
 
+    <!-- Skeleton inicial -->
     <div id="grid-skeleton" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0">
       {% for _ in "123" %}
         <div class="card">
@@ -117,8 +118,9 @@
       {% endfor %}
     </div>
 
+    <!-- Grid real -->
     <div id="grid-cafes" class="hidden min-w-0" tabindex="-1" aria-labelledby="titulo-cafeterias">
-      <div id="resultados" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0">
+      <div id="resultados" class="grid-cafes min-w-0">
         {% for cafe in cafes %}
           {% include "reviews/_cafe_card.html" with cafe=cafe %}
         {% empty %}
