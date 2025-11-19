@@ -67,14 +67,14 @@
               <button type="submit"
                       class="btn btn-outline btn-sm js-fav-btn"
                       aria-pressed="false">
-                🧥
+                🤍
               </button>
             {% endif %}
           </form>
         {% else %}
           <a href="{% url 'account_login' %}?next={% url 'reviews:cafe_list' %}"
              class="btn btn-outline btn-sm"
-             title="Iniciar sesión para guardar favoritos">🧥</a>
+             title="Iniciar sesión para guardar favoritos">🤍</a>
         {% endif %}
 
         <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="btn btn-primary btn-sm">Ver</a>
