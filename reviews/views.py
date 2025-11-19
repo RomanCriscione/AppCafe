@@ -150,7 +150,16 @@ class CafeListView(ListView):
             "accepts_reservations": request.GET.get("accepts_reservations") == "on",
         }
 
-        cafes = Cafe.objects.all()
+        cafes = Cafe.objects.only(
+            'id', 'name', 'location', 'latitude', 'longitude',
+            'photo1', 'photo2', 'photo3',
+            'visibility_level',
+            'is_vegan_friendly', 'is_pet_friendly', 'has_wifi',
+            'has_outdoor_seating', 'has_parking', 'is_accessible',
+            'has_vegetarian_options', 'serves_breakfast', 'serves_alcohol',
+            'has_books_or_games', 'has_air_conditioning'
+)
+
 
         if zona:
             cafes = cafes.filter(location=zona)

@@ -4,7 +4,7 @@ module.exports = {
     "./templates/**/*.html",
     "./**/templates/**/*.html",
     "./static/**/*.js",
-    "./static/src/**/*.{js,ts,jsx,tsx}",   // 👈 por si tenés JS ahí
+    "./static/src/**/*.{js,ts,jsx,tsx}",
     "./reviews/**/*.py",
     "./core/**/*.py"
   ],

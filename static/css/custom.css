@@ -207,12 +207,6 @@ header.site-nav.is-scrolled{
 .card-sub{ font-size:.85rem; color: var(--text-2); }
 .card-actions{ display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-top:.75rem; }
 
-/* === Grid de cards === */
-.grid-cafes{ display:grid; gap:1rem; grid-template-columns: repeat(1, minmax(0, 1fr)); }
-@media (min-width:640px){ .grid-cafes{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width:1024px){ .grid-cafes{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width:1280px){ .grid-cafes{ grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-
 /* === Formularios === */
 .input, .select, .textarea{
   width:100%; padding:.6rem .75rem; border-radius: var(--radius-md);
@@ -555,3 +549,13 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
   display: block;
 }
 
+@media (max-width: 640px) {
+  .cafe-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .cafe-card-media {
+    aspect-ratio: 16/10;
+  }
+}

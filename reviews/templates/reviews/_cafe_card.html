@@ -1,9 +1,9 @@
 {% load static %}
 
-<article class="card cafe-card focus:outline-none min-w-0" tabindex="0">
+<article class="card cafe-card focus:outline-none min-w-0 min-h-[450px] sm:min-h-[500px]">
   <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block min-w-0">
-    <!-- CONTENEDOR FIJO PARA LA FOTO -->
-    <div class="cafe-card-media rounded-t-[16px]">
+    <!-- FOTO CON ALTURA FIJA POR BREAKPOINTS -->
+    <div class="w-full h-48 sm:h-60 lg:h-72 overflow-hidden rounded-t-[16px]">
       {% if cafe.photo1 and cafe.photo1.url %}
         <img
           src="{{ cafe.photo1.url }}"
@@ -11,6 +11,7 @@
           loading="lazy"
           decoding="async"
           fetchpriority="low"
+          class="w-full h-full object-cover block"
         >
       {% else %}
         <img
@@ -19,9 +20,11 @@
           loading="lazy"
           decoding="async"
           fetchpriority="low"
+          class="w-full h-full object-cover block"
         >
       {% endif %}
     </div>
+
   </a>
 
   <div class="card-body">
@@ -64,14 +67,14 @@
               <button type="submit"
                       class="btn btn-outline btn-sm js-fav-btn"
                       aria-pressed="false">
-                🤍
+                🧥
               </button>
             {% endif %}
           </form>
         {% else %}
           <a href="{% url 'account_login' %}?next={% url 'reviews:cafe_list' %}"
              class="btn btn-outline btn-sm"
-             title="Iniciar sesión para guardar favoritos">🤍</a>
+             title="Iniciar sesión para guardar favoritos">🧥</a>
         {% endif %}
 
         <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="btn btn-primary btn-sm">Ver</a>
