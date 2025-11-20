@@ -544,33 +544,30 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
 
 /* === FIXES FINAL PARA OVERFLOW Y MOBILE === */
 
-.chip {
+
+/* Fix: primer tap en rating no se registraba */
+#rating-cups label {
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+#rating-cups {
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: contain;
+}
+
+/* === FIX WIZARD TAGS RESPONSIVE — ROMA === */
+#tag-steps .chip,
+#tag-steps .chip span,
+#tag-steps label > span {
   white-space: normal !important;
+  word-break: break-word !important;
   overflow-wrap: break-word !important;
-  word-break: break-word !important;
+  max-width: 100% !important;
 }
 
-.tag-list,
-.tag-item {
-  min-width: 0 !important;
-}
-
-.rating-cups label {
-  cursor: pointer !important;
-  touch-action: manipulation !important;
-  -webkit-tap-highlight-color: transparent !important;
-}
-
-.rating-cups input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* === FIX WIZARD TAGS RESPONSIVE === */
-.peer + span,
-.inline-flex {
-  max-width: 100%;
-  white-space: normal !important;
-  word-break: break-word !important;
+#tag-steps .chip {
+  display: inline-flex !important;
+  align-items: center;
 }
