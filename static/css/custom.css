@@ -531,31 +531,46 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
   text-overflow: ellipsis;
 }
 
-/* === FIJAR CONTENEDOR DE IMAGENES DE TARJETAS === */
 
-.cafe-card-media {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10; /* podés ajustar a 4/3 si preferís */
-  overflow: hidden;
+/* === AJUSTE DE FONDO PARA SECCIÓN FINAL DE LISTA DE CAFÉS === */
+
+.bg-zinc-50 {
+  background-color: #F9FAFB !important;
 }
 
-.cafe-card-media img {
+.dark .bg-zinc-50 {
+  background-color: #1F1F1F !important;
+}
+
+/* === FIXES FINAL PARA OVERFLOW Y MOBILE === */
+
+.chip {
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+}
+
+.tag-list,
+.tag-item {
+  min-width: 0 !important;
+}
+
+.rating-cups label {
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.rating-cups input {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  opacity: 0;
+  pointer-events: none;
 }
 
-@media (max-width: 640px) {
-  .cafe-card {
-    min-width: 0 !important;
-    max-width: 100% !important;
-  }
-
-  .cafe-card-media {
-    aspect-ratio: 16/10;
-  }
+/* === FIX WIZARD TAGS RESPONSIVE === */
+.peer + span,
+.inline-flex {
+  max-width: 100%;
+  white-space: normal !important;
+  word-break: break-word !important;
 }
