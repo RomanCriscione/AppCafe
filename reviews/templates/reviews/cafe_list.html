@@ -131,7 +131,7 @@
   <div id="grid-cafes" class="hidden min-w-0" tabindex="-1" aria-labelledby="titulo-cafeterias">
 
       <div id="resultados" class="min-w-0">
-        <div class="grid auto-rows-fr grid-cols-[repeat(auto-fit,minmax(280px,380px))] justify-center gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {% for cafe in cafes %}
             {% include "reviews/_cafe_card.html" with cafe=cafe %}
           {% empty %}
