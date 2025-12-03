@@ -180,6 +180,11 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     owner_reply = models.TextField(blank=True, null=True)
     tags = models.ManyToManyField("Tag", blank=True, related_name="reviews")
+    precio_capuccino = models.PositiveIntegerField(
+    null=True,
+    blank=True,
+    help_text="Precio pagado por un capuccino mediano"
+)
 
     class Meta:
         indexes = [

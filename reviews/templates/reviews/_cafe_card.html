@@ -1,9 +1,13 @@
 {% load static %}
 
 <article class="card cafe-card focus:outline-none min-w-0 min-h-[450px] sm:min-h-[500px]">
-  <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block min-w-0">
-    <!-- FOTO CON ALTURA FIJA POR BREAKPOINTS -->
-    <div class="w-full h-48 sm:h-60 lg:h-72 overflow-hidden rounded-t-[16px]">
+
+  <!-- FOTO + OVERLAY -->
+  <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block min-w-0 relative">
+
+    <div class="w-full h-48 sm:h-60 lg:h-72 overflow-hidden rounded-t-[16px] relative">
+      
+      <!-- FOTO -->
       {% if cafe.photo1 and cafe.photo1.url %}
         <img
           src="{{ cafe.photo1.url }}"
@@ -23,11 +27,33 @@
           class="w-full h-full object-cover block"
         >
       {% endif %}
-    </div>
 
+      <!-- OVERLAY: RATING IZQUIERDA + RESEÑAS DERECHA -->
+      <div class="absolute top-2 left-2 flex items-center">
+        <div class="bg-white/90 backdrop-blur px-2 py-1 rounded-md shadow text-xs font-semibold flex items-center gap-1 text-gray-800">
+          ☕ 
+          {% if cafe.avg_rating %}
+            {{ cafe.avg_rating|floatformat:1 }}
+          {% else %}
+            –
+          {% endif %}
+          <span class="text-gray-500">/ 5</span>
+        </div>
+      </div>
+
+      <div class="absolute top-2 right-2">
+        <div class="bg-white/90 backdrop-blur px-2 py-1 rounded-md shadow text-xs text-gray-700">
+          ({{ cafe.num_reviews }} reseñas)
+        </div>
+      </div>
+
+    </div>
   </a>
 
+  <!-- CUERPO DE LA CARD -->
   <div class="card-body">
+
+    <!-- NOMBRE + UBICACIÓN -->
     <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block hover:underline">
       <h3 class="card-title">{{ cafe.name }}</h3>
 
@@ -40,45 +66,53 @@
       {% endif %}
     </a>
 
-    <div class="card-actions">
-      <div class="flex items-center gap-2">
-        {% with avg=cafe.average_rating|default:0 %}
-          <span class="badge" title="Calificación promedio">☕ {{ avg|floatformat:1 }} / 5</span>
-        {% endwith %}
-        {% with rc=cafe.reviews_count|default:0 %}
-          <span class="text-muted text-sm">({{ rc }} reseñas)</span>
-        {% endwith %}
+    <div class="card-actions space-y-3">
+
+      <!-- PRECIO (opcional) -->
+      {% if cafe.precio_promedio %}
+        <div class="text-sm text-amber-900 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg w-fit">
+          ☕ Capuccino mediano:
+          <strong>${{ cafe.precio_promedio|floatformat:0 }}</strong>
+        </div>
+      {% endif %}
+
+      <!-- FAVORITOS + VER -->
+      <div class="flex items-center justify-between">
+
+        <!-- FAVORITO -->
+        <div class="flex items-center gap-2">
+          {% if user.is_authenticated %}
+            <form method="post"
+                  action="{% url 'reviews:toggle_favorite' cafe.id %}"
+                  class="fav-form js-ajax-post"
+                  data-cafe="{{ cafe.id }}">
+              {% csrf_token %}
+              {% if cafe.is_favorite or user in cafe.favorites.all %}
+                <button type="submit"
+                        class="btn btn-success btn-sm js-fav-btn"
+                        aria-pressed="true">❤️</button>
+              {% else %}
+                <button type="submit"
+                        class="btn btn-outline btn-sm js-fav-btn"
+                        aria-pressed="false">🤍</button>
+              {% endif %}
+            </form>
+          {% else %}
+            <a href="{% url 'account_login' %}?next={% url 'reviews:cafe_list' %}"
+               class="btn btn-outline btn-sm"
+               title="Iniciar sesión para guardar favoritos">🤍</a>
+          {% endif %}
+        </div>
+
+        <!-- VER -->
+        <a href="{% url 'reviews:cafe_detail' cafe.id %}"
+          class="btn btn-primary btn-sm">
+          Ver
+        </a>
+
       </div>
 
-      <div class="flex items-center gap-2">
-        {% if user.is_authenticated %}
-          <form method="post"
-                action="{% url 'reviews:toggle_favorite' cafe.id %}"
-                class="fav-form js-ajax-post"
-                data-cafe="{{ cafe.id }}">
-            {% csrf_token %}
-            {% if cafe.is_favorite or user in cafe.favorites.all %}
-              <button type="submit"
-                      class="btn btn-success btn-sm js-fav-btn"
-                      aria-pressed="true">
-                ❤️
-              </button>
-            {% else %}
-              <button type="submit"
-                      class="btn btn-outline btn-sm js-fav-btn"
-                      aria-pressed="false">
-                🤍
-              </button>
-            {% endif %}
-          </form>
-        {% else %}
-          <a href="{% url 'account_login' %}?next={% url 'reviews:cafe_list' %}"
-             class="btn btn-outline btn-sm"
-             title="Iniciar sesión para guardar favoritos">🤍</a>
-        {% endif %}
-
-        <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="btn btn-primary btn-sm">Ver</a>
-      </div>
     </div>
   </div>
+
 </article>

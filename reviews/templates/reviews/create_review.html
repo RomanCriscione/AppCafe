@@ -159,53 +159,84 @@
 
       <div class="mt-4 flex items-center justify-between">
         <button type="button" id="btn-back" class="text-sm text-blue-600 hover:underline">← Volver a etiquetas</button>
-        <button type="submit" class="btn btn-success rounded-xl px-4 py-2" id="submit-btn">Enviar reseña</button>
+        <button type="button" class="btn btn-success rounded-xl px-4 py-2" id="btn-to-price">Siguiente →</button>
+
       </div>
     </section>
+    <!-- PASO 3: PRECIO DEL CAPUCCINO -->
+<section id="step-price" class="surface p-5 rounded-xl border hidden">
+  <h2 class="text-lg font-semibold mb-3">3) Precio del capuccino</h2>
+
+  <label class="block font-medium mb-2">
+    ¿Cuánto pagaste por un capuccino mediano?
+  </label>
+
+  <input
+    type="number"
+    name="precio_capuccino"
+    min="1000"
+    max="15000"
+    placeholder="Ej: 3500"
+    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-400"
+  >
+
+  <p class="text-sm text-gray-600 mt-1">Esto nos ayuda a mostrar precios reales.</p>
+
+  <div class="mt-4 flex items-center justify-between">
+    <button type="button" id="btn-back-price" class="text-sm text-blue-600 hover:underline">← Volver</button>
+
+    <button type="submit" class="btn btn-success rounded-xl px-4 py-2">
+      Finalizar reseña
+    </button>
+  </div>
+</section>
+
   </form>
 </div>
 
 {# === Script ÚNICO del wizard de categorías === #}
 <script>
 (function () {
-  const step1      = document.getElementById('step-tags');
-  const step2      = document.getElementById('step-review');
-  const stepWrap   = document.getElementById('tag-steps');
-  const steps      = stepWrap ? Array.from(stepWrap.querySelectorAll('.tag-step')) : [];
-  const btnPrev    = document.getElementById('btn-prev');
-  const btnNext    = document.getElementById('btn-next');
-  const btnSkip    = document.getElementById('btn-skip');
-  const btnGoRev   = document.getElementById('btn-go-review');
-  const selCountEl = document.getElementById('sel-count');
-  const search     = document.getElementById('tag-search');
-  const stepIndex  = document.getElementById('step-index');
-  const stepTotal  = document.getElementById('step-total');
+  const step1 = document.getElementById('step-tags');
+  const step2 = document.getElementById('step-review');
+  const step3 = document.getElementById('step-price');
 
+  const stepWrap = document.getElementById('tag-steps');
+  const steps = stepWrap ? Array.from(stepWrap.querySelectorAll('.tag-step')) : [];
+
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const btnSkip = document.getElementById('btn-skip');
+  const btnGoRev = document.getElementById('btn-go-review');
+
+  const selCountEl = document.getElementById('sel-count');
+  const search = document.getElementById('tag-search');
+  const stepIndex = document.getElementById('step-index');
+  const stepTotal = document.getElementById('step-total');
+
+  // ---------- TAGS ----------
   function selectedTotal(){ return document.querySelectorAll('input[name="tags"]:checked').length; }
   function paintCount(){ if (selCountEl) selCountEl.textContent = selectedTotal(); }
 
-  // Restaurar estado visual si hay checks marcados (pre-selección desde el server)
   document.querySelectorAll('.chip input[type="checkbox"]').forEach(inp => {
     if (inp.checked) inp.closest('.chip').dataset.checked = '1';
   });
   paintCount();
 
-  // Si no hay categorías -> ir directo al comentario
   if (!steps.length) {
     btnGoRev && btnGoRev.addEventListener('click', () => {
-      step1.classList.add('hidden'); step2.classList.remove('hidden');
+      step1.classList.add('hidden'); 
+      step2.classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
     return;
   }
 
-  // Toggle de chips
   stepWrap.querySelectorAll('.chip').forEach(ch => {
     ch.addEventListener('click', (e) => {
-      // Evitá doble toggle si se clickea el <input>
       if (e.target.tagName === 'INPUT') return;
       e.preventDefault();
-      const input = ch.querySelector('input[type="checkbox"]'); if(!input) return;
+      const input = ch.querySelector('input[type="checkbox"]'); 
       input.checked = !input.checked;
       ch.dataset.checked = input.checked ? '1' : '0';
       paintCount();
@@ -226,114 +257,82 @@
   function show(k) {
     i = Math.max(0, Math.min(k, steps.length - 1));
     steps.forEach((el, idx) => el.classList.toggle('hidden', idx !== i));
-    if (stepIndex) stepIndex.textContent = i + 1;
-    if (stepTotal) stepTotal.textContent = steps.length;
+    stepIndex.textContent = i + 1;
+    stepTotal.textContent = steps.length;
     btnPrev.disabled = i === 0;
-    btnNext.textContent = (i === steps.length - 1) ? 'Ir a comentario →' : 'Siguiente →';
+    btnNext.textContent = (i === steps.length - 1) ? 'Ir al precio →' : 'Siguiente →';
     filterChips();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function goToReview(){
-    step1.classList.add('hidden');
-    step2.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
   btnPrev.addEventListener('click', () => show(i - 1));
-  btnSkip.addEventListener('click', () => (i < steps.length - 1) ? show(i + 1) : goToReview());
-  btnNext.addEventListener('click', () => (i < steps.length - 1) ? show(i + 1) : goToReview());
 
-  // Botón "volver a etiquetas" en Paso 2
+  // PASO 1 → PASO 2 (rating/comment)
+  btnNext.addEventListener('click', () => {
+    if (i < steps.length - 1) {
+      show(i + 1);
+    } else {
+      // último paso de etiquetas → rating
+      step1.classList.add('hidden');
+      step2.classList.remove('hidden');
+      step3.classList.add('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+
+  // Saltar categoría → rating (solo si es la última)
+  btnSkip.addEventListener('click', () => {
+    if (i < steps.length - 1) {
+      show(i + 1);
+    } else {
+      step1.classList.add('hidden');
+      step2.classList.remove('hidden');
+      step3.classList.add('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+
+
+  // Desde Paso 2 → Paso 1
   document.getElementById('btn-back')?.addEventListener('click', () => {
     step2.classList.add('hidden');
     step1.classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
+  // Desde Paso 3 → Paso 2
+  document.getElementById('btn-back-price')?.addEventListener('click', () => {
+    step3.classList.add('hidden');
+    step2.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Paso 2 → Paso 3
+document.getElementById('btn-to-price')?.addEventListener('click', () => {
+  step2.classList.add('hidden');
+  step3.classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// --- RATING (tazas) ---
+document.querySelectorAll('#rating-cups .cup-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const val = btn.dataset.value;
+
+    // activar radios
+    const radio = document.querySelector(`#rating_${val}`);
+    if (radio) radio.checked = true;
+
+    // aplicar estilos activos
+    document.querySelectorAll('#rating-cups .cup-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.value <= val);
+      b.classList.toggle('dim', b.dataset.value > val);
+    });
+  });
+});
+
   show(0);
 })();
 </script>
 
-{# === Paso 2: rating a tazas + contador de caracteres + validaciones suaves === #}
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const wrap   = document.getElementById('rating-cups');
-  if (wrap) {
-    const labels = {1:"Malo", 2:"Regular", 3:"Bueno", 4:"Muy bueno", 5:"Excelente"};
-    const cups   = [...wrap.querySelectorAll('label.cup-btn')];
-    const radios = [...wrap.querySelectorAll('input[name="rating"]')];
-    const out    = document.getElementById('rating-label');
-
-    const selected = () => {
-      const r = radios.find(x => x.checked);
-      return r ? Number(r.value) : 0;
-    };
-
-    function paint(temp) {
-      const s = temp ?? selected();
-      cups.forEach(btn => {
-        const v = Number(btn.dataset.value);
-        btn.classList.toggle('active', s && v <= s);
-        btn.classList.toggle('dim', !(s && v <= s));
-      });
-      out.textContent = s ? labels[s] : "";
-    }
-
-    cups.forEach(btn => {
-      const v = Number(btn.dataset.value);
-      btn.addEventListener('mouseenter', () => paint(v));
-      btn.addEventListener('mouseleave', () => paint());
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const r = radios.find(x => Number(x.value) === v);
-        if (r) { r.checked = true; paint(); }
-      });
-    });
-
-    wrap.addEventListener('keydown', (e) => {
-      let s = selected();
-      if (e.key === 'ArrowRight' && s < 5) {
-        const nxt = radios.find(x => Number(x.value) === s+1);
-        if (nxt) nxt.checked = true; paint(); e.preventDefault();
-      }
-      if (e.key === 'ArrowLeft'  && s > 1) {
-        const prv = radios.find(x => Number(x.value) === s-1);
-        if (prv) prv.checked = true; paint(); e.preventDefault();
-      }
-    });
-
-    radios.forEach(r => r.addEventListener('change', paint));
-    paint();
-  }
-
-  // Contador de caracteres (600)
-  const ta  = document.getElementById('comment');
-  const now = document.getElementById('char-now');
-  if (ta && now) {
-    const MAX = 600;
-    ta.maxLength = MAX;
-    const sync = () => { now.textContent = (ta.value || '').length; };
-    ta.addEventListener('input', sync);
-    sync();
-  }
-
-  // Validación suave en submit (rating requerido)
-  const form = document.getElementById('review-form');
-  form?.addEventListener('submit', (e) => {
-    const anyRating = !!document.querySelector('input[name="rating"]:checked');
-    if (!anyRating) {
-      e.preventDefault();
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.textContent = 'Elegí una calificación (1 a 5 tazas).';
-      toast.setAttribute('role','alert');
-      toast.setAttribute('aria-live','polite');
-      document.body.appendChild(toast);
-      setTimeout(() => { toast.style.transition='opacity .3s'; toast.style.opacity='0'; setTimeout(() => toast.remove(), 300); }, 1600);
-      wrap?.focus();
-    }
-  });
-});
-</script>
 {% endblock %}

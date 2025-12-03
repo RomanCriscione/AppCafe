@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head_title %}
+  <title>Completar registro · Gota</title>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center px-4">
+  <div class="w-full max-w-md bg-white/95 backdrop-blur rounded-2xl shadow-xl border border-slate-100 p-6 sm:p-8 space-y-6">
+
+    <!-- Header -->
+    <header class="space-y-2 text-center">
+      <div class="mx-auto w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xl">
+        G
+      </div>
+      <h1 class="text-xl sm:text-2xl font-bold text-slate-900">
+        Completar registro
+      </h1>
+      <p class="text-sm text-slate-600">
+        Vas a usar tu cuenta de Google para acceder a <span class="font-semibold">Gota</span>.
+        Solo necesitamos que confirmes estos datos.
+      </p>
+    </header>
+
+    <!-- Info del mail que viene de Google -->
+    <div class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700">
+      <p class="font-medium">Correo conectado</p>
+      <p class="truncate text-slate-600">
+        {{ form.email.value|default:form.email.initial|default:"(email de Google)" }}
+      </p>
+    </div>
+
+    <!-- Formulario -->
+    <form method="post" action="">
+      {% csrf_token %}
+
+      {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+      {% endif %}
+
+      {% if form.non_field_errors %}
+        <div class="mb-3 text-sm text-red-600">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <div class="space-y-4">
+        {% for field in form %}
+          <div>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-800 mb-1">
+              {{ field.label }}
+            </label>
+            {{ field }}
+            {% if field.help_text %}
+              <p class="mt-1 text-xs text-slate-500">{{ field.help_text|safe }}</p>
+            {% endif %}
+            {% if field.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ field.errors|striptags }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <button
+        type="submit"
+        class="mt-6 w-full inline-flex items-center justify-center rounded-xl bg-brown-700 text-white font-semibold text-sm px-4 py-2.5 hover:bg-brown-800 transition shadow-sm"
+      >
+        Crear cuenta y continuar
+      </button>
+    </form>
+
+    <!-- Link alternativo -->
+    <p class="text-center text-xs text-slate-500">
+      ¿Ya tenés cuenta en Gota?
+      <a href="{% url 'account_login' %}" class="text-brown-700 font-medium hover:underline">
+        Iniciar sesión
+      </a>
+    </p>
+  </div>
+</div>
+{% endblock %}

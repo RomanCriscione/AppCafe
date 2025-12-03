@@ -42,9 +42,21 @@ class ReviewForm(forms.ModelForm):
         })
     )
 
+    precio_capuccino = forms.IntegerField(
+    required=False,
+    label="¿Cuánto pagaste por un capuccino mediano?",
+    min_value=1000,
+    max_value=15000,
+    widget=forms.NumberInput(attrs={
+        "placeholder": "Ej: 3500",
+        "class": "w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-400"
+    })
+)
+
+
     class Meta:
         model = Review
-        fields = ['rating', 'comment', 'tags']
+        fields = ['rating', 'comment', 'tags', 'precio_capuccino']
 
 
 # --------------------------------------------------------------------------------------

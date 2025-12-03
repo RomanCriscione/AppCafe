@@ -174,6 +174,7 @@ class CafeListView(ListView):
             avg_rating=Avg('reviews__rating'),
             total_reviews=Count('reviews'),
             num_reviews=Count('reviews'),
+            precio_promedio=Avg('reviews__precio_capuccino'),
         ).prefetch_related('favorites')
 
         if orden == 'rating':
@@ -301,6 +302,13 @@ def cafe_detail(request, cafe_id):
     average_rating = round(agg["avg"], 1) if agg["avg"] is not None else None
     best_review = reviews_qs.order_by("-rating", "-created_at").first()
 
+    # ⭐ NUEVO — promedio de precio del capuccino
+    precio_promedio = cafe.reviews.filter(
+        precio_capuccino__isnull=False
+    ).aggregate(
+        Avg("precio_capuccino")
+    )["precio_capuccino__avg"]
+
     # % positivas
     positives = reviews_qs.filter(rating__gte=4).count()
     positive_pct = int((positives / total_reviews) * 100) if total_reviews else 0
@@ -332,7 +340,7 @@ def cafe_detail(request, cafe_id):
     except Exception:
         pass
 
-    # fotos seguras: solo las que realmente tienen .url
+    # fotos seguras
     safe_photos = []
     for idx in (1, 2, 3):
         photo = getattr(cafe, f"photo{idx}", None)
@@ -419,6 +427,9 @@ def cafe_detail(request, cafe_id):
             "full_image_url": full_image_url,
             "cafe_list_abs": cafe_list_abs,
             "photos": safe_photos,
+
+            # ⭐ NUEVO: precio
+            "precio_promedio": precio_promedio,
         },
     )
 
@@ -448,6 +459,7 @@ def create_review(request, cafe_id):
             review = form.save(commit=False)
             review.cafe = cafe
             review.user = request.user
+            review.precio_capuccino = form.cleaned_data.get("precio_capuccino")
             review.save()
 
             # Tags del paso 1 (checkboxes)
