@@ -534,17 +534,6 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
 
 /* === AJUSTE DE FONDO PARA SECCIÓN FINAL DE LISTA DE CAFÉS === */
 
-.bg-zinc-50 {
-  background-color: #F9FAFB !important;
-}
-
-.dark .bg-zinc-50 {
-  background-color: #1F1F1F !important;
-}
-
-/* === FIXES FINAL PARA OVERFLOW Y MOBILE === */
-
-
 /* Fix: primer tap en rating no se registraba */
 #rating-cups label {
   pointer-events: auto;
@@ -625,6 +614,7 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
 }
 
 /* Chips de tags sensoriales */
+/* TAG CHIP — modo claro */
 .tag-chip{
   display: inline-flex;
   align-items: center;
@@ -637,13 +627,183 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
   color: var(--text-1);
   box-shadow: var(--shadow-soft);
 }
+
 .tag-chip--small{
   font-size: .8rem;
   padding: .3rem .65rem;
   opacity: .96;
 }
 
+/* TAG CHIP — modo oscuro */
+@media (prefers-color-scheme: dark){
+  .tag-chip{
+    background: color-mix(in srgb, var(--surface) 88%, var(--primary-700) 12%);
+    border-color: color-mix(in srgb, var(--primary-700) 40%, transparent);
+    color: var(--text-1);
+  }
+}
+
+
 /* Fade del listado de reseñas compatible con modo oscuro */
 .reviews-fade-gradient{
-  background: linear-gradient(to top, var(--canvas) 0%, rgba(0,0,0,0));
+  background: linear-gradient(to top, var(--canvas) 0%, transparent);
+}
+
+/* FIX 1 — Textos que quedan demasiado oscuros en modo oscuro */
+.dark .text-gray-600,
+.dark .text-slate-600,
+.dark .text-gray-700,
+.dark .text-slate-700 {
+  color: var(--text-2) !important;
+}
+
+.dark .text-gray-800,
+.dark .text-slate-800,
+.dark .text-gray-900 {
+  color: var(--text-1) !important;
+}
+
+/* FIX 3 — fondo de tarjetas en modo oscuro */
+.dark .surface,
+.dark .card,
+.dark .review-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+/* ===========================================================
+   FIX GLOBAL PARA TEXTO EN MODO OSCURO
+   Sin romper Tailwind ni tu diseño existente
+   =========================================================== */
+@media (prefers-color-scheme: dark){
+
+  /* Textos grisáceos (usados en subheaders, listas, reseñas, labels) */
+  .text-gray-600,
+  .text-gray-700,
+  .text-gray-800,
+  .text-gray-900,
+  .text-slate-600,
+  .text-slate-700,
+  p.text-gray-600,
+  span.text-gray-600 {
+    color: var(--text-2) !important;
+  }
+
+  /* Títulos que usaban slate/gray oscuros */
+  h1.text-gray-800,
+  h2.text-gray-800,
+  h3.text-gray-800,
+  .text-gray-800 {
+    color: var(--text-1) !important;
+  }
+
+  /* Descripciones pequeñas */
+  .text-xs.text-gray-600,
+  .text-sm.text-gray-600 {
+    color: color-mix(in srgb, var(--text-2) 85%, var(--text-1) 15%) !important;
+  }
+
+  /* Para que los links queden visibles en modo oscuro */
+  a.text-gray-600,
+  a.text-gray-700 {
+    color: var(--primary) !important;
+  }
+
+}
+
+/* ===========================================================
+   D — BARRA SUPERIOR MODERNA DEL DETALLE DEL CAFÉ
+   =========================================================== */
+
+/* Contenedor general */
+.cafe-topbar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .85rem 1rem;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Ítems internos */
+.cafe-topbar__item{
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .95rem;
+  color: var(--text-1);
+  white-space: nowrap;
+}
+
+/* Emojis alineados */
+.cafe-topbar__item span.emoji{
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+/* Divider “|” */
+.cafe-topbar__divider{
+  opacity: .55;
+  color: var(--text-2);
+  font-weight: 300;
+}
+
+/* Versión dark-mode optimizada */
+@media (prefers-color-scheme: dark){
+  .cafe-topbar{
+    background: color-mix(in srgb, var(--surface-2) 75%, transparent);
+    border-color: color-mix(in srgb, var(--border) 50%, transparent);
+    box-shadow: 0 8px 20px rgba(0,0,0,.35);
+  }
+  .cafe-topbar__item{
+    color: var(--text-1);
+  }
+  .cafe-topbar__divider{
+    color: var(--text-2);
+  }
+}
+
+/* ===========================================================
+   FIX GLOBAL PARA TEXTO EN MODO OSCURO
+   Sin romper Tailwind ni tu diseño existente
+   =========================================================== */
+@media (prefers-color-scheme: dark){
+
+  /* Textos grisáceos (subheaders, listas, reseñas, labels) */
+  .text-gray-600,
+  .text-gray-700,
+  .text-gray-800,
+  .text-gray-900,
+  .text-slate-600,
+  .text-slate-700,
+  p.text-gray-600,
+  span.text-gray-600 {
+    color: var(--text-2) !important;
+  }
+
+  /* Títulos que usaban slate/gray oscuros */
+  h1.text-gray-800,
+  h2.text-gray-800,
+  h3.text-gray-800,
+  .text-gray-800 {
+    color: var(--text-1) !important;
+  }
+
+  /* Descripciones pequeñas */
+  .text-xs.text-gray-600,
+  .text-sm.text-gray-600 {
+    color: color-mix(in srgb, var(--text-2) 85%, var(--text-1) 15%) !important;
+  }
+
+  /* Links que quedaban invisibles */
+  a.text-gray-600,
+  a.text-gray-700 {
+    color: var(--primary) !important;
+  }
+
 }

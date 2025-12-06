@@ -55,7 +55,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 
-<body class="page">
+<body class="page bg-[var(--canvas)] text-[var(--text-1)] transition-colors duration-300">
   <div class="min-h-screen flex flex-col">
 
     <!-- NAVBAR -->
@@ -110,7 +110,7 @@
     </header>
 
     <!-- OVERLAY + PANEL MÓVIL (fuera del header) -->
-    <div id="mobile-overlay" class="hidden fixed inset-0 bg-black/45 z-40"></div>
+    <div id="mobile-overlay" class="hidden fixed inset-0 bg-[rgba(0,0,0,0.55)] backdrop-blur-sm z-40"></div>
 
     <nav id="mobile-panel"
          class="hidden fixed inset-0 z-50 bg-white overflow-y-auto lg:hidden"

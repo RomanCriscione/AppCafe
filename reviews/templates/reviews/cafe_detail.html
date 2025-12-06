@@ -120,6 +120,34 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 space-y-8">
 
+   <!-- TOPBAR FIJO Y EN MODO CORRECTO -->
+  <div class="cafe-topbar animate-fade-in-up animate-delay-150 bg-white/70 dark:bg-[var(--surface-2)] backdrop-blur-sm border border-[var(--border)] px-4 py-2 rounded-xl">
+
+    {% if average_rating %}
+      <div class="cafe-topbar__item text-gray-800 dark:text-[var(--text-1)]">
+        <span class="emoji">☕</span>
+        {{ average_rating|floatformat:1 }}
+      </div>
+    {% endif %}
+
+    <span class="cafe-topbar__divider text-gray-500 dark:text-[var(--text-2)]">•</span>
+
+    <div class="cafe-topbar__item text-gray-800 dark:text-[var(--text-1)]">
+      <span class="emoji">🗳️</span>
+      {{ total_reviews }} reseñas
+    </div>
+
+    {% if precio_promedio %}
+      <span class="cafe-topbar__divider text-gray-500 dark:text-[var(--text-2)]">•</span>
+      <div class="cafe-topbar__item text-gray-800 dark:text-[var(--text-1)]">
+        <span class="emoji">💲</span>
+        ${{ precio_promedio|floatformat:0 }}
+      </div>
+    {% endif %}
+
+  </div>
+
+
   <h1 class="text-3xl font-bold animate-fade-in-up">{{ cafe.name }}</h1>
 
   <div class="mt-3 flex flex-wrap items-center gap-3 animate-fade-in-up animate-delay-125">
@@ -135,80 +163,108 @@
   <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-100">
     <div class="grid gap-4 sm:grid-cols-2">
 
+      <!-- DIRECCIÓN -->
       <div class="flex items-start gap-2">
         <span>📍</span>
         <div>
-          <div class="font-semibold">Dirección</div>
-          <div class="text-sm text-gray-600">{{ cafe.address }}{% if cafe.location %}, {{ cafe.location }}{% endif %}</div>
+          <div class="font-semibold text-gray-900 dark:text-[var(--text-1)]">
+            Dirección
+          </div>
+          <div class="text-sm text-gray-600 dark:text-[var(--text-2)]">
+            {{ cafe.address }}{% if cafe.location %}, {{ cafe.location }}{% endif %}
+          </div>
         </div>
       </div>
 
+      <!-- TELÉFONO -->
       <div class="flex items-start gap-2">
         <span>☎</span>
         <div>
-          <div class="font-semibold">Teléfono</div>
-          <div class="text-sm text-gray-600">{{ cafe.phone|default:"—" }}</div>
+          <div class="font-semibold text-gray-900 dark:text-[var(--text-1)]">
+            Teléfono
+          </div>
+          <div class="text-sm text-gray-600 dark:text-[var(--text-2)]">
+            {{ cafe.phone|default:"—" }}
+          </div>
         </div>
       </div>
 
+      <!-- BOTONES -->
       <div class="sm:col-span-2 flex flex-wrap gap-3">
         <a href="https://www.google.com/maps/search/?api=1{% if cafe.latitude and cafe.longitude %}&query={{ cafe.latitude }},{{ cafe.longitude }}{% else %}&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}{% endif %}"
-           target="_blank" class="btn btn-primary rounded-xl">
+          target="_blank"
+          class="btn btn-primary rounded-xl">
           📍 Ver en Google Maps
         </a>
 
         {% if cafe.claim_status != 'VERIFIED' %}
-          <a href="{% url 'reviews:claim_start' cafe.id %}" class="cta cta-indigo">🏷️ ¿Sos el dueño? Reclamá este local</a>
+          <a href="{% url 'reviews:claim_start' cafe.id %}"
+            class="cta cta-indigo">
+            🏷️ ¿Sos el dueño? Reclamá este local
+          </a>
         {% endif %}
       </div>
 
     </div>
   </section>
 
+
   <!-- FEATURES -->
   <section class="mt-4 animate-fade-in-up animate-delay-150">
-    {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
+    <div class="surface p-4 rounded-xl">
+      {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
+    </div>
   </section>
 
   <!-- FOTOS -->
   {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
-    <div class="animate-fade-in-up animate-delay-200">
+    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-200">
       {% include "reviews/includes/cafe_photos.html" with cafe=cafe %}
-    </div>
+    </section>
   {% endif %}
 
-  <!-- TAGS -->
+    <!-- TAGS -->
   {% if top_tags %}
-    <section class="surface p-4 rounded-xl">
-      <h2 class="text-lg font-semibold mb-3">🧠 Lo que otros destacan</h2>
+    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-225">
+
+      <h2 class="text-lg font-semibold mb-3 text-[var(--text-1)]">🧠 Lo que otros destacan</h2>
+
+      <!-- TOP TAGS -->
       <ul class="flex flex-wrap gap-2">
         {% for t in top_tags %}
           <li>
-            <span class="px-3 py-1.5 rounded-full text-sm bg-slate-50 text-slate-800 border border-slate-200">
+            <span class="tag-chip">
               {{ t|tag_emoji }} {{ t.name }}
             </span>
           </li>
         {% empty %}
-          <li class="text-gray-500">Aún no hay etiquetas.</li>
+          <li class="text-gray-500 dark:text-[var(--text-2)]">Aún no hay etiquetas.</li>
         {% endfor %}
       </ul>
 
       {% if more_tags %}
-      <details class="mt-3">
-        <summary class="text-sm text-blue-600 cursor-pointer">Ver más</summary>
+      <details class="mt-3 group">
+        <summary class="text-sm text-primary cursor-pointer dark:text-[var(--accent)]">
+          Ver más
+        </summary>
+
         <ul class="mt-2 flex flex-wrap gap-2">
           {% for t in more_tags %}
             <li>
-              <span class="px-3 py-1.5 rounded-full text-xs bg-slate-50 text-slate-700 border border-slate-200">
+              <span class="tag-chip tag-chip--small">
                 {{ t|tag_emoji }} {{ t.name }}
               </span>
             </li>
           {% endfor %}
         </ul>
+
       </details>
       {% endif %}
+
     </section>
+
   {% endif %}
+
 
   <!-- PERFIL SENSORIAL -->
   {% if radar_values and radar_labels %}
@@ -230,21 +286,37 @@
       <p class="mb-4"><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
 
       {% if precio_promedio %}
-        <div class="bg-amber-50 border border-amber-200 px-4 py-3 rounded-xl text-amber-800 mt-4">
+        <div class="px-4 py-3 rounded-xl mt-4 border
+                    bg-white dark:bg-[var(--surface-2)]
+                    border-amber-200 dark:border-[var(--border)]
+                    text-amber-800 dark:text-[var(--text-1)]">
           <p class="text-sm font-semibold">Capuccino mediano (promedio):</p>
           <p class="text-lg font-bold">${{ precio_promedio|floatformat:0 }}</p>
-          <p class="text-xs text-gray-600">Basado en precios reales cargados por usuarios</p>
+          <p class="text-xs text-gray-600 dark:text-[var(--text-2)]">
+            Basado en precios reales cargados por usuarios
+          </p>
         </div>
+
       {% endif %}
 
       {% if best_review %}
-        <div class="bg-[#f0fdfa] p-4 rounded border-l-4 border-accent mb-6 animate-fade-in">
+        <div class="p-4 rounded-xl border-l-4 mb-6 animate-fade-in
+                    bg-white dark:bg-[var(--surface-2)]
+                    border-accent/30 dark:border-accent/50">
+          
           <p class="font-semibold text-accent">☕✨ Reseña destacada</p>
-          <p class="text-sm text-gray-600">
-            {{ best_review.user.username }} ({{ best_review.created_at|date:"d M Y" }}) — ☕ {{ best_review.rating|floatformat:1 }}
+
+          <p class="text-sm text-gray-600 dark:text-[var(--text-2)]">
+            {{ best_review.user.username }} ({{ best_review.created_at|date:"d M Y" }})
+            — ☕ {{ best_review.rating|floatformat:1 }}
           </p>
-          <p>“{{ best_review.comment }}”</p>
+
+          <p class="mt-1 text-gray-800 dark:text-[var(--text-1)]">
+            “{{ best_review.comment }}”
+          </p>
+
         </div>
+
       {% endif %}
 
     {% else %}
@@ -266,7 +338,7 @@
     {% endfor %}
 
     {% if reviews|length > 3 %}
-      <div id="fade-reviews" class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+      <div id="fade-reviews" class="absolute bottom-0 left-0 w-full h-20 reviews-fade-gradient pointer-events-none"></div>
     {% endif %}
 
   </div>
@@ -405,8 +477,23 @@
       const values = {{ radar_values|safe }};
       const maxVal = Math.max(1, ...values);
 
-      const palette = ['#F1E8E3','#E7D7C9','#E6CCB2','#DDB892','#B08968','#996B53','#7A4F2A'];
-      const bg = labels.map((_, i) => palette[i % palette.length]);
+      const paletteLight = [
+        'var(--brand-50)', 'var(--brand-100)', 'var(--brand-200)',
+        'var(--caramel-200)', 'var(--caramel-300)',
+        'var(--caramel-400)', 'var(--brand-300)'
+      ];
+
+      const paletteDark = [
+        'color-mix(in srgb, var(--primary) 20%, transparent)',
+        'color-mix(in srgb, var(--primary) 30%, transparent)',
+        'color-mix(in srgb, var(--primary) 40%, transparent)',
+        'color-mix(in srgb, var(--accent) 25%, transparent)',
+        'color-mix(in srgb, var(--accent) 35%, transparent)',
+        'color-mix(in srgb, var(--accent) 45%, transparent)',
+        'color-mix(in srgb, var(--accent) 55%, transparent)'
+      ];
+
+      const bg = (isDark ? paletteDark : paletteLight).slice(0, labels.length);
 
       const el = document.getElementById('sensor-bars');
       if (!el) return;
@@ -419,9 +506,9 @@
             data: values,
             backgroundColor: bg,
             borderWidth: 0,
-            borderRadius: 10,
-            barThickness: 16,
-            maxBarThickness: 18
+            borderRadius: 12,
+            barThickness: 18,
+            maxBarThickness: 20
           }]
         },
         options: {
@@ -443,12 +530,12 @@
             x: {
               beginAtZero: true,
               suggestedMax: maxVal,
-              grid: { color: 'rgba(0,0,0,.06)' },
-              ticks: { precision: 0, color: '#475569' }
+              grid: { color: isDark ? 'rgba(255,255,255,.12)' : 'rgba(0,0,0,.06)' },
+              ticks: { color: isDark ? 'var(--text-2)' : '#475569' }
             },
             y: {
               grid: { display: false },
-              ticks: { color: '#334155' }
+              ticks: { color: isDark ? 'var(--text-1)' : '#334155' }
             }
           }
         }
