@@ -571,3 +571,79 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
   display: inline-flex !important;
   align-items: center;
 }
+
+/* === MODO OSCURO · CARDS ESPECIALES CAFÉ DETAIL === */
+
+/* Precio promedio del capuccino */
+.price-card{
+  background: color-mix(in srgb, var(--surface) 90%, var(--accent) 10%);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 18px;
+  padding: .75rem 1rem;
+  box-shadow: var(--shadow-soft);
+}
+.price-card-title{
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.price-card-amount{
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-top: .15rem;
+}
+.price-card-note{
+  font-size: .75rem;
+  color: var(--text-2);
+  margin-top: .1rem;
+}
+
+/* Reseña destacada */
+.best-review-card{
+  background: color-mix(in srgb, var(--surface) 92%, var(--accent) 8%);
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--shadow-soft);
+}
+.best-review-card-header{
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: .25rem;
+}
+.best-review-card-meta{
+  font-size: .8rem;
+  color: var(--text-2);
+  margin-bottom: .4rem;
+}
+.best-review-card-body{
+  font-size: .92rem;
+  color: var(--text-1);
+}
+
+/* Chips de tags sensoriales */
+.tag-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .4rem .8rem;
+  border-radius: 9999px;
+  font-size: .85rem;
+  background: color-mix(in srgb, var(--surface) 82%, var(--primary-50) 18%);
+  border: 1px solid color-mix(in srgb, var(--primary-100) 65%, transparent);
+  color: var(--text-1);
+  box-shadow: var(--shadow-soft);
+}
+.tag-chip--small{
+  font-size: .8rem;
+  padding: .3rem .65rem;
+  opacity: .96;
+}
+
+/* Fade del listado de reseñas compatible con modo oscuro */
+.reviews-fade-gradient{
+  background: linear-gradient(to top, var(--canvas) 0%, rgba(0,0,0,0));
+}
