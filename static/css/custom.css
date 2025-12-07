@@ -67,7 +67,7 @@ img, svg, video, canvas, audio, iframe, embed, object {
   --review-collapsed: 140px;
 }
 
-@media (prefers-color-scheme: dark){
+/* @media (prefers-color-scheme: dark){
   :root{
     --canvas:#16110E;
     --surface:#1F1813;
@@ -82,7 +82,7 @@ img, svg, video, canvas, audio, iframe, embed, object {
     --accent:#D29061;
   }
 }
-
+*/
 /* === Base === */
 * { -webkit-tap-highlight-color: transparent; }
 body {
@@ -429,10 +429,10 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
   content:""; position:absolute; inset:0;
   background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.25));
 }
-@media (prefers-color-scheme: dark){
+/* @media (prefers-color-scheme: dark){
   .section-hero::before{ background: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,.35)); }
 }
-
+*/
 .rating-cups label{ transition: transform .12s ease, filter .12s ease; }
 .rating-cups input:checked ~ label,
 .rating-cups label:hover,
@@ -635,7 +635,7 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
 }
 
 /* TAG CHIP — modo oscuro */
-@media (prefers-color-scheme: dark){
+/*@media (prefers-color-scheme: dark){
   .tag-chip{
     background: color-mix(in srgb, var(--surface) 88%, var(--primary-700) 12%);
     border-color: color-mix(in srgb, var(--primary-700) 40%, transparent);
@@ -643,7 +643,7 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
   }
 }
 
-
+*/
 /* Fade del listado de reseñas compatible con modo oscuro */
 .reviews-fade-gradient{
   background: linear-gradient(to top, var(--canvas) 0%, transparent);
@@ -675,9 +675,9 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
    FIX GLOBAL PARA TEXTO EN MODO OSCURO
    Sin romper Tailwind ni tu diseño existente
    =========================================================== */
-@media (prefers-color-scheme: dark){
+/* @media (prefers-color-scheme: dark){
 
-  /* Textos grisáceos (usados en subheaders, listas, reseñas, labels) */
+   Textos grisáceos (usados en subheaders, listas, reseñas, labels) 
   .text-gray-600,
   .text-gray-700,
   .text-gray-800,
@@ -689,7 +689,7 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
     color: var(--text-2) !important;
   }
 
-  /* Títulos que usaban slate/gray oscuros */
+  
   h1.text-gray-800,
   h2.text-gray-800,
   h3.text-gray-800,
@@ -697,20 +697,20 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
     color: var(--text-1) !important;
   }
 
-  /* Descripciones pequeñas */
+  
   .text-xs.text-gray-600,
   .text-sm.text-gray-600 {
     color: color-mix(in srgb, var(--text-2) 85%, var(--text-1) 15%) !important;
   }
 
-  /* Para que los links queden visibles en modo oscuro */
+  
   a.text-gray-600,
   a.text-gray-700 {
     color: var(--primary) !important;
   }
 
 }
-
+*/
 /* ===========================================================
    D — BARRA SUPERIOR MODERNA DEL DETALLE DEL CAFÉ
    =========================================================== */
@@ -754,7 +754,7 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
 }
 
 /* Versión dark-mode optimizada */
-@media (prefers-color-scheme: dark){
+/*@media (prefers-color-scheme: dark){
   .cafe-topbar{
     background: color-mix(in srgb, var(--surface-2) 75%, transparent);
     border-color: color-mix(in srgb, var(--border) 50%, transparent);
@@ -767,14 +767,14 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
     color: var(--text-2);
   }
 }
-
+*/
 /* ===========================================================
    FIX GLOBAL PARA TEXTO EN MODO OSCURO
    Sin romper Tailwind ni tu diseño existente
    =========================================================== */
-@media (prefers-color-scheme: dark){
+/*@media (prefers-color-scheme: dark){
 
-  /* Textos grisáceos (subheaders, listas, reseñas, labels) */
+ 
   .text-gray-600,
   .text-gray-700,
   .text-gray-800,
@@ -786,7 +786,7 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
     color: var(--text-2) !important;
   }
 
-  /* Títulos que usaban slate/gray oscuros */
+  
   h1.text-gray-800,
   h2.text-gray-800,
   h3.text-gray-800,
@@ -794,16 +794,17 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
     color: var(--text-1) !important;
   }
 
-  /* Descripciones pequeñas */
+ 
   .text-xs.text-gray-600,
   .text-sm.text-gray-600 {
     color: color-mix(in srgb, var(--text-2) 85%, var(--text-1) 15%) !important;
   }
 
-  /* Links que quedaban invisibles */
+  
   a.text-gray-600,
   a.text-gray-700 {
     color: var(--primary) !important;
   }
 
 }
+*/
