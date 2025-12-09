@@ -49,6 +49,51 @@ _UI_MSG = {
     "no_reviews": "Todavía no hay reseñas.",
 }
 
+# === TAGS SENSORIALES MANUALES (18 etiquetas, 3 grupos) ===
+
+MANUAL_TAG_GROUPS = {
+    "Sensorial": [
+        "Baños cuidados (y eso dice mucho)",
+        "Cada taza es distinta, como debe ser",
+        "Hay un gato que manda",
+        "Paredes con historias (y fotos de verdad)",
+        "Ventanales con luz todo el día",
+        "Huele a café recién molido",
+    ],
+    "Ambiente / Servicio": [
+        "Podés ir solo sin sentirte solo",
+        "Te saludan por tu nombre",
+        "Ideal para charla de sobremesa",
+        "Buen lugar para esperar sin ansiedad",
+        "Ideal para una primera cita sin presión",
+        "Te vas y te dan ganas de volver",
+    ],
+    "Emocional / Experiencia": [
+        "Buena conexión, pero te da ganas de desconectarte",
+        "Ideal para escribir un cuento",
+        "La playlist ayuda a concentrarse",
+        "Las sillas no te arruinan la espalda",
+        "Para leer sin mirar el reloj",
+        "Pan casero y café en taza pesada",
+    ],
+}
+
+
+def get_manual_tag_choices():
+    from .models import Tag
+    all_names = []
+    for names in MANUAL_TAG_GROUPS.values():
+        all_names.extend(names)
+
+    tags_qs = Tag.objects.filter(name__in=all_names)
+    tags_by_name = {t.name: t for t in tags_qs}
+
+    grouped = {}
+    for category, names in MANUAL_TAG_GROUPS.items():
+        grouped[category] = [tags_by_name[n] for n in names if n in tags_by_name]
+
+    return grouped
+
 
 class ReviewListView(ListView):
     model = Review
@@ -437,7 +482,6 @@ def cafe_detail(request, cafe_id):
 def create_review(request, cafe_id):
     cafe = get_object_or_404(Cafe, pk=cafe_id)
 
-    # Si el usuario ya dejó una reseña en este café, lo llevamos a editar la última
     existing = (
         Review.objects.filter(user=request.user, cafe=cafe)
         .order_by('-created_at', '-id')
@@ -447,30 +491,31 @@ def create_review(request, cafe_id):
         messages.info(request, "Ya dejaste una reseña en este café. Podés editarla si querés.")
         return redirect("reviews:edit_review", review_id=existing.id)
 
+    selected_tag_ids = []
+
     if request.method == "POST":
         form = ReviewForm(request.POST)
-        # initial_rating también en POST inválido
         try:
             initial_rating = int(request.POST.get("rating") or 0)
-        except (TypeError, ValueError):
+        except:
             initial_rating = 0
+
+        selected_tag_ids = [int(t) for t in request.POST.getlist("tags") if t.isdigit()]
 
         if form.is_valid():
             review = form.save(commit=False)
             review.cafe = cafe
             review.user = request.user
-            review.precio_capuccino = form.cleaned_data.get("precio_capuccino")
+            precio = request.POST.get("precio_capuccino")
+            review.precio_capuccino = int(precio) if precio and precio.isdigit() else None
             review.save()
 
-            # Tags del paso 1 (checkboxes)
-            selected_tag_ids = request.POST.getlist("tags")
             if selected_tag_ids:
-                tags = Tag.objects.filter(id__in=selected_tag_ids)
-                review.tags.set(tags)
+                review.tags.set(Tag.objects.filter(id__in=selected_tag_ids))
 
             try:
                 _invalidate_reviews_cache(cafe.id, user_id=request.user.id)
-            except Exception:
+            except:
                 pass
 
             messages.success(request, "¡Gracias por tu reseña! ☕️")
@@ -478,41 +523,26 @@ def create_review(request, cafe_id):
         else:
             messages.error(request, "Por favor corregí los errores.")
     else:
-        # Permite precargar rating con ?rating=3
         try:
             initial_rating = int(request.GET.get("rating") or 0)
-        except (TypeError, ValueError):
+        except:
             initial_rating = 0
         form = ReviewForm(initial={"rating": initial_rating})
 
-    # Agrupar tags por categoría para el PASO 1
-    all_tags = Tag.objects.all().order_by("category", "name")
-    tag_groups = defaultdict(list)
-    for tag in all_tags:
-        tag_groups[tag.category].append(tag)
+    tag_choices = get_manual_tag_choices()
 
-    # Sugerencias
-    tag_counts_qs = (
-        Tag.objects.filter(reviews__cafe=cafe)
-        .annotate(num=Count('reviews', filter=Q(reviews__cafe=cafe)))
-        .order_by('-num', 'name')
-    )
-    top_tags = list(tag_counts_qs[:8])
-    my_tags = list(
-        Tag.objects.filter(reviews__user=request.user)
-        .annotate(num=Count('reviews', filter=Q(reviews__user=request.user)))
-        .order_by('-num', 'name')[:6]
+    return render(
+        request,
+        "reviews/create_review.html",
+        {
+            "form": form,
+            "cafe": cafe,
+            "tag_choices": tag_choices,
+            "initial_rating": initial_rating,
+            "selected_tag_ids": selected_tag_ids,
+        },
     )
 
-    context = {
-        "form": form,
-        "cafe": cafe,
-        "tag_choices": dict(tag_groups),
-        "top_tags": top_tags,
-        "my_tags": my_tags,
-        "initial_rating": initial_rating,   # ★ clave para el template
-    }
-    return render(request, "reviews/create_review.html", context)
 
 
 @login_required
@@ -522,20 +552,23 @@ def edit_review(request, review_id):
     if request.user != review.user and not request.user.is_staff:
         raise PermissionDenied("No podés editar esta reseña.")
 
+    selected_tag_ids = list(review.tags.values_list("id", flat=True))
+
     if request.method == "POST":
         form = ReviewForm(request.POST, instance=review)
-        # Si POST inválido, tomamos lo que vino o el valor actual
+
         try:
             initial_rating = int(request.POST.get("rating") or review.rating or 0)
-        except (TypeError, ValueError):
+        except:
             initial_rating = int(review.rating or 0)
+
+        selected_tag_ids = [int(t) for t in request.POST.getlist("tags") if t.isdigit()]
 
         if form.is_valid():
             form.save()
+
             if "tags" in request.POST:
-                selected_tag_ids = request.POST.getlist("tags")
-                tags = Tag.objects.filter(id__in=selected_tag_ids)
-                review.tags.set(tags)
+                review.tags.set(Tag.objects.filter(id__in=selected_tag_ids))
 
             key = make_template_fragment_key("cafe_reviews_list", [review.cafe_id])
             cache.delete(key)
@@ -548,13 +581,10 @@ def edit_review(request, review_id):
         form = ReviewForm(instance=review)
         try:
             initial_rating = int(review.rating or 0)
-        except (TypeError, ValueError):
+        except:
             initial_rating = 0
 
-    all_tags = Tag.objects.all().order_by("category", "name")
-    tag_groups = defaultdict(list)
-    for tag in all_tags:
-        tag_groups[tag.category].append(tag)
+    tag_choices = get_manual_tag_choices()
 
     return render(
         request,
@@ -562,11 +592,13 @@ def edit_review(request, review_id):
         {
             "form": form,
             "cafe": review.cafe,
-            "tag_choices": dict(tag_groups),
+            "tag_choices": tag_choices,
             "editing": True,
-            "initial_rating": initial_rating,  # ★ clave para el template
+            "initial_rating": initial_rating,
+            "selected_tag_ids": selected_tag_ids,
         },
     )
+
 
 
 @login_required

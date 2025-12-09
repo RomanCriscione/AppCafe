@@ -1,337 +1,208 @@
 {% extends "base.html" %}
 {% load static tag_icons %}
 
-{% block head_title %}<title>Dejar reseña — {{ cafe.name }}</title>{% endblock %}
+{% block head_title %}
+<title>Dejar reseña — {{ cafe.name }}</title>
+{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto px-4">
-  <header class="mb-6">
-    <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="text-blue-600 hover:underline text-sm">← Volver a {{ cafe.name }}</a>
-    <h1 class="text-2xl font-bold mt-2">Contanos tu experiencia</h1>
-    <p class="text-gray-600">Primero elegí las etiquetas que mejor describen lo que sentiste. Luego calificá y dejá un comentario.</p>
-  </header>
+<div class="max-w-3xl mx-auto px-4 py-6">
 
-  {# Errores globales del form (si usás Form en la vista) #}
-  {% if form.non_field_errors %}
-    <div class="toast" role="alert" aria-live="polite">{{ form.non_field_errors }}</div>
-  {% endif %}
+  <!-- VOLVER -->
+  <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="text-blue-600 hover:underline text-sm">
+    ← Volver a {{ cafe.name }}
+  </a>
 
-  <form method="post" class="space-y-8" id="review-form" {% if form.photo or form.photos or form.images %}enctype="multipart/form-data"{% endif %}>
+  <h1 class="text-2xl font-bold mt-2 mb-4">Contanos tu experiencia</h1>
+
+  <form method="post" id="review-form">
     {% csrf_token %}
 
-    {# === PASO 1: ETIQUETAS (una categoría por paso) === #}
-    <section id="step-tags" class="surface p-5 rounded-xl border">
-      <div class="flex items-center justify-between gap-3 mb-3">
-        <h2 class="text-lg font-semibold">1) Etiquetas sensoriales</h2>
-        <div class="flex items-center gap-3 text-sm text-gray-500">
-          <input id="tag-search" type="search" placeholder="Buscar etiqueta en esta categoría"
-                 class="rounded-lg border px-3 py-1.5 text-sm" />
-          <span><b id="sel-count">0</b> seleccionadas</span>
-          <span class="hidden sm:inline">·</span>
-          <span><span id="step-index">1</span>/<span id="step-total">{{ tag_choices|length }}</span></span>
-        </div>
-      </div>
+    <!-- ================================================= -->
+    <!-- PASO 1 — RATING → COMENTARIO → PRECIO (opcional) -->
+    <!-- ================================================= -->
+    <section id="step-1" class="wizard-step">
 
-      <style>
-        .chip{--b:#e5e7eb;--bg:#f8fafc;--fg:#0f172a;display:inline-flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border:1px solid var(--b);border-radius:9999px;background:var(--bg);color:var(--fg);cursor:pointer;transition:transform .08s,box-shadow .12s,background .12s;user-select:none;font-size:.925rem}
-        .chip input{display:none}
-        .chip[data-checked="1"]{background:#eef2ff;border-color:#c7d2fe}
-        .chip-grid{display:flex;flex-wrap:wrap;gap:.5rem}
-        .cat-title{font-weight:600;color:#334155;margin:.25rem 0 1rem;display:flex;align-items:center;gap:.5rem}
-        .no-scrollbar::-webkit-scrollbar{display:none}
-        .btn-ghost{padding:.5rem .75rem;border-radius:.5rem}
-      </style>
+      <h3 class="text-xl font-semibold mb-4">1) Calificación, comentario y precio</h3>
 
-      {% if tag_choices %}
-        <div id="tag-steps">
-          {% comment %}
-            Podés pasar opcionalmente selected_tag_ids desde la vista (lista de IDs) para pre-seleccionar.
-          {% endcomment %}
-          {% for category, tags in tag_choices.items %}
-            <div class="tag-step hidden" data-step="{{ forloop.counter0 }}" data-cat="{{ category|slugify }}">
-              <h3 class="cat-title">{{ forloop.counter }}. {{ category|title }}</h3>
-              <div class="chip-grid" data-grid>
-                {% for t in tags %}
-                  {% with is_checked=False %}
-                    {% if selected_tag_ids and t.id in selected_tag_ids %}
-                      {% with is_checked=True %}{% endwith %}
-                    {% endif %}
-                    <label class="chip" data-checked="{{ is_checked|yesno:'1,0' }}" data-text="{{ t.name|lower }}">
-                      <input type="checkbox" name="tags" value="{{ t.id }}" {% if is_checked %}checked{% endif %}>
-                      <span>{{ t|tag_emoji }} {{ t.name }}</span>
-                    </label>
-                  {% endwith %}
-                {% endfor %}
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <p class="text-sm text-gray-600">Aún no hay etiquetas definidas.</p>
-        <div class="mt-4 text-right">
-          <button type="button" id="btn-go-review" class="btn btn-primary rounded-xl">Ir a comentario →</button>
-        </div>
-      {% endif %}
+      <!-- ===================== -->
+      <!-- RATING (Tazas)       -->
+      <!-- ===================== -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium mb-2">Calificación</label>
 
-      <div class="mt-5 flex items-center justify-between">
-        <button type="button" id="btn-prev" class="btn-ghost text-gray-600">← Volver</button>
-        <p id="tags-hint" class="text-sm text-gray-500">Podés elegir ninguna, una o varias y continuar.</p>
-        <div class="flex gap-2">
-          <button type="button" id="btn-skip" class="text-sm text-gray-500 underline">Saltar</button>
-          <button type="button" id="btn-next" class="btn btn-primary rounded-xl px-4 py-2">Siguiente →</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- PASO 2: RATING + COMENTARIO -->
-    <section id="step-review" class="surface p-5 rounded-xl border hidden">
-      <h2 class="text-lg font-semibold mb-3">2) Calificá y dejá tu comentario</h2>
-
-      <!-- RATING A TAZAS (1→5) -->
-      <div class="mb-3">
         <style>
-          .cup-btn{width:36px;height:36px;display:grid;place-items:center;border-radius:.5rem;transition:transform .08s,background .12s}
-          .cup-btn:hover{background:#f1f5f9}
-          .cup-btn:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
-          .cup-icon{width:28px;height:28px}
-          .cup-outline{stroke:#9aa0a6;stroke-width:1.6;fill:none;opacity:.9}
-          .cup-fill{fill:#f59e0b;opacity:0;transition:opacity .12s}
-          .cup-btn.active .cup-fill{opacity:1}
-          .cup-btn.dim .cup-outline{opacity:.45}
+          .cup-btn { width: 40px; height: 40px; display:grid; place-items:center; cursor:pointer; }
+          .cup-icon { width: 32px; height:32px; }
+          .cup-outline { stroke:#9aa0a6; stroke-width:1.6; fill:none; opacity:.9; }
+          .cup-fill { fill:#f59e0b; opacity:0; transition:opacity .15s; }
+          .cup-btn.active .cup-fill { opacity:1; }
+          .cup-btn.dim .cup-outline { opacity:.35; }
         </style>
 
-        <div id="rating-cups" tabindex="0" class="flex items-center gap-2 select-none"
-             role="radiogroup" aria-label="Calificación" aria-required="true">
-          {% with rv=form.rating.value|default:form.instance.rating|default:initial_rating|default:'' %}
-            {% for n in "12345" %}
-              <input type="radio" class="sr-only" id="rating_{{forloop.counter}}" name="rating"
-                     value="{{forloop.counter}}"
-                     {% if rv|stringformat:"s" == forloop.counter|stringformat:"s" %}checked{% endif %} required>
-              <label for="rating_{{forloop.counter}}" class="cup-btn" data-value="{{forloop.counter}}" aria-label="{{forloop.counter}}">
-                <svg viewBox="0 0 24 24" class="cup-icon" aria-hidden="true">
-                  <path class="cup-fill" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
-                  <g class="cup-outline">
-                    <path d="M4 8h11v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8z"/>
-                    <path d="M15 9h3a3 3 0 0 1 0 6h-2"/>
-                  </g>
-                </svg>
-              </label>
-            {% endfor %}
-          {% endwith %}
-          <span id="rating-label" class="ml-2 text-sm text-gray-600"></span>
-        </div>
+        <div id="rating-cups" class="flex gap-2">
+          {% for n in "12345" %}
+            <input type="radio" name="rating" id="rating_{{ forloop.counter }}"
+                   value="{{ forloop.counter }}" class="sr-only">
 
-        {% if form.rating.errors %}
-          <p class="text-red-600 text-sm mt-1" aria-live="polite">{{ form.rating.errors|striptags }}</p>
-        {% endif %}
-      </div>
-
-      <!-- Comentario -->
-      <div>
-        <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Comentario (opcional)</label>
-        {% if form.comment %}
-          {{ form.comment }}
-        {% else %}
-          <textarea id="comment" name="comment" rows="5" maxlength="600"
-                    class="w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="¿Qué te gustó? ¿Algo para mejorar?"></textarea>
-        {% endif %}
-        {% if form.comment.errors %}
-          <p class="text-red-600 text-sm mt-1" aria-live="polite">{{ form.comment.errors|striptags }}</p>
-        {% endif %}
-        <div class="flex justify-end mt-1 text-xs text-gray-500">
-          <span><span id="char-now">0</span>/600</span>
+            <label class="cup-btn" data-value="{{ forloop.counter }}" for="rating_{{ forloop.counter }}">
+              <svg viewBox="0 0 24 24" class="cup-icon">
+                <path class="cup-fill" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
+                <g class="cup-outline">
+                  <path d="M4 8h11v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8z"/>
+                  <path d="M15 9h3a3 3 0 0 1 0 6h-2"/>
+                </g>
+              </svg>
+            </label>
+          {% endfor %}
         </div>
       </div>
 
-      {# Fotos opcionales si tu Form expone campos #}
-      {% if form.photo or form.photos or form.images %}
-      <div class="mt-4">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Fotos (opcional)</label>
-        {% if form.photo %} <div class="mb-2">{{ form.photo }}</div> {% endif %}
-        {% if form.photos %} <div class="mb-2">{{ form.photos }}</div> {% endif %}
-        {% if form.images %} <div class="mb-2">{{ form.images }}</div> {% endif %}
-        {% if form.photo.errors %}<p class="text-red-600 text-sm mt-1">{{ form.photo.errors|striptags }}</p>{% endif %}
-        {% if form.photos.errors %}<p class="text-red-600 text-sm mt-1">{{ form.photos.errors|striptags }}</p>{% endif %}
-        {% if form.images.errors %}<p class="text-red-600 text-sm mt-1">{{ form.images.errors|striptags }}</p>{% endif %}
+      <!-- ===================== -->
+      <!-- COMENTARIO            -->
+      <!-- ===================== -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Tu comentario</label>
+        <textarea name="comment" rows="5" maxlength="600"
+          class="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500"
+          placeholder="¿Qué te gustó? ¿Algo para mejorar?"></textarea>
       </div>
-      {% endif %}
 
-      <div class="mt-4 flex items-center justify-between">
-        <button type="button" id="btn-back" class="text-sm text-blue-600 hover:underline">← Volver a etiquetas</button>
-        <button type="button" class="btn btn-success rounded-xl px-4 py-2" id="btn-to-price">Siguiente →</button>
+      <!-- ===================== -->
+      <!-- PRECIO (opcional)     -->
+      <!-- ===================== -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium mb-2">
+          ¿Cuánto pagaste por un capuccino mediano? (opcional)
+        </label>
 
+        <input type="number"
+              name="precio_capuccino"
+              min="1000"
+              max="15000"
+              placeholder="Ej: 3500"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-400">
+
+        <p class="text-sm text-gray-600 mt-1">
+          Esto ayuda a otros usuarios, pero podés saltearlo.
+        </p>
+      </div>
+
+      <div class="flex justify-end">
+        <button type="button"
+                class="next-btn bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+          Siguiente →
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ========================================= -->
+    <!-- PASO 2 — ETIQUETAS (3 categorías)         -->
+    <!-- ========================================= -->
+    <section id="step-2" class="wizard-step hidden">
+      <h3 class="text-xl font-semibold mb-4 text-center">2) Elegí las etiquetas que mejor describen tu experiencia</h3>
+
+      <div id="tag-steps">
+        {% for category, tags in tag_choices.items %}
+          <div class="tag-step hidden">
+
+            <h4 class="text-lg font-semibold mb-3 text-center">{{ category }}</h4>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {% for t in tags %}
+                <label class="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox"
+                         name="tags"
+                         value="{{ t.id }}"
+                         class="mt-1 h-4 w-4 text-blue-600">
+                  <span>{{ t|tag_emoji }} {{ t.name }}</span>
+                </label>
+              {% endfor %}
+            </div>
+
+            <div class="flex justify-between mt-6">
+              <button type="button"
+                      class="prev-tag bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">
+                ← Volver
+              </button>
+
+              <div class="flex gap-2">
+                <button type="button" class="skip-tag text-sm underline text-gray-600">Saltar</button>
+
+                {% if forloop.last %}
+                  <button type="button"
+                          class="finish-tags bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    Finalizar reseña →
+                  </button>
+                {% else %}
+                  <button type="button"
+                          class="next-tag bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                    Siguiente →
+                  </button>
+                {% endif %}
+              </div>
+            </div>
+
+          </div>
+        {% endfor %}
       </div>
     </section>
-    <!-- PASO 3: PRECIO DEL CAPUCCINO -->
-<section id="step-price" class="surface p-5 rounded-xl border hidden">
-  <h2 class="text-lg font-semibold mb-3">3) Precio del capuccino</h2>
-
-  <label class="block font-medium mb-2">
-    ¿Cuánto pagaste por un capuccino mediano?
-  </label>
-
-  <input
-    type="number"
-    name="precio_capuccino"
-    min="1000"
-    max="15000"
-    placeholder="Ej: 3500"
-    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-400"
-  >
-
-  <p class="text-sm text-gray-600 mt-1">Esto nos ayuda a mostrar precios reales.</p>
-
-  <div class="mt-4 flex items-center justify-between">
-    <button type="button" id="btn-back-price" class="text-sm text-blue-600 hover:underline">← Volver</button>
-
-    <button type="submit" class="btn btn-success rounded-xl px-4 py-2">
-      Finalizar reseña
-    </button>
-  </div>
-</section>
 
   </form>
 </div>
 
-{# === Script ÚNICO del wizard de categorías === #}
+<!-- =============================== -->
+<!--       SCRIPT DEL WIZARD        -->
+<!-- =============================== -->
 <script>
 (function () {
-  const step1 = document.getElementById('step-tags');
-  const step2 = document.getElementById('step-review');
-  const step3 = document.getElementById('step-price');
-
-  const stepWrap = document.getElementById('tag-steps');
-  const steps = stepWrap ? Array.from(stepWrap.querySelectorAll('.tag-step')) : [];
-
-  const btnPrev = document.getElementById('btn-prev');
-  const btnNext = document.getElementById('btn-next');
-  const btnSkip = document.getElementById('btn-skip');
-  const btnGoRev = document.getElementById('btn-go-review');
-
-  const selCountEl = document.getElementById('sel-count');
-  const search = document.getElementById('tag-search');
-  const stepIndex = document.getElementById('step-index');
-  const stepTotal = document.getElementById('step-total');
-
-  // ---------- TAGS ----------
-  function selectedTotal(){ return document.querySelectorAll('input[name="tags"]:checked').length; }
-  function paintCount(){ if (selCountEl) selCountEl.textContent = selectedTotal(); }
-
-  document.querySelectorAll('.chip input[type="checkbox"]').forEach(inp => {
-    if (inp.checked) inp.closest('.chip').dataset.checked = '1';
-  });
-  paintCount();
-
-  if (!steps.length) {
-    btnGoRev && btnGoRev.addEventListener('click', () => {
-      step1.classList.add('hidden'); 
-      step2.classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-    return;
-  }
-
-  stepWrap.querySelectorAll('.chip').forEach(ch => {
-    ch.addEventListener('click', (e) => {
-      if (e.target.tagName === 'INPUT') return;
-      e.preventDefault();
-      const input = ch.querySelector('input[type="checkbox"]'); 
-      input.checked = !input.checked;
-      ch.dataset.checked = input.checked ? '1' : '0';
-      paintCount();
-    });
-  });
+  const step1 = document.getElementById("step-1");
+  const step2 = document.getElementById("step-2");
+  const steps = Array.from(document.querySelectorAll(".tag-step"));
 
   let i = 0;
 
-  function filterChips() {
-    const q = (search?.value || '').trim().toLowerCase();
-    const grid = steps[i].querySelector('[data-grid]');
-    grid.querySelectorAll('.chip[data-text]').forEach(ch => {
-      ch.style.display = q && !ch.dataset.text.includes(q) ? 'none' : '';
-    });
-  }
-  search && search.addEventListener('input', filterChips);
+  // === RATING ===
+  document.querySelectorAll("#rating-cups .cup-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const val = btn.dataset.value;
+      document.getElementById(`rating_${val}`).checked = true;
 
+      document.querySelectorAll("#rating-cups .cup-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.value <= val);
+        b.classList.toggle("dim", b.dataset.value > val);
+      });
+    });
+  });
+
+  // Paso 1 → Paso 2
+  document.querySelector("#step-1 .next-btn").onclick = () => {
+    step1.classList.add("hidden");
+    step2.classList.remove("hidden");
+    show(0);
+  };
+
+  // Mostrar categoría de etiquetas
   function show(k) {
     i = Math.max(0, Math.min(k, steps.length - 1));
-    steps.forEach((el, idx) => el.classList.toggle('hidden', idx !== i));
-    stepIndex.textContent = i + 1;
-    stepTotal.textContent = steps.length;
-    btnPrev.disabled = i === 0;
-    btnNext.textContent = (i === steps.length - 1) ? 'Ir al precio →' : 'Siguiente →';
-    filterChips();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    steps.forEach((s, idx) => s.classList.toggle("hidden", idx !== i));
   }
 
-  btnPrev.addEventListener('click', () => show(i - 1));
-
-  // PASO 1 → PASO 2 (rating/comment)
-  btnNext.addEventListener('click', () => {
-    if (i < steps.length - 1) {
-      show(i + 1);
-    } else {
-      // último paso de etiquetas → rating
-      step1.classList.add('hidden');
-      step2.classList.remove('hidden');
-      step3.classList.add('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+  // Navegación entre categorías
+  steps.forEach((step, idx) => {
+    step.querySelector(".next-tag")?.addEventListener("click", () => show(idx + 1));
+    step.querySelector(".skip-tag")?.addEventListener("click", () => show(idx + 1));
+    step.querySelector(".prev-tag")?.addEventListener("click", () => show(idx - 1));
   });
 
-  // Saltar categoría → rating (solo si es la última)
-  btnSkip.addEventListener('click', () => {
-    if (i < steps.length - 1) {
-      show(i + 1);
-    } else {
-      step1.classList.add('hidden');
-      step2.classList.remove('hidden');
-      step3.classList.add('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  });
+  // Finalizar reseña
+  document.querySelectorAll(".finish-tags").forEach(btn =>
+    btn.addEventListener("click", () => {
+      document.getElementById("review-form").submit();
+    })
+  );
 
-
-  // Desde Paso 2 → Paso 1
-  document.getElementById('btn-back')?.addEventListener('click', () => {
-    step2.classList.add('hidden');
-    step1.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-
-  // Desde Paso 3 → Paso 2
-  document.getElementById('btn-back-price')?.addEventListener('click', () => {
-    step3.classList.add('hidden');
-    step2.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-
-  // Paso 2 → Paso 3
-document.getElementById('btn-to-price')?.addEventListener('click', () => {
-  step2.classList.add('hidden');
-  step3.classList.remove('hidden');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-// --- RATING (tazas) ---
-document.querySelectorAll('#rating-cups .cup-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const val = btn.dataset.value;
-
-    // activar radios
-    const radio = document.querySelector(`#rating_${val}`);
-    if (radio) radio.checked = true;
-
-    // aplicar estilos activos
-    document.querySelectorAll('#rating-cups .cup-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.value <= val);
-      b.classList.toggle('dim', b.dataset.value > val);
-    });
-  });
-});
-
-  show(0);
 })();
 </script>
 

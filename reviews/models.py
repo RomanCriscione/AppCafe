@@ -14,12 +14,11 @@ User = get_user_model()
 
 class Tag(models.Model):
     CATEGORY_CHOICES = [
-        ("sensorial", "☕ Experiencia sensorial"),
-        ("ambiente", "💬 Ambiente humano"),
-        ("hacer", "✍️ Para hacer cosas"),
-        ("estetica", "🌿 Estética y atmósfera"),
-        ("emocional", "🧠 Estados mentales"),
+        ("sensorial", "🧠 Sensorial / Emocional"),
+        ("estetica", "🌿 Estética y detalles"),
+        ("experiencia", "✍️ Actividades y experiencia"),
     ]
+
 
     name = models.CharField(max_length=100, unique=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
