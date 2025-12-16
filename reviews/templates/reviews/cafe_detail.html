@@ -118,6 +118,21 @@
 
 
 {% block content %}
+
+{% if messages %}
+  {% for message in messages %}
+    {% if "review_success" in message.tags %}
+      <div class="my-4 rounded-xl border bg-green-50 p-4">
+        <div class="font-semibold text-green-800">
+          ¡Gracias por tu reseña!
+        </div>
+        <div class="text-sm text-green-700 mt-1">
+          Tu aporte ayuda a que otros encuentren su próximo café.
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endif %}
 <div class="max-w-4xl mx-auto px-4 space-y-8">
 
    <!-- TOPBAR FIJO Y EN MODO CORRECTO -->

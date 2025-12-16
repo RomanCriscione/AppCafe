@@ -15,18 +15,26 @@
 
   <h1 class="text-2xl font-bold mt-2 mb-4">Contanos tu experiencia</h1>
 
-  <form method="post" id="review-form">
+  {% if form.errors %}
+    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+      Hay errores en el formulario. Revisá los campos marcados y probá de nuevo.
+    </div>
+  {% endif %}
+
+  <form method="post" id="review-form" novalidate>
     {% csrf_token %}
 
-    <!-- ================================================= -->
-    <!-- PASO 1 — RATING → COMENTARIO → PRECIO (opcional) -->
-    <!-- ================================================= -->
-    <section id="step-1" class="wizard-step">
+    <!-- Mantener en qué paso estaba (si vuelve con error) -->
+    <input type="hidden" name="current_step" id="current_step" value="{{ current_step|default:'1' }}">
 
+    <!-- ================================================= -->
+    <!-- PASO 1 — RATING → COMENTARIO → PRECIO (opcional)  -->
+    <!-- ================================================= -->
+    <section id="step-1" class="wizard-step transition-all duration-300 ease-out">
       <h3 class="text-xl font-semibold mb-4">1) Calificación, comentario y precio</h3>
 
       <!-- ===================== -->
-      <!-- RATING (Tazas)       -->
+      <!-- RATING (Tazas)        -->
       <!-- ===================== -->
       <div class="mb-6">
         <label class="block text-sm font-medium mb-2">Calificación</label>
@@ -38,14 +46,21 @@
           .cup-fill { fill:#f59e0b; opacity:0; transition:opacity .15s; }
           .cup-btn.active .cup-fill { opacity:1; }
           .cup-btn.dim .cup-outline { opacity:.35; }
+          .field-error { border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239,68,68,.15); }
         </style>
 
         <div id="rating-cups" class="flex gap-2">
           {% for n in "12345" %}
-            <input type="radio" name="rating" id="rating_{{ forloop.counter }}"
-                   value="{{ forloop.counter }}" class="sr-only">
+            <input type="radio"
+                   name="rating"
+                   id="rating_{{ forloop.counter }}"
+                   value="{{ forloop.counter }}"
+                   class="sr-only"
+                   {% if initial_rating == forloop.counter %}checked{% endif %}>
 
-            <label class="cup-btn" data-value="{{ forloop.counter }}" for="rating_{{ forloop.counter }}">
+            <label class="cup-btn"
+                   data-value="{{ forloop.counter }}"
+                   for="rating_{{ forloop.counter }}">
               <svg viewBox="0 0 24 24" class="cup-icon">
                 <path class="cup-fill" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
                 <g class="cup-outline">
@@ -56,6 +71,12 @@
             </label>
           {% endfor %}
         </div>
+
+        <!-- Feedback -->
+        <p id="rating-feedback" class="mt-3 text-sm text-gray-600 italic min-h-[1.25rem]"></p>
+
+        <!-- Error rating (solo si querés señal visual, sin meter lógica Django compleja) -->
+        <p id="rating-error" class="mt-2 text-sm text-red-600 hidden">Elegí una calificación para seguir.</p>
       </div>
 
       <!-- ===================== -->
@@ -63,9 +84,18 @@
       <!-- ===================== -->
       <div class="mb-4">
         <label class="block text-sm font-medium mb-1">Tu comentario</label>
-        <textarea name="comment" rows="5" maxlength="600"
-          class="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500"
-          placeholder="¿Qué te gustó? ¿Algo para mejorar?"></textarea>
+
+        <div class="mb-1 flex justify-between text-xs text-gray-500">
+          <span id="comment-hint">Contanos un poco más para ayudar a otros</span>
+          <span><span id="char-count">0</span>/600</span>
+        </div>
+
+        <textarea id="comment"
+                  name="comment"
+                  rows="5"
+                  maxlength="600"
+                  class="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500"
+                  placeholder="Ej: Pedí un capuccino y medialuna. El café salió rápido, la música tranquila y el lugar cómodo para quedarse un rato."></textarea>
       </div>
 
       <!-- ===================== -->
@@ -73,15 +103,16 @@
       <!-- ===================== -->
       <div class="mb-6">
         <label class="block text-sm font-medium mb-2">
-          ¿Cuánto pagaste por un capuccino mediano? (opcional)
+          ¿Cuánto pagaste por un capuccino mediano? <span class="text-gray-500">(opcional)</span>
         </label>
 
         <input type="number"
-              name="precio_capuccino"
-              min="1000"
-              max="15000"
-              placeholder="Ej: 3500"
-              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-400">
+               id="precio_capuccino"
+               name="precio_capuccino"
+               min="1000"
+               max="15000"
+               placeholder="Ej: 3500"
+               class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-400">
 
         <p class="text-sm text-gray-600 mt-1">
           Esto ayuda a otros usuarios, pero podés saltearlo.
@@ -90,33 +121,64 @@
 
       <div class="flex justify-end">
         <button type="button"
+                id="btn-step1-next"
                 class="next-btn bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
           Siguiente →
         </button>
       </div>
-
     </section>
 
     <!-- ========================================= -->
-    <!-- PASO 2 — ETIQUETAS (3 categorías)         -->
+    <!-- PASO 2 — ETIQUETAS (categorías)           -->
+    <!-- + Top tags del café (chips)               -->
     <!-- ========================================= -->
-    <section id="step-2" class="wizard-step hidden">
-      <h3 class="text-xl font-semibold mb-4 text-center">2) Elegí las etiquetas que mejor describen tu experiencia</h3>
+    <section id="step-2" class="wizard-step hidden opacity-0 translate-y-2 transition-all duration-300">
+      <h3 class="text-xl font-semibold mb-2 text-center">2) Elegí las etiquetas</h3>
+      <p class="text-sm text-gray-500 text-center mb-4">
+        Podés saltar cualquier categoría. Elegí las que mejor describan tu experiencia.
+      </p>
+
+      {% if top_tags %}
+        <div class="mb-5 rounded-lg border bg-white p-4">
+          <div class="text-xs uppercase tracking-wide text-gray-500 mb-2 text-center">
+            Más usadas en este café
+          </div>
+          <div class="flex flex-wrap justify-center gap-2" id="top-tags">
+            {% for t in top_tags %}
+              <button type="button"
+                      class="top-tag-chip inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm hover:shadow transition"
+                      data-tag-id="{{ t.id }}">
+                {{ t|tag_emoji }} {{ t.name }}
+                {% if t.num_reviews %}
+                  <span class="text-xs opacity-70">({{ t.num_reviews }})</span>
+                {% endif %}
+              </button>
+            {% endfor %}
+          </div>
+          <p class="text-xs text-gray-500 mt-2 text-center">
+            Tocá una para seleccionarla rápido.
+          </p>
+        </div>
+      {% endif %}
 
       <div id="tag-steps">
         {% for category, tags in tag_choices.items %}
           <div class="tag-step hidden">
+            <h4 class="text-lg font-semibold mb-2 text-center">{{ category }}</h4>
 
-            <h4 class="text-lg font-semibold mb-3 text-center">{{ category }}</h4>
+            <p class="text-sm text-gray-500 text-center mb-4">
+              Elegiste <span class="tag-count">0</span> etiquetas en esta categoría
+            </p>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {% for t in tags %}
                 <label class="flex items-start gap-2 cursor-pointer">
                   <input type="checkbox"
+                         class="tag-checkbox mt-1 h-4 w-4 text-blue-600"
                          name="tags"
                          value="{{ t.id }}"
-                         class="mt-1 h-4 w-4 text-blue-600">
-                  <span>{{ t|tag_emoji }} {{ t.name }}</span>
+                         {% if selected_tag_ids and t.id in selected_tag_ids %}checked{% endif %}>
+                  <span class="text-gray-800">{{ t|tag_emoji }} {{ t.name }}</span>
                 </label>
               {% endfor %}
             </div>
@@ -128,12 +190,16 @@
               </button>
 
               <div class="flex gap-2">
-                <button type="button" class="skip-tag text-sm underline text-gray-600">Saltar</button>
+                <button type="button"
+                        class="skip-tag text-sm underline text-gray-600">
+                  Saltar
+                </button>
 
                 {% if forloop.last %}
                   <button type="button"
-                          class="finish-tags bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                    Finalizar reseña →
+                          id="btn-preview"
+                          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    Ver preview →
                   </button>
                 {% else %}
                   <button type="button"
@@ -149,6 +215,61 @@
       </div>
     </section>
 
+    <!-- ========================================= -->
+    <!-- PASO 3 — PREVIEW ANTES DE ENVIAR           -->
+    <!-- ========================================= -->
+    <section id="step-3" class="wizard-step hidden opacity-0 translate-y-2 transition-all duration-300">
+      <h3 class="text-xl font-semibold mb-4 text-center">3) Preview de tu reseña</h3>
+
+      <div class="rounded-xl border bg-white p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <div class="font-semibold">{{ cafe.name }}</div>
+          <div id="pv-rating" class="text-sm text-gray-700"></div>
+        </div>
+
+        <div class="mb-3">
+          <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Comentario</div>
+          <div id="pv-comment" class="text-gray-800 whitespace-pre-wrap"></div>
+        </div>
+
+        <div class="mb-3">
+          <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Precio capuccino</div>
+          <div id="pv-price" class="text-gray-800"></div>
+        </div>
+
+        <div class="mb-1">
+          <div class="text-xs uppercase tracking-wide text-gray-500 mb-2">Etiquetas</div>
+          <div id="pv-tags" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-between gap-2">
+        <button type="button"
+                id="btn-back-to-tags"
+                class="px-4 py-2 rounded border hover:bg-gray-50">
+          ← Editar etiquetas
+        </button>
+
+        <div class="flex gap-2">
+          <button type="button"
+                  id="btn-back-to-step1"
+                  class="px-4 py-2 rounded border hover:bg-gray-50">
+            Editar paso 1
+          </button>
+
+          <button type="submit"
+                  id="btn-submit"
+                  class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            Publicar reseña
+          </button>
+        </div>
+      </div>
+
+      <p class="text-xs text-gray-500 mt-3 text-center">
+        Al publicar, se limpia el borrador guardado para este café.
+      </p>
+    </section>
+
   </form>
 </div>
 
@@ -157,51 +278,375 @@
 <!-- =============================== -->
 <script>
 (function () {
+  // -------------------------
+  // Helpers / Estado
+  // -------------------------
+  const cafeId = "{{ cafe.id }}";
+  const draftKey = `gota_review_draft_cafe_${cafeId}`;
+
+  const form = document.getElementById("review-form");
+  const currentStepInput = document.getElementById("current_step");
+
   const step1 = document.getElementById("step-1");
   const step2 = document.getElementById("step-2");
-  const steps = Array.from(document.querySelectorAll(".tag-step"));
+  const step3 = document.getElementById("step-3");
 
-  let i = 0;
+  const stepsTags = Array.from(document.querySelectorAll(".tag-step"));
+  let tagIdx = 0;
 
-  // === RATING ===
+  const commentEl = document.getElementById("comment");
+  const priceEl = document.getElementById("precio_capuccino");
+
+  const feedbackEl = document.getElementById("rating-feedback");
+  const ratingErrorEl = document.getElementById("rating-error");
+
+  const ratingTexts = {
+    1: "No fue una buena experiencia.",
+    2: "Podría haber sido mejor.",
+    3: "Estuvo bien, sin destacarse.",
+    4: "Muy buen lugar, volvería.",
+    5: "Me encantó, definitivamente vuelvo."
+  };
+
+  // hints por rating + contador
+  const counter = document.getElementById("char-count");
+  const hint = document.getElementById("comment-hint");
+  const hintsByRating = {
+    1: "¿Qué fue lo que no funcionó?",
+    2: "¿Qué mejorarías?",
+    3: "¿Qué estuvo bien y qué no?",
+    4: "¿Qué fue lo que más te gustó?",
+    5: "¿Qué hizo que sea una gran experiencia?"
+  };
+
+  function getSelectedRating() {
+    const r = document.querySelector('input[name="rating"]:checked');
+    return r ? parseInt(r.value, 10) : null;
+  }
+
+  function setStep(n) {
+    currentStepInput.value = String(n);
+  }
+
+  function showOnly(sectionToShow) {
+    [step1, step2, step3].forEach(s => {
+      s.classList.add("hidden", "opacity-0", "translate-y-2");
+    });
+
+    sectionToShow.classList.remove("hidden");
+    requestAnimationFrame(() => {
+      sectionToShow.classList.remove("opacity-0", "translate-y-2");
+    });
+  }
+
+  function showTagStep(k) {
+    tagIdx = Math.max(0, Math.min(k, stepsTags.length - 1));
+    stepsTags.forEach((s, idx) => s.classList.toggle("hidden", idx !== tagIdx));
+  }
+
+  // -------------------------
+  // Rating UI
+  // -------------------------
+  function paintCups(val) {
+    document.querySelectorAll("#rating-cups .cup-btn").forEach(b => {
+      const v = Number(b.dataset.value);
+      b.classList.toggle("active", v <= val);
+      b.classList.toggle("dim", v > val);
+    });
+  }
+
+  // Click cups
   document.querySelectorAll("#rating-cups .cup-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      const val = btn.dataset.value;
-      document.getElementById(`rating_${val}`).checked = true;
+      const val = Number(btn.dataset.value);
+      const r = document.getElementById(`rating_${val}`);
+      if (r) r.checked = true;
 
-      document.querySelectorAll("#rating-cups .cup-btn").forEach(b => {
-        b.classList.toggle("active", b.dataset.value <= val);
-        b.classList.toggle("dim", b.dataset.value > val);
-      });
+      paintCups(val);
+
+      if (feedbackEl && ratingTexts[val]) feedbackEl.textContent = ratingTexts[val];
+
+      // limpiar error si existía
+      ratingErrorEl?.classList.add("hidden");
+
+      saveDraft(); // autosave
     });
   });
 
-  // Paso 1 → Paso 2
-  document.querySelector("#step-1 .next-btn").onclick = () => {
-    step1.classList.add("hidden");
-    step2.classList.remove("hidden");
-    show(0);
-  };
-
-  // Mostrar categoría de etiquetas
-  function show(k) {
-    i = Math.max(0, Math.min(k, steps.length - 1));
-    steps.forEach((s, idx) => s.classList.toggle("hidden", idx !== i));
+  // Inicializar cups si viene rating pre-check
+  const initial = getSelectedRating();
+  if (initial) {
+    paintCups(initial);
+    if (feedbackEl && ratingTexts[initial]) feedbackEl.textContent = ratingTexts[initial];
   }
 
-  // Navegación entre categorías
-  steps.forEach((step, idx) => {
-    step.querySelector(".next-tag")?.addEventListener("click", () => show(idx + 1));
-    step.querySelector(".skip-tag")?.addEventListener("click", () => show(idx + 1));
-    step.querySelector(".prev-tag")?.addEventListener("click", () => show(idx - 1));
+  // -------------------------
+  // Comentario: contador + hint
+  // -------------------------
+  function updateCommentUX() {
+    if (!commentEl) return;
+    const len = commentEl.value.length;
+    if (counter) counter.textContent = String(len);
+
+    const rating = getSelectedRating();
+    if (hint) {
+      if (rating && len < 40) hint.textContent = hintsByRating[rating] || "Contanos un poco más";
+      else if (len < 20) hint.textContent = "Un poco más de detalle suma mucho";
+      else hint.textContent = "Gracias por tomarte el tiempo ☕";
+    }
+  }
+
+  commentEl?.addEventListener("input", () => {
+    updateCommentUX();
+    saveDraft();
   });
 
-  // Finalizar reseña
-  document.querySelectorAll(".finish-tags").forEach(btn =>
-    btn.addEventListener("click", () => {
-      document.getElementById("review-form").submit();
-    })
-  );
+  priceEl?.addEventListener("input", () => {
+    saveDraft();
+  });
+
+  // -------------------------
+  // Tags: contador por categoría + autosave
+  // -------------------------
+  document.querySelectorAll(".tag-step").forEach(step => {
+    const counterEl = step.querySelector(".tag-count");
+    const cbs = step.querySelectorAll('input[type="checkbox"]');
+
+    const update = () => {
+      const count = Array.from(cbs).filter(c => c.checked).length;
+      if (counterEl) counterEl.textContent = String(count);
+      saveDraft();
+    };
+
+    cbs.forEach(cb => cb.addEventListener("change", update));
+    update();
+  });
+
+  // -------------------------
+  // Top tags chips: toggle checkbox correspondiente
+  // -------------------------
+  document.querySelectorAll(".top-tag-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const id = chip.dataset.tagId;
+      const cb = document.querySelector(`input.tag-checkbox[value="${id}"]`);
+      if (cb) {
+        cb.checked = !cb.checked;
+        cb.dispatchEvent(new Event("change", { bubbles: true }));
+        chip.classList.toggle("bg-blue-600");
+        chip.classList.toggle("text-white");
+        chip.classList.toggle("border-blue-600");
+      }
+    });
+  });
+
+  // -------------------------
+  // Navegación Wizard
+  // -------------------------
+  document.getElementById("btn-step1-next")?.addEventListener("click", () => {
+    // Validación mínima: rating requerido
+    const rating = getSelectedRating();
+    if (!rating) {
+      ratingErrorEl?.classList.remove("hidden");
+      return;
+    }
+    setStep(2);
+    showOnly(step2);
+    showTagStep(0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // Navegación entre categorías
+  stepsTags.forEach((step, idx) => {
+    step.querySelector(".next-tag")?.addEventListener("click", () => showTagStep(idx + 1));
+    step.querySelector(".skip-tag")?.addEventListener("click", () => showTagStep(idx + 1));
+    step.querySelector(".prev-tag")?.addEventListener("click", () => showTagStep(idx - 1));
+  });
+
+  // Preview
+  document.getElementById("btn-preview")?.addEventListener("click", () => {
+    setStep(3);
+    buildPreview();
+    showOnly(step3);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // Volver desde preview
+  document.getElementById("btn-back-to-tags")?.addEventListener("click", () => {
+    setStep(2);
+    showOnly(step2);
+    showTagStep(stepsTags.length - 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  document.getElementById("btn-back-to-step1")?.addEventListener("click", () => {
+    setStep(1);
+    showOnly(step1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // -------------------------
+  // Preview: render
+  // -------------------------
+  function buildPreview() {
+    const rating = getSelectedRating();
+    const comment = (commentEl?.value || "").trim();
+    const price = (priceEl?.value || "").trim();
+
+    // Rating
+    const pvRating = document.getElementById("pv-rating");
+    if (pvRating) {
+      pvRating.textContent = rating ? `☕ ${rating} / 5` : "Sin calificación";
+    }
+
+    // Comment
+    const pvComment = document.getElementById("pv-comment");
+    if (pvComment) {
+      pvComment.textContent = comment || "Sin comentario";
+    }
+
+    // Price
+    const pvPrice = document.getElementById("pv-price");
+    if (pvPrice) {
+      pvPrice.textContent = price ? `$ ${price}` : "No informado";
+    }
+
+    // Tags
+    const pvTags = document.getElementById("pv-tags");
+    if (pvTags) {
+      pvTags.innerHTML = "";
+      const checked = Array.from(document.querySelectorAll('input[name="tags"]:checked'));
+
+      if (!checked.length) {
+        pvTags.innerHTML = '<span class="text-gray-500">Sin etiquetas</span>';
+      } else {
+        checked.forEach(cb => {
+          const label = cb.closest("label");
+          const text = label ? label.innerText.trim() : `Tag ${cb.value}`;
+
+          const chip = document.createElement("span");
+          chip.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm bg-gray-50";
+          chip.textContent = text;
+          pvTags.appendChild(chip);
+        });
+      }
+    }
+  }
+
+  // -------------------------
+  // Draft: save / restore / clear
+  // -------------------------
+  function collectDraft() {
+    const rating = getSelectedRating();
+    const comment = commentEl ? commentEl.value : "";
+    const price = priceEl ? priceEl.value : "";
+
+    const tags = Array.from(document.querySelectorAll('input[name="tags"]:checked'))
+      .map(cb => cb.value);
+
+    return {
+      rating: rating || null,
+      comment: comment || "",
+      price: price || "",
+      tags,
+      ts: Date.now()
+    };
+  }
+
+  function saveDraft() {
+    try {
+      const data = collectDraft();
+      localStorage.setItem(draftKey, JSON.stringify(data));
+    } catch (e) {
+      // silencioso
+    }
+  }
+
+  function restoreDraft() {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+
+      const data = JSON.parse(raw);
+
+      // rating
+      if (data.rating) {
+        const r = document.getElementById(`rating_${data.rating}`);
+        if (r) r.checked = true;
+        paintCups(Number(data.rating));
+        if (feedbackEl && ratingTexts[data.rating]) feedbackEl.textContent = ratingTexts[data.rating];
+      }
+
+      // comment
+      if (commentEl && typeof data.comment === "string") commentEl.value = data.comment;
+
+      // price
+      if (priceEl && typeof data.price === "string") priceEl.value = data.price;
+
+      // tags
+      if (Array.isArray(data.tags)) {
+        document.querySelectorAll('input[name="tags"]').forEach(cb => {
+          cb.checked = data.tags.includes(cb.value);
+        });
+
+        // forzar update contadores
+        document.querySelectorAll(".tag-step").forEach(step => {
+          const counterEl = step.querySelector(".tag-count");
+          const cbs = step.querySelectorAll('input[type="checkbox"]');
+          const count = Array.from(cbs).filter(c => c.checked).length;
+          if (counterEl) counterEl.textContent = String(count);
+        });
+      }
+
+      updateCommentUX();
+    } catch (e) {
+      // silencioso
+    }
+  }
+
+  function clearDraft() {
+    try { localStorage.removeItem(draftKey); } catch (e) {}
+  }
+
+  // Limpia borrador al submit (solo si el POST realmente ocurre)
+  form?.addEventListener("submit", () => {
+    clearDraft();
+    window.removeEventListener("beforeunload", saveDraft);
+  });
+
+
+  // Autosave también al salir
+  window.addEventListener("beforeunload", () => {
+    saveDraft();
+  });
+
+  // -------------------------
+  // Inicialización
+  // -------------------------
+  restoreDraft();
+  updateCommentUX();
+
+  // Abrir paso correcto (si el servidor devolvió error y current_step venía seteado)
+  const serverStep = parseInt(currentStepInput?.value || "1", 10);
+  if (serverStep === 2) {
+    showOnly(step2);
+    showTagStep(0);
+  } else if (serverStep === 3) {
+    buildPreview();
+    showOnly(step3);
+  } else {
+    showOnly(step1);
+  }
+
+  // sincronizar estilo visual de top-tags
+document.querySelectorAll(".top-tag-chip").forEach(chip => {
+  const id = chip.dataset.tagId;
+  const cb = document.querySelector(`input.tag-checkbox[value="${id}"]`);
+  if (cb && cb.checked) {
+    chip.classList.add("bg-blue-600", "text-white", "border-blue-600");
+  } else {
+    chip.classList.remove("bg-blue-600", "text-white", "border-blue-600");
+  }
+});
 
 })();
 </script>

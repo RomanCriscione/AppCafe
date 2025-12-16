@@ -80,19 +80,26 @@ MANUAL_TAG_GROUPS = {
 
 
 def get_manual_tag_choices():
-    from .models import Tag
     all_names = []
     for names in MANUAL_TAG_GROUPS.values():
         all_names.extend(names)
 
-    tags_qs = Tag.objects.filter(name__in=all_names)
+    tags_qs = (
+        Tag.objects
+        .filter(name__in=all_names)
+        .annotate(num_reviews=Count("reviews"))
+    )
+
     tags_by_name = {t.name: t for t in tags_qs}
 
     grouped = {}
     for category, names in MANUAL_TAG_GROUPS.items():
-        grouped[category] = [tags_by_name[n] for n in names if n in tags_by_name]
+        tags = [tags_by_name[n] for n in names if n in tags_by_name]
+        tags.sort(key=lambda t: (-t.num_reviews, t.name.lower()))
+        grouped[category] = tags
 
     return grouped
+
 
 
 class ReviewListView(ListView):
@@ -482,53 +489,82 @@ def cafe_detail(request, cafe_id):
 def create_review(request, cafe_id):
     cafe = get_object_or_404(Cafe, pk=cafe_id)
 
+    # --- evitar múltiples reseñas ---
     existing = (
         Review.objects.filter(user=request.user, cafe=cafe)
-        .order_by('-created_at', '-id')
+        .order_by("-created_at", "-id")
         .first()
     )
     if request.method == "GET" and existing:
-        messages.info(request, "Ya dejaste una reseña en este café. Podés editarla si querés.")
+        messages.info(
+            request,
+            "Ya dejaste una reseña en este café. Podés editarla si querés."
+        )
         return redirect("reviews:edit_review", review_id=existing.id)
 
     selected_tag_ids = []
+    current_step = "1"
 
+    # =========================
+    # POST
+    # =========================
     if request.method == "POST":
         form = ReviewForm(request.POST)
+        current_step = request.POST.get("current_step") or "1"
+
         try:
             initial_rating = int(request.POST.get("rating") or 0)
-        except:
+        except ValueError:
             initial_rating = 0
 
-        selected_tag_ids = [int(t) for t in request.POST.getlist("tags") if t.isdigit()]
+        selected_tag_ids = [
+            int(t) for t in request.POST.getlist("tags") if t.isdigit()
+        ]
 
         if form.is_valid():
             review = form.save(commit=False)
             review.cafe = cafe
             review.user = request.user
+
             precio = request.POST.get("precio_capuccino")
-            review.precio_capuccino = int(precio) if precio and precio.isdigit() else None
+            review.precio_capuccino = (
+                int(precio) if precio and precio.isdigit() else None
+            )
+
             review.save()
 
             if selected_tag_ids:
-                review.tags.set(Tag.objects.filter(id__in=selected_tag_ids))
+                review.tags.set(
+                    Tag.objects.filter(id__in=selected_tag_ids)
+                )
 
             try:
                 _invalidate_reviews_cache(cafe.id, user_id=request.user.id)
-            except:
+            except Exception:
                 pass
 
-            messages.success(request, "¡Gracias por tu reseña! ☕️")
+            messages.success(
+                request,
+                "¡Gracias por tu reseña!",
+                extra_tags="review_success"
+            )
             return redirect("reviews:cafe_detail", cafe_id=cafe.id)
+
         else:
             messages.error(request, "Por favor corregí los errores.")
+
+    # =========================
+    # GET
+    # =========================
     else:
         try:
             initial_rating = int(request.GET.get("rating") or 0)
-        except:
+        except ValueError:
             initial_rating = 0
+
         form = ReviewForm(initial={"rating": initial_rating})
 
+    # 👉 SIEMPRE disponible (GET y POST inválido)
     tag_choices = get_manual_tag_choices()
 
     return render(
@@ -540,9 +576,9 @@ def create_review(request, cafe_id):
             "tag_choices": tag_choices,
             "initial_rating": initial_rating,
             "selected_tag_ids": selected_tag_ids,
+            "current_step": current_step,
         },
     )
-
 
 
 @login_required
