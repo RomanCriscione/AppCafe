@@ -119,31 +119,63 @@
 
 {% block content %}
 
-{% if messages %}
-  {% for message in messages %}
-    {% if "review_success" in message.tags %}
-      <div class="my-4 rounded-xl border bg-green-50 p-4">
-        <div class="font-semibold text-green-800">
-          ¡Gracias por tu reseña!
-        </div>
-        <div class="text-sm text-green-700 mt-1">
-          Tu aporte ayuda a que otros encuentren su próximo café.
-        </div>
-      </div>
-    {% endif %}
-  {% endfor %}
-{% endif %}
 <div class="max-w-4xl mx-auto px-4 space-y-8">
 
-   <!-- TOPBAR FIJO Y EN MODO CORRECTO -->
-  <div class="cafe-topbar animate-fade-in-up animate-delay-150 bg-white/70 dark:bg-[var(--surface-2)] backdrop-blur-sm border border-[var(--border)] px-4 py-2 rounded-xl">
+<!-- TOPBAR FIJO Y EN MODO CORRECTO -->
+<div class="cafe-topbar animate-fade-in-up animate-delay-150 bg-white/70 dark:bg-[var(--surface-2)] backdrop-blur-sm border border-[var(--border)] px-4 py-2 rounded-xl">
 
-    {% if average_rating %}
-      <div class="cafe-topbar__item text-gray-800 dark:text-[var(--text-1)]">
-        <span class="emoji">☕</span>
-        {{ average_rating|floatformat:1 }}
-      </div>
-    {% endif %}
+  {% if average_rating %}
+    <div class="cafe-topbar__item text-gray-800 dark:text-[var(--text-1)] relative">
+      <span class="emoji">☕</span>
+      {{ average_rating|floatformat:1 }}
+
+      {% if messages %}
+        {% for message in messages %}
+          {% if "review_success" in message.tags %}
+            <div
+              id="review-success-banner"
+              class="my-4 rounded-xl border border-green-200 bg-green-50 p-4
+                     flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3
+                     opacity-0 translate-y-4 transition-all duration-500">
+
+              <div>
+                <div class="font-semibold text-green-800">
+                  ¡Reseña publicada! ☕
+                </div>
+                <div class="text-sm text-green-700 mt-1">
+                  Gracias por compartir tu experiencia. Ayudás a que otros descubran este café.
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                {% if user.is_authenticated %}
+                  {% if user not in cafe.favorites.all %}
+                    <form method="post" action="{% url 'reviews:toggle_favorite' cafe.id %}">
+                      {% csrf_token %}
+                      <button class="btn btn-sm btn-success rounded-lg">
+                        ❤️ Agregar a favoritos
+                      </button>
+                    </form>
+                  {% endif %}
+                {% endif %}
+
+                {% if my_review %}
+                  <a href="{% url 'reviews:edit_review' my_review.id %}"
+                     class="btn btn-sm btn-outline rounded-lg">
+                    ✏️ Editar reseña
+                  </a>
+                {% endif %}
+              </div>
+
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  {% endif %}
+
+</div>
+
 
     <span class="cafe-topbar__divider text-gray-500 dark:text-[var(--text-2)]">•</span>
 
@@ -627,5 +659,85 @@
       });
     });
   </script>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document
+      .querySelectorAll("[data-animate-on-load]")
+      .forEach(el => {
+        requestAnimationFrame(() => {
+          el.classList.add("animate-fade-in-up-active");
+        });
+      });
+  });
+
+  </script>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const el = document.querySelector("[data-rating-celebration]");
+    if (!el) return;
+
+    // entrada
+    requestAnimationFrame(() => {
+      el.classList.add("animate-fade-in-up-active");
+    });
+
+    // salida suave
+    setTimeout(() => {
+      el.classList.remove("animate-fade-in-up-active");
+      el.style.opacity = "0";
+    }, 2200);
+  });
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const highlightId = "{{ highlight_id|default:'' }}";
+  if (!highlightId) return;
+
+  const el = document.getElementById(`review-${highlightId}`);
+  if (!el) return;
+
+  setTimeout(() => {
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.classList.add("review-highlight-active");
+
+    setTimeout(() => {
+      el.classList.remove("review-highlight-active");
+    }, 3500);
+  }, 300);
+});
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  if (!window.location.search.includes("highlight=")) return;
+
+  const url = new URL(window.location.href);
+  url.searchParams.delete("highlight");
+
+  window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const banner = document.getElementById("review-success-banner");
+  if (!banner) return;
+
+  // entrada
+  requestAnimationFrame(() => {
+    banner.classList.remove("opacity-0", "translate-y-4");
+  });
+
+  // salida automática
+  setTimeout(() => {
+    banner.classList.add("opacity-0", "translate-y-4");
+  }, 6000);
+});
+</script>
+
 
 {% endblock %}

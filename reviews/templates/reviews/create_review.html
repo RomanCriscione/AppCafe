@@ -27,6 +27,7 @@
     <!-- Mantener en qué paso estaba (si vuelve con error) -->
     <input type="hidden" name="current_step" id="current_step" value="{{ current_step|default:'1' }}">
 
+
     <!-- ================================================= -->
     <!-- PASO 1 — RATING → COMENTARIO → PRECIO (opcional)  -->
     <!-- ================================================= -->
@@ -259,9 +260,13 @@
 
           <button type="submit"
                   id="btn-submit"
-                  class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-            Publicar reseña
+                  class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700
+                        disabled:opacity-60 disabled:cursor-not-allowed
+                        flex items-center gap-2 justify-center">
+            <span id="submit-text">Publicar reseña</span>
+            <span id="submit-spinner" class="hidden animate-spin">⏳</span>
           </button>
+
         </div>
       </div>
 
@@ -272,6 +277,13 @@
 
   </form>
 </div>
+
+<div id="draft-status"
+      class="fixed bottom-4 right-4 text-xs px-3 py-1 rounded-full
+            bg-gray-800 text-white opacity-0 transition-opacity duration-300 pointer-events-none">
+  Guardado
+</div>
+
 
 <!-- =============================== -->
 <!--       SCRIPT DEL WIZARD        -->
@@ -356,22 +368,30 @@
   }
 
   // Click cups
-  document.querySelectorAll("#rating-cups .cup-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const val = Number(btn.dataset.value);
-      const r = document.getElementById(`rating_${val}`);
-      if (r) r.checked = true;
+document.querySelectorAll("#rating-cups .cup-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const val = Number(btn.dataset.value);
+    const r = document.getElementById(`rating_${val}`);
+    if (r) r.checked = true;
 
-      paintCups(val);
+    paintCups(val);
 
-      if (feedbackEl && ratingTexts[val]) feedbackEl.textContent = ratingTexts[val];
+    if (feedbackEl && ratingTexts[val]) {
+      feedbackEl.textContent = ratingTexts[val];
+    }
 
-      // limpiar error si existía
-      ratingErrorEl?.classList.add("hidden");
+    // --- micro animación ---
+    btn.classList.remove("pop", "pulse");
+    void btn.offsetWidth; // fuerza reflow para reiniciar animación
+    btn.classList.add("pop", "pulse");
 
-      saveDraft(); // autosave
-    });
+    // limpiar error visual
+    ratingErrorEl?.classList.add("hidden");
+
+    saveDraft();
   });
+});
+
 
   // Inicializar cups si viene rating pre-check
   const initial = getSelectedRating();
@@ -408,19 +428,33 @@
   // -------------------------
   // Tags: contador por categoría + autosave
   // -------------------------
-  document.querySelectorAll(".tag-step").forEach(step => {
-    const counterEl = step.querySelector(".tag-count");
-    const cbs = step.querySelectorAll('input[type="checkbox"]');
+document.querySelectorAll(".tag-step").forEach(step => {
+  const counterEl = step.querySelector(".tag-count");
+  const cbs = step.querySelectorAll('input[type="checkbox"]');
 
-    const update = () => {
-      const count = Array.from(cbs).filter(c => c.checked).length;
-      if (counterEl) counterEl.textContent = String(count);
-      saveDraft();
-    };
+  const update = () => {
+    let count = 0;
 
-    cbs.forEach(cb => cb.addEventListener("change", update));
-    update();
-  });
+    cbs.forEach(cb => {
+      const label = cb.closest("label");
+      if (!label) return;
+
+      if (cb.checked) {
+        count++;
+        label.classList.add("tag-chip-active", "tag-chip-pop");
+        setTimeout(() => label.classList.remove("tag-chip-pop"), 200);
+      } else {
+        label.classList.remove("tag-chip-active");
+      }
+    });
+
+    if (counterEl) counterEl.textContent = String(count);
+    saveDraft();
+  };
+
+  cbs.forEach(cb => cb.addEventListener("change", update));
+  update();
+});
 
   // -------------------------
   // Top tags chips: toggle checkbox correspondiente
@@ -429,15 +463,25 @@
     chip.addEventListener("click", () => {
       const id = chip.dataset.tagId;
       const cb = document.querySelector(`input.tag-checkbox[value="${id}"]`);
-      if (cb) {
-        cb.checked = !cb.checked;
-        cb.dispatchEvent(new Event("change", { bubbles: true }));
-        chip.classList.toggle("bg-blue-600");
-        chip.classList.toggle("text-white");
-        chip.classList.toggle("border-blue-600");
-      }
+      if (!cb) return;
+
+      cb.checked = !cb.checked;
+      cb.dispatchEvent(new Event("change", { bubbles: true }));
+
+      // micro feedback visual
+      chip.classList.add("ring-2", "ring-blue-400");
+      setTimeout(() => {
+        chip.classList.remove("ring-2", "ring-blue-400");
+      }, 600);
+
+
+      chip.classList.toggle("tag-chip-active");
+      chip.classList.remove("tag-chip-pop");
+      void chip.offsetWidth; // reset animación
+      chip.classList.add("tag-chip-pop");
     });
   });
+
 
   // -------------------------
   // Navegación Wizard
@@ -451,6 +495,7 @@
     }
     setStep(2);
     showOnly(step2);
+    flashStepFeedback("¡Bien! Seguimos 👌");
     showTagStep(0);
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
@@ -467,6 +512,7 @@
     setStep(3);
     buildPreview();
     showOnly(step3);
+    flashStepFeedback("¡Listo! Mirá tu reseña 👀");
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
@@ -552,14 +598,30 @@
     };
   }
 
+  const savedEl = document.getElementById("draft-saved");
+  let savedTimeout = null;
+
+  function flashSaved() {
+    if (!savedEl) return;
+
+    savedEl.classList.add("draft-saved-visible");
+
+    clearTimeout(savedTimeout);
+    savedTimeout = setTimeout(() => {
+      savedEl.classList.remove("draft-saved-visible");
+    }, 1200);
+  }
+
   function saveDraft() {
     try {
       const data = collectDraft();
       localStorage.setItem(draftKey, JSON.stringify(data));
+      showDraftSaved();
     } catch (e) {
       // silencioso
     }
   }
+
 
   function restoreDraft() {
     try {
@@ -648,7 +710,59 @@ document.querySelectorAll(".top-tag-chip").forEach(chip => {
   }
 });
 
+// -------------------------
+// Submit loading state
+// -------------------------
+const submitBtn = document.getElementById("btn-submit");
+const submitText = document.getElementById("submit-text");
+const submitSpinner = document.getElementById("submit-spinner");
+
+form?.addEventListener("submit", () => {
+  if (!submitBtn) return;
+
+  submitBtn.disabled = true;
+
+  if (submitText) submitText.textContent = "Publicando…";
+  if (submitSpinner) submitSpinner.classList.remove("hidden");
+});
+
 })();
+
+
+function showDraftSaved() {
+  const el = document.getElementById("draft-status");
+  if (!el) return;
+
+  el.classList.remove("opacity-0");
+  el.classList.add("opacity-100");
+
+  clearTimeout(el._t);
+  el._t = setTimeout(() => {
+    el.classList.remove("opacity-100");
+    el.classList.add("opacity-0");
+  }, 900);
+}
+
+function flashStepFeedback(text) {
+  const el = document.createElement("div");
+  el.textContent = text;
+  el.className =
+    "fixed top-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full " +
+    "bg-green-600 text-white text-sm opacity-0 transition";
+
+  document.body.appendChild(el);
+
+  requestAnimationFrame(() => {
+    el.style.opacity = "1";
+  });
+
+  setTimeout(() => {
+    el.style.opacity = "0";
+    setTimeout(() => el.remove(), 400);
+  }, 900);
+}
+
+
 </script>
 
 {% endblock %}

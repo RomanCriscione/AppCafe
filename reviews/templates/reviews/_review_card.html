@@ -1,4 +1,6 @@
-<article id="rev-{{ review.id }}" class="review-card p-4">
+<article
+  id="review-{{ review.id }}"
+  class="review-card p-4 {% if highlight_id == review.id %}review-highlight{% endif %}">
   <header class="review-head">
     <div class="review-avatar" aria-hidden="true">
       {{ review.user.username|default:"U"|slice:":1" }}

@@ -753,6 +753,29 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
   font-weight: 300;
 }
 
+.review-highlight {
+  border: 2px solid #22c55e;
+  background: #ecfdf5;
+  animation: reviewGlow 2.5s ease-out;
+}
+
+@keyframes reviewGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34,197,94,.5);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgba(34,197,94,0);
+  }
+}
+
+.review-highlight-active {
+  animation: reviewGlow 2.5s ease-out;
+  outline: 3px solid var(--accent);
+  background: rgba(255, 200, 120, 0.15);
+  transition: all .6s ease;
+}
+
+
 /* Versión dark-mode optimizada */
 /*@media (prefers-color-scheme: dark){
   .cafe-topbar{
@@ -808,3 +831,4 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
 
 }
 */
+

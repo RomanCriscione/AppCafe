@@ -340,6 +340,9 @@ class CafeListView(ListView):
 def cafe_detail(request, cafe_id):
     cafe = get_object_or_404(Cafe, id=cafe_id)
 
+    # ⭐ NUEVO — highlight desde URL (?highlight=ID)
+    highlight_id = request.GET.get("highlight")
+
     # todas las reseñas de ese café
     reviews_qs = (
         cafe.reviews
@@ -354,7 +357,7 @@ def cafe_detail(request, cafe_id):
     average_rating = round(agg["avg"], 1) if agg["avg"] is not None else None
     best_review = reviews_qs.order_by("-rating", "-created_at").first()
 
-    # ⭐ NUEVO — promedio de precio del capuccino
+    # ⭐ promedio de precio del capuccino
     precio_promedio = cafe.reviews.filter(
         precio_capuccino__isnull=False
     ).aggregate(
@@ -380,18 +383,6 @@ def cafe_detail(request, cafe_id):
     paginator = Paginator(reviews_qs, 8)
     page_obj = paginator.get_page(request.GET.get("page") or 1)
 
-    # registrar visita (si existe el modelo, no romper si no está)
-    try:
-        from .models import CafeStat  # podría no existir en tu DB
-        today = timezone.localdate()
-        session_key = f"viewed_cafe_{cafe.id}_{today.isoformat()}"
-        if not request.session.get(session_key):
-            stat, _ = CafeStat.objects.get_or_create(cafe=cafe, date=today)
-            CafeStat.objects.filter(pk=stat.pk).update(views=F("views") + 1)
-            request.session[session_key] = True
-    except Exception:
-        pass
-
     # fotos seguras
     safe_photos = []
     for idx in (1, 2, 3):
@@ -408,8 +399,8 @@ def cafe_detail(request, cafe_id):
     # tags más usadas
     tag_counts_qs = (
         Tag.objects.filter(reviews__cafe=cafe)
-        .annotate(num=Count('reviews', filter=Q(reviews__cafe=cafe)))
-        .order_by('-num', 'name')
+        .annotate(num=Count("reviews", filter=Q(reviews__cafe=cafe)))
+        .order_by("-num", "name")
     )
     top_tags = list(tag_counts_qs[:5])
     more_tags = list(tag_counts_qs[5:])
@@ -480,10 +471,13 @@ def cafe_detail(request, cafe_id):
             "cafe_list_abs": cafe_list_abs,
             "photos": safe_photos,
 
-            # ⭐ NUEVO: precio
+            # ⭐ NUEVOS
             "precio_promedio": precio_promedio,
+            "highlight_id": int(highlight_id) if highlight_id and highlight_id.isdigit() else None,
         },
     )
+
+
 
 @login_required
 def create_review(request, cafe_id):
@@ -548,7 +542,9 @@ def create_review(request, cafe_id):
                 "¡Gracias por tu reseña!",
                 extra_tags="review_success"
             )
-            return redirect("reviews:cafe_detail", cafe_id=cafe.id)
+            return redirect(
+    f"{reverse('reviews:cafe_detail', args=[cafe.id])}?highlight={review.id}#reviews")
+
 
         else:
             messages.error(request, "Por favor corregí los errores.")
