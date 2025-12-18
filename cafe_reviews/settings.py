@@ -202,6 +202,7 @@ ACCOUNT_EMAIL_VERIFICATION = config(
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
 
 ACCOUNT_SIGNUP_FIELDS = [
     "email*",
@@ -217,6 +218,7 @@ ACCOUNT_RATE_LIMITS = {
 }
 
 ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
+SOCIALACCOUNT_ADAPTER = "accounts.adapters.CustomSocialAccountAdapter"
 ACCOUNT_EMAIL_VALIDATORS = ["core.validators.validate_not_disposable"]
 
 SOCIALACCOUNT_PROVIDERS = {
