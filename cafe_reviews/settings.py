@@ -72,9 +72,9 @@ INSTALLED_APPS = [
 
     # Propias
     'core',
-    'accounts',
+    'accounts.apps.AccountsConfig',
     'reviews.apps.ReviewsConfig',
-    "accounts.apps.AccountsConfig",
+
 
     # 3rd party
     

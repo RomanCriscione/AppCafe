@@ -194,36 +194,6 @@
 </section>
 
 
-
-    <span class="cafe-topbar__divider text-gray-500 dark:text-[var(--text-2)]">•</span>
-
-    <div class="cafe-topbar__item text-gray-800 dark:text-[var(--text-1)]">
-      <span class="emoji">🗳️</span>
-      {{ total_reviews }} reseñas
-    </div>
-
-    {% if precio_promedio %}
-      <span class="cafe-topbar__divider text-gray-500 dark:text-[var(--text-2)]">•</span>
-      <div class="cafe-topbar__item text-gray-800 dark:text-[var(--text-1)]">
-        <span class="emoji">💲</span>
-        ${{ precio_promedio|floatformat:0 }}
-      </div>
-    {% endif %}
-
-  </div>
-
-
-  <h1 class="text-3xl font-bold animate-fade-in-up">{{ cafe.name }}</h1>
-
-  <div class="mt-3 flex flex-wrap items-center gap-3 animate-fade-in-up animate-delay-125">
-    {% if user.is_authenticated %}
-      <a href="{% url 'reviews:create_review' cafe.id %}" class="btn btn-primary rounded-xl">✍️ Dejar reseña</a>
-    {% else %}
-      <a href="{% url 'account_login' %}?next={% url 'reviews:create_review' cafe.id %}" class="btn btn-primary rounded-xl">✍️ Dejar reseña</a>
-    {% endif %}
-    <a href="#reviews" class="btn btn-outline rounded-xl">Ver reseñas</a>
-  </div>
-
   <!-- INFO PRINCIPAL -->
   <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-100">
     <div class="grid gap-4 sm:grid-cols-2">
