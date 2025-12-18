@@ -122,59 +122,77 @@
 <div class="max-w-4xl mx-auto px-4 space-y-8">
 
 <!-- TOPBAR FIJO Y EN MODO CORRECTO -->
-<div class="cafe-topbar animate-fade-in-up animate-delay-150 bg-white/70 dark:bg-[var(--surface-2)] backdrop-blur-sm border border-[var(--border)] px-4 py-2 rounded-xl">
+<!-- HEADER PRINCIPAL -->
+<section class="surface p-5 rounded-2xl space-y-4 animate-fade-in-up">
 
-  {% if average_rating %}
-    <div class="cafe-topbar__item text-gray-800 dark:text-[var(--text-1)] relative">
-      <span class="emoji">☕</span>
-      {{ average_rating|floatformat:1 }}
+  <!-- FILA SUPERIOR: rating / reseñas / precio -->
+  <div class="flex flex-wrap items-center gap-4 text-sm text-gray-700 dark:text-[var(--text-2)]">
 
-      {% if messages %}
-        {% for message in messages %}
-          {% if "review_success" in message.tags %}
-            <div
-              id="review-success-banner"
-              class="my-4 rounded-xl border border-green-200 bg-green-50 p-4
-                     flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3
-                     opacity-0 translate-y-4 transition-all duration-500">
+    {% if average_rating %}
+      <div class="flex items-center gap-1 font-semibold text-gray-900 dark:text-[var(--text-1)]">
+        ☕ {{ average_rating|floatformat:1 }}
+      </div>
+    {% endif %}
 
-              <div>
-                <div class="font-semibold text-green-800">
-                  ¡Reseña publicada! ☕
-                </div>
-                <div class="text-sm text-green-700 mt-1">
-                  Gracias por compartir tu experiencia. Ayudás a que otros descubran este café.
-                </div>
-              </div>
+    {% if total_reviews %}
+      <div class="flex items-center gap-1">
+        🗳️ {{ total_reviews }} reseña{{ total_reviews|pluralize }}
+      </div>
+    {% endif %}
 
-              <div class="flex flex-wrap gap-2">
-                {% if user.is_authenticated %}
-                  {% if user not in cafe.favorites.all %}
-                    <form method="post" action="{% url 'reviews:toggle_favorite' cafe.id %}">
-                      {% csrf_token %}
-                      <button class="btn btn-sm btn-success rounded-lg">
-                        ❤️ Agregar a favoritos
-                      </button>
-                    </form>
-                  {% endif %}
-                {% endif %}
+    {% if precio_promedio %}
+      <div class="flex items-center gap-1">
+        💲 ${{ precio_promedio|floatformat:0 }}
+      </div>
+    {% endif %}
 
-                {% if my_review %}
-                  <a href="{% url 'reviews:edit_review' my_review.id %}"
-                     class="btn btn-sm btn-outline rounded-lg">
-                    ✏️ Editar reseña
-                  </a>
-                {% endif %}
-              </div>
+  </div>
 
-            </div>
-          {% endif %} 
-        {% endfor %}
-      {% endif %}
-    </div>
+  <!-- NOMBRE -->
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-[var(--text-1)]">
+    {{ cafe.name }}
+  </h1>
+
+  {% if one_liner %}
+    <p class="text-sm text-gray-600 dark:text-[var(--text-2)]">
+      {{ one_liner }}
+    </p>
   {% endif %}
 
-</div>
+  <!-- CTAs -->
+  <div class="flex flex-wrap gap-3 pt-2">
+
+    {% if user.is_authenticated %}
+      <a href="{% url 'reviews:create_review' cafe.id %}"
+         class="btn btn-primary rounded-xl">
+        ✍️ Dejar reseña
+      </a>
+    {% else %}
+      <a href="{% url 'account_login' %}?next={% url 'reviews:create_review' cafe.id %}"
+         class="btn btn-primary rounded-xl">
+        ✍️ Dejar reseña
+      </a>
+    {% endif %}
+
+    <a href="#reviews" class="btn btn-outline rounded-xl">
+      Ver reseñas
+    </a>
+
+    {% if user.is_authenticated %}
+      {% if user not in cafe.favorites.all %}
+        <form method="post" action="{% url 'reviews:toggle_favorite' cafe.id %}">
+          {% csrf_token %}
+          <button class="btn btn-outline rounded-xl">
+            🤍 Favorito
+          </button>
+        </form>
+      {% endif %}
+    {% endif %}
+
+  </div>
+
+</section>
+
 
 
     <span class="cafe-topbar__divider text-gray-500 dark:text-[var(--text-2)]">•</span>
