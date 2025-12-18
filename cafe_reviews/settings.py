@@ -55,6 +55,8 @@ if not DEBUG:
     X_FRAME_OPTIONS = "DENY"
     SESSION_COOKIE_SAMESITE = "Lax"
     CSRF_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
 
 # === Apps ===
 INSTALLED_APPS = [
@@ -72,8 +74,10 @@ INSTALLED_APPS = [
     'core',
     'accounts',
     'reviews.apps.ReviewsConfig',
+    "accounts.apps.AccountsConfig",
 
     # 3rd party
+    
     'rest_framework',
     'allauth',
     'allauth.account',
@@ -184,13 +188,34 @@ LOGOUT_REDIRECT_URL = '/'
 
 # === Email ===
 EMAIL_BACKEND = config('EMAIL_BACKEND', default="django.core.mail.backends.console.EmailBackend")
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default="no-reply@gota.local")
+DEFAULT_FROM_EMAIL = config(
+    "DEFAULT_FROM_EMAIL",
+    default="Gota <no-reply@gotacafe.ar>"
+)
+
 
 # === allauth ===
-ACCOUNT_EMAIL_VERIFICATION = config('ACCOUNT_EMAIL_VERIFICATION', default="optional")
-ACCOUNT_LOGIN_METHODS = {"username", "email"}  # reemplaza ACCOUNT_AUTHENTICATION_METHOD
-ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
-ACCOUNT_RATE_LIMITS = {"login_failed": "5/5m"}
+ACCOUNT_EMAIL_VERIFICATION = config(
+    "ACCOUNT_EMAIL_VERIFICATION",
+    default="mandatory" if not DEBUG else "optional"
+)
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_SIGNUP_FIELDS = [
+    "email*",
+    "password1*",
+    "password2*",
+]
+
+ACCOUNT_RATE_LIMITS = {
+    "login_failed": "5/5m",
+    "signup": "3/10m",
+    "confirm_email": "3/10m",
+    "password_reset": "3/10m",
+}
+
 ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
 ACCOUNT_EMAIL_VALIDATORS = ["core.validators.validate_not_disposable"]
 
@@ -209,6 +234,9 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+
+
 # === Cache ===
 CACHES = {
     "default": {
@@ -218,7 +246,12 @@ CACHES = {
 }
 
 # === CORS ===
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+CORS_ALLOWED_ORIGINS = [
+    "https://gotacafe.ar",
+    "https://www.gotacafe.ar",
+]
 
 # === DRF ===
 REST_FRAMEWORK = {

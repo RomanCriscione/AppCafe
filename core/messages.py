@@ -12,4 +12,10 @@ MESSAGES = {
     "owner_no_cafes": "Tu espacio en Gota todavía está vacío. ¿Le damos vida con tu primer café?",
     "owner_no_reviews": "Todavía no hay reseñas para tus cafés. El primer comentario puede llegar pronto.",
     "generic_404": "Ups... la página que buscabas no está disponible. Probá con otro aroma.",
+    "email_not_verified": "Confirmá tu email para continuar.",
+    "spam_detected": "Detectamos un comportamiento sospechoso.",
+    "form_invalid": "Por favor revisá los campos marcados.",
+    "permission_denied": "No tenés permisos para realizar esta acción.",
+    "review_already_exists": "Ya dejaste una reseña en este café. Podés editarla si querés.",
+    
 }

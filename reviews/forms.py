@@ -4,6 +4,8 @@ import re
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import Review, Cafe, Tag, ReviewReport
+from core.messages import MESSAGES
+
 # Formularios de reclamo: dependen de tu archivo reviews/claims.py
 from .claims import (
     ClaimRequest,
@@ -28,12 +30,20 @@ def validar_phone(valor):
 # Reviews
 # --------------------------------------------------------------------------------------
 class ReviewForm(forms.ModelForm):
+
+    # 🛡️ Honeypot anti-bots (invisible para humanos)
+    honeypot = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput
+    )
+
     tags = forms.ModelMultipleChoiceField(
         queryset=Tag.objects.all().order_by('category', 'name'),
         widget=forms.CheckboxSelectMultiple(attrs={'class': 'mb-2'}),
         required=False,
         label="¿Cómo describirías tu experiencia?",
     )
+
     comment = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={
@@ -43,20 +53,26 @@ class ReviewForm(forms.ModelForm):
     )
 
     precio_capuccino = forms.IntegerField(
-    required=False,
-    label="¿Cuánto pagaste por un capuccino mediano?",
-    min_value=1000,
-    max_value=15000,
-    widget=forms.NumberInput(attrs={
-        "placeholder": "Ej: 3500",
-        "class": "w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-400"
-    })
-)
-
+        required=False,
+        label="¿Cuánto pagaste por un capuccino mediano?",
+        min_value=1000,
+        max_value=15000,
+        widget=forms.NumberInput(attrs={
+            "placeholder": "Ej: 3500",
+            "class": "w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-400"
+        })
+    )
 
     class Meta:
         model = Review
         fields = ['rating', 'comment', 'tags', 'precio_capuccino']
+
+    # 🚫 Si un bot completa el honeypot → bloqueo
+    def clean_honeypot(self):
+        if self.cleaned_data.get("honeypot"):
+            raise forms.ValidationError(MESSAGES["spam_detected"])
+        return ""
+
 
 
 # --------------------------------------------------------------------------------------

@@ -1,0 +1,11 @@
+Hola {{ user.email }},
+
+Gracias por sumarte a Gota ☕
+
+Para activar tu cuenta y empezar a descubrir cafés, confirmá tu email haciendo click en el siguiente enlace:
+
+{{ activate_url }}
+
+Si no creaste esta cuenta, podés ignorar este mensaje.
+
+— Gota

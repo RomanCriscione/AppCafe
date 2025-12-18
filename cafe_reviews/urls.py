@@ -54,6 +54,8 @@ urlpatterns = [
 # ✅ Servir MEDIA también en producción (Render)
 urlpatterns += [
     re_path(r"^media/(?P<path>.*)$", media_serve, {"document_root": settings.MEDIA_ROOT}),
+
+    
 ]
 
 # (Opcional) si querés mantener la variante clásica para dev:

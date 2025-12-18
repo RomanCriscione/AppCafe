@@ -16,6 +16,9 @@ from datetime import timedelta
 from django.views.decorators.http import require_POST
 from django.conf import settings
 import os, json
+from core.mixins import EmailVerifiedRequiredMixin
+from allauth.account.models import EmailAddress
+from core.rate_limit import rate_limit
 
 from .models import Review, Cafe, ReviewLike, ReviewReport, Tag, CafeStat
 from .forms import ReviewForm, CafeForm, ReviewReportForm
@@ -481,6 +484,16 @@ def cafe_detail(request, cafe_id):
 
 @login_required
 def create_review(request, cafe_id):
+    if not EmailAddress.objects.filter(
+        user=request.user,
+        verified=True
+    ).exists():
+        messages.warning(
+            request,
+            MESSAGES["email_not_verified"]
+        )
+
+        return redirect("account_email_verification_sent")
     cafe = get_object_or_404(Cafe, pk=cafe_id)
 
     # --- evitar múltiples reseñas ---
@@ -490,10 +503,7 @@ def create_review(request, cafe_id):
         .first()
     )
     if request.method == "GET" and existing:
-        messages.info(
-            request,
-            "Ya dejaste una reseña en este café. Podés editarla si querés."
-        )
+        messages.info(request, MESSAGES["review_already_exists"])
         return redirect("reviews:edit_review", review_id=existing.id)
 
     selected_tag_ids = []
@@ -547,7 +557,8 @@ def create_review(request, cafe_id):
 
 
         else:
-            messages.error(request, "Por favor corregí los errores.")
+            messages.error(request, MESSAGES["form_invalid"])
+
 
     # =========================
     # GET
@@ -738,7 +749,11 @@ def owner_reviews(request):
     })
 
 
-class CreateCafeView(LoginRequiredMixin, CreateView):
+class CreateCafeView(
+    EmailVerifiedRequiredMixin,
+    LoginRequiredMixin,
+    CreateView
+):
     model = Cafe
     form_class = CafeForm
     template_name = 'reviews/create_cafe.html'
@@ -852,6 +867,39 @@ def favorite_cafes(request):
 @login_required
 @require_POST
 def toggle_favorite(request, cafe_id):
+
+    # ⛔ Bloqueo si email no está verificado
+    if not EmailAddress.objects.filter(
+        user=request.user,
+        verified=True
+    ).exists():
+
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "email_not_verified",
+                    "message": "Confirmá tu email para usar favoritos."
+                },
+                status=403
+            )
+
+        messages.warning(
+            request,
+            "Confirmá tu email para usar favoritos."
+        )
+        return redirect("account_email_verification_sent")
+    
+        rl = rate_limit(
+        key=f"fav:{request.user.id}",
+        limit=20,
+        window_seconds=60,
+        ajax=True,
+        message="Demasiados favoritos en poco tiempo."
+    )
+    if rl:
+        return rl
+
     cafe = get_object_or_404(Cafe, id=cafe_id)
 
     if request.user in cafe.favorites.all():
@@ -868,7 +916,8 @@ def toggle_favorite(request, cafe_id):
         return JsonResponse({"ok": True, "liked": liked})
 
     # Fallback sin JS
-    return redirect(request.META.get('HTTP_REFERER') or reverse('reviews:cafe_list'))
+    return redirect(request.META.get("HTTP_REFERER") or reverse("reviews:cafe_list"))
+
 
 
 @login_required
