@@ -1,0 +1,11 @@
+Hola,
+
+Alguien intentó registrarse en Gota con este email, pero ya existe una cuenta asociada.
+
+Si sos vos y olvidaste tu contraseña, podés recuperarla acá:
+
+{{ password_reset_url }}
+
+Si no fuiste vos, ignorá este mensaje.
+
+— El equipo de Gota
