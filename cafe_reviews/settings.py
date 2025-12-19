@@ -221,13 +221,17 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = f"Gota <{EMAIL_HOST_USER}>"
 
 # === allauth ===
-ACCOUNT_EMAIL_VERIFICATION = (
-    "mandatory" if not DEBUG else "optional"
-)
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
+
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = "/accounts/login/"
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "/reviews/cafes/"
+
+ACCOUNT_SIGNUP_REDIRECT_URL = "/accounts/login/"
 
 ACCOUNT_SIGNUP_FIELDS = [
     "email*",
@@ -241,6 +245,7 @@ ACCOUNT_RATE_LIMITS = {
     "confirm_email": "3/10m",
     "password_reset": "3/10m",
 }
+
 
 ACCOUNT_FORMS = {
     'signup': 'accounts.forms.CustomSignupForm'
@@ -264,7 +269,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
-ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
