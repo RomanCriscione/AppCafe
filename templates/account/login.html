@@ -6,14 +6,22 @@
   <h1 class="text-2xl font-bold mb-6 text-center">🔐 Iniciar sesión</h1>
 
   {% if form.errors %}
-    <p class="text-red-600 mb-4 text-center font-medium">Usuario o contraseña inválidos. Intenta de nuevo.</p>
+    <p class="text-red-600 mb-4 text-center font-medium">
+      Usuario o contraseña inválidos. Intentá de nuevo.
+    </p>
   {% endif %}
 
   {% get_providers as social_providers %}
   {% for p in social_providers %}
     {% if p.id == "google" %}
-      <a href="{% if redirect_field_value %}{% provider_login_url 'google' process='login' next=redirect_field_value %}{% else %}{% provider_login_url 'google' process='login' %}{% endif %}"
-         class="w-full mb-4 inline-flex items-center justify-center gap-3 border border-gray-300 rounded-md py-2 px-3 bg-white hover:bg-gray-50 transition font-medium focus:outline-none focus:ring focus:ring-blue-200">
+      <a
+        href="{% if redirect_field_value %}
+                {% provider_login_url 'google' process='login' next=redirect_field_value %}
+              {% else %}
+                {% provider_login_url 'google' process='login' %}
+              {% endif %}"
+        class="w-full mb-4 inline-flex items-center justify-center gap-3 border border-gray-300 rounded-md py-2 px-3 bg-white hover:bg-gray-50 transition font-medium focus:outline-none focus:ring focus:ring-blue-200"
+      >
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
           <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 3l5.7-5.7C33.4 6.1 28.9 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c10 0 19-7.3 19-20 0-1.3-.1-2.2-.4-3.5z"/>
           <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 18.9 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C33.4 6.1 28.9 4 24 4 16.3 4 9.6 8.4 6.3 14.7z"/>
@@ -36,20 +44,43 @@
     {% if redirect_field_value %}
       <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
     {% endif %}
+
     <div>
       <label for="id_login" class="block font-medium">Usuario o Email:</label>
       {{ form.login|add_class:"w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-500" }}
     </div>
+
     <div>
       <label for="id_password" class="block font-medium">Contraseña:</label>
       {{ form.password|add_class:"w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-500" }}
     </div>
-    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition font-semibold">Entrar</button>
+
+    <button
+      type="submit"
+      class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition font-semibold"
+    >
+      Entrar
+    </button>
   </form>
+
+  <!-- 🔑 OLVIDÉ MI CONTRASEÑA -->
+  <div class="mt-4 text-center">
+    <a
+      href="{% url 'account_reset_password' %}"
+      class="text-sm text-amber-700 hover:underline"
+    >
+      ¿Olvidaste tu contraseña?
+    </a>
+  </div>
 
   <p class="mt-4 text-center text-sm">
     ¿No tenés cuenta?
-    <a href="{% url 'account_signup' %}" class="text-blue-600 hover:underline font-medium">Registrate aquí</a>
+    <a
+      href="{% url 'account_signup' %}"
+      class="text-blue-600 hover:underline font-medium"
+    >
+      Registrate aquí
+    </a>
   </p>
 </div>
 {% endblock %}
