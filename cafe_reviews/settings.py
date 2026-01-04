@@ -13,10 +13,11 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = [
     h.strip() for h in config(
         'ALLOWED_HOSTS',
-        default='127.0.0.1,localhost,.onrender.com'
+        default='127.0.0.1,localhost,.onrender.com,gogota.ar,www.gogota.ar'
     ).split(',')
     if h.strip()
 ]
+
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
@@ -51,7 +52,11 @@ if _csrf_from_env:
         o.strip() for o in _csrf_from_env.split(',') if o.strip()
     ]
 else:
-    CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.onrender.com',
+        'https://gogota.ar',
+        'https://www.gogota.ar',
+    ]
     if RENDER_EXTERNAL_HOSTNAME:
         CSRF_TRUSTED_ORIGINS.append(
             f"https://{RENDER_EXTERNAL_HOSTNAME}"
@@ -61,6 +66,7 @@ else:
             "http://localhost",
             "http://127.0.0.1",
         ]
+
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = config(
