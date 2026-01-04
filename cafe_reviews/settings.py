@@ -11,16 +11,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = [
-    h.strip() for h in config(
-        'ALLOWED_HOSTS',
-        default='127.0.0.1,localhost,.onrender.com,gogota.ar,www.gogota.ar'
-    ).split(',')
-    if h.strip()
+    "gogota.ar",
+    "www.gogota.ar",
+    "gota-tath.onrender.com",
+    "localhost",
+    "127.0.0.1",
 ]
 
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 
 SECRET_KEY = config('SECRET_KEY', default=None)
