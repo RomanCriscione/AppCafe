@@ -6,44 +6,96 @@ from .claims import ClaimRequest, ClaimEvidence, ClaimStatus, ClaimMethod
 
 @admin.register(Cafe)
 class CafeAdmin(admin.ModelAdmin):
-    # Lo más útil a la vista
     list_display = (
         "name", "location", "email", "phone",
         "visibility_level", "claim_status", "claimed_by",
     )
-    list_filter = ("location", "visibility_level", "claim_status")
+
+    list_filter = (
+        "location",
+        "visibility_level",
+        "claim_status",
+
+        # Filtros útiles reales
+        "has_wifi",
+        "is_pet_friendly",
+        "has_specialty_coffee",
+        "laptop_friendly",
+        "quiet_space",
+    )
+
     search_fields = ("name", "location", "address", "phone", "email")
     ordering = ("name",)
-
-    # Evitamos autocompletar de User si no está configurado; raw_id_fields siempre funciona
     raw_id_fields = ("claimed_by", "owner")
 
     fieldsets = (
         ("Identificación", {
-            "fields": ("name", "address", "location", "phone", "email", "google_maps_url")
-        }),
-        ("Imágenes", {
-            "fields": ("photo1", "photo1_title", "photo2", "photo2_title", "photo3", "photo3_title")
-        }),
-        ("Características", {
             "fields": (
-                "is_vegan_friendly", "is_pet_friendly", "has_wifi", "has_outdoor_seating",
-                "has_parking", "is_accessible", "has_vegetarian_options",
-                "serves_breakfast", "serves_alcohol",
-                "has_books_or_games", "has_air_conditioning",
-                "has_gluten_free", "has_specialty_coffee", "has_artisanal_pastries",
-                "accepts_cards", "gluten_free_options", "has_baby_changing",
-                "has_power_outlets", "laptop_friendly", "quiet_space",
-                "specialty_coffee", "brunch", "accepts_reservations",
+                "name", "address", "location",
+                "phone", "email", "google_maps_url",
             )
         }),
-        ("Estado / Plan", {
-            "fields": ("visibility_level", "claim_status", "claimed_by", "owner")
+
+        ("Imágenes", {
+            "fields": (
+                "photo1", "photo1_title",
+                "photo2", "photo2_title",
+                "photo3", "photo3_title",
+            )
         }),
+
+        ("Características", {
+            "fields": (
+                # Servicios / infraestructura
+                "has_wifi",
+                "has_air_conditioning",
+                "has_power_outlets",
+                "has_outdoor_seating",
+                "has_parking",
+                "is_accessible",
+                "accepts_cards",
+                "accepts_reservations",
+                "has_baby_changing",
+
+                # Mascotas
+                "is_pet_friendly",
+
+                # Oferta gastronómica
+                "has_specialty_coffee",
+                "serves_brunch",
+                "serves_breakfast",
+                "serves_alcohol",
+                "has_artisanal_pastries",
+                "offers_ice_cream",
+
+                # Opciones alimentarias
+                "is_vegan_friendly",
+                "has_vegetarian_options",
+                "has_gluten_free_options",
+
+                # Uso del espacio
+                "laptop_friendly",
+                "quiet_space",
+
+                # Extras
+                "has_books_or_games",
+            )
+        }),
+
+        ("Estado / Plan", {
+            "fields": (
+                "visibility_level",
+                "claim_status",
+                "claimed_by",
+                "owner",
+            )
+        }),
+
         ("Ubicación", {
             "fields": ("latitude", "longitude")
         }),
     )
+
 
 
 @admin.register(Review)

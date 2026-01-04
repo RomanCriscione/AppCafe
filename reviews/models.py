@@ -51,30 +51,45 @@ class Cafe(models.Model):
     photo3 = models.ImageField(upload_to='cafes/', blank=True, null=True)
     photo3_title = models.CharField(max_length=200, blank=True, null=True)
 
-    # Características
-    is_vegan_friendly = models.BooleanField(default=False, verbose_name="Vegano friendly")
-    is_pet_friendly = models.BooleanField(default=False, verbose_name="Pet friendly")
-    has_wifi = models.BooleanField(default=False, verbose_name="WiFi")
+    # Características del café (declaradas por el dueño)
+
+    # Servicios / infraestructura
+    has_wifi = models.BooleanField(default=False, verbose_name="Wi-Fi disponible")
+    has_air_conditioning = models.BooleanField(default=False, verbose_name="Aire acondicionado")
+    has_power_outlets = models.BooleanField(default=False, verbose_name="Enchufes disponibles")
     has_outdoor_seating = models.BooleanField(default=False, verbose_name="Mesas al aire libre")
     has_parking = models.BooleanField(default=False, verbose_name="Estacionamiento disponible")
-    is_accessible = models.BooleanField(default=False, verbose_name="Accesible para personas con movilidad reducida")
-    has_vegetarian_options = models.BooleanField(default=False, verbose_name="Opciones vegetarianas")
+    is_accessible = models.BooleanField(
+        default=False,
+        verbose_name="Accesible para personas con movilidad reducida"
+    )
+    accepts_cards = models.BooleanField(default=False, verbose_name="Acepta tarjetas")
+    accepts_reservations = models.BooleanField(default=False, verbose_name="Acepta reservas")
+    has_baby_changing = models.BooleanField(default=False, verbose_name="Cambiador para bebés")
+
+    # Mascotas
+    is_pet_friendly = models.BooleanField(default=False, verbose_name="Apto mascotas")
+
+    # Oferta gastronómica
+    has_specialty_coffee = models.BooleanField(default=False, verbose_name="Café de especialidad")
+    serves_brunch = models.BooleanField(default=False, verbose_name="Brunch")
     serves_breakfast = models.BooleanField(default=False, verbose_name="Sirve desayuno")
     serves_alcohol = models.BooleanField(default=False, verbose_name="Sirve alcohol")
-    has_books_or_games = models.BooleanField(default=False, verbose_name="Libros o juegos disponibles")
-    has_air_conditioning = models.BooleanField(default=False, verbose_name="Aire acondicionado")
-    has_gluten_free = models.BooleanField(default=False, verbose_name="Sin TACC / Gluten Free")
-    has_specialty_coffee = models.BooleanField(default=False, verbose_name="Café de especialidad")
     has_artisanal_pastries = models.BooleanField(default=False, verbose_name="Pastelería artesanal")
-    accepts_cards = models.BooleanField(default=False, verbose_name="Acepta tarjetas")
-    gluten_free_options = models.BooleanField(default=False, verbose_name="Opciones sin gluten")
-    has_baby_changing = models.BooleanField(default=False, verbose_name="Cambiador para bebés")
-    has_power_outlets = models.BooleanField(default=False, verbose_name="Enchufes disponibles")
+    offers_ice_cream = models.BooleanField(default=False, verbose_name="Ofrece helados")
+
+    # Opciones alimentarias
+    is_vegan_friendly = models.BooleanField(default=False, verbose_name="Opciones veganas")
+    has_vegetarian_options = models.BooleanField(default=False, verbose_name="Opciones vegetarianas")
+    has_gluten_free_options = models.BooleanField(default=False, verbose_name="Opciones sin gluten / Sin TACC")
+
+    # Uso del espacio
     laptop_friendly = models.BooleanField(default=False, verbose_name="Apto para trabajar")
     quiet_space = models.BooleanField(default=False, verbose_name="Espacio tranquilo")
-    specialty_coffee = models.BooleanField(default=False, verbose_name="Café de especialidad")
-    brunch = models.BooleanField(default=False, verbose_name="Brunch")
-    accepts_reservations = models.BooleanField(default=False, verbose_name="Acepta reservas")
+
+    # Extras
+    has_books_or_games = models.BooleanField(default=False, verbose_name="Libros o juegos disponibles")
+
 
     # Relaciones
     favorites = models.ManyToManyField(User, related_name='favorite_cafes', blank=True)

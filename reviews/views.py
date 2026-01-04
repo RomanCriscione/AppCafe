@@ -103,6 +103,42 @@ def get_manual_tag_choices():
 
     return grouped
 
+FEATURE_FIELDS = [
+    # Servicios / infraestructura
+    "has_wifi",
+    "has_air_conditioning",
+    "has_power_outlets",
+    "has_outdoor_seating",
+    "has_parking",
+    "is_accessible",
+    "accepts_cards",
+    "accepts_reservations",
+    "has_baby_changing",
+
+    # Mascotas
+    "is_pet_friendly",
+
+    # Oferta gastronómica
+    "has_specialty_coffee",
+    "serves_brunch",
+    "serves_breakfast",
+    "serves_alcohol",
+    "has_artisanal_pastries",
+    "offers_ice_cream",
+
+    # Opciones alimentarias
+    "is_vegan_friendly",
+    "has_vegetarian_options",
+    "has_gluten_free_options",
+
+    # Uso del espacio
+    "laptop_friendly",
+    "quiet_space",
+
+    # Extras
+    "has_books_or_games",
+]
+
 
 
 class ReviewListView(ListView):
@@ -167,7 +203,7 @@ class ReviewListView(ListView):
         context['cafes_json'] = json.dumps(cafes_data, cls=DjangoJSONEncoder)
         context['ui_messages'] = _UI_MSG
         return context
-
+    
 
 class CafeListView(ListView):
     model = Cafe
@@ -182,28 +218,6 @@ class CafeListView(ListView):
         lat = request.GET.get('lat')
         lon = request.GET.get('lon')
 
-        filtros = {
-            'is_vegan_friendly': request.GET.get('vegan') == 'on',
-            'is_pet_friendly': request.GET.get('pet') == 'on',
-            'has_wifi': request.GET.get('wifi') == 'on',
-            'has_outdoor_seating': request.GET.get('outdoor') == 'on',
-            'has_parking': request.GET.get('has_parking') == 'on',
-            'is_accessible': request.GET.get('is_accessible') == 'on',
-            'has_vegetarian_options': request.GET.get('has_vegetarian_options') == 'on',
-            'serves_breakfast': request.GET.get('serves_breakfast') == 'on',
-            'serves_alcohol': request.GET.get('serves_alcohol') == 'on',
-            'has_books_or_games': request.GET.get('has_books_or_games') == 'on',
-            'has_air_conditioning': request.GET.get('has_air_conditioning') == 'on',
-            "accepts_cards": request.GET.get("accepts_cards") == "on",
-            "gluten_free_options": request.GET.get("gluten_free_options") == "on",
-            "has_baby_changing": request.GET.get("has_baby_changing") == "on",
-            "has_power_outlets": request.GET.get("has_power_outlets") == "on",
-            "laptop_friendly": request.GET.get("laptop_friendly") == "on",
-            "quiet_space": request.GET.get("quiet_space") == "on",
-            "specialty_coffee": request.GET.get("specialty_coffee") == "on",
-            "brunch": request.GET.get("brunch") == "on",
-            "accepts_reservations": request.GET.get("accepts_reservations") == "on",
-        }
 
         cafes = Cafe.objects.only(
             'id', 'name', 'location', 'latitude', 'longitude',
@@ -219,9 +233,9 @@ class CafeListView(ListView):
         if zona:
             cafes = cafes.filter(location=zona)
 
-        for key, value in filtros.items():
-            if value:
-                cafes = cafes.filter(**{key: True})
+        for field in FEATURE_FIELDS:
+            if request.GET.get(field) == "on":
+                cafes = cafes.filter(**{field: True})
 
         # Alias para que la tarjeta lea avg_rating / num_reviews
         cafes = cafes.annotate(
@@ -300,22 +314,18 @@ class CafeListView(ListView):
         context['zona_seleccionada'] = request.GET.get('zona')
         context['orden_actual'] = request.GET.get('orden')
 
-        boolean_keys = [
-            'has_wifi', 'has_air_conditioning', 'serves_alcohol', 'is_pet_friendly',
-            'is_vegan_friendly', 'has_outdoor_seating', 'has_parking', 'is_accessible',
-            'has_vegetarian_options', 'has_books_or_games',
-            "accepts_cards", "gluten_free_options", "has_baby_changing",
-            "has_power_outlets", "laptop_friendly", "quiet_space",
-            "specialty_coffee", "brunch", "accepts_reservations",
-        ]
-        context['campos_activos'] = {k: (request.GET.get(k) == 'on') for k in boolean_keys}
+        context["campos_activos"] = {
+            field: field in request.GET
+            for field in FEATURE_FIELDS
+        }
+
 
         context['mostrar_boton_reset'] = any([
             request.GET.get('zona'),
             request.GET.get('orden'),
             request.GET.get('lat'),
             request.GET.get('lon'),
-            *[request.GET.get(k) for k in boolean_keys],
+            *[request.GET.get(f) for f in FEATURE_FIELDS],
         ])
 
         if request.user.is_authenticated:
