@@ -18,10 +18,10 @@ ALLOWED_HOSTS = [
     if h.strip()
 ]
 
-
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
 
 SECRET_KEY = config('SECRET_KEY', default=None)
 
@@ -46,26 +46,12 @@ elif not DEBUG and not _is_strong_secret(SECRET_KEY):
     )
 
 # === CSRF ===
-_csrf_from_env = config('CSRF_TRUSTED_ORIGINS', default=None)
-if _csrf_from_env:
-    CSRF_TRUSTED_ORIGINS = [
-        o.strip() for o in _csrf_from_env.split(',') if o.strip()
-    ]
-else:
-    CSRF_TRUSTED_ORIGINS = [
-        'https://*.onrender.com',
-        'https://gogota.ar',
-        'https://www.gogota.ar',
-    ]
-    if RENDER_EXTERNAL_HOSTNAME:
-        CSRF_TRUSTED_ORIGINS.append(
-            f"https://{RENDER_EXTERNAL_HOSTNAME}"
-        )
-    if DEBUG:
-        CSRF_TRUSTED_ORIGINS += [
-            "http://localhost",
-            "http://127.0.0.1",
-        ]
+CSRF_TRUSTED_ORIGINS = [
+    "https://gogota.ar",
+    "https://www.gogota.ar",
+    "https://gota-tath.onrender.com",
+]
+
 
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
