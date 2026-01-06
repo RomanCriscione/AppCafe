@@ -1,4 +1,10 @@
 User-agent: *
-Disallow: /admin/
+Allow: /
 
-Sitemap: {{ request.scheme }}://{{ request.get_host }}{% url 'django_sitemap' %}
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /owner/
+Disallow: /planes/
+Disallow: /analytics/
+
+Sitemap: https://gogota.ar/sitemap.xml

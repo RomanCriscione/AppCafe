@@ -83,8 +83,49 @@
     <a href="#resultados" class="sr-only">Saltar a resultados</a>
     <a href="#paginacion" class="sr-only">Saltar a paginación</a>
 
-    <div class="flex justify-between items-center mb-4">
-      <h1 id="titulo-cafeterias" class="text-2xl font-bold">Cafeterías</h1>
+    <div class="mb-6">
+      <h1 id="titulo-cafeterias" class="text-2xl font-bold mb-2">
+        {% if zona_seleccionada %}
+          Cafeterías en {{ zona_seleccionada }}
+        {% else %}
+          Cafeterías
+        {% endif %}
+
+        {% if campos_activos.has_wifi %} con Wi-Fi{% endif %}
+        {% if campos_activos.is_pet_friendly %} pet friendly{% endif %}
+        {% if campos_activos.has_outdoor_seating %} con mesas al aire libre{% endif %}
+        {% if campos_activos.serves_breakfast %} para desayunar{% endif %}
+      </h1>
+
+      <p class="text-sm text-gray-600 max-w-2xl">
+        {% if zona_seleccionada %}
+          Explorá cafeterías{% if campos_activos.has_wifi %} con Wi-Fi{% endif %}
+          {% if campos_activos.is_pet_friendly %} pet friendly{% endif %}
+          {% if campos_activos.has_outdoor_seating %} con mesas al aire libre{% endif %}
+          en {{ zona_seleccionada }}, con reseñas reales, fotos y experiencias que se sienten.
+        {% else %}
+          Explorá cafeterías{% if campos_activos.has_wifi %} con Wi-Fi{% endif %}
+          {% if campos_activos.is_pet_friendly %} pet friendly{% endif %}
+          {% if campos_activos.has_outdoor_seating %} con mesas al aire libre{% endif %}
+          con reseñas reales, fotos y experiencias que se sienten.
+        {% endif %}
+      </p>
+      {% if cafes %}
+        <p class="sr-only">
+          Cafeterías con experiencias como
+          {% for cafe in cafes %}
+            {% for tag in cafe.tags.all|slice:":2" %}
+              {{ tag.name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          {% endfor %}
+          según reseñas reales de la comunidad.
+        </p>
+      {% endif %}
+
+    </div>
+
+
+
       <div class="flex gap-3 items-center">
         <a href="{% url 'reviews:mapa_cafes' %}"
           class="fixed bottom-5 right-5 z-40 bg-white text-brown hover:bg-brand-100 transition px-4 py-2 rounded-full shadow-md border border-brand-200 text-sm sm:text-base">
@@ -100,7 +141,6 @@
           <a href="{% url 'reviews:cafe_list' %}" class="btn btn-ghost rounded-xl text-sm">🔄 Ver todos los cafés</a>
         {% endif %}
       </div>
-    </div>
 
     <!-- Skeleton inicial -->
     <div id="grid-skeleton" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0">

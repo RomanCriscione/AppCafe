@@ -76,6 +76,25 @@
         </div>
       {% endif %}
 
+      {% if cafe.tags.exists %}
+        <div class="flex flex-wrap gap-1">
+          {% for tag in cafe.tags.all|slice:":3" %}
+            <span class="bg-blue-100 text-blue-800 text-[11px] px-2 py-0.5 rounded-full">
+              {{ tag.name }}
+            </span>
+          {% endfor %}
+        </div>
+
+        <span class="sr-only">
+          Cafetería percibida como
+          {% for tag in cafe.tags.all|slice:":3" %}
+            {{ tag.name }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+          según reseñas reales.
+        </span>
+      {% endif %}
+
+
       <!-- FAVORITOS + VER -->
       <div class="flex items-center justify-between">
 

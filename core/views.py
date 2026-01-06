@@ -85,7 +85,15 @@ def home(request):
             "review_submitted": core_messages.MESSAGES.get("review_sent"),
         },
     }
+    context["meta_title"] = "Gota · Descubrí y recomendá cafeterías con identidad"
+    context["meta_description"] = (
+        "Gota es una plataforma para descubrir y recomendar cafeterías reales, "
+        "con buen café y experiencias que se sienten."
+    )
+
     return render(request, "core/home.html", context)
+
+
 
 
 # ✅ About

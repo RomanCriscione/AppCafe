@@ -306,6 +306,21 @@ class CafeListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         request = self.request
+                # === SEO: meta dinámicos para listado de cafés ===
+        zona = request.GET.get("zona")
+        orden = request.GET.get("orden")
+
+        if zona:
+            context["meta_title"] = f"Cafeterías en {zona} | Gota"
+            context["meta_description"] = (
+                f"Descubrí cafeterías en {zona}: reseñas reales, buen café y experiencias con identidad."
+            )
+        else:
+            context["meta_title"] = "Cafeterías recomendadas | Gota"
+            context["meta_description"] = (
+                "Descubrí y recomendá cafeterías reales: buen café, reseñas honestas y experiencias que se sienten."
+            )
+
 
         context['zonas_disponibles'] = (
             Cafe.objects.values_list('location', flat=True)
@@ -457,8 +472,6 @@ def cafe_detail(request, cafe_id):
     elif best_review and best_review.comment:
         txt = best_review.comment.strip()
         one_liner = txt[:90] + ("…" if len(txt) > 90 else "")
-    else:
-        one_liner = None
 
     return render(
         request,
@@ -487,6 +500,14 @@ def cafe_detail(request, cafe_id):
             # ⭐ NUEVOS
             "precio_promedio": precio_promedio,
             "highlight_id": int(highlight_id) if highlight_id and highlight_id.isdigit() else None,
+
+                    # ✅ SEO
+            "meta_title": f"{cafe.name} en {cafe.location} | Reseñas y experiencias reales – Gota",
+            "meta_description": (
+                f"{cafe.name} en {cafe.location}. "
+                "Reseñas reales, fotos, puntuaciones y experiencias de personas que lo visitaron."
+            ),
+            "og_image_url": cafe.photo1.url if cafe.photo1 else full_image_url,
         },
     )
 

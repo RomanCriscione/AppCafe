@@ -9,11 +9,12 @@
           style="background-image: url('{% static 'images/coffee-hero.jpg' %}');">
   <div class="relative max-w-2xl mx-auto z-10 pt-20">
     <h1 class="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">
-      ☕ {{ ui_messages.welcome_user|default:"Bienvenido. ¿Qué café descubrimos hoy?" }}
+      Descubrí y recomendá cafeterías reales en Buenos Aires
     </h1>
-    <p class="mb-6 text-lg/7 opacity-95">
-      Descubrí, calificá y compartí tus cafeterías favoritas de Buenos Aires.
-    </p>
+      <p class="mb-6 text-lg opacity-95">
+        Gota es una plataforma para descubrir y recomendar cafeterías reales,
+        con reseñas honestas, fotos y experiencias que se sienten.
+      </p>
     <a href="{% url 'reviews:cafe_list' %}" class="btn btn-primary rounded-xl">
       ✨ Explorá Cafeterías
     </a>

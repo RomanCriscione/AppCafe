@@ -3,7 +3,7 @@
 {% load static cache tag_icons %}
 
 {% block head_title %}
-  <title>{{ cafe.name }} - Cafetería en {{ cafe.location }}</title>
+  <title>{{ cafe.name }} en {{ cafe.location }} | Gota</title>
 {% endblock %}
 
 {% block meta %}
@@ -44,6 +44,21 @@
     "@type": "CafeOrCoffeeShop",
     "@id": "{{ full_page_url }}#place",
     "name": "{{ cafe.name|escapejs }}",
+    "priceRange": "$$",
+    "servesCuisine": ["Coffee", "Cafe"],
+    "openingHoursSpecification": [{
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"
+      ],
+      "opens": "06:00",
+      "closes": "23:59"
+    }],
+    "amenityFeature": [
+      { "@type": "LocationFeatureSpecification", "name": "Wi-Fi", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Pet friendly", "value": true }
+    ],
+    "hasMap": "https://www.google.com/maps/search/?api=1&query={{ cafe.latitude }},{{ cafe.longitude }}",
     "url": "{{ full_page_url|escapejs }}",
 
     {% if full_image_url %}
@@ -98,7 +113,10 @@
     ],
     {% endif %}
 
-    "sameAs": [{% if cafe.google_maps_url %}"{{ cafe.google_maps_url|escapejs }}"{% endif %}]
+    {% if cafe.google_maps_url %}
+    "sameAs": ["{{ cafe.google_maps_url|escapejs }}"]
+    {% endif %}
+
   }
   </script>
 
@@ -151,6 +169,35 @@
   <h1 class="text-3xl font-bold text-gray-900 dark:text-[var(--text-1)]">
     {{ cafe.name }}
   </h1>
+
+  <nav aria-label="Breadcrumb" class="text-sm text-gray-500 mb-3">
+    <ol class="flex flex-wrap items-center gap-1">
+      <li>
+        <a href="{% url 'home' %}" class="hover:underline">Inicio</a>
+        <span class="mx-1">›</span>
+      </li>
+
+      <li>
+        <a href="{{ cafe_list_abs }}" class="hover:underline">Cafés</a>
+        <span class="mx-1">›</span>
+      </li>
+
+      {% if cafe.location %}
+        <li>
+          <a href="{{ cafe_list_abs }}?zona={{ cafe.location|urlencode }}"
+            class="hover:underline">
+            {{ cafe.location }}
+          </a>
+          <span class="mx-1">›</span>
+        </li>
+      {% endif %}
+
+      <li class="text-gray-700 font-medium">
+        {{ cafe.name }}
+      </li>
+    </ol>
+  </nav>
+
 
   {% if one_liner %}
     <p class="text-sm text-gray-600 dark:text-[var(--text-2)]">
@@ -725,6 +772,5 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 6000);
 });
 </script>
-
 
 {% endblock %}
