@@ -273,8 +273,10 @@ CACHES = {
 # === CORS ===
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOWED_ORIGINS = [
-    "https://gotacafe.ar",
-    "https://www.gotacafe.ar",
+    "https://gogota.ar",
+    "https://www.gogota.ar",
+    "https://gogota.com.ar",
+    "https://www.gogota.com.ar",
 ]
 
 # === DRF ===

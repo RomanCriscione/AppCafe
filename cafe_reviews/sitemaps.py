@@ -7,18 +7,13 @@ from reviews.models import Cafe
 class StaticSitemap(Sitemap):
     """Sitemap de páginas estáticas."""
     def items(self):
-        # OJO: las rutas de reviews están bajo el namespace "reviews"
-        # core.* (home/about/contact) quedan sin namespace porque se incluyen sin namespace en cafe_reviews/urls.py
         return [
             "home",
-            "reviews:cafe_list",
-            "reviews:mapa_cafes",
+            "reviews:cafe_list",      # daily
+            "reviews:mapa_cafes",     # weekly
             "about",
             "contact",
         ]
-
-    def location(self, item):
-        return reverse(item)
 
     def changefreq(self, item):
         mapping = {
@@ -34,11 +29,14 @@ class StaticSitemap(Sitemap):
         mapping = {
             "home": 0.8,
             "reviews:cafe_list": 0.9,
-            "reviews:mapa_cafes": 0.8,
+            "reviews:mapa_cafes": 0.6,
             "about": 0.3,
             "contact": 0.3,
         }
         return mapping.get(item, 0.5)
+
+    def location(self, item):
+        return reverse(item)
 
 
 class CafeSitemap(Sitemap):
@@ -47,21 +45,16 @@ class CafeSitemap(Sitemap):
     priority = 0.7
 
     def items(self):
-        # Sólo necesitamos el id para armar la URL
-        return Cafe.objects.only("id")
+        return Cafe.objects.only("id", "updated_at")
 
     def location(self, obj):
-        # Respetar el namespace "reviews"
         return reverse("reviews:cafe_detail", kwargs={"cafe_id": obj.id})
 
     def lastmod(self, obj):
-        # Última actividad: reseña más reciente del café
-        last_review = obj.reviews.aggregate(last=Max("created_at"))["last"]
-        # Si el modelo Cafe tiene updated_at, lo usamos como fallback
+        last_review = obj.reviews.aggregate(last=Max("created_at")).get("last")
         return last_review or getattr(obj, "updated_at", None)
 
 
-# Registro de sitemaps
 sitemaps = {
     "static": StaticSitemap,
     "cafes": CafeSitemap,
