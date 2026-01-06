@@ -49,6 +49,15 @@ urlpatterns = [
         RedirectView.as_view(url=static_url("images/coffee-icon.png"), permanent=False),
         name="favicon",
     ),
+
+    # --- Verificación Google ---
+    path(
+        "google157d26ef7e3007f2.html",
+        media_serve,
+        {"document_root": settings.STATIC_ROOT},
+        name="google_verify",
+    ),
+
 ]
 
 # ✅ Servir MEDIA también en producción (Render)

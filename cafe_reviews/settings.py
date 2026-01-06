@@ -13,6 +13,8 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = [
     "gogota.ar",
     "www.gogota.ar",
+    "gogota.com.ar",
+    "www.gogota.com.ar",
     "gota-tath.onrender.com",
     "localhost",
     "127.0.0.1",
