@@ -2,9 +2,21 @@
    GOTA · COFFEE THEME — espresso + caramelo (moderno)
    ========================================================= */
 
+/* ---- RESET MÓVIL SEGURO ---- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html, body { width: 100%; overflow-x: hidden; }
+img, svg, video, canvas, audio, iframe, embed, object {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
 /* === Design tokens (CSS vars) === */
 :root{
-  /* radios / sombras */
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
@@ -17,13 +29,13 @@
   --brand-200:#E2CCB8;
   --brand-300:#D4B394;
   --brand-400:#B98D6E;
-  --brand-500:#8B5E3C;      /* base */
-  --brand-600:#6E4B3B;      /* primary */
-  --brand-700:#553A2F;      /* hover/focus */
+  --brand-500:#8B5E3C;
+  --brand-600:#6E4B3B;
+  --brand-700:#553A2F;
   --brand-800:#3D2B23;
   --brand-900:#2B1E16;
 
-  /* Caramelo (acento cálido) */
+  /* Caramelo */
   --caramel-50:#FFF6EC;
   --caramel-100:#FDECD9;
   --caramel-200:#F7D4B5;
@@ -33,7 +45,7 @@
   --caramel-600:#B36D3D;
   --caramel-700:#8F5330;
 
-  /* Neutrales cálidos */
+  /* Neutrales */
   --canvas:#FBF7F2;
   --surface:#FFFFFF;
   --surface-2:#F5EEE6;
@@ -41,7 +53,6 @@
   --text-1:#1F130E;
   --text-2:#6B5E55;
 
-  /* Semánticos (compat) */
   --primary:     var(--brand-600);
   --primary-600: var(--brand-700);
   --primary-700: var(--brand-800);
@@ -53,12 +64,10 @@
   --danger:  #B5533C;
   --success: #2E7D32;
 
-  /* Alto del preview de reseñas */
   --review-collapsed: 140px;
 }
 
-/* Dark (opcional por sistema) */
-@media (prefers-color-scheme: dark){
+/* @media (prefers-color-scheme: dark){
   :root{
     --canvas:#16110E;
     --surface:#1F1813;
@@ -73,10 +82,9 @@
     --accent:#D29061;
   }
 }
-
+*/
 /* === Base === */
 * { -webkit-tap-highlight-color: transparent; }
-html { scroll-behavior: smooth; }
 body {
   color: var(--text-1);
   background: var(--canvas);
@@ -84,7 +92,6 @@ body {
                Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
                'Apple Color Emoji', 'Segoe UI Emoji';
 }
-img { display:block; max-width:100%; height:auto; }
 a { text-decoration: none; color: var(--primary-600); }
 a:hover { color: var(--primary); }
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
@@ -94,7 +101,7 @@ a:hover { color: var(--primary); }
 .surface { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
 .text-primary{ color: var(--primary) !important; }
 
-/* === Header fijo + estado scrolleado === */
+/* === Header fijo === */
 header.site-nav{
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -174,7 +181,6 @@ header.site-nav.is-scrolled{
 .badge-success{ background: rgba(46,125,50,.12); border-color: rgba(46,125,50,.25); color:#1B5E20; }
 .badge-warning{ background: rgba(183,121,31,.12); border-color: rgba(183,121,31,.25); color:#7C4A0E; }
 
-/* Chips */
 .chip{
   display:inline-flex; align-items:center; gap:.4rem;
   padding:.45rem .75rem; border-radius:9999px; font-size:.88rem;
@@ -189,27 +195,19 @@ header.site-nav.is-scrolled{
   color: var(--primary-600);
 }
 
-/* === Cards de café === */
+/* === Cards === */
 .card{
   background: var(--surface); border:1px solid var(--border);
   border-radius: var(--radius-lg); overflow:hidden; box-shadow: var(--shadow-soft);
   transition: transform .18s ease, box-shadow .18s ease;
 }
 .card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-hover); }
-.card-media{ aspect-ratio: 4 / 3; overflow:hidden; background: var(--surface-2); }
-.card-media img{ width:100%; height:100%; object-fit:cover; }
 .card-body{ padding: .9rem .95rem 1rem; }
 .card-title{ font-size: 1.05rem; font-weight:700; line-height:1.2; }
 .card-sub{ font-size:.85rem; color: var(--text-2); }
 .card-actions{ display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-top:.75rem; }
 
-/* === Grid de cards === */
-.grid-cafes{ display:grid; gap:1rem; grid-template-columns: repeat(1, minmax(0, 1fr)); }
-@media (min-width:640px){ .grid-cafes{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width:1024px){ .grid-cafes{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width:1280px){ .grid-cafes{ grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-
-/* === Inputs / formularios === */
+/* === Formularios === */
 .input, .select, .textarea{
   width:100%; padding:.6rem .75rem; border-radius: var(--radius-md);
   border:1px solid var(--border); background:#fff; color: var(--text-1);
@@ -219,7 +217,6 @@ header.site-nav.is-scrolled{
   border-color: var(--primary); box-shadow: 0 0 0 3px rgba(142,103,77,.18);
   outline: none;
 }
-
 select,
 input[type="text"], input[type="search"], input[type="email"], input[type="number"],
 input[type="password"], input[type="tel"], textarea {
@@ -241,15 +238,10 @@ textarea:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(142,103,77,.18);
 }
-
-/* Checkboxes */
 input[type="checkbox"]{ width:1rem; height:1rem; accent-color: var(--primary); vertical-align: middle; }
 label { display: inline-flex; align-items: center; gap: .45rem; }
-
-/* Fieldset */
 fieldset { border-top: 1px solid var(--border); margin-top: .5rem; padding-top: .5rem; }
 
-/* Submit genérico (cuando no usa .btn) */
 form button[type="submit"]:not(.btn),
 form input[type="submit"]:not(.btn) {
   background: var(--primary);
@@ -264,7 +256,6 @@ form input[type="submit"]:not(.btn) {
 form button[type="submit"]:not(.btn):hover,
 form input[type="submit"]:not(.btn):hover { background: var(--primary-600); }
 
-/* Link "Limpiar" */
 form a.button-reset, form a[type="reset"] {
   display: inline-flex; align-items: center; justify-content: center;
   padding: .55rem .9rem;
@@ -275,68 +266,11 @@ form a.button-reset, form a[type="reset"] {
   text-decoration: none;
 }
 
-/* Trigger del Drawer de filtros */
-#toggle-filtros,
-a[href="#panel-filtros"] {
-  display: inline-flex; align-items: center; gap: .5rem;
-  padding: .6rem .9rem;
-  border-radius: var(--radius-md);
-  background: var(--primary);
-  color: #fff;
-  border: 1px solid transparent;
-  font-weight: 600;
-  box-shadow: var(--shadow-soft);
-}
-#toggle-filtros:hover,
-a[href="#panel-filtros"]:hover { background: var(--primary-600); }
-
-/* Títulos y respiración */
 h2 { margin: .25rem 0 .5rem; }
 h2 + form { margin-top: .25rem; }
-main img { max-width: 100%; height: auto; display: block; }
+main img { max-width: 100%; display: block; }
 
-/* Submits en panel filtros / formularios */
-#panel-filtros .btn[type="submit"],
-#panel-filtros button[type="submit"],
-#panel-filtros button:not([type]),
-#panel-filtros input[type="submit"],
-#panel-filtros form > button,
-#panel-filtros form > input[type="submit"],
-form .btn[type="submit"]:not(.btn-secondary),
-form button[type="submit"],
-form button:not([type]) {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: .5rem; background: var(--primary) !important; color: #fff !important;
-  padding: .6rem .95rem; border-radius: var(--radius-md);
-  border: 1px solid transparent !important; font-weight: 600;
-  box-shadow: var(--shadow-soft);
-  transition: background-color .18s ease, box-shadow .18s ease, transform .12s ease;
-  margin-top: .5rem;
-}
-#panel-filtros .btn[type="submit"]:hover,
-#panel-filtros button[type="submit"]:hover,
-#panel-filtros button:not([type]):hover,
-#panel-filtros input[type="submit"]:hover,
-#panel-filtros form > button:hover,
-#panel-filtros form > input[type="submit"]:hover,
-form .btn[type="submit"]:not(.btn-secondary):hover,
-form button[type="submit"]:hover,
-form button:not([type]):hover {
-  background: var(--primary-600) !important;
-  box-shadow: var(--shadow-hover);
-  transform: translateY(-1px);
-}
-#panel-filtros .btn[type="submit"]:active,
-#panel-filtros button[type="submit"]:active,
-#panel-filtros button:not([type]):active,
-#panel-filtros input[type="submit"]:active,
-#panel-filtros form > button:active,
-#panel-filtros form > input[type="submit"]:active,
-form .btn[type="submit"]:not(.btn-secondary):active,
-form button[type="submit"] :active,
-form button:not([type]):active { transform: translateY(0); }
-
-/* === Etiquetas sensoriales (listado) === */
+/* === Etiquetas sensoriales === */
 .tag-list{ display:grid; gap:.4rem; grid-template-columns:1fr; }
 @media (min-width:640px){ .tag-list{ grid-template-columns:1fr 1fr; } }
 .tag-item{ display:flex; align-items:flex-start; gap:.55rem; padding:.25rem 0; }
@@ -355,7 +289,7 @@ form button:not([type]):active { transform: translateY(0); }
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
 }
-.review-head{ display:flex; gap:.75rem; align-items:flex-start; }
+.review-head{ display:flex; gap:.75rem; alignments:flex-start; }
 .review-avatar{
   width: 42px; height: 42px; border-radius: 999px;
   background: #e5e7eb; display:flex; align-items:center; justify-content:center;
@@ -382,10 +316,13 @@ form button:not([type]):active { transform: translateY(0); }
 .tags-inline{ display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.5rem; }
 .badge-xs{ font-size:.72rem; padding:.18rem .5rem; }
 
-/* === Alias rápidos === */
+/* === Alias rápidos / utilidades === */
 .bg-primary{ background-color: var(--primary) !important; color:#fff !important; }
 .text-accent{ color: var(--accent) !important; }
 .border-accent{ border-color: var(--accent) !important; }
+.shadow-soft{ box-shadow: var(--shadow-soft); }
+.rounded-blob{ border-radius: 24px; }
+.min-w-0{ min-width: 0 !important; }
 
 /* === Animaciones === */
 @keyframes bounce { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
@@ -394,15 +331,12 @@ form button:not([type]):active { transform: translateY(0); }
 .animated-bounce{ animation: bounce 1s infinite; }
 .animate-fade-in{ animation: fadeIn .35s ease; }
 
-/* Hover suave para cards clickeables */
 .cafe-card { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; will-change: transform, box-shadow, filter; }
 .cafe-card:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
 
-/* Botón like: rebote */
 @keyframes like-bounce { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
 .like-bounce { animation: like-bounce .28s ease; }
 
-/* Taza flotante (% positivas) */
 .cup-float {
   position: fixed; right: 16px; bottom: 100px; z-index: 40;
   display: flex; align-items: center; gap: 8px;
@@ -411,21 +345,19 @@ form button:not([type]):active { transform: translateY(0); }
   padding: 10px 12px; border-radius: 999px; box-shadow: var(--shadow-soft);
 }
 .cup-emoji { font-size: 18px; transform-origin: bottom; }
-.cup-emoji.fill { animation: cup-fill 900ms ease forwards; }
+.cup-emoji.fill { animation: cup-fill 900ms.ease forwards; }
 @keyframes cup-fill { from { filter: saturate(.4) brightness(.95); transform: translateY(2px); } to { filter: saturate(1.05); transform: translateY(0); } }
 
-/* === Owner CTA (genérica) === */
 .owner-card-actions{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
 .owner-card-actions .btn{ min-width:120px; justify-content:center; }
 
-/* CTA sueltas */
 a.cta{
   display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:.5rem !important;
   height:48px !important; padding:0 1.25rem !important; min-width:280px !important;
   border-radius:12px !important; font-weight:700 !important; letter-spacing:.01em; line-height:1 !important;
   color:#fff !important; border:1px solid transparent !important;
   background-color: var(--primary) !important; box-shadow: var(--shadow-soft) !important;
-  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease; white-space:nowrap; text-align:center;
+  transition: transform .15s ease, box-shadow .15s.ease, background-color .15s.ease; white-space:nowrap; text-align:center;
 }
 a.cta:hover{ transform: translateY(-1px); box-shadow: var(--shadow-hover) !important; background-color: var(--primary-600) !important; }
 a.cta:active{ transform: translateY(0); }
@@ -440,43 +372,23 @@ a.btn-primary, button.btn-primary {
 a.cta.cta-blue, a.cta.cta-indigo { background-color: var(--primary) !important; }
 a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-600) !important; }
 
-/* Tailwind/DaisyUI utilidades comunes mapeadas a la paleta café */
 .bg-blue-50,.bg-blue-100,.bg-blue-200,.bg-blue-300,.bg-blue-400,
 .bg-blue-500,.bg-blue-600,.bg-blue-700,.bg-blue-800,.bg-blue-900,
 .bg-indigo-500,.bg-indigo-600,.bg-indigo-700 { background-color: var(--primary) !important; }
+.text-blue-500,.text-blue-600,.text-blue-700,.text-indigo-600,.text-indigo-700 { color: var(--primary) !important; }
+.border-blue-500,.border-blue-600,.border-indigo-500,.border-indigo-600 { border-color: var(--primary) !important; }
+.hover\:bg-blue-600:hover,.hover\:bg-blue-700:hover,.hover\:bg-indigo-600:hover,.hover\:bg-indigo-700:hover { background-color: var(--primary-600) !important; }
+.focus\:ring-blue-500:focus,.focus\:ring-indigo-500:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent) !important; }
 
-.text-blue-500,.text-blue-600,.text-blue-700,.text-indigo-600,
-.text-indigo-700 { color: var(--primary) !important; }
-
-.border-blue-500,.border-blue-600,.border-indigo-500,.border-indigo-600 {
-  border-color: var(--primary) !important;
-}
-
-/* estados hover/focus */
-.hover\:bg-blue-600:hover,.hover\:bg-blue-700:hover,
-.hover\:bg-indigo-600:hover,.hover\:bg-indigo-700:hover {
-  background-color: var(--primary-600) !important;
-}
-.focus\:ring-blue-500:focus,.focus\:ring-indigo-500:focus {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent) !important;
-}
-
-/* Leaflet marker extra */
 .leaflet-marker-icon.cup-marker { filter: drop-shadow(0 3px 6px rgba(0,0,0,.25)); }
 
-/* Skeletons */
-.skeleton{
-  position:relative; overflow:hidden; background: var(--surface-2);
-  border-radius: var(--radius-md);
-}
+.skeleton{ position:relative; overflow:hidden; background: var(--surface-2); border-radius: var(--radius-md); }
 .skeleton::after{
   content:""; position:absolute; inset:0;
   background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.35) 50%, transparent 100%);
-  transform: translateX(-100%);
-  animation: shimmer 1.15s infinite;
+  transform: translateX(-100%); animation: shimmer 1.15s infinite;
 }
 
-/* Chips: scroll suave + fades laterales */
 .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .chips-fade{ position: relative; }
@@ -487,65 +399,436 @@ a.cta.cta-blue:hover, a.cta.cta-indigo:hover { background-color: var(--primary-6
 .chips-fade::before{ left:0; background: linear-gradient(90deg, var(--surface) 30%, transparent); border-top-left-radius: var(--radius-lg); }
 .chips-fade::after{ right:0; background: linear-gradient(270deg, var(--surface) 30%, transparent); border-top-right-radius: var(--radius-lg); }
 
-/* Swiper look & feel */
+.swiper-container { overflow: hidden; max-width: 100vw; }
+.swiper-wrapper { max-width: 100%; }
+.swiper-slide { min-width: 0; }
+
 .swiper-button-next, .swiper-button-prev{
   width:38px;height:38px;border-radius:999px;background:#fff;border:1px solid var(--border);
   box-shadow: var(--shadow-soft); backdrop-filter: blur(4px);
 }
 .swiper-button-next:after, .swiper-button-prev:after{ font-size:16px; color: var(--text-1); }
-.swiper-pagination-bullet{
-  opacity:.6; background: var(--border); width: 8px; height: 8px;
-}
-.swiper-pagination-bullet-active{
-  opacity:1; background: var(--primary);
-}
+.swiper-pagination-bullet{ opacity:.6; background: var(--border); width: 8px; height: 8px; }
+.swiper-pagination-bullet-active{ opacity:1; background: var(--primary); }
 
-/* Cards + focus */
 .card { outline: none; }
 .card:focus-visible{ box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent); }
 
-/* Map container pulido */
 #cafes-map, #map{
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   overflow: hidden;
   box-shadow: var(--shadow-soft);
-  /* FIX solapamiento: que el mapa quede en su propio plano por debajo */
   position: relative;
   z-index: 0;
 }
-/* FIX solapamiento: el buscador de dirección por encima del mapa */
-.map-search{
-  position: relative;
-  z-index: 2;
-  margin-top: .75rem;
-}
+.map-search{ position: relative; z-index: 2; margin-top: .75rem; }
 
-/* Hero overlay adaptativo */
+.section-hero { width: 100%; background-size: cover; background-position: center; }
 .section-hero::before{
   content:""; position:absolute; inset:0;
   background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.25));
 }
-@media (prefers-color-scheme: dark){
+/* @media (prefers-color-scheme: dark){
   .section-hero::before{ background: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,.35)); }
 }
-
-/* Rating "cups" (wizard) */
+*/
 .rating-cups label{ transition: transform .12s ease, filter .12s ease; }
 .rating-cups input:checked ~ label,
 .rating-cups label:hover,
-.rating-cups label:hover ~ label{
-  filter: saturate(1.15);
-  transform: translateY(-1px) scale(1.02);
-}
+.rating-cups label:hover ~ label{ filter: saturate(1.15); transform: translateY(-1px) scale(1.02); }
 
-/* Toasts */
 .toast{
   position:fixed; top:1rem; right:1rem; z-index:2147485000;
   background: var(--primary); color:#fff; padding:.6rem .9rem;
   border-radius: var(--radius-md); box-shadow: var(--shadow-soft);
 }
 
-/* Utilidades */
-.shadow-soft{ box-shadow: var(--shadow-soft); }
-.rounded-blob{ border-radius: 24px; }
+.photo-thumb { min-width: 0; }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.fav-card-img { width: 100%; height: 12rem; object-fit: cover; border-radius: 12px; }
+
+.cafe-main-photo,
+.cafe-hero,
+.cafe-photo-lg {
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  overflow: hidden;
+  border-radius: 16px;
+}
+.cafe-main-photo img,
+.cafe-hero img,
+.cafe-photo-lg img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 60vh;
+  object-fit: cover;
+}
+
+/* === CAFÉ LISTA: FILTROS MOBILE Y MAPA === */
+
+/* Contenedor de filtros móvil */
+@media (max-width: 768px) {
+  #filtrosMobile {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 70%;
+    overflow-y: auto;
+    z-index: 50;
+    background-color: white;
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    padding: 1rem;
+    border-radius: 16px 16px 0 0;
+  }
+
+  #filtrosMobile.open {
+    transform: translateY(0%);
+  }
+
+  .filtros-toggle-btn {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 60;
+    background-color: var(--brand-500, #7a553c);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    font-weight: 600;
+    box-shadow: var(--shadow-hover);
+  }
+
+  .filtros-toggle-btn:hover {
+    background-color: var(--brand-700, #593d2d);
+  }
+}
+
+/* === FIXES FINAL PARA OVERFLOW === */
+
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container {
+  max-width: 100%;
+  overflow-x: hidden;
+  min-width: 0;
+}
+
+#toggle-filtros {
+  max-width: 90vw;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+/* === AJUSTE DE FONDO PARA SECCIÓN FINAL DE LISTA DE CAFÉS === */
+
+/* Fix: primer tap en rating no se registraba */
+#rating-cups label {
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+#rating-cups {
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: contain;
+}
+
+/* === FIX WIZARD TAGS RESPONSIVE — ROMA === */
+#tag-steps .chip,
+#tag-steps .chip span,
+#tag-steps label > span {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
+}
+
+#tag-steps .chip {
+  display: inline-flex !important;
+  align-items: center;
+}
+
+/* === MODO OSCURO · CARDS ESPECIALES CAFÉ DETAIL === */
+
+/* Precio promedio del capuccino */
+.price-card{
+  background: color-mix(in srgb, var(--surface) 90%, var(--accent) 10%);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 18px;
+  padding: .75rem 1rem;
+  box-shadow: var(--shadow-soft);
+}
+.price-card-title{
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.price-card-amount{
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-top: .15rem;
+}
+.price-card-note{
+  font-size: .75rem;
+  color: var(--text-2);
+  margin-top: .1rem;
+}
+
+/* Reseña destacada */
+.best-review-card{
+  background: color-mix(in srgb, var(--surface) 92%, var(--accent) 8%);
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--shadow-soft);
+}
+.best-review-card-header{
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: .25rem;
+}
+.best-review-card-meta{
+  font-size: .8rem;
+  color: var(--text-2);
+  margin-bottom: .4rem;
+}
+.best-review-card-body{
+  font-size: .92rem;
+  color: var(--text-1);
+}
+
+/* Chips de tags sensoriales */
+/* TAG CHIP — modo claro */
+.tag-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .4rem .8rem;
+  border-radius: 9999px;
+  font-size: .85rem;
+  background: color-mix(in srgb, var(--surface) 82%, var(--primary-50) 18%);
+  border: 1px solid color-mix(in srgb, var(--primary-100) 65%, transparent);
+  color: var(--text-1);
+  box-shadow: var(--shadow-soft);
+}
+
+.tag-chip--small{
+  font-size: .8rem;
+  padding: .3rem .65rem;
+  opacity: .96;
+}
+
+/* TAG CHIP — modo oscuro */
+/*@media (prefers-color-scheme: dark){
+  .tag-chip{
+    background: color-mix(in srgb, var(--surface) 88%, var(--primary-700) 12%);
+    border-color: color-mix(in srgb, var(--primary-700) 40%, transparent);
+    color: var(--text-1);
+  }
+}
+
+*/
+/* Fade del listado de reseñas compatible con modo oscuro */
+.reviews-fade-gradient{
+  background: linear-gradient(to top, var(--canvas) 0%, transparent);
+}
+
+/* FIX 1 — Textos que quedan demasiado oscuros en modo oscuro */
+.dark .text-gray-600,
+.dark .text-slate-600,
+.dark .text-gray-700,
+.dark .text-slate-700 {
+  color: var(--text-2) !important;
+}
+
+.dark .text-gray-800,
+.dark .text-slate-800,
+.dark .text-gray-900 {
+  color: var(--text-1) !important;
+}
+
+/* FIX 3 — fondo de tarjetas en modo oscuro */
+.dark .surface,
+.dark .card,
+.dark .review-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+/* ===========================================================
+   FIX GLOBAL PARA TEXTO EN MODO OSCURO
+   Sin romper Tailwind ni tu diseño existente
+   =========================================================== */
+/* @media (prefers-color-scheme: dark){
+
+   Textos grisáceos (usados en subheaders, listas, reseñas, labels) 
+  .text-gray-600,
+  .text-gray-700,
+  .text-gray-800,
+  .text-gray-900,
+  .text-slate-600,
+  .text-slate-700,
+  p.text-gray-600,
+  span.text-gray-600 {
+    color: var(--text-2) !important;
+  }
+
+  
+  h1.text-gray-800,
+  h2.text-gray-800,
+  h3.text-gray-800,
+  .text-gray-800 {
+    color: var(--text-1) !important;
+  }
+
+  
+  .text-xs.text-gray-600,
+  .text-sm.text-gray-600 {
+    color: color-mix(in srgb, var(--text-2) 85%, var(--text-1) 15%) !important;
+  }
+
+  
+  a.text-gray-600,
+  a.text-gray-700 {
+    color: var(--primary) !important;
+  }
+
+}
+*/
+/* ===========================================================
+   D — BARRA SUPERIOR MODERNA DEL DETALLE DEL CAFÉ
+   =========================================================== */
+
+/* Contenedor general */
+.cafe-topbar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .85rem 1rem;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Ítems internos */
+.cafe-topbar__item{
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .95rem;
+  color: var(--text-1);
+  white-space: nowrap;
+}
+
+/* Emojis alineados */
+.cafe-topbar__item span.emoji{
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+/* Divider “|” */
+.cafe-topbar__divider{
+  opacity: .55;
+  color: var(--text-2);
+  font-weight: 300;
+}
+
+.review-highlight {
+  border: 2px solid #22c55e;
+  background: #ecfdf5;
+  animation: reviewGlow 2.5s ease-out;
+}
+
+@keyframes reviewGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34,197,94,.5);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgba(34,197,94,0);
+  }
+}
+
+.review-highlight-active {
+  animation: reviewGlow 2.5s ease-out;
+  outline: 3px solid var(--accent);
+  background: rgba(255, 200, 120, 0.15);
+  transition: all .6s ease;
+}
+
+
+/* Versión dark-mode optimizada */
+/*@media (prefers-color-scheme: dark){
+  .cafe-topbar{
+    background: color-mix(in srgb, var(--surface-2) 75%, transparent);
+    border-color: color-mix(in srgb, var(--border) 50%, transparent);
+    box-shadow: 0 8px 20px rgba(0,0,0,.35);
+  }
+  .cafe-topbar__item{
+    color: var(--text-1);
+  }
+  .cafe-topbar__divider{
+    color: var(--text-2);
+  }
+}
+*/
+/* ===========================================================
+   FIX GLOBAL PARA TEXTO EN MODO OSCURO
+   Sin romper Tailwind ni tu diseño existente
+   =========================================================== */
+/*@media (prefers-color-scheme: dark){
+
+ 
+  .text-gray-600,
+  .text-gray-700,
+  .text-gray-800,
+  .text-gray-900,
+  .text-slate-600,
+  .text-slate-700,
+  p.text-gray-600,
+  span.text-gray-600 {
+    color: var(--text-2) !important;
+  }
+
+  
+  h1.text-gray-800,
+  h2.text-gray-800,
+  h3.text-gray-800,
+  .text-gray-800 {
+    color: var(--text-1) !important;
+  }
+
+ 
+  .text-xs.text-gray-600,
+  .text-sm.text-gray-600 {
+    color: color-mix(in srgb, var(--text-2) 85%, var(--text-1) 15%) !important;
+  }
+
+  
+  a.text-gray-600,
+  a.text-gray-700 {
+    color: var(--primary) !important;
+  }
+
+}
+*/
+
