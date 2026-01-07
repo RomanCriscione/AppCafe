@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
-from django.views.generic import TemplateView, RedirectView
-from django.views.static import serve
+from django.views.generic import RedirectView, TemplateView
+from django.views.static import serve        # ✅
 
 from django.contrib.sitemaps.views import sitemap
-from cafe_reviews.sitemaps import sitemaps
+from cafe_reviews.sitemaps import sitemaps   # tu diccionario del sitemaps.py
 
 from rest_framework.routers import DefaultRouter
 from reviews.api import CafeViewSet
@@ -17,19 +17,19 @@ router.register(r"cafes", CafeViewSet, basename="cafe")
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # Autenticación Allauth
+    # Allauth
     path("accounts/", include("allauth.urls")),
 
     # Usuarios
     path("users/", include("accounts.urls")),
 
-    # Público – home y páginas estáticas
+    # Público
     path("", include("core.urls")),
 
-    # Cafés HTML (ya con su propio namespace)
+    # App reviews HTML
     path("reviews/", include("reviews.urls")),
 
-    # API REST
+    # API
     path("api/", include(router.urls)),
 
     # robots.txt
@@ -42,7 +42,7 @@ urlpatterns = [
         name="robots_txt",
     ),
 
-    # sitemap
+    # sitemap principal
     path(
         "sitemap.xml",
         sitemap,
@@ -60,16 +60,21 @@ urlpatterns = [
         name="favicon",
     ),
 
-    # ✅ VERIFICACIÓN GOOGLE – MÉTODO DEFINITIVO
+    # ==============================
+    # 🔎 GOOGLE VERIFICATION
+    # ==============================
     path(
         "google157d26ef7e3007f2.html",
         serve,
-        {"document_root": Path(settings.STATIC_ROOT), "path": "google157d26ef7e3007f2.html"},
+        {
+            "document_root": settings.STATIC_ROOT,   # es Path, Whitenoise lo sirve
+            "path": "google157d26ef7e3007f2.html",   # ✅ ESTO RESUELVE EL ERROR
+        },
         name="google_verify",
     ),
 ]
 
-# MEDIA en producción (Render)
+# === MEDIA producción ===
 urlpatterns += [
     re_path(
         r"^media/(?P<path>.*)$",
