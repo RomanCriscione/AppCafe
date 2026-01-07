@@ -64,7 +64,7 @@ urlpatterns = [
     path(
         "google157d26ef7e3007f2.html",
         serve,
-        {"document_root": settings.STATIC_ROOT},
+        {"document_root": Path(settings.STATIC_ROOT), "path": "google157d26ef7e3007f2.html"},
         name="google_verify",
     ),
 ]
