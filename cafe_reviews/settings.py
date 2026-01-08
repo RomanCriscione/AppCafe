@@ -1,75 +1,158 @@
 from pathlib import Path
-from django.conf import settings
-from django.contrib import admin
-from django.urls import path, include, re_path
+from decouple import config
 
-from django.views.generic import RedirectView
-from django.views.static import serve            # ✅ este es el correcto
-
-from django.contrib.sitemaps.views import sitemap
-from cafe_reviews.sitemaps import sitemaps       # tu diccionario ya corregido
-
-from rest_framework.routers import DefaultRouter
-from reviews.api import CafeViewSet
-
+# ======================================================
+# BASE
+# ======================================================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Router API
-router = DefaultRouter()
-router.register(r"cafes", CafeViewSet, basename="cafe")
+# ======================================================
+# SECURITY
+# ======================================================
+SECRET_KEY = config("SECRET_KEY", default="django-insecure-dev-key")
+DEBUG = config("DEBUG", default=True, cast=bool)
 
-urlpatterns = [
-    path("admin/", admin.site.urls),
-
-    # Allauth
-    path("accounts/", include("allauth.urls")),
-
-    # Users
-    path("users/", include("accounts.urls")),
-
-    # Público
-    path("", include("core.urls")),
-
-    # Cafés HTML
-    path("reviews/", include("reviews.urls")),
-
-    # API REST
-    path("api/", include(router.urls)),
-
-    # robots
-    path(
-        "robots.txt",
-        RedirectView.as_view(url="/static/css/"),
-        name="robots_txt"
-    ),
-
-    # sitemap
-    path("sitemap.xml", sitemap, {"sitemaps": sitemaps},
-            name="django_sitemap"),
-
-    # favicon
-    path("favicon.ico",
-            RedirectView.as_view(url="/static/images/coffee-icon.png",
-                                permanent=False),
-            name="favicon"),
-
-    # ==============================
-    # 🔎 GOOGLE VERIFICATION
-    # ==============================
-    path(
-        "google157d26ef7e3007f2.html",
-        serve,
-        {"document_root": BASE_DIR / "static"},
-        name="google_verify",
-    ),
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "gogota.ar",
+    "www.gogota.ar",
 ]
 
-# Servir MEDIA producción
-urlpatterns += [
-    re_path(r"^media/(?P<path>.*)$", serve,
-            {"document_root": settings.MEDIA_ROOT}),
+# ======================================================
+# APPLICATIONS
+# ======================================================
+INSTALLED_APPS = [
+    # Django
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "django.contrib.sitemaps",
+
+    # Third party
+    "rest_framework",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+
+    # Apps propias
+    "core",
+    "accounts",
+    "reviews",
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL,
-                            document_root=settings.MEDIA_ROOT)
+SITE_ID = 1
+
+# ======================================================
+# MIDDLEWARE
+# ======================================================
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+
+    "allauth.account.middleware.AccountMiddleware",
+
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+
+# ======================================================
+# URLS / WSGI
+# ======================================================
+ROOT_URLCONF = "cafe_reviews.urls"
+WSGI_APPLICATION = "cafe_reviews.wsgi.application"
+
+# ======================================================
+# TEMPLATES
+# ======================================================
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
+# ======================================================
+# DATABASE
+# ======================================================
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
+
+# ======================================================
+# AUTH / ALLAUTH
+# ======================================================
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+AUTH_USER_MODEL = "accounts.CustomUser"
+
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+
+# ======================================================
+# PASSWORD VALIDATION
+# ======================================================
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+# ======================================================
+# I18N
+# ======================================================
+LANGUAGE_CODE = "es-ar"
+TIME_ZONE = "America/Argentina/Buenos_Aires"
+USE_I18N = True
+USE_TZ = True
+
+# ======================================================
+# STATIC / MEDIA
+# ======================================================
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+# ======================================================
+# DEFAULTS
+# ======================================================
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

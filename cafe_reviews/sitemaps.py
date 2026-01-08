@@ -1,16 +1,16 @@
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 from django.db.models import Max
-from reviews.models import Cafe
 
 
 class StaticSitemap(Sitemap):
-    """Sitemap de páginas estáticas."""
+    """Sitemap de páginas estáticas"""
+
     def items(self):
         return [
             "home",
-            "reviews:cafe_list",      # daily
-            "reviews:mapa_cafes",     # weekly
+            "reviews:cafe_list",
+            "reviews:mapa_cafes",
             "about",
             "contact",
         ]
@@ -40,11 +40,14 @@ class StaticSitemap(Sitemap):
 
 
 class CafeSitemap(Sitemap):
-    """Sitemap de detalles de cafeterías."""
+    """Sitemap de cafeterías"""
+
     changefreq = "monthly"
     priority = 0.7
 
     def items(self):
+        # ✅ IMPORT DIFERIDO (CLAVE)
+        from reviews.models import Cafe
         return Cafe.objects.only("id", "updated_at")
 
     def location(self, obj):
@@ -52,10 +55,11 @@ class CafeSitemap(Sitemap):
 
     def lastmod(self, obj):
         last_review = obj.reviews.aggregate(last=Max("created_at")).get("last")
-        return last_review or getattr(obj, "updated_at", None)
+        return last_review or obj.updated_at
 
 
+# ✅ diccionario FINAL (instancias, no clases)
 sitemaps = {
-    "static": StaticSitemap,
-    "cafes": CafeSitemap,
+    "static": StaticSitemap(),
+    "cafes": CafeSitemap(),
 }
