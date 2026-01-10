@@ -34,6 +34,11 @@ INSTALLED_APPS = [
     "django.contrib.sitemaps",
     "widget_tweaks",
 
+    # Apps propias (ANTES que allauth)
+    "accounts",
+    "core",
+    "reviews",
+
     # Third party
     "rest_framework",
     "allauth",
@@ -41,10 +46,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
 
-    # Apps propias
-    "core",
-    "accounts",
-    "reviews",
 ]
 
 SITE_ID = 1

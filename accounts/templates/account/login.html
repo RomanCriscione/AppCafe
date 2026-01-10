@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+{% load i18n %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-12 bg-white p-6 rounded-lg shadow-lg">
+
+  <h1 class="text-2xl font-bold mb-6 text-center">
+    🔐 Iniciar sesión
+  </h1>
+
+  {% get_providers as socialaccount_providers %}
+
+  {% if socialaccount_providers %}
+    {% for provider in socialaccount_providers %}
+      {% if provider.id == "google" %}
+        <a
+          href="{% provider_login_url provider.id %}"
+          class="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-md py-2 mb-4 hover:bg-gray-50 transition font-medium"
+        >
+          <i class="fab fa-google text-red-500"></i>
+          Continuar con Google
+        </a>
+      {% endif %}
+    {% endfor %}
+
+    <div class="my-4 flex items-center">
+      <div class="flex-1 h-px bg-gray-200"></div>
+      <span class="px-3 text-xs uppercase tracking-wide text-gray-400">
+        o con email
+      </span>
+      <div class="flex-1 h-px bg-gray-200"></div>
+    </div>
+  {% endif %}
+
+  <form method="post" action="{% url 'account_login' %}" class="space-y-4">
+    {% csrf_token %}
+
+    <div>
+      <label class="block font-medium">Email</label>
+      <input
+        type="email"
+        name="login"
+        required
+        class="w-full px-3 py-2 border rounded-md"
+        placeholder="tu@email.com"
+      />
+    </div>
+
+    <div>
+      <label class="block font-medium">Contraseña</label>
+      <input
+        type="password"
+        name="password"
+        required
+        class="w-full px-3 py-2 border rounded-md"
+        placeholder="Contraseña"
+      />
+    </div>
+
+    <button
+      type="submit"
+      class="w-full bg-[var(--brand)] text-white py-2 rounded-md font-semibold"
+    >
+      Entrar
+    </button>
+  </form>
+
+  <div class="mt-4 text-center text-sm">
+    <a href="{% url 'account_reset_password' %}" class="text-amber-700 hover:underline">
+      ¿Olvidaste tu contraseña?
+    </a>
+  </div>
+
+  <p class="mt-4 text-center text-sm">
+    ¿No tenés cuenta?
+    <a href="{% url 'account_signup' %}" class="text-blue-600 font-medium">
+      Registrate aquí
+    </a>
+  </p>
+</div>
+{% endblock %}
