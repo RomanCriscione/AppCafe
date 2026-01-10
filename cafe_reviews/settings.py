@@ -1,5 +1,6 @@
 from pathlib import Path
 from decouple import config
+import dj_database_url
 
 # ======================================================
 # BASE
@@ -48,7 +49,7 @@ INSTALLED_APPS = [
 
 ]
 
-SITE_ID = 6
+SITE_ID = 1
 
 # ======================================================
 # MIDDLEWARE
@@ -98,10 +99,9 @@ TEMPLATES = [
 # DATABASE
 # ======================================================
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=config("DATABASE_URL")
+    )
 }
 
 # ======================================================
