@@ -48,7 +48,7 @@ INSTALLED_APPS = [
 
 ]
 
-SITE_ID = X
+SITE_ID = 3
 
 # ======================================================
 # MIDDLEWARE
