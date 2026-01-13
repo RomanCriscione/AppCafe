@@ -1,33 +1,50 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-lg mx-auto mt-12 bg-white rounded-xl shadow-lg p-6 space-y-6">
+<div class="max-w-lg mx-auto mt-12 bg-white rounded-2xl shadow-lg p-6 space-y-6">
 
-  <h1 class="text-2xl font-bold text-center">
+  <h1 class="text-2xl font-bold text-center flex items-center justify-center gap-2">
     ⚙️ Mi cuenta
   </h1>
 
-  <div class="space-y-4">
+  <!-- Email -->
+  <div class="border rounded-xl p-4 space-y-1">
+    <p class="text-sm text-gray-500">Email</p>
+    <p class="font-medium">{{ request.user.email }}</p>
 
-    <div class="border rounded-lg p-4">
-      <p class="text-sm text-gray-500">Email</p>
-      <p class="font-medium">{{ request.user.email }}</p>
-    </div>
+    {% if request.user.emailaddress_set.first and request.user.emailaddress_set.first.verified %}
+      <p class="text-sm text-green-600 flex items-center gap-1">
+        ✅ Email verificado
+      </p>
+    {% else %}
+      <p class="text-sm text-amber-600 flex items-center gap-1">
+        ⚠️ Email sin verificar
+      </p>
 
+      <a
+        href="{% url 'account_email' %}"
+        class="inline-block mt-2 text-sm text-brand-700 underline hover:text-brand-900"
+      >
+        Reenviar verificación
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Acciones -->
+  <div class="space-y-3">
     <a
       href="{% url 'account_change_password' %}"
-      class="block w-full text-center bg-[var(--brand)] text-white py-2 rounded-md font-semibold hover:opacity-90 transition"
+      class="block w-full text-center bg-[var(--brand)] text-white py-2 rounded-lg font-semibold hover:opacity-90 transition"
     >
       🔒 Cambiar contraseña
     </a>
 
     <a
       href="{% url 'account_logout' %}"
-      class="block w-full text-center text-red-600 border border-red-200 py-2 rounded-md hover:bg-red-50 transition"
+      class="block w-full text-center text-red-600 border border-red-200 py-2 rounded-lg hover:bg-red-50 transition"
     >
       🚪 Cerrar sesión
     </a>
-
   </div>
 
 </div>
