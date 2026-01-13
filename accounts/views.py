@@ -67,3 +67,8 @@ def register_owner(request):
     # GET
     # return render(request, "accounts/register_owner.html", {"form": OwnerSignupForm(instance=request.user)})
     return render(request, "accounts/register_owner.html")
+
+
+@login_required
+def my_account(request):
+    return render(request, "accounts/my_account.html")

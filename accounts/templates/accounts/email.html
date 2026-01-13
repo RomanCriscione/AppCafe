@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load account %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-12 bg-white p-6 rounded-lg shadow-lg">
+
+  <h1 class="text-2xl font-bold mb-6 text-center">
+    📧 Gestión de email
+  </h1>
+
+  {% if user.emailaddress_set.all %}
+    <form method="post" action="{% url 'account_email' %}">
+      {% csrf_token %}
+
+      <div class="space-y-3 mb-6">
+        {% for emailaddress in user.emailaddress_set.all %}
+          <label class="flex items-center justify-between p-3 border rounded-md">
+            <div>
+              <input
+                type="radio"
+                name="email"
+                value="{{ emailaddress.email }}"
+                {% if emailaddress.primary %}checked{% endif %}
+              >
+              <span class="ml-2 font-medium">{{ emailaddress.email }}</span>
+
+              {% if emailaddress.verified %}
+                <span class="ml-2 text-green-600 text-sm">✔ verificado</span>
+              {% else %}
+                <span class="ml-2 text-yellow-600 text-sm">⚠ no verificado</span>
+              {% endif %}
+            </div>
+          </label>
+        {% endfor %}
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <button
+          name="action_primary"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Marcar como principal
+        </button>
+
+        <button
+          name="action_send"
+          class="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700"
+        >
+          Reenviar verificación
+        </button>
+
+        <button
+          name="action_remove"
+          class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Eliminar
+        </button>
+      </div>
+    </form>
+  {% endif %}
+
+  <hr class="my-6">
+
+  <h2 class="text-lg font-semibold mb-3">
+    ➕ Agregar nuevo email
+  </h2>
+
+  <form method="post" action="{% url 'account_email' %}" class="flex gap-2">
+    {% csrf_token %}
+    <input
+      type="email"
+      name="email"
+      required
+      placeholder="nuevo@email.com"
+      class="flex-1 px-3 py-2 border rounded-md"
+    >
+    <button
+      name="action_add"
+      class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+    >
+      Agregar
+    </button>
+  </form>
+
+</div>
+{% endblock %}

@@ -92,6 +92,10 @@
           <a href="{% url 'contact' %}" class="nav-link">Contacto</a>
           {% if user.is_authenticated %}
             <a href="{% url 'reviews:favorite_cafes' %}" class="nav-link">❤️ Favoritos</a>
+
+            <!-- ⚙️ Cuenta -->
+            <a href="{% url 'my_account' %}" class="nav-link">⚙️ Cuenta</a>
+
             {% if user.is_owner %}
               <a href="{% url 'reviews:create_cafe' %}" class="btn btn-ghost">➕ Agregar Café</a>
               <a href="{% url 'reviews:owner_dashboard' %}" class="btn btn-ghost">Mis Cafés</a>
@@ -100,8 +104,13 @@
                 <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
               </a>
             {% endif %}
-            <a href="{% url 'account_logout' %}" class="btn btn-danger btn-sm">Cerrar sesión</a>
+
+            <a href="{% url 'account_logout' %}" class="btn btn-danger btn-sm">
+              Cerrar sesión
+            </a>
+
           {% else %}
+
             <a href="{% url 'account_login' %}" class="btn btn-ghost">Iniciar sesión</a>
             <a href="{% url 'account_signup' %}" class="btn btn-primary">Registrarse</a>
             <a href="{% url 'register_owner' %}" class="btn btn-success">
@@ -133,14 +142,20 @@
         <hr class="my-2">
         {% if user.is_authenticated %}
           <a href="{% url 'reviews:favorite_cafes' %}" class="block py-2">❤️ Favoritos</a>
+
+          <!-- ⚙️ Cuenta -->
+          <a href="{% url 'my_account' %}" class="nav-link">⚙️ Cuenta</a>
+
           {% if user.is_owner %}
             <a href="{% url 'reviews:create_cafe' %}" class="block py-2">➕ Agregar Café</a>
             <a href="{% url 'reviews:owner_dashboard' %}" class="block py-2">Mis Cafés</a>
           {% else %}
             <a href="{% url 'register_owner' %}" class="block py-2">☕ Registrar tu café</a>
           {% endif %}
+
           <a href="{% url 'account_logout' %}" class="block py-2">Cerrar sesión</a>
         {% else %}
+
           <a href="{% url 'account_login' %}" class="block py-2">Iniciar sesión</a>
           <a href="{% url 'account_signup' %}" class="block py-2">Registrarse</a>
           <a href="{% url 'register_owner' %}" class="block py-2">☕ Registrar tu café</a>
