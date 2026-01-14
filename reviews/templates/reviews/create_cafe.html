@@ -69,29 +69,62 @@
     </div>
 
     <!-- Fotos -->
-    <div class="bg-blue-50 p-6 rounded-xl shadow-sm space-y-6">
-      <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
-        <i class="fas fa-camera"></i> Fotos
+    <div class="bg-white p-6 rounded-xl shadow-sm space-y-6 border">
+      <h3 class="text-xl font-semibold text-brand-700 flex items-center gap-2">
+        <i class="fas fa-camera"></i> Fotos del café
       </h3>
-      <p class="text-xs text-gray-500 mb-2">Subí hasta 3 fotos. Las horizontales se ven mejor.</p>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block font-semibold text-gray-700">{{ form.photo1.label }}</label>
-          {{ form.photo1|add_class:"block mt-1" }}
-          {{ form.photo1_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm mt-1" }}
+
+      <p class="text-sm text-gray-500">
+        Subí al menos <strong>1 foto obligatoria</strong>. Máximo 3. Las horizontales se ven mejor.
+      </p>
+
+      {% if form.photo1.errors %}
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          {{ form.photo1.errors.0 }}
         </div>
-        <div>
-          <label class="block font-semibold text-gray-700">{{ form.photo2.label }}</label>
-          {{ form.photo2|add_class:"block mt-1" }}
-          {{ form.photo2_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm mt-1" }}
+      {% endif %}
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- FOTO 1 -->
+        <div class="space-y-2">
+          <label class="block font-semibold text-gray-700">Foto principal *</label>
+
+          <label class="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition">
+            <span class="text-sm text-gray-600">📷 Subir foto</span>
+            {{ form.photo1|add_class:"hidden" }}
+          </label>
+
+          {{ form.photo1_title|add_class:"w-full rounded-lg border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
         </div>
-        <div>
-          <label class="block font-semibold text-gray-700">{{ form.photo3.label }}</label>
-          {{ form.photo3|add_class:"block mt-1" }}
-          {{ form.photo3_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm mt-1" }}
+
+        <!-- FOTO 2 -->
+        <div class="space-y-2">
+          <label class="block font-semibold text-gray-700">Foto secundaria</label>
+
+          <label class="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition">
+            <span class="text-sm text-gray-600">📷 Subir foto</span>
+            {{ form.photo2|add_class:"hidden" }}
+          </label>
+
+          {{ form.photo2_title|add_class:"w-full rounded-lg border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
         </div>
+
+        <!-- FOTO 3 -->
+        <div class="space-y-2">
+          <label class="block font-semibold text-gray-700">Foto secundaria</label>
+
+          <label class="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition">
+            <span class="text-sm text-gray-600">📷 Subir foto</span>
+            {{ form.photo3|add_class:"hidden" }}
+          </label>
+
+          {{ form.photo3_title|add_class:"w-full rounded-lg border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
+        </div>
+
       </div>
     </div>
+
 
     <!-- Opciones (todas las booleanas) -->
     <div class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-4">
@@ -146,4 +179,16 @@
     </button>
   </form>
 </div>
+
+<script>
+  document.querySelector("form").addEventListener("submit", function (e) {
+    const photo1 = document.querySelector('input[name="photo1"]');
+    if (!photo1.files.length) {
+      e.preventDefault();
+      alert("📸 Tenés que subir al menos una foto del café.");
+      photo1.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  });
+</script>
+
 {% endblock %}
