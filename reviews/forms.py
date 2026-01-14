@@ -145,6 +145,7 @@ class CafeForm(forms.ModelForm):
             'photo2': forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png'}),
             'photo3': forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png'}),
         }
+
         help_texts = {
             'photo1': 'Máximo 3MB. Formatos aceptados: JPG o PNG.',
             'photo2': 'Máximo 3MB. Formatos aceptados: JPG o PNG.',
@@ -194,17 +195,39 @@ class CafeForm(forms.ModelForm):
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
         if phone and not re.match(r'^\+?\d{6,15}$', phone):
-            raise forms.ValidationError("Número inválido. Usá solo números, con o sin +, de 6 a 15 dígitos.")
+            raise forms.ValidationError(
+                "Número inválido. Usá solo números, con o sin +, de 6 a 15 dígitos."
+            )
         return phone
 
     def clean(self):
         cleaned_data = super().clean()
+
+        # -------------------------------
+        # Foto obligatoria al crear café
+        # -------------------------------
+        if not self.instance.pk:
+            photo1 = self.files.get('photo1')
+            if not photo1:
+                self.add_error(
+                    'photo1',
+                    'Tenés que subir al menos una foto del café.'
+                )
+
+        # -------------------------------
+        # Validación de tamaño de imágenes
+        # -------------------------------
         max_size = 3 * 1024 * 1024  # 3MB
         for campo in ['photo1', 'photo2', 'photo3']:
             imagen = self.files.get(campo)
             if imagen and imagen.size > max_size:
-                self.add_error(campo, "La imagen no puede superar los 3MB.")
+                self.add_error(
+                    campo,
+                    'La imagen no puede superar los 3MB.'
+                )
+
         return cleaned_data
+
 
 
 # --------------------------------------------------------------------------------------
