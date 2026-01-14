@@ -467,11 +467,14 @@ def cafe_detail(request, cafe_id):
         )
 
     # texto de cabecera
+    one_liner = None
+
     if top_tags:
         one_liner = f"Ideal: {top_tags[0].name}"
     elif best_review and best_review.comment:
         txt = best_review.comment.strip()
         one_liner = txt[:90] + ("…" if len(txt) > 90 else "")
+
 
     return render(
         request,
