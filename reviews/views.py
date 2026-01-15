@@ -19,6 +19,7 @@ import os, json
 from core.mixins import EmailVerifiedRequiredMixin
 from allauth.account.models import EmailAddress
 from core.rate_limit import rate_limit
+from reviews.utils.ranking import calcular_score_cafe
 
 from .models import Review, Cafe, ReviewLike, ReviewReport, Tag, CafeStat
 from .forms import ReviewForm, CafeForm, ReviewReportForm
@@ -165,9 +166,9 @@ class ReviewListView(ListView):
             'has_wifi', 'has_air_conditioning', 'serves_alcohol', 'is_pet_friendly',
             'is_vegan_friendly', 'has_outdoor_seating', 'has_parking', 'is_accessible',
             'has_vegetarian_options', 'has_books_or_games', 'serves_breakfast',
-            "accepts_cards", "gluten_free_options", "has_baby_changing",
+            "accepts_cards", "has_gluten_free_options", "has_baby_changing",
             "has_power_outlets", "laptop_friendly", "quiet_space",
-            "specialty_coffee", "brunch", "accepts_reservations",
+            "has_specialty_coffee", "serves_brunch", "accepts_reservations",
         ]
         context['campos_activos'] = {k: (request.GET.get(k) == 'on') for k in boolean_keys}
 
@@ -250,40 +251,23 @@ class CafeListView(ListView):
             cafes = cafes.order_by('-average_rating')
         elif orden == 'reviews':
             cafes = cafes.order_by('-total_reviews')
+
         elif orden == 'algoritmo':
             cafes = list(cafes)
+
+            cafes_vistos = request.session.get("cafes_vistos", [])
+
             for cafe in cafes:
-                rating = cafe.average_rating or 0
-                reviews = cafe.total_reviews or 0
-                fotos = sum(bool(getattr(cafe, f'photo{i}')) for i in range(1, 4))
-                favs = cafe.favorites.count()
-                caracteristicas_count = sum([
-                    cafe.is_vegan_friendly,
-                    cafe.is_pet_friendly,
-                    cafe.has_wifi,
-                    cafe.has_outdoor_seating,
-                    cafe.has_parking,
-                    cafe.is_accessible,
-                    cafe.has_vegetarian_options,
-                    cafe.serves_breakfast,
-                    cafe.serves_alcohol,
-                    cafe.has_books_or_games,
-                    cafe.has_air_conditioning
-                ])
-                score_base = (
-                    rating * 2 +
-                    reviews * 0.7 +
-                    fotos * 1 +
-                    favs * 0.6 +
-                    caracteristicas_count * 0.3
+                cafe.score = calcular_score_cafe(
+                    cafe,
+                    user=request.user if request.user.is_authenticated else None,
+                    user_lat=float(lat) if lat else None,
+                    user_lon=float(lon) if lon else None,
+                    cafes_vistos_ids=cafes_vistos,
                 )
-                if cafe.visibility_level == 1:
-                    cafe.score = score_base * 1.10
-                elif cafe.visibility_level == 2:
-                    cafe.score = score_base * 1.20
-                else:
-                    cafe.score = score_base
+
             cafes.sort(key=lambda c: c.score, reverse=True)
+
         else:
             cafes = cafes.order_by('name')
 
@@ -300,7 +284,6 @@ class CafeListView(ListView):
             except ValueError:
                 pass
 
-        self._cafes_finales = cafes
         return cafes
 
     def get_context_data(self, **kwargs):
@@ -474,6 +457,15 @@ def cafe_detail(request, cafe_id):
     elif best_review and best_review.comment:
         txt = best_review.comment.strip()
         one_liner = txt[:90] + ("…" if len(txt) > 90 else "")
+
+    # === Diversidad: marcar café como visto ===
+    vistos = request.session.get("cafes_vistos", [])
+
+    if cafe.id not in vistos:
+        vistos.append(cafe.id)
+
+    # limitar tamaño para no inflar la sesión
+    request.session["cafes_vistos"] = vistos[-50:]
 
 
     return render(
@@ -923,8 +915,8 @@ def toggle_favorite(request, cafe_id):
             "Confirmá tu email para usar favoritos."
         )
         return redirect("account_email_verification_sent")
-    
-        rl = rate_limit(
+
+    rl = rate_limit(
         key=f"fav:{request.user.id}",
         limit=20,
         window_seconds=60,

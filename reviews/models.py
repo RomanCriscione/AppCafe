@@ -110,6 +110,13 @@ class Cafe(models.Model):
     )
     visibility_level = models.IntegerField(choices=VISIBILITY_CHOICES, default=0)
 
+    # ⭐ Curaduría Gota (editorial)
+    is_curated = models.BooleanField(
+        default=False,
+        help_text="Café destacado manualmente por Gota"
+    )
+
+
     # Dueño (ya lo tenías)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -139,14 +146,18 @@ class Cafe(models.Model):
         ]
 
     def save(self, *args, **kwargs):
+        procesar = kwargs.pop("procesar_imagenes", True)
+
         if self.photo1 and self.photo1.size > 2_000_000:
             raise ValueError("Imagen muy grande")
+
+        is_new = self.pk is None
+
+        # ✅ UN solo save base
         super().save(*args, **kwargs)
 
-        procesar = kwargs.pop("procesar_imagenes", True)
-        super().save(*args, **kwargs)
-
-        if procesar:
+        # 🔁 Procesar imágenes SOLO si el objeto ya existe
+        if procesar and not is_new:
             def procesar_imagen(campo):
                 img_field = getattr(self, campo)
                 if img_field and hasattr(img_field, 'path'):
@@ -172,13 +183,18 @@ class Cafe(models.Model):
                         )
 
                         file_content = ContentFile(buffer.getvalue())
-                        img_field.save(os.path.basename(img_field.name), file_content, save=False)
+                        img_field.save(
+                            os.path.basename(img_field.name),
+                            file_content,
+                            save=False
+                        )
                     except Exception as e:
                         print(f"⚠️ Error al procesar la imagen en {campo}: {e}")
 
             for campo in ['photo1', 'photo2', 'photo3']:
                 procesar_imagen(campo)
 
+            # ✅ Update controlado (NO INSERT)
             super().save(update_fields=['photo1', 'photo2', 'photo3'])
 
     def average_rating(self):
