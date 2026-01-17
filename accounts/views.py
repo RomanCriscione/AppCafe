@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.shortcuts import render, redirect
 
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-# from .forms import OwnerSignupForm  # <- úsalo si tenés un formulario específico de dueños
+
 
 
 # ---- Registro de usuario común
@@ -14,9 +14,7 @@ def register(request):
         form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            # Si usás allauth, el nombre suele ser 'account_login'
             return redirect('account_login')
-            # return redirect('login')  # <- usa este si tu URL se llama 'login'
     else:
         form = CustomUserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})
@@ -45,7 +43,7 @@ def profile(request):
 @login_required
 def register_owner(request):
     if request.method == "POST":
-        # Si tenés un formulario, podrías validar algo extra:
+        # Validación extra, por el momento no
         # form = OwnerSignupForm(request.POST, instance=request.user)
         # if form.is_valid():
         #     user = form.save(commit=False)
