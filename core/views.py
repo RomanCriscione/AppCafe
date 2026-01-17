@@ -3,6 +3,9 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.urls import reverse
 from django.core.serializers.json import DjangoJSONEncoder
+from django.core.mail import send_mail
+from django.conf import settings
+
 
 from reviews.models import Review, Cafe
 from reviews.utils.tags import get_tags_grouped_by_cafe
@@ -104,10 +107,28 @@ def about_view(request):
 # ✅ Contacto
 def contact_view(request):
     success = False
+
     if request.method == "POST":
-        # Podés procesar/guardar el mensaje acá si querés
-        success = True
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        message = request.POST.get("message")
+
+        if name and email and message:
+            send_mail(
+                subject=f"Contacto Gota · {name}",
+                message=(
+                    f"Nombre: {name}\n"
+                    f"Email: {email}\n\n"
+                    f"Mensaje:\n{message}"
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=["hola@gogota.ar"],
+                reply_to=[email],                         
+            )
+            success = True
+
     return render(request, "core/contact.html", {"success": success})
+
 
 
 # ✅ Sitemap dinámico
