@@ -38,21 +38,27 @@
   <link rel="manifest" href="{% static 'site.webmanifest' %}">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#553A2F">
-  <link rel="icon" href="{% static 'images/coffee-icon.png' %}">
-  <link rel="apple-touch-icon" sizes="192x192" href="{% static 'images/coffee-icon.png' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'images/gota-icon.png' %}">
   <link rel="canonical" href="{{ request.build_absolute_uri }}">
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="{{ page_title|default:'Gota — Descubrí tu próximo café' }}">
-  <meta property="og:description" content="{{ page_description|default:'Encontrá cafés por zona, estilo y experiencia.' }}">
-  {% if og_image_url %}
-    <meta property="og:image" content="{{ og_image_url }}">
-  {% else %}
-    <meta property="og:image" content="{% static 'images/og-default.jpg' %}">
-  {% endif %}
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="{{ request.build_absolute_uri }}">
-  <meta name="twitter:card" content="summary_large_image">
+  <!-- Open Graph / Social -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gota">
+<meta property="og:title" content="Gota">
+<meta property="og:description" content="Descubrí tu próximo café">
+<meta property="og:image" content="{% static 'images/gota-og.png' %}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Gota">
+<meta name="twitter:description" content="Descubrí tu próximo café">
+<meta name="twitter:image" content="{% static 'images/gota-og.png' %}">
+
 
   <!-- Chart.js (si lo usás) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
