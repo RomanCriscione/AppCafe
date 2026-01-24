@@ -205,13 +205,7 @@
     </p>
   {% endif %}
 
-  <!-- FOTOS -->
-  {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
-    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-200">
-      {% include "reviews/includes/cafe_photos.html" with cafe=cafe %}
-    </section>
-  {% endif %}
-
+  
   <!-- CTAs -->
   <div class="flex flex-wrap gap-3 pt-2">
 
@@ -231,6 +225,13 @@
       Ver reseñas
     </a>
 
+    <!-- FOTOS -->
+  {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
+    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-200">
+      {% include "reviews/includes/cafe_photos.html" with cafe=cafe %}
+    </section>
+  {% endif %}
+    
     {% if user.is_authenticated %}
       {% if user not in cafe.favorites.all %}
         <form method="post" action="{% url 'reviews:toggle_favorite' cafe.id %}">
