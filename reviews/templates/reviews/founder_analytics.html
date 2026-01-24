@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">📊 Founder Analytics – Gota</h1>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+
+  <div class="p-4 border rounded">
+    <div class="text-xs text-gray-500">Visitas</div>
+    <div class="text-xl font-bold">{{ totals.views }}</div>
+  </div>
+
+  <div class="p-4 border rounded">
+    <div class="text-xs text-gray-500">Reviews</div>
+    <div class="text-xl font-bold">{{ totals.reviews }}</div>
+  </div>
+
+  <div class="p-4 border rounded">
+    <div class="text-xs text-gray-500">Favoritos</div>
+    <div class="text-xl font-bold">{{ totals.favorites }}</div>
+  </div>
+
+  <div class="p-4 border rounded">
+    <div class="text-xs text-gray-500">Rating promedio</div>
+    <div class="text-xl font-bold">
+      {% if totals.avg_rating %}{{ totals.avg_rating }}{% else %}—{% endif %}
+    </div>
+  </div>
+
+</div>
+
+{% if top_cafes %}
+<h2 class="text-lg font-semibold mb-2">🔥 Cafés más visitados</h2>
+
+<div class="overflow-x-auto mb-6">
+  <table class="min-w-full text-sm border">
+    <thead>
+      <tr class="bg-gray-100">
+        <th>#</th>
+        <th>Café</th>
+        <th>Zona</th>
+        <th>Visitas</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in top_cafes %}
+      <tr class="border-t">
+        <td class="font-medium">{{ forloop.counter }}</td>
+        <td>{{ c.name }}</td>
+        <td>{{ c.location }}</td>
+        <td class="font-semibold">{{ c.total_views|default:0 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<h2 class="text-lg font-semibold mb-2">📈 Evolución de visitas</h2>
+
+<div class="mb-8">
+  <canvas id="visitsChart" height="100"></canvas>
+</div>
+
+
+<form method="get" class="flex flex-wrap gap-2 mb-4 items-end">
+
+  <div>
+    <label class="text-xs block">Rango rápido</label>
+    <select name="range" class="border px-2 py-1 text-sm">
+      <option value="">—</option>
+      <option value="7" {% if range == "7" %}selected{% endif %}>Últimos 7 días</option>
+      <option value="30" {% if range == "30" %}selected{% endif %}>Últimos 30 días</option>
+    </select>
+  </div>
+
+  <div>
+    <label class="text-xs block">Desde</label>
+    <input type="date" name="from" value="{{ from }}" class="border px-2 py-1 text-sm">
+  </div>
+
+  <div>
+    <label class="text-xs block">Hasta</label>
+    <input type="date" name="to" value="{{ to }}" class="border px-2 py-1 text-sm">
+  </div>
+
+  <button class="px-3 py-1 bg-black text-white text-sm rounded">
+    Aplicar
+  </button>
+
+</form>
+
+<a
+  href="?export=excel{% if range %}&range={{ range }}{% endif %}{% if from %}&from={{ from }}{% endif %}{% if to %}&to={{ to }}{% endif %}"
+  class="inline-block mb-4 ml-2 px-4 py-2 bg-gray-700 text-white rounded"
+>
+  Descargar Excel
+</a>
+
+<div class="overflow-x-auto">
+<table class="min-w-full text-sm border">
+  <thead>
+    <tr class="bg-gray-100">
+      <th>Café</th>
+      <th>Dueño</th>
+      <th>Zona</th>
+      <th>Plan</th>
+      <th>Visitas</th>
+      <th>Reviews</th>
+      <th>Favoritos</th>
+      <th>Rating</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in cafes %}
+    <tr class="border-t">
+      <td class="font-medium">{{ c.name }}</td>
+      <td>{{ c.owner.email }}</td>
+      <td>{{ c.location }}</td>
+      <td>{{ c.get_visibility_level_display }}</td>
+      <td>{{ c.total_views|default:0 }}</td>
+      <td>{{ c.total_reviews }}</td>
+      <td>{{ c.total_favorites }}</td>
+      <td>
+        {% if c.avg_rating %}
+          {{ c.avg_rating|floatformat:1 }}
+        {% else %}
+          —
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('visitsChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {{ labels|safe }},
+        datasets: [{
+          label: 'Visitas',
+          data: {{ values|safe }},
+          borderWidth: 2,
+          tension: 0.3,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+</script>
+
+
+{% endblock %}
+

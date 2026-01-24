@@ -20,11 +20,14 @@ from core.mixins import EmailVerifiedRequiredMixin
 from allauth.account.models import EmailAddress
 from core.rate_limit import rate_limit
 from reviews.utils.ranking import calcular_score_cafe
-
 from .models import Review, Cafe, ReviewLike, ReviewReport, Tag, CafeStat
 from .forms import ReviewForm, CafeForm, ReviewReportForm
 from reviews.utils.geo import haversine_distance
 from core.messages import MESSAGES
+from django.contrib.admin.views.decorators import staff_member_required
+from django.http import HttpResponse
+from openpyxl import Workbook
+from datetime import datetime
 
 # Helper para invalidar el fragment cache de la lista de reseñas
 def _invalidate_reviews_cache(cafe_id, user_id=None):
@@ -1218,3 +1221,149 @@ def report_review(request, review_id):
         "reviews/reports/report_form.html",
         {"review": review, "form": form}
     )
+
+@staff_member_required
+def founder_analytics(request):
+    today = timezone.localdate()
+
+    range_param = request.GET.get("range")
+    date_from = request.GET.get("from")
+    date_to = request.GET.get("to")
+
+    if range_param == "7":
+        start_date = today - timedelta(days=6)
+        end_date = today
+    elif range_param == "30":
+        start_date = today - timedelta(days=29)
+        end_date = today
+    elif date_from and date_to:
+        try:
+            start_date = datetime.fromisoformat(date_from).date()
+            end_date = datetime.fromisoformat(date_to).date()
+        except ValueError:
+            start_date = None
+            end_date = None
+    else:
+        start_date = None
+        end_date = None
+
+    cafes = Cafe.objects.select_related("owner")
+
+    if start_date and end_date:
+        cafes = cafes.annotate(
+            total_views=Sum(
+                "stats__views",
+                filter=Q(stats__date__range=(start_date, end_date))
+            )
+        )
+    else:
+        cafes = cafes.annotate(
+            total_views=Sum("stats__views")
+        )
+
+    cafes = cafes.annotate(
+        total_reviews=Count("reviews", distinct=True),
+        total_favorites=Count("favorites", distinct=True),
+        avg_rating=Avg("reviews__rating"),
+    ).order_by(F("total_views").desc(nulls_last=True))
+    # === TOTALES GLOBALES (KPIs) ===
+    ratings = [c.avg_rating for c in cafes if c.avg_rating]
+
+    totals = {
+        "views": sum(c.total_views or 0 for c in cafes),
+        "reviews": sum(c.total_reviews or 0 for c in cafes),
+        "favorites": sum(c.total_favorites or 0 for c in cafes),
+        "avg_rating": round(sum(ratings) / len(ratings), 2) if ratings else None,
+    }
+
+    # === TOP CAFÉS POR VISITAS ===
+    top_cafes = (
+        cafes
+        .filter(total_views__gt=0)
+        .order_by("-total_views")[:5]
+    )
+
+    # === EVOLUCIÓN DIARIA DE VISITAS (GLOBAL) ===
+    stats_qs = CafeStat.objects.filter(
+        cafe__in=cafes.values_list("id", flat=True)
+    )
+    if start_date and end_date:
+        stats_qs = stats_qs.filter(date__range=(start_date, end_date))
+
+    daily = (
+        stats_qs
+        .values("date")
+        .annotate(total=Sum("views"))
+        .order_by("date")
+    )
+
+    labels = [d["date"].strftime("%d/%m") for d in daily]
+    values = [d["total"] or 0 for d in daily]
+
+    export = request.GET.get("export")
+
+    if export == "excel":
+        return export_founder_excel(cafes)
+
+    return render(
+        request,
+        "reviews/founder_analytics.html",
+        {
+            "cafes": cafes,
+            "top_cafes": top_cafes,
+            "totals": totals,
+            "labels": labels,
+            "values": values,
+            "range": range_param,
+            "from": date_from,
+            "to": date_to,
+        }
+    )
+
+
+def export_founder_excel(cafes):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Founder Analytics"
+
+    headers = [
+        "Café",
+        "Dueño",
+        "Email dueño",
+        "Zona",
+        "Plan",
+        "Visitas",
+        "Reviews",
+        "Favoritos",
+        "Rating promedio",
+        "Creado",
+    ]
+    ws.append(headers)
+
+    PLAN_MAP = {
+        0: "Gratis",
+        1: "Destacado",
+        2: "Premium",
+    }
+
+    for c in cafes:
+        ws.append([
+            c.name,
+            c.owner.get_full_name() or c.owner.email,
+            c.owner.email,
+            c.location,
+            PLAN_MAP.get(c.visibility_level),
+            c.total_views or 0,
+            c.total_reviews,
+            c.total_favorites,
+            round(c.avg_rating, 1) if c.avg_rating else "",
+            c.created_at.strftime("%Y-%m-%d"),
+        ])
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="gota_founder_analytics.xlsx"'
+
+    wb.save(response)
+    return response

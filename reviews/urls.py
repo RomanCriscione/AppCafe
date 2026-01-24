@@ -21,6 +21,8 @@ urlpatterns = [
 
     path('cafes/cercanos/', views.nearby_cafes, name='nearby_cafes'),
     path("owner/analytics/", views.analytics_dashboard, name="analytics_dashboard"),
+    path(
+    "founder/analytics/", views.founder_analytics, name="founder_analytics",),
 
     # Favoritos
     path('favoritos/', views.favorite_cafes, name='favorite_cafes'),
