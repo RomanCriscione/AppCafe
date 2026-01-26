@@ -148,9 +148,6 @@ class Cafe(models.Model):
     def save(self, *args, **kwargs):
         procesar = kwargs.pop("procesar_imagenes", True)
 
-        if self.photo1 and self.photo1.size > 2_000_000:
-            raise ValueError("Imagen muy grande")
-
         is_new = self.pk is None
 
         # ✅ UN solo save base

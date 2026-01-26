@@ -217,13 +217,13 @@ class CafeForm(forms.ModelForm):
         # -------------------------------
         # Validación de tamaño de imágenes
         # -------------------------------
-        max_size = 3 * 1024 * 1024  # 3MB
+        max_size = 4 * 1024 * 1024  # 4MB
         for campo in ['photo1', 'photo2', 'photo3']:
             imagen = self.files.get(campo)
             if imagen and imagen.size > max_size:
                 self.add_error(
                     campo,
-                    'La imagen no puede superar los 3MB.'
+                    'La imagen no puede superar los 4MB.'
                 )
 
         return cleaned_data
