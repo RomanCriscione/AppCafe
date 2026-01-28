@@ -38,10 +38,16 @@ class Cafe(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     google_maps_url = models.URLField(blank=True, null=True)
     email = models.EmailField(
-    blank=True, null=True,
-    verbose_name="Email del negocio",
-    help_text="Se usa para verificar al dueño por dominio (no se muestra públicamente)."
-)
+        blank=True, null=True,
+        verbose_name="Email del negocio",
+        help_text="Se usa para verificar al dueño por dominio (no se muestra públicamente)."
+    )
+    instagram = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Usuario de Instagram sin @ (ej: cafepepito)"
+    )
+
 
     # Fotos
     photo1 = models.ImageField(upload_to='cafes/', blank=True, null=True)

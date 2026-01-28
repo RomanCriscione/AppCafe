@@ -93,6 +93,7 @@ class CafeForm(forms.ModelForm):
             'name', 'address', 'location', 'description',
             'phone', 'email',
             'google_maps_url',
+            'instagram',
             'photo1', 'photo1_title',
             'photo2', 'photo2_title',
             'photo3', 'photo3_title',
@@ -137,6 +138,7 @@ class CafeForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
             'google_maps_url': forms.URLInput(attrs={'placeholder': 'https://maps.google.com/...'}),
+            'instagram': forms.TextInput(attrs={'placeholder': 'cafepepito'}),
             'email': forms.EmailInput(attrs={'placeholder': 'dueño@tucafe.com'}),
             'photo1_title': forms.TextInput(attrs={'placeholder': 'Título de la foto 1'}),
             'photo2_title': forms.TextInput(attrs={'placeholder': 'Título de la foto 2'}),
@@ -227,6 +229,24 @@ class CafeForm(forms.ModelForm):
                 )
 
         return cleaned_data
+    
+    def clean_instagram(self):
+        ig = self.cleaned_data.get("instagram", "").strip()
+
+        if not ig:
+            return ""
+
+        ig = ig.replace("@", "")
+        ig = ig.replace("https://instagram.com/", "")
+        ig = ig.replace("https://www.instagram.com/", "")
+        ig = ig.strip("/")
+
+        if " " in ig:
+            raise forms.ValidationError(
+                "El usuario de Instagram no puede contener espacios."
+            )
+
+        return ig
 
 
 

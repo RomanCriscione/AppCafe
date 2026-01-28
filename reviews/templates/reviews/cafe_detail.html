@@ -113,9 +113,18 @@
     ],
     {% endif %}
 
-    {% if cafe.google_maps_url %}
-    "sameAs": ["{{ cafe.google_maps_url|escapejs }}"]
+    {% if cafe.google_maps_url or cafe.instagram %}
+    "sameAs": [
+      {% if cafe.google_maps_url %}
+        "{{ cafe.google_maps_url|escapejs }}"
+      {% endif %}
+      {% if cafe.instagram %}
+        {% if cafe.google_maps_url %},{% endif %}
+        "https://www.instagram.com/{{ cafe.instagram|escapejs }}/"
+      {% endif %}
+    ]
     {% endif %}
+
 
   }
   </script>
@@ -266,6 +275,28 @@
           </div>
         </div>
       </div>
+
+      {% if cafe.instagram %}
+      <div class="flex items-start gap-2">
+        <span>📸</span>
+        <div>
+          <div class="font-semibold text-gray-900 dark:text-[var(--text-1)]">
+            Instagram
+          </div>
+          <div class="text-sm">
+            <a
+              href="https://www.instagram.com/{{ cafe.instagram }}/"
+              target="_blank"
+              rel="noopener"
+              class="text-pink-600 hover:underline"
+            >
+              @{{ cafe.instagram }}
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
 
       <!-- BOTONES -->
       <div class="sm:col-span-2 flex flex-wrap gap-3">
