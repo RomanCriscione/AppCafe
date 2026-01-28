@@ -138,7 +138,7 @@ class CafeForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
             'google_maps_url': forms.URLInput(attrs={'placeholder': 'https://maps.google.com/...'}),
-            'instagram': forms.TextInput(attrs={'placeholder': 'cafepepito'}),
+            'instagram': forms.TextInput(attrs={'placeholder': 'app.gota'}),
             'email': forms.EmailInput(attrs={'placeholder': 'dueño@tucafe.com'}),
             'photo1_title': forms.TextInput(attrs={'placeholder': 'Título de la foto 1'}),
             'photo2_title': forms.TextInput(attrs={'placeholder': 'Título de la foto 2'}),
