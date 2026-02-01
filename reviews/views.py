@@ -218,7 +218,7 @@ class CafeListView(ListView):
     def get_queryset(self):
         request = self.request
         zona = request.GET.get('zona')
-        orden = request.GET.get('orden')
+        orden = request.GET.get('orden', 'algoritmo')
         lat = request.GET.get('lat')
         lon = request.GET.get('lon')
 
@@ -252,10 +252,12 @@ class CafeListView(ListView):
 
         if orden == 'rating':
             cafes = cafes.order_by('-average_rating')
+
         elif orden == 'reviews':
             cafes = cafes.order_by('-total_reviews')
 
-        elif orden == 'algoritmo':
+        else:
+            # 🔥 ALGORITMO POR DEFECTO
             cafes = list(cafes)
 
             cafes_vistos = request.session.get("cafes_vistos", [])
@@ -271,8 +273,6 @@ class CafeListView(ListView):
 
             cafes.sort(key=lambda c: c.score, reverse=True)
 
-        else:
-            cafes = cafes.order_by('name')
 
         # Filtro por ubicación (3 km)
         if lat and lon:
@@ -313,7 +313,7 @@ class CafeListView(ListView):
             .distinct().order_by('location')
         )
         context['zona_seleccionada'] = request.GET.get('zona')
-        context['orden_actual'] = request.GET.get('orden')
+        context['orden_actual'] = request.GET.get('orden', 'algoritmo')
 
         context["campos_activos"] = {
             field: field in request.GET
