@@ -108,10 +108,21 @@
         <div class="space-y-2">
           <label class="block font-semibold text-gray-700">Foto principal *</label>
 
-          <label class="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition">
-            <span class="text-sm text-gray-600">📷 Subir foto</span>
+          <label class="relative flex flex-col items-center justify-center w-full px-4 py-3 
+                        border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition
+                        text-center"
+                data-preview-container>
+                
+            <span class="text-sm text-gray-600" data-label-text>
+              📷 Subir foto
+            </span>
+
+            <img class="hidden mt-2 w-24 h-24 object-cover rounded-lg shadow"
+                data-preview-img />
+
             {{ form.photo1|add_class:"hidden" }}
           </label>
+
 
           {{ form.photo1_title|add_class:"w-full rounded-lg border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
         </div>
@@ -208,5 +219,32 @@
     }
   });
 </script>
+
+<script>
+  document.querySelectorAll('[data-preview-container]').forEach(container => {
+    const input = container.querySelector('input[type="file"]');
+    const labelText = container.querySelector('[data-label-text]');
+    const previewImg = container.querySelector('[data-preview-img]');
+
+    input.addEventListener('change', () => {
+      const file = input.files[0];
+      if (!file) return;
+
+      // feedback visual
+      labelText.textContent = '✅ Foto cargada';
+      container.classList.remove('border-dashed');
+      container.classList.add('border-green-400', 'bg-green-50');
+
+      // preview
+      const reader = new FileReader();
+      reader.onload = e => {
+        previewImg.src = e.target.result;
+        previewImg.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+</script>
+
 
 {% endblock %}
