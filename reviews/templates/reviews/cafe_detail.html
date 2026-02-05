@@ -312,6 +312,26 @@
             🏷️ ¿Sos el dueño? Reclamalo
           </a>
         {% endif %}
+
+        <!-- COMPARTIR -->
+        <button onclick="shareCafe('{{ cafe.name|escapejs }}', '{{ full_page_url }}')"
+                class="btn btn-outline rounded-xl">
+          📤 Compartir
+        </button>
+
+        <!-- WhatsApp directo -->
+        <a href="https://wa.me/?text=Mirá%20{{ cafe.name|urlencode }}%20en%20Gota%20☕%0A{{ full_page_url|urlencode }}"
+          target="_blank"
+          class="btn btn-outline rounded-xl">
+          🟢 WhatsApp
+        </a>
+
+        <!-- Copiar link -->
+        <button onclick="copyCafeLink('{{ full_page_url }}', this)"
+                class="btn btn-outline rounded-xl">
+          🔗 Copiar link
+        </button>
+
       </div>
 
     </div>
@@ -799,5 +819,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 6000);
 });
 </script>
+
+<script>
+
+function shareCafe(title, url){
+  if(navigator.share){
+    navigator.share({
+      title: title,
+      text: "Mirá este café en Gota ☕",
+      url: url
+    });
+  }else{
+    navigator.clipboard.writeText(url);
+    alert("Link copiado 📋");
+  }
+}
+</script>
+
 
 {% endblock %}

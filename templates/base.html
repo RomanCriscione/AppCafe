@@ -306,5 +306,19 @@
   </script>
 
   {% block scripts %}{% endblock %}
+
+  <script>
+function copyCafeLink(url, btn){
+  const fullUrl = window.location.origin + url;
+
+  navigator.clipboard.writeText(fullUrl).then(()=>{
+    if(!btn) return;
+    const original = btn.innerText;
+    btn.innerText = "✅";
+    setTimeout(()=> btn.innerText = original, 1200);
+  });
+}
+</script>
+
 </body>
 </html>
