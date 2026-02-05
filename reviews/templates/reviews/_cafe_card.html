@@ -123,13 +123,6 @@
           {% endif %}
         </div>
 
-          <button onclick="copyCafeLink('{{ request.scheme }}://{{ request.get_host }}{% url 'reviews:cafe_detail' cafe.id %}', this)"
-                  class="text-xs text-gray-500 hover:text-black">
-            🔗 Compartir
-          </button>
-
-
-
         <!-- VER -->
         <a href="{% url 'reviews:cafe_detail' cafe.id %}"
           class="btn btn-primary btn-sm">
