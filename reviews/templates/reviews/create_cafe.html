@@ -112,7 +112,7 @@
                         border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition
                         text-center"
                 data-preview-container>
-                
+            
             <span class="text-sm text-gray-600" data-label-text>
               📷 Subir foto
             </span>
@@ -123,7 +123,6 @@
             {{ form.photo1|add_class:"hidden" }}
           </label>
 
-
           {{ form.photo1_title|add_class:"w-full rounded-lg border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
         </div>
 
@@ -131,8 +130,18 @@
         <div class="space-y-2">
           <label class="block font-semibold text-gray-700">Foto secundaria</label>
 
-          <label class="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition">
-            <span class="text-sm text-gray-600">📷 Subir foto</span>
+          <label class="relative flex flex-col items-center justify-center w-full px-4 py-3 
+                        border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition
+                        text-center"
+                data-preview-container>
+            
+            <span class="text-sm text-gray-600" data-label-text>
+              📷 Subir foto
+            </span>
+
+            <img class="hidden mt-2 w-24 h-24 object-cover rounded-lg shadow"
+                data-preview-img />
+
             {{ form.photo2|add_class:"hidden" }}
           </label>
 
@@ -143,8 +152,18 @@
         <div class="space-y-2">
           <label class="block font-semibold text-gray-700">Foto secundaria</label>
 
-          <label class="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition">
-            <span class="text-sm text-gray-600">📷 Subir foto</span>
+          <label class="relative flex flex-col items-center justify-center w-full px-4 py-3 
+                        border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition
+                        text-center"
+                data-preview-container>
+            
+            <span class="text-sm text-gray-600" data-label-text>
+              📷 Subir foto
+            </span>
+
+            <img class="hidden mt-2 w-24 h-24 object-cover rounded-lg shadow"
+                data-preview-img />
+
             {{ form.photo3|add_class:"hidden" }}
           </label>
 
