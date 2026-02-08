@@ -156,7 +156,15 @@
 
     {% if average_rating %}
       <div class="flex items-center gap-1 font-semibold text-gray-900 dark:text-[var(--text-1)]">
-        ☕ {{ average_rating|floatformat:1 }}
+        {{ average_rating|floatformat:1 }}
+        <svg viewBox="0 0 24 24" class="w-5 h-5 inline align-[-2px] ml-1">
+          <path fill="#f59e0b" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
+          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
+                d="M4 8h11v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8z"/>
+          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
+                d="M15 9h3a3 3 0 0 1 0 6h-2"/>
+        </svg>
+
       </div>
     {% endif %}
 
@@ -298,47 +306,67 @@
       {% endif %}
 
 
-      <!-- BOTONES -->
-      <div class="sm:col-span-2 flex flex-wrap gap-3">
-        <a href="https://www.google.com/maps/search/?api=1{% if cafe.latitude and cafe.longitude %}&query={{ cafe.latitude }},{{ cafe.longitude }}{% else %}&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}{% endif %}"
-          target="_blank"
-          class="btn btn-primary rounded-xl">
-          📍 Ver en Google Maps
-        </a>
+        
+      <!-- BOTONES ORDENADOS -->
+      <div class="sm:col-span-2 space-y-3">
 
-        {% if cafe.claim_status != 'VERIFIED' %}
-          <a href="{% url 'reviews:claim_start' cafe.id %}"
-            class="cta cta-indigo">
-            🏷️ ¿Sos el dueño? Reclamalo
+        <!-- FILA PRINCIPAL -->
+        <div class="flex flex-wrap gap-3">
+
+          <!-- QR reseñas -->
+          <button onclick="openQRModal()"
+                  class="btn btn-primary rounded-xl">
+            ⭐ QR para reseñas
+          </button>
+
+          <!-- Compartir -->
+          <button onclick="toggleShareMenu()"
+                  class="btn btn-outline rounded-xl">
+            📤 Compartir
+          </button>
+
+        </div>
+
+        <!-- MENU SHARE -->
+        <div id="shareMenu"
+            class="hidden flex flex-wrap gap-2 bg-gray-50 dark:bg-[var(--surface-2)] p-3 rounded-xl">
+
+          <!-- WhatsApp -->
+          <a href="https://wa.me/?text=Mirá%20{{ cafe.name|urlencode }}%20en%20Gota%20☕%0A{{ full_page_url|urlencode }}"
+            target="_blank"
+            class="btn btn-outline btn-sm rounded-lg">
+            🟢 WhatsApp
           </a>
-        {% endif %}
 
-        <!-- COMPARTIR -->
-        <button onclick="shareCafe('{{ cafe.name|escapejs }}', '{{ full_page_url }}')"
-                class="btn btn-outline rounded-xl">
-          📤 Compartir
-        </button>
+          <!-- Copiar -->
+          <button onclick="copyCafeLink('{{ full_page_url }}', this)"
+                  class="btn btn-outline btn-sm rounded-lg">
+            🔗 Copiar link
+          </button>
 
-        <!-- WhatsApp directo -->
-        <a href="https://wa.me/?text=Mirá%20{{ cafe.name|urlencode }}%20en%20Gota%20☕%0A{{ full_page_url|urlencode }}"
-          target="_blank"
-          class="btn btn-outline rounded-xl">
-          🟢 WhatsApp
-        </a>
+        </div>
 
+        <!-- FILA SECUNDARIA -->
+        <div class="flex flex-wrap gap-4 pt-2 border-t border-gray-200 dark:border-[var(--border)]">
 
-        <!-- Copiar link -->
-        <button onclick="copyCafeLink('{{ full_page_url }}', this)"
-                class="btn btn-outline rounded-xl">
-          🔗 Copiar link
-        </button>
+          <!-- Google maps -->
+          <a href="https://www.google.com/maps/search/?api=1{% if cafe.latitude and cafe.longitude %}&query={{ cafe.latitude }},{{ cafe.longitude }}{% else %}&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}{% endif %}"
+            target="_blank"
+            class="text-sm text-gray-500 hover:underline">
+            📍 Ver en Google Maps
+          </a>
 
-        <button onclick="openQRModal()"
-                class="btn btn-outline rounded-xl">
-          📲 QR para reseñas
-        </button>
+          {% if cafe.claim_status != 'VERIFIED' %}
+            <a href="{% url 'reviews:claim_start' cafe.id %}"
+              class="text-sm text-gray-500 hover:underline">
+              🏷️ ¿Sos el dueño? Reclamalo
+            </a>
+          {% endif %}
+
+        </div>
 
       </div>
+
 
     </div>
   </section>
@@ -411,7 +439,16 @@
   <div class="animate-fade-in-up animate-delay-300">
 
     {% if average_rating %}
-      <p class="mb-4"><strong>Calificación promedio:</strong> ☕ {{ average_rating|floatformat:1 }}</p>
+      <p class="mb-4">
+        <strong>Calificación promedio:</strong> {{ average_rating|floatformat:1 }}
+        <svg viewBox="0 0 24 24" class="w-5 h-5 inline align-[-2px] ml-1">
+          <path fill="#f59e0b" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
+          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
+                d="M4 8h11v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8z"/>
+          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
+                d="M15 9h3a3 3 0 0 1 0 6h-2"/>
+        </svg>
+      </p>
 
       {% if precio_promedio %}
         <div class="px-4 py-3 rounded-xl mt-4 border
@@ -436,7 +473,15 @@
 
           <p class="text-sm text-gray-600 dark:text-[var(--text-2)]">
             {{ best_review.user.username }} ({{ best_review.created_at|date:"d M Y" }})
-            — ☕ {{ best_review.rating|floatformat:1 }}
+            — {{ best_review.rating|floatformat:1 }}
+            <svg viewBox="0 0 24 24" class="w-4 h-4 inline align-[-2px] ml-1">
+              <path fill="#f59e0b" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
+              <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
+                    d="M4 8h11v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8z"/>
+              <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
+                    d="M15 9h3a3 3 0 0 1 0 6h-2"/>
+            </svg>
+
           </p>
 
           <p class="mt-1 text-gray-800 dark:text-[var(--text-1)]">
@@ -852,6 +897,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <script>
 
+function toggleShareMenu(){
+  const menu = document.getElementById("shareMenu");
+  if(!menu) return;
+  menu.classList.toggle("hidden");
+}
+
 function shareCafe(title, url){
   if(navigator.share){
     navigator.share({
@@ -864,7 +915,9 @@ function shareCafe(title, url){
     alert("Link copiado 📋");
   }
 }
+
 </script>
+
 
 <script>
 function openQRModal(){
@@ -885,7 +938,7 @@ function openQRModal(){
 function closeQRModal(){
   const modal = document.getElementById("qrModal");
   modal.classList.add("hidden");
-  modal.classList.remove("flex"); // 👈 importante
+  modal.classList.remove("flex");
 }
 
 // cerrar tocando fondo oscuro (UX pro)
