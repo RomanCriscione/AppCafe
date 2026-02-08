@@ -393,6 +393,11 @@ def cafe_detail(request, cafe_id):
     radar_labels = SENSOR_AXES
     radar_values = [sensor_dict.get(k, 0) for k in SENSOR_AXES]
 
+    # ⭐ si todo está en 0, mostrar mínimo para que se vea el gráfico
+    if sum(radar_values) == 0 and total_reviews > 0:
+        radar_values = [1] + [0]*(len(SENSOR_AXES)-1)
+
+
     # paginado
     paginator = Paginator(reviews_qs, 8)
     page_obj = paginator.get_page(request.GET.get("page") or 1)
