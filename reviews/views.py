@@ -59,7 +59,7 @@ _UI_MSG = {
 # === TAGS SENSORIALES MANUALES (18 etiquetas, 3 grupos) ===
 
 MANUAL_TAG_GROUPS = {
-    "Sensorial": [
+    "sensorial": [
         "Baños cuidados (y eso dice mucho)",
         "Cada taza es distinta, como debe ser",
         "Hay un gato que manda",
@@ -67,7 +67,7 @@ MANUAL_TAG_GROUPS = {
         "Ventanales con luz todo el día",
         "Huele a café recién molido",
     ],
-    "Ambiente / Servicio": [
+    "ambiente": [
         "Podés ir solo sin sentirte solo",
         "Te saludan por tu nombre",
         "Ideal para charla de sobremesa",
@@ -75,7 +75,7 @@ MANUAL_TAG_GROUPS = {
         "Ideal para una primera cita sin presión",
         "Te vas y te dan ganas de volver",
     ],
-    "Emocional / Experiencia": [
+    "experiencia": [
         "Buena conexión, pero te da ganas de desconectarte",
         "Ideal para escribir un cuento",
         "La playlist ayuda a concentrarse",
