@@ -709,6 +709,8 @@
       const values = {{ radar_values|safe }};
       const maxVal = Math.max(1, ...values);
 
+      const isDark = document.documentElement.classList.contains("dark");
+
       const paletteLight = [
         'var(--brand-50)', 'var(--brand-100)', 'var(--brand-200)',
         'var(--caramel-200)', 'var(--caramel-300)',
@@ -747,28 +749,12 @@
           indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
-          layout: {
-            padding: { top: 2, right: 8, bottom: 2, left: 0 }
-          },
           plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: ctx => `${ctx.raw} mencione${ctx.raw === 1 ? '' : 's'}`
-              }
-            }
+            legend: { display: false }
           },
           scales: {
-            x: {
-              beginAtZero: true,
-              suggestedMax: maxVal,
-              grid: { color: isDark ? 'rgba(255,255,255,.12)' : 'rgba(0,0,0,.06)' },
-              ticks: { color: isDark ? 'var(--text-2)' : '#475569' }
-            },
-            y: {
-              grid: { display: false },
-              ticks: { color: isDark ? 'var(--text-1)' : '#334155' }
-            }
+            x: { beginAtZero: true, suggestedMax: maxVal },
+            y: { grid: { display: false } }
           }
         }
       });
