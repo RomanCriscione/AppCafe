@@ -383,7 +383,7 @@ def cafe_detail(request, cafe_id):
     positive_pct = int((positives / total_reviews) * 100) if total_reviews else 0
 
     # radar por categorías a partir de tags
-    SENSOR_AXES = ["sensorial", "emocional", "estética", "ambiente", "comida", "bebida", "servicio"]
+    SENSOR_AXES = ["sensorial", "experiencia", "ambiente"]
     sensor_rows = (
         Tag.objects.filter(reviews__cafe=cafe)
         .values("category")
