@@ -712,19 +712,23 @@
       const isDark = document.documentElement.classList.contains("dark");
 
       const paletteLight = [
-        'var(--brand-50)', 'var(--brand-100)', 'var(--brand-200)',
-        'var(--caramel-200)', 'var(--caramel-300)',
-        'var(--caramel-400)', 'var(--brand-300)'
+        "#E6C7A6", // crema café
+        "#D6A77A",
+        "#C28B5A",
+        "#A56A3F",
+        "#7B4A2E",
+        "#5B371F",
+        "#3E2515"
       ];
 
       const paletteDark = [
-        'color-mix(in srgb, var(--primary) 20%, transparent)',
-        'color-mix(in srgb, var(--primary) 30%, transparent)',
-        'color-mix(in srgb, var(--primary) 40%, transparent)',
-        'color-mix(in srgb, var(--accent) 25%, transparent)',
-        'color-mix(in srgb, var(--accent) 35%, transparent)',
-        'color-mix(in srgb, var(--accent) 45%, transparent)',
-        'color-mix(in srgb, var(--accent) 55%, transparent)'
+        "#F1D2B6",
+        "#E2B88F",
+        "#D09A64",
+        "#B87A45",
+        "#915A33",
+        "#6E4125",
+        "#4A2A18"
       ];
 
       const bg = (isDark ? paletteDark : paletteLight).slice(0, labels.length);
@@ -732,16 +736,19 @@
       const el = document.getElementById('sensor-bars');
       if (!el) return;
 
+      const total = values.reduce((a,b)=>a+b,0) || 1;
+      const pct = values.map(v => Math.round((v/total)*100));
+
       new Chart(el.getContext('2d'), {
         type: 'bar',
         data: {
-          labels: labels.map((l, i) => `${l} (${values[i]})`),
+          labels: labels,
           datasets: [{
-            data: values,
+            data: pct,
             backgroundColor: bg,
             borderWidth: 0,
-            borderRadius: 20,
-            barThickness: 22,
+            borderRadius: 999,
+            barThickness: 18,
             maxBarThickness: 26
           }]
         },
@@ -752,13 +759,16 @@
           plugins: {
             legend: { display: false }
           },
+          animation:{
+            duration:1200,
+            easing:'easeOutQuart'
+          },
           scales: {
-            x: { beginAtZero: true, suggestedMax: maxVal },
+            x: { beginAtZero: true, max: 100, ticks:{ callback:v=>v+"%" } },
             y: { grid: { display: false } }
           }
         }
       });
-    });
   </script>
   {% endif %}
 
