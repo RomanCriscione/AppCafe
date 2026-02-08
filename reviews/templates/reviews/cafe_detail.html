@@ -427,10 +427,38 @@
     <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-225">
       <div class="flex items-center gap-2 mb-2">
         <span>📊</span>
-        <h2 class="text-lg font-semibold">Perfil sensorial del lugar</h2>
+        <h2 class="text-lg font-semibold">Perfil del café según usuarios</h2>
+
+        {% if total_reviews == 1 %}
+        <p class="text-sm text-gray-500 mt-1">
+        Primeras impresiones del lugar ☕
+        </p>
+
+        {% elif total_reviews > 1 %}
+        {% with max_val=radar_values|max %}
+          {% if max_val > 0 %}
+            {% for label in radar_labels %}
+              {% if radar_values|index:forloop.counter0 == max_val %}
+                <p class="text-sm text-gray-500 mt-1">
+        Destaca por <strong>{{ label }}</strong> según las reseñas
+        </p>
+                {% break %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% endif %}
+
       </div>
-      <div class="h-48 sm:h-44 md:h-52">
+      <div class="h-56 sm:h-60 md:h-64">
+        {% if total_reviews == 0 %}
+        <p class="text-sm text-gray-400 text-center mt-6">
+        Aún no hay datos suficientes para el perfil ☕
+        </p>
+        {% else %}
         <canvas id="sensor-bars"></canvas>
+        {% endif %}
+
       </div>
     </section>
   {% endif %}
@@ -709,9 +737,9 @@
             data: values,
             backgroundColor: bg,
             borderWidth: 0,
-            borderRadius: 12,
-            barThickness: 18,
-            maxBarThickness: 20
+            borderRadius: 20,
+            barThickness: 22,
+            maxBarThickness: 26
           }]
         },
         options: {
