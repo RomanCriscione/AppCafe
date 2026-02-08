@@ -37,7 +37,10 @@
   <div id="filtros-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[1000] hidden opacity-0 transition-opacity duration-300 lg:hidden"></div>
 
   <!-- Panel filtros -->
-  <aside id="panel-filtros" class="lg:static fixed top-0 left-0 h-full w-4/5 max-w-xs bg-white p-4 rounded-lg shadow-lg z-[1001] transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:w-1/4 lg:h-auto lg:shadow-none overflow-auto">
+  <aside id="panel-filtros"
+  class="lg:static fixed lg:relative top-0 left-0 h-full w-4/5 max-w-xs bg-white p-4 rounded-lg shadow-lg z-[1001]
+  transform -translate-x-full transition-transform duration-300 ease-in-out
+  lg:translate-x-0 lg:w-1/4 lg:h-auto lg:shadow-none overflow-auto">
     <div class="flex justify-between items-center lg:hidden mb-4">
       <h2 class="text-xl font-semibold">🔍 Filtros</h2>
       <button id="cerrar-filtros" class="text-gray-600 hover:text-black text-2xl">&times;</button>
@@ -79,7 +82,7 @@
   </aside>
 
   <!-- Columna resultados -->
-  <section class="lg:w-3/4 max-w-6xl mx-auto relative z-0 min-w-0">
+  <section class="lg:w-3/4 max-w-6xl mx-auto relative z-10 min-w-0">
     <a href="#resultados" class="sr-only">Saltar a resultados</a>
     <a href="#paginacion" class="sr-only">Saltar a paginación</a>
 
