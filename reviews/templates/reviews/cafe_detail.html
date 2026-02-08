@@ -326,10 +326,16 @@
           🟢 WhatsApp
         </a>
 
+
         <!-- Copiar link -->
         <button onclick="copyCafeLink('{{ full_page_url }}', this)"
                 class="btn btn-outline rounded-xl">
           🔗 Copiar link
+        </button>
+
+        <button onclick="openQRModal()"
+                class="btn btn-outline rounded-xl">
+          📲 QR para reseñas
         </button>
 
       </div>
@@ -590,6 +596,30 @@
 
   {% endif %}
 </div>
+
+<!-- MODAL QR -->
+<div id="qrModal" class="fixed inset-0 bg-black/60 hidden z-50 items-center justify-center">
+  <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center relative">
+
+    <button onclick="closeQRModal()" class="absolute top-2 right-3 text-xl">✖</button>
+
+    <h3 class="text-lg font-bold mb-3">QR para dejar reseña</h3>
+    <p class="text-sm text-gray-500 mb-4">
+      Escaneá y dejá tu opinión en Gota ☕
+    </p>
+
+    <img id="qrImage" class="mx-auto rounded-lg shadow mb-4"/>
+
+    <a id="downloadQR"
+       class="btn btn-primary w-full mb-2"
+       download="qr-gota.png">
+       Descargar QR
+    </a>
+
+  </div>
+</div>
+
+
 {% endblock %}
 
 
@@ -835,6 +865,40 @@ function shareCafe(title, url){
   }
 }
 </script>
+
+<script>
+function openQRModal(){
+  const modal = document.getElementById("qrModal");
+
+  // mostrar modal
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+
+  // URL review directa
+  const url = window.location.origin + "{% url 'reviews:create_review' cafe.id %}";
+  const qrApi = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(url);
+
+  document.getElementById("qrImage").src = qrApi;
+  document.getElementById("downloadQR").href = qrApi;
+}
+
+function closeQRModal(){
+  const modal = document.getElementById("qrModal");
+  modal.classList.add("hidden");
+  modal.classList.remove("flex"); // 👈 importante
+}
+
+// cerrar tocando fondo oscuro (UX pro)
+document.addEventListener("click", function(e){
+  const modal = document.getElementById("qrModal");
+  if(!modal) return;
+
+  if(e.target === modal){
+    closeQRModal();
+  }
+});
+</script>
+
 
 
 {% endblock %}
