@@ -219,6 +219,7 @@ class CafeListView(ListView):
         request = self.request
         zona = request.GET.get('zona')
         orden = request.GET.get('orden', 'algoritmo')
+        search = request.GET.get("q")
         lat = request.GET.get('lat')
         lon = request.GET.get('lon')
 
@@ -232,7 +233,8 @@ class CafeListView(ListView):
             'has_vegetarian_options', 'serves_breakfast', 'serves_alcohol',
             'has_books_or_games', 'has_air_conditioning'
 )
-
+        if search:
+            cafes = cafes.filter(name__icontains=search)
 
         if zona:
             cafes = cafes.filter(location=zona)

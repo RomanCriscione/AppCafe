@@ -58,7 +58,7 @@
       { "@type": "LocationFeatureSpecification", "name": "Wi-Fi", "value": true },
       { "@type": "LocationFeatureSpecification", "name": "Pet friendly", "value": true }
     ],
-    "hasMap": "https://www.google.com/maps/search/?api=1&query={{ cafe.latitude }},{{ cafe.longitude }}",
+    "hasMap": "https://www.google.com/maps?q={{ cafe.latitude }},{{ cafe.longitude }}",
     "url": "{{ full_page_url|escapejs }}",
 
     {% if full_image_url %}
@@ -350,11 +350,12 @@
         <div class="flex flex-wrap gap-4 pt-2 border-t border-gray-200 dark:border-[var(--border)]">
 
           <!-- Google maps -->
-          <a href="https://www.google.com/maps/search/?api=1{% if cafe.latitude and cafe.longitude %}&query={{ cafe.latitude }},{{ cafe.longitude }}{% else %}&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}{% endif %}"
-            target="_blank"
-            class="text-sm text-gray-500 hover:underline">
-            📍 Ver en Google Maps
+          <a href="https://www.google.com/maps?q={% if cafe.latitude and cafe.longitude %}{{ cafe.latitude }},{{ cafe.longitude }}{% else %}{{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}{% endif %}"
+          target="_blank"
+          class="text-sm text-gray-500 hover:underline">
+          📍 Ver en Google Maps
           </a>
+
 
           {% if cafe.claim_status != 'VERIFIED' %}
             <a href="{% url 'reviews:claim_start' cafe.id %}"
@@ -591,7 +592,11 @@
   <!-- PORCENTAJE POSITIVAS -->
   {% if total_reviews %}
     <div class="cup-float">
-      <span class="cup-emoji {% if positive_pct >= 50 %}fill{% endif %}">☕</span>
+      <span class="cup-emoji">
+        <img 
+          src="{% static 'images/taza-amarilla.png' %}" 
+          class="w-5 h-5 inline-block {% if positive_pct < 50 %}opacity-40{% endif %}">
+      </span>
       <span class="text-sm text-gray-700">Positivas: <strong>{{ positive_pct }}%</strong></span>
     </div>
   {% endif %}
@@ -777,7 +782,7 @@
       }
     });
   });
-  
+
   </script>
   {% endif %}
 

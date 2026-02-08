@@ -83,6 +83,24 @@
     <a href="#resultados" class="sr-only">Saltar a resultados</a>
     <a href="#paginacion" class="sr-only">Saltar a paginación</a>
 
+    <section class="lg:w-3/4 max-w-6xl mx-auto relative z-0 min-w-0">
+
+    <!-- 🔎 BUSCADOR -->
+    <form method="get" class="mb-6">
+      <div class="flex gap-2">
+        <input
+          type="text"
+          name="q"
+          placeholder="Buscar café por nombre..."
+          value="{{ request.GET.q }}"
+          class="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-amber-400">
+
+        <button class="px-4 py-2 bg-amber-600 text-white rounded-xl">
+          Buscar
+        </button>
+      </div>
+    </form>
+
     <div class="mb-6">
       <h1 id="titulo-cafeterias" class="text-2xl font-bold mb-2">
         {% if zona_seleccionada %}
