@@ -28,6 +28,13 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
 from openpyxl import Workbook
 from datetime import datetime
+from django.contrib.postgres.search import (
+    SearchVector,
+    SearchQuery,
+    SearchRank,
+    TrigramSimilarity
+)
+
 
 # Helper para invalidar el fragment cache de la lista de reseñas
 def _invalidate_reviews_cache(cafe_id, user_id=None):
@@ -234,7 +241,16 @@ class CafeListView(ListView):
             'has_books_or_games', 'has_air_conditioning'
 )
         if search:
-            cafes = cafes.filter(name__icontains=search)
+            query = SearchQuery(search)
+
+            cafes = cafes.annotate(
+                search_vector=SearchVector("name", "location"),
+                rank=SearchRank(SearchVector("name", "location"), query),
+                similarity=TrigramSimilarity("name", search)
+            ).filter(
+                Q(rank__gte=0.1) | Q(similarity__gt=0.2)
+            ).order_by("-rank", "-similarity")
+
 
         if zona:
             cafes = cafes.filter(location=zona)
