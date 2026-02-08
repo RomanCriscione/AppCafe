@@ -350,7 +350,7 @@
         <div class="flex flex-wrap gap-4 pt-2 border-t border-gray-200 dark:border-[var(--border)]">
 
           <!-- Google maps -->
-          <a href="https://www.google.com/maps?q={% if cafe.latitude and cafe.longitude %}{{ cafe.latitude }},{{ cafe.longitude }}{% else %}{{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}{% endif %}"
+          <a href="https://www.google.com/maps/search/?api=1&query={% if cafe.latitude and cafe.longitude %}{{ cafe.latitude }},{{ cafe.longitude }}{% else %}{{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}{% endif %}"
           target="_blank"
           class="text-sm text-gray-500 hover:underline">
           📍 Ver en Google Maps
