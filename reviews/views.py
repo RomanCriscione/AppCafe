@@ -405,7 +405,7 @@ def cafe_detail(request, cafe_id):
     sensor_rows = (
         Tag.objects.filter(reviews__cafe=cafe)
         .values("category")
-        .annotate(count=Count("reviews", filter=Q(reviews__cafe=cafe)))
+        .annotate(count=Count("id"))
     )
     sensor_dict = {row["category"]: row["count"] for row in sensor_rows}
     radar_labels = SENSOR_AXES
@@ -436,7 +436,7 @@ def cafe_detail(request, cafe_id):
     # tags más usadas
     tag_counts_qs = (
         Tag.objects.filter(reviews__cafe=cafe)
-        .annotate(num=Count("reviews", filter=Q(reviews__cafe=cafe)))
+        .annotate(num=Count("id"))
         .order_by("-num", "name")
     )
     top_tags = list(tag_counts_qs[:5])
