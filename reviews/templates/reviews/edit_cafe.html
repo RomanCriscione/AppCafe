@@ -98,10 +98,14 @@
           <!-- eliminar -->
           {% if cafe.photo1 %}
           <label class="inline-flex items-center gap-2 text-sm text-red-600 mt-1">
-            <input type="checkbox" id="id_photo1-clear" name="photo1-clear">
-            Eliminar foto
-          </label>
-          {% endif %}
+            <button type="button"
+                    id="btn-delete-photo1"
+                    class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition">
+              🗑 Eliminar foto
+            </button>
+
+            <input type="hidden" id="id_photo1-clear" name="photo1-clear" value="">
+
 
           <label class="block text-sm text-gray-700">Cambiar:</label>
           <input type="file" name="{{ form.photo1.html_name }}" id="{{ form.photo1.id_for_label }}"
@@ -124,10 +128,11 @@
           <!-- eliminar -->
           {% if cafe.photo2 %}
           <label class="inline-flex items-center gap-2 text-sm text-red-600 mt-1">
-            <input type="checkbox" id="id_photo2-clear" name="photo2-clear">
-            Eliminar foto
-          </label>
-          {% endif %}
+            <button type="button" id="btn-delete-photo2" class="delete-photo-btn">
+            🗑 Eliminar foto
+            </button>
+            <input type="hidden" id="id_photo2-clear" name="photo2-clear" value="">
+
 
           <label class="block text-sm text-gray-700">Cambiar:</label>
           <input type="file" name="{{ form.photo2.html_name }}" id="{{ form.photo2.id_for_label }}"
@@ -150,9 +155,11 @@
           <!-- eliminar -->
           {% if cafe.photo3 %}
           <label class="inline-flex items-center gap-2 text-sm text-red-600 mt-1">
-            <input type="checkbox" id="id_photo3-clear" name="photo3-clear">
-            Eliminar foto
-          </label>
+            <button type="button" id="btn-delete-photo3" class="delete-photo-btn">
+            🗑 Eliminar foto
+            </button>
+            <input type="hidden" id="id_photo3-clear" name="photo3-clear" value="">
+
           {% endif %}
 
           <label class="block text-sm text-gray-700">Cambiar:</label>
@@ -221,42 +228,56 @@
 <script>
 document.addEventListener("DOMContentLoaded", function(){
 
-  function setupPhoto(inputId, previewId, clearId){
+  function setupPhoto(inputId, previewId, clearId, btnId){
     const input = document.getElementById(inputId);
     const preview = document.getElementById(previewId);
     const clear = document.getElementById(clearId);
+    const btn = document.getElementById(btnId);
 
     if(!preview) return;
 
-    // 📸 preview instantáneo al subir nueva
+    let deleted = false;
+    let original = preview.src;
+
+    // 📸 subir nueva foto
     if(input){
       input.addEventListener("change", function(e){
         const file = e.target.files[0];
         if(file){
           preview.src = URL.createObjectURL(file);
-
-          // si sube nueva → destilda eliminar
-          if(clear) clear.checked = false;
+          deleted = false;
+          clear.value = "";
+          if(btn) btn.innerText = "🗑 Eliminar foto";
         }
       });
     }
 
-    // 🗑 eliminar visual inmediato
-    if(clear){
-      clear.addEventListener("change", function(){
-        if(this.checked){
+    // 🗑 botón eliminar toggle
+    if(btn){
+      btn.addEventListener("click", function(){
+
+        if(!deleted){
           preview.src = "https://via.placeholder.com/150/f3f4f6/9ca3af?text=Sin+foto";
+          clear.value = "on";
+          deleted = true;
+          btn.innerText = "↩️ Deshacer";
+        } else {
+          preview.src = original;
+          clear.value = "";
+          deleted = false;
+          btn.innerText = "🗑 Eliminar foto";
         }
+
       });
     }
   }
 
-  // activar para las 3 fotos
-  setupPhoto("id_photo1", "preview-photo1", "id_photo1-clear");
-  setupPhoto("id_photo2", "preview-photo2", "id_photo2-clear");
-  setupPhoto("id_photo3", "preview-photo3", "id_photo3-clear");
+  setupPhoto("id_photo1","preview-photo1","id_photo1-clear","btn-delete-photo1");
+  setupPhoto("id_photo2","preview-photo2","id_photo2-clear","btn-delete-photo2");
+  setupPhoto("id_photo3","preview-photo3","id_photo3-clear","btn-delete-photo3");
 
 });
 </script>
+
 
 {% endblock %}
