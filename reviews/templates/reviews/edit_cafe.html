@@ -97,14 +97,18 @@
 
           <!-- eliminar -->
           {% if cafe.photo1 %}
-          <label class="inline-flex items-center gap-2 text-sm text-red-600 mt-1">
+          <div class="flex flex-col gap-2 mt-1">
+
             <button type="button"
                     id="btn-delete-photo1"
-                    class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition">
+                    class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition w-fit">
               🗑 Eliminar foto
             </button>
 
             <input type="hidden" id="id_photo1-clear" name="photo1-clear" value="">
+
+          </div>
+          {% endif %}
 
 
           <label class="block text-sm text-gray-700">Cambiar:</label>
@@ -127,11 +131,18 @@
 
           <!-- eliminar -->
           {% if cafe.photo2 %}
-          <label class="inline-flex items-center gap-2 text-sm text-red-600 mt-1">
-            <button type="button" id="btn-delete-photo2" class="delete-photo-btn">
-            🗑 Eliminar foto
+          <div class="flex flex-col gap-2 mt-1">
+
+            <button type="button"
+                    id="btn-delete-photo2"
+                    class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition w-fit">
+              🗑 Eliminar foto
             </button>
+
             <input type="hidden" id="id_photo2-clear" name="photo2-clear" value="">
+
+          </div>
+          {% endif %}
 
 
           <label class="block text-sm text-gray-700">Cambiar:</label>
@@ -154,13 +165,19 @@
 
           <!-- eliminar -->
           {% if cafe.photo3 %}
-          <label class="inline-flex items-center gap-2 text-sm text-red-600 mt-1">
-            <button type="button" id="btn-delete-photo3" class="delete-photo-btn">
-            🗑 Eliminar foto
+          <div class="flex flex-col gap-2 mt-1">
+
+            <button type="button"
+                    id="btn-delete-photo3"
+                    class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition w-fit">
+              🗑 Eliminar foto
             </button>
+
             <input type="hidden" id="id_photo3-clear" name="photo3-clear" value="">
 
+          </div>
           {% endif %}
+
 
           <label class="block text-sm text-gray-700">Cambiar:</label>
           <input type="file" name="{{ form.photo3.html_name }}" id="{{ form.photo3.id_for_label }}"
