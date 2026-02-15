@@ -281,29 +281,59 @@
       });
     })();
 
-    if (document.querySelector('.swiper-container')) {
-      new Swiper('.swiper-container', {
-        slidesPerView: 1,
-        spaceBetween: 20,
-        loop: false,
+    document.addEventListener("DOMContentLoaded", function () {
 
-        breakpoints: {
-          640: { slidesPerView: 1 },
-          900: { slidesPerView: 2 },
-          1200: { slidesPerView: 3 }
-        },
+      // ⭐ SWIPER ÚLTIMAS RESEÑAS
+      if (document.querySelector('.swiper-reviews')) {
+        new Swiper('.swiper-reviews', {
+          slidesPerView: 1,
+          spaceBetween: 20,
+          loop: false,
 
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev'
-        },
+          breakpoints: {
+            640: { slidesPerView: 1 },
+            900: { slidesPerView: 2 },
+            1200: { slidesPerView: 3 }
+          },
 
-        pagination: {
-          el: '.swiper-pagination',
-          clickable: true
-        }
-      });
-    }
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev'
+          },
+
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true
+          }
+        });
+      }
+
+      // ⭐ SWIPER CAFÉS RECIENTES
+      if (document.querySelector('#recently-viewed-container')) {
+        new Swiper('#recently-viewed-container', {
+          slidesPerView: 1,
+          spaceBetween: 20,
+          loop: false,
+
+          breakpoints: {
+            640: { slidesPerView: 2 },
+            1000: { slidesPerView: 3 }
+          },
+
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev'
+          },
+
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true
+          }
+        });
+      }
+
+    });
+
 
     document.querySelectorAll('.alert-message').forEach(alert => {
       setTimeout(() => {
