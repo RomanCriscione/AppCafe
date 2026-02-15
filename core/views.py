@@ -24,8 +24,11 @@ def get_recently_viewed_cafes(request):
 def home(request):
     # Últimas reseñas
     latest_reviews = (
-        Review.objects.select_related("user", "cafe")
-        .order_by("-created_at")[:6]
+        Review.objects
+        .select_related("user", "cafe")
+        .exclude(comment__isnull=True)
+        .exclude(comment__exact="")
+        .order_by("-created_at")[:3]
     )
 
     # Cafés con coordenadas (para mapa)
