@@ -151,65 +151,7 @@ class Cafe(models.Model):
         ]
 
     def save(self, *args, **kwargs):
-        procesar = kwargs.pop("procesar_imagenes", True)
-        is_new = self.pk is None
-
-        # Guardado normal
         super().save(*args, **kwargs)
-
-        # ⚠️ Si usamos Cloudinary → NO procesar imágenes
-        # Cloudinary no tiene .path
-        if self.photo1 and "res.cloudinary.com" in str(self.photo1.url):
-            return
-
-        # Solo procesar si es local (Render)
-        if procesar and not is_new:
-            def procesar_imagen(campo):
-                img_field = getattr(self, campo)
-
-                if not img_field:
-                    return
-
-                try:
-                    # ⚠️ Solo si existe path local
-                    if not hasattr(img_field, "path"):
-                        return
-
-                    img = Image.open(img_field.path)
-                    formato_original = img.format or "JPEG"
-
-                    if img.mode in ("RGBA", "P"):
-                        img = img.convert("RGB")
-
-                    max_width = 1280
-                    if img.width > max_width:
-                        ratio = max_width / float(img.width)
-                        new_height = int(float(img.height) * ratio)
-                        img = img.resize((max_width, new_height), Image.LANCZOS)
-
-                    buffer = BytesIO()
-                    img.save(
-                        buffer,
-                        format="JPEG" if formato_original not in ["JPEG", "PNG"] else formato_original,
-                        optimize=True,
-                        quality=70,
-                    )
-
-                    file_content = ContentFile(buffer.getvalue())
-                    img_field.save(
-                        os.path.basename(img_field.name),
-                        file_content,
-                        save=False,
-                    )
-
-                except Exception as e:
-                    print(f"⚠️ Error procesando imagen {campo}: {e}")
-
-            for campo in ["photo1", "photo2", "photo3"]:
-                procesar_imagen(campo)
-
-            super().save(update_fields=["photo1", "photo2", "photo3"])
-
 
     def average_rating(self):
         result = self.reviews.aggregate(Avg('rating'))
