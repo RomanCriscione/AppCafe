@@ -80,7 +80,7 @@
     </div>
 
     <!-- Fotos -->
-    <div class="bg-blue-50 p-6 rounded-xl shadow-sm space-y-6">
+    <div class="bg-[var(--surface)] border border-[var(--border)] p-6 rounded-2xl shadow-soft space-y-6">
       <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
         <i class="fas fa-camera"></i> Fotos
       </h3>
@@ -90,15 +90,19 @@
         {# FOTO 1 #}
         <div class="space-y-2">
           <p class="text-sm font-medium text-gray-700">Foto 1</p>
+          <!-- visor foto -->
+          <img id="preview-photo1"
+              src="{% if cafe.photo1 %}{{ cafe.photo1.url }}{% else %}https://via.placeholder.com/150?text=Sin+foto{% endif %}"
+              class="w-36 h-36 object-cover rounded-xl shadow bg-white border">
+
+          <!-- eliminar -->
           {% if cafe.photo1 %}
-            <img src="{{ cafe.photo1.url }}" alt="Foto 1" class="w-36 h-36 object-cover rounded-lg shadow" loading="lazy">
-            <label for="id_photo1-clear" class="inline-flex items-center gap-2 text-sm text-red-600">
-              <input type="checkbox" id="id_photo1-clear" name="photo1-clear" class="rounded border-gray-300">
-              Eliminar foto
-            </label>
-          {% else %}
-            <div class="w-36 h-36 rounded-lg bg-white/70 border border-dashed grid place-items-center text-xs text-gray-500">Sin imagen</div>
+          <label class="inline-flex items-center gap-2 text-sm text-red-600 mt-1">
+            <input type="checkbox" id="id_photo1-clear" name="photo1-clear">
+            Eliminar foto
+          </label>
           {% endif %}
+
           <label class="block text-sm text-gray-700">Cambiar:</label>
           <input type="file" name="{{ form.photo1.html_name }}" id="{{ form.photo1.id_for_label }}"
                  accept="image/jpeg,image/png"
@@ -112,15 +116,19 @@
         {# FOTO 2 #}
         <div class="space-y-2">
           <p class="text-sm font-medium text-gray-700">Foto 2</p>
+          <!-- visor foto -->
+          <img id="preview-photo2"
+              src="{% if cafe.photo2 %}{{ cafe.photo2.url }}{% else %}https://via.placeholder.com/150?text=Sin+foto{% endif %}"
+              class="w-36 h-36 object-cover rounded-xl shadow bg-white border">
+
+          <!-- eliminar -->
           {% if cafe.photo2 %}
-            <img src="{{ cafe.photo2.url }}" alt="Foto 2" class="w-36 h-36 object-cover rounded-lg shadow" loading="lazy">
-            <label for="id_photo2-clear" class="inline-flex items-center gap-2 text-sm text-red-600">
-              <input type="checkbox" id="id_photo2-clear" name="photo2-clear" class="rounded border-gray-300">
-              Eliminar foto
-            </label>
-          {% else %}
-            <div class="w-36 h-36 rounded-lg bg-white/70 border border-dashed grid place-items-center text-xs text-gray-500">Sin imagen</div>
+          <label class="inline-flex items-center gap-2 text-sm text-red-600 mt-1">
+            <input type="checkbox" id="id_photo2-clear" name="photo2-clear">
+            Eliminar foto
+          </label>
           {% endif %}
+
           <label class="block text-sm text-gray-700">Cambiar:</label>
           <input type="file" name="{{ form.photo2.html_name }}" id="{{ form.photo2.id_for_label }}"
                  accept="image/jpeg,image/png"
@@ -134,15 +142,19 @@
         {# FOTO 3 #}
         <div class="space-y-2">
           <p class="text-sm font-medium text-gray-700">Foto 3</p>
+          <!-- visor foto -->
+          <img id="preview-photo3"
+              src="{% if cafe.photo3 %}{{ cafe.photo3.url }}{% else %}https://via.placeholder.com/150?text=Sin+foto{% endif %}"
+              class="w-36 h-36 object-cover rounded-xl shadow bg-white border">
+
+          <!-- eliminar -->
           {% if cafe.photo3 %}
-            <img src="{{ cafe.photo3.url }}" alt="Foto 3" class="w-36 h-36 object-cover rounded-lg shadow" loading="lazy">
-            <label for="id_photo3-clear" class="inline-flex items-center gap-2 text-sm text-red-600">
-              <input type="checkbox" id="id_photo3-clear" name="photo3-clear" class="rounded border-gray-300">
-              Eliminar foto
-            </label>
-          {% else %}
-            <div class="w-36 h-36 rounded-lg bg-white/70 border border-dashed grid place-items-center text-xs text-gray-500">Sin imagen</div>
+          <label class="inline-flex items-center gap-2 text-sm text-red-600 mt-1">
+            <input type="checkbox" id="id_photo3-clear" name="photo3-clear">
+            Eliminar foto
+          </label>
           {% endif %}
+
           <label class="block text-sm text-gray-700">Cambiar:</label>
           <input type="file" name="{{ form.photo3.html_name }}" id="{{ form.photo3.id_for_label }}"
                  accept="image/jpeg,image/png"
@@ -205,4 +217,46 @@
     </button>
   </form>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+  function setupPhoto(inputId, previewId, clearId){
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+    const clear = document.getElementById(clearId);
+
+    if(!preview) return;
+
+    // 📸 preview instantáneo al subir nueva
+    if(input){
+      input.addEventListener("change", function(e){
+        const file = e.target.files[0];
+        if(file){
+          preview.src = URL.createObjectURL(file);
+
+          // si sube nueva → destilda eliminar
+          if(clear) clear.checked = false;
+        }
+      });
+    }
+
+    // 🗑 eliminar visual inmediato
+    if(clear){
+      clear.addEventListener("change", function(){
+        if(this.checked){
+          preview.src = "https://via.placeholder.com/150?text=Eliminada";
+        }
+      });
+    }
+  }
+
+  // activar para las 3 fotos
+  setupPhoto("id_photo1", "preview-photo1", "id_photo1-clear");
+  setupPhoto("id_photo2", "preview-photo2", "id_photo2-clear");
+  setupPhoto("id_photo3", "preview-photo3", "id_photo3-clear");
+
+});
+</script>
+
 {% endblock %}
