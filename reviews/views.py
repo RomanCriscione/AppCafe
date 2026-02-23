@@ -15,6 +15,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.views.decorators.http import require_POST
 from django.conf import settings
+import requests
 import os, json
 from core.mixins import EmailVerifiedRequiredMixin
 from allauth.account.models import EmailAddress
@@ -1392,29 +1393,35 @@ def export_founder_excel(cafes):
     wb.save(response)
     return response
 
+@staff_member_required
 def descargar_todos_qr(request):
-    if not request.user.is_superuser:
-        return HttpResponse("No autorizado", status=403)
 
-    # Crear zip en memoria
+    # crear zip
     response = HttpResponse(content_type='application/zip')
-    response['Content-Disposition'] = 'attachment; filename="qrs_cafeterias.zip"'
+    response['Content-Disposition'] = 'attachment; filename="qr_gota_cafes.zip"'
 
-    zip_file = zipfile.ZipFile(response, 'w')
+    zip_buffer = zipfile.ZipFile(response, "w")
 
     cafes = Cafe.objects.all()
 
     for cafe in cafes:
-        if cafe.qr_code:  # campo donde guardás el QR
-            try:
-                # obtener archivo físico
-                qr_path = cafe.qr_code.path
-                nombre = f"{cafe.name}.png".replace(" ", "_").lower()
 
-                zip_file.write(qr_path, nombre)
+        # URL directa a dejar review (igual que tu modal)
+        review_url = request.build_absolute_uri(
+            reverse("reviews:create_review", args=[cafe.id])
+        )
 
-            except Exception as e:
-                print(f"Error con {cafe.name}: {e}")
+        qr_api = f"https://api.qrserver.com/v1/create-qr-code/?size=800x800&data={review_url}"
 
-    zip_file.close()
+        try:
+            img = requests.get(qr_api, timeout=10)
+
+            if img.status_code == 200:
+                filename = f"{cafe.name}.png".replace(" ", "_").lower()
+                zip_buffer.writestr(filename, img.content)
+
+        except Exception as e:
+            print("QR error:", cafe.name, e)
+
+    zip_buffer.close()
     return response
