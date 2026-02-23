@@ -28,6 +28,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
 from openpyxl import Workbook
 from datetime import datetime
+import zipfile
 from django.contrib.postgres.search import (
     SearchVector,
     SearchQuery,
@@ -1391,3 +1392,29 @@ def export_founder_excel(cafes):
     wb.save(response)
     return response
 
+def descargar_todos_qr(request):
+    if not request.user.is_superuser:
+        return HttpResponse("No autorizado", status=403)
+
+    # Crear zip en memoria
+    response = HttpResponse(content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename="qrs_cafeterias.zip"'
+
+    zip_file = zipfile.ZipFile(response, 'w')
+
+    cafes = Cafe.objects.all()
+
+    for cafe in cafes:
+        if cafe.qr_code:  # campo donde guardás el QR
+            try:
+                # obtener archivo físico
+                qr_path = cafe.qr_code.path
+                nombre = f"{cafe.name}.png".replace(" ", "_").lower()
+
+                zip_file.write(qr_path, nombre)
+
+            except Exception as e:
+                print(f"Error con {cafe.name}: {e}")
+
+    zip_file.close()
+    return response

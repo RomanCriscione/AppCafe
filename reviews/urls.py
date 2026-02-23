@@ -51,4 +51,6 @@ urlpatterns = [
 
     # Checkout plan
     path('planes/checkout/<int:cafe_id>/<int:nivel>/', views.plan_checkout_redirect, name='plan_checkout_redirect'),
+
+    path("admin/descargar-qrs/", views.descargar_todos_qr, name="descargar_qrs"),
 ]
