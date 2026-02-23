@@ -1398,11 +1398,16 @@ def export_founder_excel(cafes):
 @staff_member_required
 def descargar_todos_qr(request):
 
+    from PIL import Image, ImageDraw, ImageFont
+
     response = HttpResponse(content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename="qr_gota_cafes.zip"'
 
     zip_buffer = zipfile.ZipFile(response, "w")
     cafes = Cafe.objects.all()
+
+    # ruta del logo (tu imagen subida)
+    logo_path = os.path.join(settings.BASE_DIR, "static/images/gota-og.png")
 
     for cafe in cafes:
 
@@ -1410,11 +1415,46 @@ def descargar_todos_qr(request):
             reverse("reviews:create_review", args=[cafe.id])
         )
 
-        # 🔥 generar QR local (SIN internet)
-        qr = qrcode.make(review_url)
+        # ===== GENERAR QR =====
+        qr = qrcode.make(review_url).convert("RGB")
+        qr = qr.resize((900, 900))
 
+        # ===== LIENZO FINAL =====
+        width = 1000
+        height = 1400
+        img = Image.new("RGB", (width, height), "white")
+        draw = ImageDraw.Draw(img)
+
+        # ===== LOGO =====
+        try:
+            logo = Image.open(logo_path).convert("RGBA")
+            logo.thumbnail((350, 350))
+            img.paste(logo, ((width - logo.width)//2, 40), logo)
+            top_after_logo = 40 + logo.height + 40
+        except:
+            top_after_logo = 120
+
+        # ===== PEGAR QR =====
+        qr_x = (width - qr.width)//2
+        img.paste(qr, (qr_x, top_after_logo))
+
+        # ===== NOMBRE CAFÉ =====
+        text = cafe.name
+
+        try:
+            font = ImageFont.truetype("DejaVuSans-Bold.ttf", 60)
+        except:
+            font = ImageFont.load_default()
+
+        text_w, text_h = draw.textbbox((0,0), text, font=font)[2:]
+        text_x = (width - text_w)//2
+        text_y = top_after_logo + qr.height + 40
+
+        draw.text((text_x, text_y), text, fill="black", font=font)
+
+        # ===== EXPORTAR =====
         buffer = BytesIO()
-        qr.save(buffer, format="PNG")
+        img.save(buffer, format="PNG")
 
         filename = f"{cafe.name}.png".replace(" ", "_").lower()
         zip_buffer.writestr(filename, buffer.getvalue())
