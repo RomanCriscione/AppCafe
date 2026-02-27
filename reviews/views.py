@@ -15,6 +15,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.views.decorators.http import require_POST
 from django.conf import settings
+from allauth.account.utils import send_email_confirmation
 import requests
 import qrcode
 from io import BytesIO
@@ -544,13 +545,15 @@ def create_review(request, cafe_id):
         user=request.user,
         verified=True
     ).exists():
+
+        send_email_confirmation(request, request.user)  # 🔥 esto envía el mail
+
         messages.warning(
             request,
             MESSAGES["email_not_verified"]
         )
 
         return redirect("account_email_verification_sent")
-    cafe = get_object_or_404(Cafe, pk=cafe_id)
 
     # --- evitar múltiples reseñas ---
     existing = (
