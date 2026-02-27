@@ -543,13 +543,24 @@ def cafe_detail(request, cafe_id):
 def create_review(request, cafe_id):
 
     cafe = get_object_or_404(Cafe, id=cafe_id)
-    
-    if not EmailAddress.objects.filter(
-        user=request.user,
-        verified=True
-    ).exists():
 
-        send_email_confirmation(request, request.user)  # 🔥 esto envía el mail
+    email_address, created = EmailAddress.objects.get_or_create(
+        user=request.user,
+        email=request.user.email,
+        defaults={
+            "primary": True,
+            "verified": False,
+        }
+    )
+
+    # asegurar que sea primary
+    if not email_address.primary:
+        EmailAddress.objects.filter(user=request.user).update(primary=False)
+        email_address.primary = True
+        email_address.save()
+
+    if not email_address.verified:
+        send_email_confirmation(request, request.user)
 
         messages.warning(
             request,
