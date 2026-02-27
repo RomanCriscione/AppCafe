@@ -545,15 +545,13 @@ def create_review(request, cafe_id):
         user=request.user,
         verified=True
     ).exists():
-
-        send_email_confirmation(request, request.user)  # 🔥 esto envía el mail
-
         messages.warning(
             request,
             MESSAGES["email_not_verified"]
         )
 
         return redirect("account_email_verification_sent")
+    cafe = get_object_or_404(Cafe, pk=cafe_id)
 
     # --- evitar múltiples reseñas ---
     existing = (
