@@ -5,6 +5,8 @@ from django.urls import reverse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db.models import Avg, Count
+import random
 
 
 from reviews.models import Review, Cafe
@@ -53,14 +55,20 @@ def home(request):
         for cafe in cafes_with_coords
     ]
 
-    # Cafés destacados con promedio >= 4
-    top_cafes = []
-    for cafe in cafes_with_coords:
-        ratings = [r.rating for r in cafe.reviews.all()]
-        if ratings:
-            avg = sum(ratings) / len(ratings)
-            if avg >= 4:
-                top_cafes.append(cafe)
+    # 🔥 Cafés destacados inteligentes
+    top_cafes_qs = (
+        Cafe.objects
+        .annotate(
+            avg_rating=Avg("reviews__rating"),
+            num_reviews=Count("reviews")
+        )
+        .filter(avg_rating__gte=4)
+        .order_by("-avg_rating", "-num_reviews")[:20]
+    )
+
+    top_cafes = list(top_cafes_qs)
+    random.shuffle(top_cafes)
+    top_cafes = top_cafes[:6]
 
     # Etiquetas por café
     tag_data = get_tags_grouped_by_cafe(top_cafes)
@@ -73,7 +81,7 @@ def home(request):
 
     context = {
         "latest_reviews": latest_reviews,
-        "top_cafes": top_cafes[:6],
+        "top_cafes": top_cafes,
         "cafes_json": json.dumps(cafes_data, cls=DjangoJSONEncoder),
         "recently_viewed_cafes": recently_viewed_cafes,
         "tag_data": tag_data,

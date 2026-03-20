@@ -80,7 +80,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {% for cafe in top_cafes %}
         <div class="relative bg-gray-50 rounded-lg shadow hover:shadow-lg p-4 transition-transform transform hover:-translate-y-1">
-          <span class="absolute top-2 left-2 bg-yellow-400 text-xs font-bold px-2 py-1 rounded-full shadow text-white">TOP ⭐</span>
+          <span class="absolute top-2 left-2 bg-yellow-400 text-xs font-bold px-2 py-1 rounded-full shadow text-white">TOP {{ forloop.counter }} ⭐</span>
           {% if cafe.photo1 %}
             <img alt="{{ cafe.name }}" class="w-full h-40 object-cover rounded-md mb-3" 
                  loading="lazy" src="{{ cafe.photo1.url }}"/>
@@ -93,9 +93,9 @@
             </a>
           </h3>
           <p class="text-sm text-gray-600">
-            ☕ <span class="font-bold text-yellow-600">{{ cafe.average_rating|floatformat:1|default:"-" }}/5</span> · {{ cafe.location }}
+            ☕ <span class="font-bold text-yellow-600">{{ cafe.avg_rating|floatformat:1|default:"-" }}/5</span> · {{ cafe.location }}
           </p>
-          {% if cafe.tags.all %}
+          {% if cafe.tags.exists %}
             <div class="mt-2 flex flex-wrap justify-center gap-2">
               {% for tag in cafe.tags.all|slice:":3" %}
                 <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ tag.name }}</span>
