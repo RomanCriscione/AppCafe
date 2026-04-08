@@ -1414,66 +1414,93 @@ def export_founder_excel(cafes):
 
 @staff_member_required
 def descargar_todos_qr(request):
-
     from PIL import Image, ImageDraw, ImageFont
 
+    # parámetros
+    try:
+        limit = int(request.GET.get("limit", 50))
+    except (TypeError, ValueError):
+        limit = 50
+
+    try:
+        offset = int(request.GET.get("offset", 0))
+    except (TypeError, ValueError):
+        offset = 0
+
+    zona = request.GET.get("zona", "").strip()
+
+    # límites de seguridad
+    if limit <= 0:
+        limit = 50
+    if limit > 100:
+        limit = 100
+    if offset < 0:
+        offset = 0
+
+    cafes = Cafe.objects.all().order_by("id")
+
+    if zona:
+        cafes = cafes.filter(location__icontains=zona)
+
+    cafes = cafes[offset:offset + limit]
+
     response = HttpResponse(content_type='application/zip')
-    response['Content-Disposition'] = 'attachment; filename="qr_gota_cafes.zip"'
+    response['Content-Disposition'] = f'attachment; filename="qr_gota_cafes_{offset}_{offset+limit}.zip"'
 
     zip_buffer = zipfile.ZipFile(response, "w")
-    cafes = Cafe.objects.all()
 
-    # ruta del logo (tu imagen subida)
     logo_path = os.path.join(settings.BASE_DIR, "static/images/gota-og.png")
 
     for cafe in cafes:
-
         review_url = request.build_absolute_uri(
             reverse("reviews:create_review", args=[cafe.id])
         )
 
-        # ===== GENERAR QR =====
+        # generar QR
         qr = qrcode.make(review_url).convert("RGB")
         qr = qr.resize((900, 900))
 
-        # ===== LIENZO FINAL =====
+        # lienzo final
         width = 1000
         height = 1400
         img = Image.new("RGB", (width, height), "white")
         draw = ImageDraw.Draw(img)
 
-        # ===== LOGO =====
+        # logo
         try:
             logo = Image.open(logo_path).convert("RGBA")
             logo.thumbnail((350, 350))
-            img.paste(logo, ((width - logo.width)//2, 40), logo)
+            img.paste(logo, ((width - logo.width) // 2, 40), logo)
             top_after_logo = 40 + logo.height + 40
-        except:
+        except Exception:
             top_after_logo = 120
 
-        # ===== PEGAR QR =====
-        qr_x = (width - qr.width)//2
+        # pegar QR
+        qr_x = (width - qr.width) // 2
         img.paste(qr, (qr_x, top_after_logo))
 
-        # ===== NOMBRE CAFÉ =====
+        # nombre del café
         text = cafe.name
 
         try:
             font = ImageFont.truetype("DejaVuSans-Bold.ttf", 60)
-        except:
+        except Exception:
             font = ImageFont.load_default()
 
-        text_w, text_h = draw.textbbox((0,0), text, font=font)[2:]
-        text_x = (width - text_w)//2
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_w = bbox[2] - bbox[0]
+        text_x = (width - text_w) // 2
         text_y = top_after_logo + qr.height + 40
 
         draw.text((text_x, text_y), text, fill="black", font=font)
 
-        # ===== EXPORTAR =====
+        # guardar en zip
         buffer = BytesIO()
         img.save(buffer, format="PNG")
 
-        filename = f"{cafe.name}.png".replace(" ", "_").lower()
+        safe_name = "".join(c for c in cafe.name if c.isalnum() or c in (" ", "_", "-")).strip()
+        filename = f"{safe_name.replace(' ', '_').lower()}.png"
+
         zip_buffer.writestr(filename, buffer.getvalue())
 
     zip_buffer.close()

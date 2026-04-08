@@ -4,11 +4,38 @@
 <h1 class="text-2xl font-bold mb-4">📊 Founder Analytics – Gota</h1>
 
 {% if request.user.is_superuser %}
-<div style="margin-bottom:20px;">
-  <a href="{% url 'reviews:descargar_qrs' %}" 
-      style="background:#000;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;">
-      ⬇️ Descargar TODOS los QR
-  </a>
+<div class="mb-6 p-4 border rounded bg-gray-50">
+  <h2 class="text-lg font-semibold mb-3">⬇️ Descargar QR por tandas</h2>
+
+  <form method="get" action="{% url 'reviews:descargar_qrs' %}" class="flex flex-wrap gap-3 items-end">
+    
+    <div>
+      <label class="text-xs block mb-1">Cantidad</label>
+      <select name="limit" class="border px-3 py-2 rounded text-sm">
+        <option value="20">20</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="text-xs block mb-1">Desde</label>
+      <input type="number" name="offset" value="0" min="0" class="border px-3 py-2 rounded text-sm w-24">
+    </div>
+
+    <div>
+      <label class="text-xs block mb-1">Zona (opcional)</label>
+      <input type="text" name="zona" placeholder="Palermo" class="border px-3 py-2 rounded text-sm">
+    </div>
+
+    <button type="submit" class="bg-black text-white px-4 py-2 rounded">
+      Descargar tanda
+    </button>
+  </form>
+
+  <p class="text-xs text-gray-500 mt-2">
+    Ejemplo: limit 50 + offset 0 descarga los primeros 50. Luego usás offset 50 para los siguientes 50.
+  </p>
 </div>
 {% endif %}
 
