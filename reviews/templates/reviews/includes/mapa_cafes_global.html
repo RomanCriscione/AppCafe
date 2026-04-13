@@ -58,7 +58,8 @@
     let circle = null;
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+      attribution: '&copy; OpenStreetMap contributors',
+      referrerPolicy: 'origin'
     }).addTo(map);
 
     function agregarMarcadores(lista) {
