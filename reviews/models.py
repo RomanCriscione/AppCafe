@@ -162,6 +162,14 @@ class Cafe(models.Model):
 
 
 class Review(models.Model):
+    PLAN_CHOICES = [
+        ("trabajar", "💻 Trabajar o estudiar"),
+        ("al_paso", "🚶‍♂️ Café al paso"),
+        ("amigos", "💬 Charlar con amigos"),
+        ("cita", "❤️ Cita"),
+        ("leer", "📖 Leer o desconectar"),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     cafe = models.ForeignKey(Cafe, on_delete=models.CASCADE, related_name='reviews')
     location = models.CharField(max_length=200)
@@ -170,11 +178,20 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     owner_reply = models.TextField(blank=True, null=True)
     tags = models.ManyToManyField("Tag", blank=True, related_name="reviews")
+
+    best_for_plan = models.CharField(
+        max_length=20,
+        choices=PLAN_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="¿Para qué plan es mejor este café?",
+    )
+
     precio_capuccino = models.PositiveIntegerField(
-    null=True,
-    blank=True,
-    help_text="Precio pagado por un capuccino mediano"
-)
+        null=True,
+        blank=True,
+        help_text="Precio pagado por un capuccino mediano"
+    )
 
     class Meta:
         indexes = [

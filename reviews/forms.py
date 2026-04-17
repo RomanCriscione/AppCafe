@@ -37,6 +37,13 @@ class ReviewForm(forms.ModelForm):
         widget=forms.HiddenInput
     )
 
+    best_for_plan = forms.ChoiceField(
+        choices=Review.PLAN_CHOICES,
+        required=True,
+        label="Si tuvieras que elegir una sola, ¿para qué plan es mejor este café?",
+        widget=forms.RadioSelect,
+    )
+
     tags = forms.ModelMultipleChoiceField(
         queryset=Tag.objects.all().order_by('category', 'name'),
         widget=forms.CheckboxSelectMultiple(attrs={'class': 'mb-2'}),
@@ -65,7 +72,7 @@ class ReviewForm(forms.ModelForm):
 
     class Meta:
         model = Review
-        fields = ['rating', 'comment', 'tags', 'precio_capuccino']
+        fields = ['rating', 'comment', 'best_for_plan', 'tags', 'precio_capuccino']
 
     # 🚫 Si un bot completa el honeypot → bloqueo
     def clean_honeypot(self):

@@ -32,7 +32,7 @@
     <!-- PASO 1 — RATING → COMENTARIO → PRECIO (opcional)  -->
     <!-- ================================================= -->
     <section id="step-1" class="wizard-step transition-all duration-300 ease-out">
-      <h3 class="text-xl font-semibold mb-4">1) Calificación, comentario y precio</h3>
+      <h3 class="text-xl font-semibold mb-4">1) Calificación y para qué plan va mejor</h3>
 
       <!-- ===================== -->
       <!-- RATING (Tazas)        -->
@@ -80,6 +80,32 @@
         <p id="rating-error" class="mt-2 text-sm text-red-600 hidden">Elegí una calificación para seguir.</p>
       </div>
 
+      <div class="mb-6">
+        <label class="block text-base font-semibold text-gray-900 mb-3">
+          Si tuvieras que elegir una sola, ¿para qué plan es mejor este café?
+        </label>
+
+        <div class="space-y-2">
+          {% for value, label in form.best_for_plan.field.choices %}
+            <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-amber-400 hover:bg-amber-50 cursor-pointer transition">
+              <input
+                type="radio"
+                name="best_for_plan"
+                value="{{ value }}"
+                class="h-4 w-4"
+                {% if form.best_for_plan.value == value %}checked{% endif %}
+                required
+              >
+              <span class="text-sm text-gray-800">{{ label }}</span>
+            </label>
+          {% endfor %}
+        </div>
+
+        {% if form.best_for_plan.errors %}
+          <p class="text-sm text-red-600 mt-2">{{ form.best_for_plan.errors.0 }}</p>
+        {% endif %}
+      </div>
+
       <!-- ===================== -->
       <!-- COMENTARIO            -->
       <!-- ===================== -->
@@ -96,7 +122,7 @@
                   rows="5"
                   maxlength="600"
                   class="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ej: Pedí un capuccino y medialuna. El café salió rápido, la música tranquila y el lugar cómodo para quedarse un rato."></textarea>
+                  placeholder="Ej: Pedí un capuccino y medialuna. El café salió rápido, la música tranquila y el lugar cómodo para quedarse un rato.">{{ form.comment.value|default_if_none:"" }}</textarea>
       </div>
 
       <!-- ===================== -->
@@ -108,12 +134,13 @@
         </label>
 
         <input type="number"
-               id="precio_capuccino"
-               name="precio_capuccino"
-               min="1000"
-               max="15000"
-               placeholder="Ej: 3500"
-               class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-400">
+              id="precio_capuccino"
+              name="precio_capuccino"
+              min="1000"
+              max="15000"
+              value="{{ form.precio_capuccino.value|default_if_none:'' }}"
+              placeholder="Ej: 3500"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-400">
 
         <p class="text-sm text-gray-600 mt-1">
           Esto ayuda a otros usuarios, pero podés saltearlo.
@@ -234,6 +261,11 @@
         </div>
 
         <div class="mb-3">
+          <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Ideal para</div>
+          <div id="pv-best-for-plan" class="text-gray-800"></div>
+        </div>
+
+        <div class="mb-3">
           <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Precio capuccino</div>
           <div id="pv-price" class="text-gray-800"></div>
         </div>
@@ -308,6 +340,7 @@
 
   const commentEl = document.getElementById("comment");
   const priceEl = document.getElementById("precio_capuccino");
+  const bestForPlanEls = Array.from(document.querySelectorAll('input[name="best_for_plan"]'));
 
   const feedbackEl = document.getElementById("rating-feedback");
   const ratingErrorEl = document.getElementById("rating-error");
@@ -334,6 +367,14 @@
   function getSelectedRating() {
     const r = document.querySelector('input[name="rating"]:checked');
     return r ? parseInt(r.value, 10) : null;
+  }
+
+  function getSelectedPlanLabel() {
+    const checked = bestForPlanEls.find(el => el.checked);
+    if (!checked) return "";
+
+    const label = checked.closest("label")?.querySelector("span");
+    return label ? label.textContent.trim() : "";
   }
 
   function setStep(n) {
@@ -425,6 +466,12 @@ document.querySelectorAll("#rating-cups .cup-btn").forEach(btn => {
     saveDraft();
   });
 
+  bestForPlanEls.forEach(el => {
+    el.addEventListener("change", () => {
+      saveDraft();
+    });
+  });
+
   // -------------------------
   // Tags: contador por categoría + autosave
   // -------------------------
@@ -493,6 +540,14 @@ document.querySelectorAll(".tag-step").forEach(step => {
       ratingErrorEl?.classList.remove("hidden");
       return;
     }
+
+    const selectedPlan = bestForPlanEls.find(el => el.checked);
+
+    if (!selectedPlan) {
+      alert("Elegí para qué plan es mejor este café antes de continuar.");
+      return;
+    }
+
     setStep(2);
     showOnly(step2);
     flashStepFeedback("¡Bien! Seguimos 👌");
@@ -514,6 +569,7 @@ document.querySelectorAll(".tag-step").forEach(step => {
     showOnly(step3);
     flashStepFeedback("¡Listo! Mirá tu reseña 👀");
     window.scrollTo({ top: 0, behavior: "smooth" });
+    
   });
 
   // Volver desde preview
@@ -537,6 +593,7 @@ document.querySelectorAll(".tag-step").forEach(step => {
     const rating = getSelectedRating();
     const comment = (commentEl?.value || "").trim();
     const price = (priceEl?.value || "").trim();
+    const bestForPlan = getSelectedPlanLabel();
 
     // Rating
     const pvRating = document.getElementById("pv-rating");
@@ -548,6 +605,12 @@ document.querySelectorAll(".tag-step").forEach(step => {
     const pvComment = document.getElementById("pv-comment");
     if (pvComment) {
       pvComment.textContent = comment || "Sin comentario";
+    }
+
+    // Best for plan
+    const pvBestForPlan = document.getElementById("pv-best-for-plan");
+    if (pvBestForPlan) {
+      pvBestForPlan.textContent = bestForPlan || "No informado";
     }
 
     // Price
@@ -585,6 +648,7 @@ document.querySelectorAll(".tag-step").forEach(step => {
     const rating = getSelectedRating();
     const comment = commentEl ? commentEl.value : "";
     const price = priceEl ? priceEl.value : "";
+    const selectedPlan = bestForPlanEls.find(el => el.checked);
 
     const tags = Array.from(document.querySelectorAll('input[name="tags"]:checked'))
       .map(cb => cb.value);
@@ -593,23 +657,10 @@ document.querySelectorAll(".tag-step").forEach(step => {
       rating: rating || null,
       comment: comment || "",
       price: price || "",
+      best_for_plan: selectedPlan ? selectedPlan.value : "",
       tags,
       ts: Date.now()
     };
-  }
-
-  const savedEl = document.getElementById("draft-saved");
-  let savedTimeout = null;
-
-  function flashSaved() {
-    if (!savedEl) return;
-
-    savedEl.classList.add("draft-saved-visible");
-
-    clearTimeout(savedTimeout);
-    savedTimeout = setTimeout(() => {
-      savedEl.classList.remove("draft-saved-visible");
-    }, 1200);
   }
 
   function saveDraft() {
@@ -643,6 +694,12 @@ document.querySelectorAll(".tag-step").forEach(step => {
 
       // price
       if (priceEl && typeof data.price === "string") priceEl.value = data.price;
+
+      // best_for_plan
+      if (typeof data.best_for_plan === "string" && data.best_for_plan) {
+        const selected = document.querySelector(`input[name="best_for_plan"][value="${data.best_for_plan}"]`);
+        if (selected) selected.checked = true;
+      }
 
       // tags
       if (Array.isArray(data.tags)) {
