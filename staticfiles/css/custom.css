@@ -289,7 +289,7 @@ main img { max-width: 100%; display: block; }
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
 }
-.review-head{ display:flex; gap:.75rem; alignments:flex-start; }
+.review-head{ display:flex; gap:.75rem; align-items:flex-start; }
 .review-avatar{
   width: 42px; height: 42px; border-radius: 999px;
   background: #e5e7eb; display:flex; align-items:center; justify-content:center;
@@ -309,7 +309,7 @@ main img { max-width: 100%; display: block; }
   background: linear-gradient(180deg, rgba(255,255,255,0), var(--surface));
   display:none; pointer-events:none;
 }
-.review-body.collapsible.collapsed .review-fade{ display:block; }
+.review-body.collapsed .review-fade{ display:block; }
 
 .review-text p{ margin: .25rem 0; }
 

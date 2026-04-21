@@ -26,7 +26,7 @@
     </div>
   </header>
 
-  <div class="review-body mt-3 collapsed" data-collapsible>
+  <div id="rev-{{ review.id }}" class="review-body mt-3 collapsed" data-collapsible>
     <div class="review-text">
       {% if review.comment %}
         <p>{{ review.comment|linebreaksbr }}</p>

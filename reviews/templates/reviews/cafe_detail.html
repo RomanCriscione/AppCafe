@@ -872,6 +872,44 @@
         });
       });
     });
+
+    
+  </script>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".review-toggle").forEach(btn => {
+      const targetId = btn.dataset.target;
+      const body = document.getElementById(targetId);
+
+      if (!body) return;
+
+      const text = body.querySelector(".review-text");
+      const fade = body.querySelector(".review-fade");
+
+      if (!text) return;
+
+      const isOverflowing = text.scrollHeight > body.clientHeight + 10;
+
+      if (isOverflowing) {
+        btn.hidden = false;
+      }
+
+      btn.addEventListener("click", () => {
+        const collapsed = body.classList.contains("collapsed");
+
+        if (collapsed) {
+          body.classList.remove("collapsed");
+          if (fade) fade.style.display = "none";
+          btn.textContent = "Ver menos";
+        } else {
+          body.classList.add("collapsed");
+          if (fade) fade.style.display = "";
+          btn.textContent = "Ver más";
+        }
+      });
+    });
+  });
   </script>
 
   <script>
