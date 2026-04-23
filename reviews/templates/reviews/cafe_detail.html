@@ -187,6 +187,12 @@
     {{ cafe.name }}
   </h1>
 
+  {% if cafe.description %}
+    <p class="text-base text-gray-700 dark:text-[var(--text-2)] leading-relaxed max-w-2xl">
+      {{ cafe.description }}
+    </p>
+  {% endif %}
+
   <nav aria-label="Breadcrumb" class="text-sm text-gray-500 mb-3">
     <ol class="flex flex-wrap items-center gap-1">
       <li>
