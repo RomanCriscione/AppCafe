@@ -182,7 +182,6 @@
 
   </div>
 
-  <!-- NOMBRE -->
   <h1 class="text-3xl font-bold text-gray-900 dark:text-[var(--text-1)]">
     {{ cafe.name }}
   </h1>
@@ -190,6 +189,12 @@
   {% if cafe.description %}
     <p class="text-base text-gray-700 dark:text-[var(--text-2)] leading-relaxed max-w-2xl">
       {{ cafe.description }}
+    </p>
+  {% endif %}
+
+  {% if one_liner %}
+    <p class="text-sm text-gray-600 dark:text-[var(--text-2)]">
+      {{ one_liner }}
     </p>
   {% endif %}
 
