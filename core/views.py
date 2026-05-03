@@ -56,13 +56,23 @@ def home(request):
     ]
 
     # 🔥 Cafés destacados inteligentes
+    total_reviews = Review.objects.count()
+
+    if total_reviews < 150:
+        min_reviews = 2
+    elif total_reviews < 600:
+        min_reviews = 5
+    else:
+        min_reviews = 10
+
     top_cafes_qs = (
         Cafe.objects
         .annotate(
             avg_rating=Avg("reviews__rating"),
             num_reviews=Count("reviews")
         )
-        .filter(avg_rating__gte=4)
+        .filter(avg_rating__gte=4, num_reviews__gte=min_reviews)
+        .prefetch_related("tags")
         .order_by("-avg_rating", "-num_reviews")[:20]
     )
 
