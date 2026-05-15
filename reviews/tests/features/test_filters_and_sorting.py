@@ -37,31 +37,31 @@ class FiltersAndSortingTestCase(TestCase):
         Review.objects.create(cafe=self.cafe2, rating=3, user=self.user2)
 
     def test_filter_by_pet_friendly(self):
-        response = self.client.get(reverse("cafe_list") + "?pet=on")
+        response = self.client.get(reverse("reviews:cafe_list") + "?pet=on")
         self.assertContains(response, "Café A")
         self.assertNotContains(response, "Café B")
 
     def test_filter_by_wifi(self):
-        response = self.client.get(reverse("cafe_list") + "?wifi=on")
+        response = self.client.get(reverse("reviews:cafe_list") + "?wifi=on")
         self.assertContains(response, "Café A")
         self.assertNotContains(response, "Café B")
 
     def test_filter_by_zona(self):
-        response = self.client.get(reverse("cafe_list") + "?zona=Palermo")
+        response = self.client.get(reverse("reviews:cafe_list") + "?zona=Palermo")
         self.assertContains(response, "Café A")
         self.assertNotContains(response, "Café B")
 
     def test_sort_by_rating(self):
-        response = self.client.get(reverse("cafe_list") + "?orden=rating")
+        response = self.client.get(reverse("reviews:cafe_list") + "?orden=rating")
         cafes = list(response.context["cafes"])
         self.assertGreaterEqual(cafes[0].average_rating, cafes[1].average_rating)
 
     def test_sort_by_reviews_count(self):
-        response = self.client.get(reverse("cafe_list") + "?orden=reviews_count")
+        response = self.client.get(reverse("reviews:cafe_list") + "?orden=reviews_count")
         cafes = list(response.context["cafes"])
         self.assertGreaterEqual(cafes[0].reviews.count(), cafes[1].reviews.count())
 
     def test_sort_by_algorithm_default(self):
-        response = self.client.get(reverse("cafe_list"))
+        response = self.client.get(reverse("reviews:cafe_list"))
         cafes = list(response.context["cafes"])
         self.assertTrue(len(cafes) >= 2)

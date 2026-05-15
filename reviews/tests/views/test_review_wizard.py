@@ -34,7 +34,7 @@ class ReviewWizardTests(TestCase):
         Tag.objects.create(name="Ideal para trabajar", category="actividad")
 
     def test_review_wizard_render(self):
-        url = reverse("create_review", args=[self.cafe.id])
+        url = reverse("reviews:create_review", args=[self.cafe.id])
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
