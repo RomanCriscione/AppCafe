@@ -456,32 +456,31 @@ def cafe_detail(request, cafe_id):
 
         radar_values.append(total)
 
+        # evitar gráfico vacío
     # evitar gráfico vacío
     if sum(radar_values) == 0 and total_reviews > 0:
         radar_values = [1, 0, 0, 0]
 
-        emotional_summary = None
+    # === RESUMEN EMOCIONAL ===
 
-        # === RESUMEN EMOCIONAL ===
+    emotional_summary = None
 
-        emotional_summary = None
+    if radar_values and sum(radar_values) > 0:
 
-        if radar_values and sum(radar_values) > 0:
+        top_index = radar_values.index(max(radar_values))
+        top_emotion = radar_labels[top_index]
 
-            top_index = radar_values.index(max(radar_values))
-            top_emotion = radar_labels[top_index]
+        summaries = {
+            "Conexión": "La gente viene más a conectar que a pasar rápido.",
 
-            summaries = {
-                "Conexión": "La gente viene más a conectar que a pasar rápido.",
+            "Refugio": "Este lugar se vive más como refugio que como ritual.",
 
-                "Refugio": "Este lugar se vive más como refugio que como ritual.",
+            "Ritual": "Los pequeños detalles hacen que quieras quedarte.",
 
-                "Ritual": "Los pequeños detalles hacen que quieras quedarte.",
+            "Inspiración": "Es de esos cafés que te dejan pensando un rato más.",
+        }
 
-                "Inspiración": "Es de esos cafés que te dejan pensando un rato más.",
-            }
-
-            emotional_summary = summaries.get(top_emotion)
+        emotional_summary = summaries.get(top_emotion)
 
 
     # paginado
