@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto px-4 py-6">
+<div class="max-w-5xl mx-auto px-4 py-6 pb-32">
 
   <!-- VOLVER -->
   <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="text-blue-600 hover:underline text-sm">
@@ -161,7 +161,7 @@
     <!-- PASO 2 — ETIQUETAS (categorías)           -->
     <!-- + Top tags del café (chips)               -->
     <!-- ========================================= -->
-    <section id="step-2" class="wizard-step hidden opacity-0 translate-y-2 transition-all duration-300">
+    <section id="step-2" class="wizard-step hidden transition-all duration-300">
 
       <h3 class="text-xl font-semibold mb-2 text-center">
         2) Elegí las etiquetas
@@ -218,7 +218,7 @@
 
       </div>
 
-      <div class="flex justify-between mt-8">
+      <div class="flex flex-col sm:flex-row gap-3 mt-8">
 
         <button type="button"
                 id="btn-back-step1"
@@ -311,12 +311,11 @@
 
   function showOnly(sectionToShow) {
     [step1, step2].forEach(s => {
-      s.classList.add("hidden", "opacity-0", "translate-y-2");
+      s.classList.add("hidden");
     });
 
     sectionToShow.classList.remove("hidden");
     requestAnimationFrame(() => {
-      sectionToShow.classList.remove("opacity-0", "translate-y-2");
     });
   }
 
