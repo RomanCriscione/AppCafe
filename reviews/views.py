@@ -110,9 +110,9 @@ def get_manual_tag_choices():
     tags_by_name = {t.name: t for t in tags_qs}
 
     grouped = {}
+
     for category, names in MANUAL_TAG_GROUPS.items():
         tags = [tags_by_name[n] for n in names if n in tags_by_name]
-        tags.sort(key=lambda t: (-t.num_reviews, t.name.lower()))
         grouped[category] = tags
 
     return grouped
