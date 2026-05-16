@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     "cloudinary",
     "cloudinary_storage",
 
+    "import_export",
+
 ]
 
 SITE_ID = 1

@@ -2,6 +2,7 @@
 from django.contrib import admin
 from .models import Cafe, Review, CafeStat, ReviewLike, ReviewReport
 from .claims import ClaimRequest, ClaimEvidence, ClaimStatus, ClaimMethod
+from import_export.admin import ImportExportModelAdmin
 
 
 @admin.register(Cafe)
@@ -157,3 +158,7 @@ class ReviewReportAdmin(admin.ModelAdmin):
         ("Reporte", {"fields": ("review", "user", "reason", "comment")}),
         ("Estado", {"fields": ("status", "resolved_by", "resolved_at", "resolution_notes")}),
     )
+
+@admin.register(Cafe)
+class CafeAdmin(ImportExportModelAdmin):
+    pass
