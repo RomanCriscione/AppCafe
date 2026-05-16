@@ -96,7 +96,6 @@ MANUAL_TAG_GROUPS = {
     ],
 }
 
-
 def get_manual_tag_choices():
     all_names = []
     for names in MANUAL_TAG_GROUPS.values():
