@@ -121,7 +121,7 @@
                   name="comment"
                   rows="5"
                   maxlength="600"
-                  class="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500"
+                  class="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-amber-500"
                   placeholder="Ej: Pedí un capuccino y medialuna. El café salió rápido, la música tranquila y el lugar cómodo para quedarse un rato.">{{ form.comment.value|default_if_none:"" }}</textarea>
       </div>
 
@@ -150,7 +150,7 @@
       <div class="flex justify-end">
         <button type="button"
                 id="btn-step1-next"
-                class="next-btn bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                class="next-btn bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700">
           Siguiente →
         </button>
       </div>
@@ -161,86 +161,78 @@
     <!-- + Top tags del café (chips)               -->
     <!-- ========================================= -->
     <section id="step-2" class="wizard-step hidden opacity-0 translate-y-2 transition-all duration-300">
-      <h3 class="text-xl font-semibold mb-2 text-center">2) Elegí las etiquetas</h3>
-      <p class="text-sm text-gray-500 text-center mb-4">
-        Podés saltar cualquier categoría. Elegí las que mejor describan tu experiencia.
+
+      <h3 class="text-xl font-semibold mb-2 text-center">
+        2) Elegí las etiquetas
+      </h3>
+
+      <p class="text-sm text-gray-500 text-center mb-6">
+        ¿Qué sensaciones te dejó este lugar?
       </p>
 
       {% if top_tags %}
-        <div class="mb-5 rounded-lg border bg-white p-4">
+        <div class="mb-6 rounded-xl border bg-white p-4">
           <div class="text-xs uppercase tracking-wide text-gray-500 mb-2 text-center">
             Más usadas en este café
           </div>
+
           <div class="flex flex-wrap justify-center gap-2" id="top-tags">
             {% for t in top_tags %}
               <button type="button"
                       class="top-tag-chip inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm hover:shadow transition"
                       data-tag-id="{{ t.id }}">
+
                 {{ t|tag_emoji }} {{ t.name }}
+
                 {% if t.num_reviews %}
                   <span class="text-xs opacity-70">({{ t.num_reviews }})</span>
                 {% endif %}
               </button>
             {% endfor %}
           </div>
-          <p class="text-xs text-gray-500 mt-2 text-center">
-            Tocá una para seleccionarla rápido.
-          </p>
         </div>
       {% endif %}
 
-      <div id="tag-steps">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
+
         {% for category, tags in tag_choices.items %}
-          <div class="tag-step hidden">
-            <h4 class="text-lg font-semibold mb-2 text-center">{{ category }}</h4>
+          {% for t in tags %}
 
-            <p class="text-sm text-gray-500 text-center mb-4">
-              Elegiste <span class="tag-count">0</span> etiquetas en esta categoría
-            </p>
+            <label class="flex items-start gap-2 cursor-pointer rounded-xl border border-gray-200 p-3 hover:border-amber-300 hover:bg-amber-50 has-[:checked]:border-amber-400 has-[:checked]:bg-amber-50 transition">
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {% for t in tags %}
-                <label class="flex items-start gap-2 cursor-pointer">
-                  <input type="checkbox"
-                         class="tag-checkbox mt-1 h-4 w-4 text-blue-600"
-                         name="tags"
-                         value="{{ t.id }}"
-                         {% if selected_tag_ids and t.id in selected_tag_ids %}checked{% endif %}>
-                  <span class="text-gray-800">{{ t|tag_emoji }} {{ t.name }}</span>
-                </label>
-              {% endfor %}
-            </div>
+              <input type="checkbox"
+                    class="tag-checkbox mt-1 h-4 w-4 text-amber-600"
+                    name="tags"
+                    value="{{ t.id }}"
+                    {% if selected_tag_ids and t.id in selected_tag_ids %}checked{% endif %}>
 
-            <div class="flex justify-between mt-6">
-              <button type="button"
-                      class="prev-tag bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">
-                ← Volver
-              </button>
+              <span class="text-gray-800">
+                {{ t|tag_emoji }} {{ t.name }}
+              </span>
 
-              <div class="flex gap-2">
-                <button type="button"
-                        class="skip-tag text-sm underline text-gray-600">
-                  Saltar
-                </button>
+            </label>
 
-                {% if forloop.last %}
-                  <button type="button"
-                          id="btn-preview"
-                          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                    Ver preview →
-                  </button>
-                {% else %}
-                  <button type="button"
-                          class="next-tag bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-                    Siguiente →
-                  </button>
-                {% endif %}
-              </div>
-            </div>
-
-          </div>
+          {% endfor %}
         {% endfor %}
+
       </div>
+
+      <div class="flex justify-between mt-8">
+
+        <button type="button"
+                id="btn-back-step1"
+                class="px-4 py-2 rounded-lg border hover:bg-gray-50">
+          ← Volver
+        </button>
+
+        <button type="button"
+                id="btn-preview"
+                class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700">
+          Ver preview →
+        </button>
+
+      </div>
+
     </section>
 
     <!-- ========================================= -->
@@ -335,9 +327,6 @@
   const step2 = document.getElementById("step-2");
   const step3 = document.getElementById("step-3");
 
-  const stepsTags = Array.from(document.querySelectorAll(".tag-step"));
-  let tagIdx = 0;
-
   const commentEl = document.getElementById("comment");
   const priceEl = document.getElementById("precio_capuccino");
   const bestForPlanEls = Array.from(document.querySelectorAll('input[name="best_for_plan"]'));
@@ -390,11 +379,6 @@
     requestAnimationFrame(() => {
       sectionToShow.classList.remove("opacity-0", "translate-y-2");
     });
-  }
-
-  function showTagStep(k) {
-    tagIdx = Math.max(0, Math.min(k, stepsTags.length - 1));
-    stepsTags.forEach((s, idx) => s.classList.toggle("hidden", idx !== tagIdx));
   }
 
   // -------------------------
@@ -473,37 +457,6 @@ document.querySelectorAll("#rating-cups .cup-btn").forEach(btn => {
   });
 
   // -------------------------
-  // Tags: contador por categoría + autosave
-  // -------------------------
-document.querySelectorAll(".tag-step").forEach(step => {
-  const counterEl = step.querySelector(".tag-count");
-  const cbs = step.querySelectorAll('input[type="checkbox"]');
-
-  const update = () => {
-    let count = 0;
-
-    cbs.forEach(cb => {
-      const label = cb.closest("label");
-      if (!label) return;
-
-      if (cb.checked) {
-        count++;
-        label.classList.add("tag-chip-active", "tag-chip-pop");
-        setTimeout(() => label.classList.remove("tag-chip-pop"), 200);
-      } else {
-        label.classList.remove("tag-chip-active");
-      }
-    });
-
-    if (counterEl) counterEl.textContent = String(count);
-    saveDraft();
-  };
-
-  cbs.forEach(cb => cb.addEventListener("change", update));
-  update();
-});
-
-  // -------------------------
   // Top tags chips: toggle checkbox correspondiente
   // -------------------------
   document.querySelectorAll(".top-tag-chip").forEach(chip => {
@@ -516,9 +469,9 @@ document.querySelectorAll(".tag-step").forEach(step => {
       cb.dispatchEvent(new Event("change", { bubbles: true }));
 
       // micro feedback visual
-      chip.classList.add("ring-2", "ring-blue-400");
+      chip.classList.add("ring-2", "ring-amber-400");
       setTimeout(() => {
-        chip.classList.remove("ring-2", "ring-blue-400");
+        chip.classList.remove("ring-2", "ring-amber-400");
       }, 600);
 
 
@@ -551,15 +504,8 @@ document.querySelectorAll(".tag-step").forEach(step => {
     setStep(2);
     showOnly(step2);
     flashStepFeedback("¡Bien! Seguimos 👌");
-    showTagStep(0);
+    // tags unificadas — ya no hay subpasos
     window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-
-  // Navegación entre categorías
-  stepsTags.forEach((step, idx) => {
-    step.querySelector(".next-tag")?.addEventListener("click", () => showTagStep(idx + 1));
-    step.querySelector(".skip-tag")?.addEventListener("click", () => showTagStep(idx + 1));
-    step.querySelector(".prev-tag")?.addEventListener("click", () => showTagStep(idx - 1));
   });
 
   // Preview
@@ -576,7 +522,7 @@ document.querySelectorAll(".tag-step").forEach(step => {
   document.getElementById("btn-back-to-tags")?.addEventListener("click", () => {
     setStep(2);
     showOnly(step2);
-    showTagStep(stepsTags.length - 1);
+    // ya no existen subpasos de tags
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
@@ -707,12 +653,17 @@ document.querySelectorAll(".tag-step").forEach(step => {
           cb.checked = data.tags.includes(cb.value);
         });
 
-        // forzar update contadores
-        document.querySelectorAll(".tag-step").forEach(step => {
-          const counterEl = step.querySelector(".tag-count");
-          const cbs = step.querySelectorAll('input[type="checkbox"]');
-          const count = Array.from(cbs).filter(c => c.checked).length;
-          if (counterEl) counterEl.textContent = String(count);
+        // restaurar estilos visuales de tags
+        document.querySelectorAll('input[name="tags"]').forEach(cb => {
+          const label = cb.closest("label");
+
+          if (!label) return;
+
+          if (cb.checked) {
+            label.classList.add("tag-chip-active");
+          } else {
+            label.classList.remove("tag-chip-active");
+          }
         });
       }
 
@@ -748,7 +699,6 @@ document.querySelectorAll(".tag-step").forEach(step => {
   const serverStep = parseInt(currentStepInput?.value || "1", 10);
   if (serverStep === 2) {
     showOnly(step2);
-    showTagStep(0);
   } else if (serverStep === 3) {
     buildPreview();
     showOnly(step3);
@@ -761,9 +711,9 @@ document.querySelectorAll(".top-tag-chip").forEach(chip => {
   const id = chip.dataset.tagId;
   const cb = document.querySelector(`input.tag-checkbox[value="${id}"]`);
   if (cb && cb.checked) {
-    chip.classList.add("bg-blue-600", "text-white", "border-blue-600");
+    chip.classList.add("bg-amber-600", "text-white", "border-amber-600");
   } else {
-    chip.classList.remove("bg-blue-600", "text-white", "border-blue-600");
+    chip.classList.remove("bg-amber-600", "text-white", "border-blue-600");
   }
 });
 
