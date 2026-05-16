@@ -227,6 +227,7 @@
         </button>
 
         <button
+            id="btn-submit"
             type="submit"
             style="background:#7A4E3A;color:white;"
             class="w-full mt-6 py-3 rounded-xl font-semibold hover:opacity-90 transition"
@@ -236,70 +237,6 @@
 
       </div>
 
-    </section>
-
-    <!-- ========================================= -->
-    <!-- PASO 3 — PREVIEW ANTES DE ENVIAR           -->
-    <!-- ========================================= -->
-    <section id="step-3" class="wizard-step hidden opacity-0 translate-y-2 transition-all duration-300">
-      <h3 class="text-xl font-semibold mb-4 text-center">3) Preview de tu reseña</h3>
-
-      <div class="rounded-xl border bg-white p-4 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-          <div class="font-semibold">{{ cafe.name }}</div>
-          <div id="pv-rating" class="text-sm text-gray-700"></div>
-        </div>
-
-        <div class="mb-3">
-          <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Comentario</div>
-          <div id="pv-comment" class="text-gray-800 whitespace-pre-wrap"></div>
-        </div>
-
-        <div class="mb-3">
-          <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Ideal para</div>
-          <div id="pv-best-for-plan" class="text-gray-800"></div>
-        </div>
-
-        <div class="mb-3">
-          <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Precio capuccino</div>
-          <div id="pv-price" class="text-gray-800"></div>
-        </div>
-
-        <div class="mb-1">
-          <div class="text-xs uppercase tracking-wide text-gray-500 mb-2">Etiquetas</div>
-          <div id="pv-tags" class="flex flex-wrap gap-2"></div>
-        </div>
-      </div>
-
-      <div class="mt-6 flex justify-between gap-2">
-        <button type="button"
-                id="btn-back-to-tags"
-                class="px-4 py-2 rounded border hover:bg-gray-50">
-          ← Editar etiquetas
-        </button>
-
-        <div class="flex gap-2">
-          <button type="button"
-                  id="btn-back-to-step1"
-                  class="px-4 py-2 rounded border hover:bg-gray-50">
-            Editar paso 1
-          </button>
-
-          <button type="submit"
-                  id="btn-submit"
-                  class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700
-                        disabled:opacity-60 disabled:cursor-not-allowed
-                        flex items-center gap-2 justify-center">
-            <span id="submit-text">Publicar reseña</span>
-            <span id="submit-spinner" class="hidden animate-spin">⏳</span>
-          </button>
-
-        </div>
-      </div>
-
-      <p class="text-xs text-gray-500 mt-3 text-center">
-        Al publicar, se limpia el borrador guardado para este café.
-      </p>
     </section>
 
   </form>
@@ -328,7 +265,6 @@
 
   const step1 = document.getElementById("step-1");
   const step2 = document.getElementById("step-2");
-  const step3 = document.getElementById("step-3");
 
   const commentEl = document.getElementById("comment");
   const priceEl = document.getElementById("precio_capuccino");
@@ -374,7 +310,7 @@
   }
 
   function showOnly(sectionToShow) {
-    [step1, step2, step3].forEach(s => {
+    [step1, step2].forEach(s => {
       s.classList.add("hidden", "opacity-0", "translate-y-2");
     });
 
@@ -511,84 +447,11 @@ document.querySelectorAll("#rating-cups .cup-btn").forEach(btn => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
-  // Preview
-  document.getElementById("btn-preview")?.addEventListener("click", () => {
-    setStep(3);
-    buildPreview();
-    showOnly(step3);
-    flashStepFeedback("¡Listo! Mirá tu reseña 👀");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    
-  });
-
-  // Volver desde preview
-  document.getElementById("btn-back-to-tags")?.addEventListener("click", () => {
-    setStep(2);
-    showOnly(step2);
-    // ya no existen subpasos de tags
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-
-  document.getElementById("btn-back-to-step1")?.addEventListener("click", () => {
-    setStep(1);
-    showOnly(step1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-
-  // -------------------------
-  // Preview: render
-  // -------------------------
-  function buildPreview() {
-    const rating = getSelectedRating();
-    const comment = (commentEl?.value || "").trim();
-    const price = (priceEl?.value || "").trim();
-    const bestForPlan = getSelectedPlanLabel();
-
-    // Rating
-    const pvRating = document.getElementById("pv-rating");
-    if (pvRating) {
-      pvRating.textContent = rating ? `☕ ${rating} / 5` : "Sin calificación";
-    }
-
-    // Comment
-    const pvComment = document.getElementById("pv-comment");
-    if (pvComment) {
-      pvComment.textContent = comment || "Sin comentario";
-    }
-
-    // Best for plan
-    const pvBestForPlan = document.getElementById("pv-best-for-plan");
-    if (pvBestForPlan) {
-      pvBestForPlan.textContent = bestForPlan || "No informado";
-    }
-
-    // Price
-    const pvPrice = document.getElementById("pv-price");
-    if (pvPrice) {
-      pvPrice.textContent = price ? `$ ${price}` : "No informado";
-    }
-
-    // Tags
-    const pvTags = document.getElementById("pv-tags");
-    if (pvTags) {
-      pvTags.innerHTML = "";
-      const checked = Array.from(document.querySelectorAll('input[name="tags"]:checked'));
-
-      if (!checked.length) {
-        pvTags.innerHTML = '<span class="text-gray-500">Sin etiquetas</span>';
-      } else {
-        checked.forEach(cb => {
-          const label = cb.closest("label");
-          const text = label ? label.innerText.trim() : `Tag ${cb.value}`;
-
-          const chip = document.createElement("span");
-          chip.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm bg-gray-50";
-          chip.textContent = text;
-          pvTags.appendChild(chip);
-        });
-      }
-    }
-  }
+      document.getElementById("btn-back-step1")?.addEventListener("click", () => {
+      setStep(1);
+      showOnly(step1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }); 
 
   // -------------------------
   // Draft: save / restore / clear
@@ -702,9 +565,6 @@ document.querySelectorAll("#rating-cups .cup-btn").forEach(btn => {
   const serverStep = parseInt(currentStepInput?.value || "1", 10);
   if (serverStep === 2) {
     showOnly(step2);
-  } else if (serverStep === 3) {
-    buildPreview();
-    showOnly(step3);
   } else {
     showOnly(step1);
   }
