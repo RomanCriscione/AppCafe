@@ -460,6 +460,8 @@ def cafe_detail(request, cafe_id):
     if sum(radar_values) == 0 and total_reviews > 0:
         radar_values = [1, 0, 0, 0]
 
+        emotional_summary = None
+
         # === RESUMEN EMOCIONAL ===
 
         emotional_summary = None
