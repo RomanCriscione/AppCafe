@@ -164,10 +164,11 @@ class Cafe(models.Model):
 class Review(models.Model):
     PLAN_CHOICES = [
         ("trabajar", "💻 Trabajar o estudiar"),
-        ("al_paso", "🚶‍♂️ Café al paso"),
+        ("al_paso", "🚶 Tomar algo rápido"),
         ("amigos", "💬 Charlar con amigos"),
         ("cita", "❤️ Cita"),
         ("leer", "📖 Leer o desconectar"),
+        ("solo", "☕ Salir solo"),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

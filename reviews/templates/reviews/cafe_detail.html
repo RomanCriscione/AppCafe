@@ -451,8 +451,18 @@
   {% if radar_values and radar_labels %}
     <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-225">
       <div class="flex items-center gap-2 mb-2">
-        <span>📊</span>
-        <h2 class="text-lg font-semibold">Perfil del café según usuarios</h2>
+        <span>☕</span>
+        <div>
+          <h2 class="text-lg font-semibold text-[var(--text-1)]">
+            ☕ Cómo se siente este café
+          </h2>
+
+          {% if emotional_summary %}
+            <p class="text-sm text-gray-500 dark:text-[var(--text-2)] mt-1 italic">
+              {{ emotional_summary }}
+            </p>
+          {% endif %}
+        </div>
 
         {% if total_reviews == 1 %}
         <p class="text-sm text-gray-500 mt-1">
@@ -744,27 +754,18 @@
 
     const isDark = document.documentElement.classList.contains("dark");
 
-    const paletteLight = [
-      "#E6C7A6",
-      "#D6A77A",
-      "#C28B5A",
-      "#A56A3F",
-      "#7B4A2E",
-      "#5B371F",
-      "#3E2515"
-    ];
+  const baseColor = isDark
+    ? "rgba(196, 156, 108, "
+    : "rgba(143, 93, 60, ";
 
-    const paletteDark = [
-      "#F1D2B6",
-      "#E2B88F",
-      "#D09A64",
-      "#B87A45",
-      "#915A33",
-      "#6E4125",
-      "#4A2A18"
-    ];
+  const radarColors = [
+    `${baseColor}0.95)`,
+    `${baseColor}0.80)`,
+    `${baseColor}0.68)`,
+    `${baseColor}0.55)`,
+  ];
 
-    const bg = (isDark ? paletteDark : paletteLight).slice(0, labels.length);
+    const bg = radarColors.slice(0, labels.length);
 
     const el = document.getElementById('sensor-bars');
     if (!el) return;

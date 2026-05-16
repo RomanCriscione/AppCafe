@@ -68,32 +68,31 @@ _UI_MSG = {
     "no_reviews": "Todavía no hay reseñas.",
 }
 
-# === TAGS SENSORIALES MANUALES (18 etiquetas, 3 grupos) ===
+# === TAGS SENSORIALES GOTA V2 ===
 
 MANUAL_TAG_GROUPS = {
-    "sensorial": [
-        "Baños cuidados (y eso dice mucho)",
-        "Cada taza es distinta, como debe ser",
-        "Hay un gato que manda",
-        "Paredes con historias (y fotos de verdad)",
-        "Ventanales con luz todo el día",
-        "Huele a café recién molido",
-    ],
-    "ambiente": [
+    "conexion": [
         "Podés ir solo sin sentirte solo",
-        "Te saludan por tu nombre",
         "Ideal para charla de sobremesa",
-        "Buen lugar para esperar sin ansiedad",
         "Ideal para una primera cita sin presión",
-        "Te vas y te dan ganas de volver",
     ],
-    "experiencia": [
-        "Buena conexión, pero te da ganas de desconectarte",
-        "Ideal para escribir un cuento",
-        "La playlist ayuda a concentrarse",
-        "Las sillas no te arruinan la espalda",
-        "Para leer sin mirar el reloj",
+
+    "refugio": [
+        "Buen lugar para esperar sin ansiedad",
+        "Te dan ganas de desconectarte",
+        "Te vas y te dan ganas de volver",
+        "Pedirías otra taza solo para quedarte",
+    ],
+
+    "ritual": [
+        "Huele a café recién molido",
         "Pan casero y café en taza pesada",
+        "Ventanales con luz todo el día",
+    ],
+
+    "inspiracion": [
+        "Ideal para escribir o leer un cuento",
+        "Paredes con historias",
     ],
 }
 
@@ -405,20 +404,83 @@ def cafe_detail(request, cafe_id):
     positives = reviews_qs.filter(rating__gte=4).count()
     positive_pct = int((positives / total_reviews) * 100) if total_reviews else 0
 
-    # radar por categorías a partir de tags
-    SENSOR_AXES = ["sensorial", "experiencia", "ambiente"]
-    sensor_rows = (
-        Tag.objects.filter(reviews__cafe=cafe)
-        .values("category")
+    # === RADAR EMOCIONAL GOTA V2 ===
+
+    EMOTIONAL_GROUPS = {
+        "Conexión": [
+            "Podés ir solo sin sentirte solo",
+            "Ideal para charla de sobremesa",
+            "Ideal para una primera cita sin presión",
+        ],
+
+        "Refugio": [
+            "Buen lugar para esperar sin ansiedad",
+            "Te dan ganas de desconectarte",
+            "Te vas y te dan ganas de volver",
+            "Pedirías otra taza solo para quedarte",
+        ],
+
+        "Ritual": [
+            "Huele a café recién molido",
+            "Pan casero y café en taza pesada",
+            "Ventanales con luz todo el día",
+        ],
+
+        "Inspiración": [
+            "Ideal para escribir o leer un cuento",
+            "Paredes con historias",
+        ],
+    }
+
+
+    tag_counts = (
+        Tag.objects
+        .filter(reviews__cafe=cafe)
+        .values("name")
         .annotate(count=Count("id"))
     )
-    sensor_dict = {row["category"]: row["count"] for row in sensor_rows}
-    radar_labels = SENSOR_AXES
-    radar_values = [sensor_dict.get(k, 0) for k in SENSOR_AXES]
 
-    # ⭐ si todo está en 0, mostrar mínimo para que se vea el gráfico
+    tag_dict = {
+        row["name"]: row["count"]
+        for row in tag_counts
+    }
+
+    radar_labels = list(EMOTIONAL_GROUPS.keys())
+
+    radar_values = []
+
+    for group_name, tag_names in EMOTIONAL_GROUPS.items():
+        total = sum(
+            tag_dict.get(tag_name, 0)
+            for tag_name in tag_names
+        )
+
+        radar_values.append(total)
+
+    # evitar gráfico vacío
     if sum(radar_values) == 0 and total_reviews > 0:
-        radar_values = [1] + [0]*(len(SENSOR_AXES)-1)
+        radar_values = [1, 0, 0, 0]
+
+        # === RESUMEN EMOCIONAL ===
+
+        emotional_summary = None
+
+        if radar_values and sum(radar_values) > 0:
+
+            top_index = radar_values.index(max(radar_values))
+            top_emotion = radar_labels[top_index]
+
+            summaries = {
+                "Conexión": "La gente viene más a conectar que a pasar rápido.",
+
+                "Refugio": "Este lugar se vive más como refugio que como ritual.",
+
+                "Ritual": "Los pequeños detalles hacen que quieras quedarte.",
+
+                "Inspiración": "Es de esos cafés que te dejan pensando un rato más.",
+            }
+
+            emotional_summary = summaries.get(top_emotion)
 
 
     # paginado
@@ -512,6 +574,7 @@ def cafe_detail(request, cafe_id):
             "positive_pct": positive_pct,
             "radar_labels": radar_labels,
             "radar_values": radar_values,
+            "emotional_summary": emotional_summary,
             "recommended_cafes": recommended_cafes,
             "top_tags": top_tags,
             "more_tags": more_tags,
