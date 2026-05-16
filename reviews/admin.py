@@ -6,7 +6,7 @@ from import_export.admin import ImportExportModelAdmin
 
 
 @admin.register(Cafe)
-class CafeAdmin(admin.ModelAdmin):
+class CafeAdmin(ImportExportModelAdmin):
     list_display = (
         "name", "location", "email", "phone",
         "visibility_level", "claim_status", "claimed_by",
@@ -159,6 +159,3 @@ class ReviewReportAdmin(admin.ModelAdmin):
         ("Estado", {"fields": ("status", "resolved_by", "resolved_at", "resolution_notes")}),
     )
 
-@admin.register(Cafe)
-class CafeAdmin(ImportExportModelAdmin):
-    pass
