@@ -95,89 +95,13 @@
       {% endif %}
 
 
-      <!-- GUARDAR + VER -->
-      <div class="flex items-center justify-between">
-
-        <!-- MAPA CAFETERO -->
-        <details class="relative">
-
-          <summary class="list-none cursor-pointer">
-
-            <div class="btn btn-outline btn-sm rounded-xl inline-flex items-center justify-center">
-
-              {% if cafe.user_status == "want_to_go" %}
-                ☕
-              {% elif cafe.user_status == "want_to_return" %}
-                ❤️
-              {% elif cafe.user_status == "visited" %}
-                ✔️
-              {% else %}
-                🤍
-              {% endif %}
-
-            </div>
-
-          </summary>
-
-          <!-- DROPDOWN -->
-          <div class="absolute left-0 mt-2 z-30 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-4">
-
-            <p class="text-sm font-semibold mb-3 text-gray-800">
-              ☕ Sumalo a tu recorrido
-            </p>
-
-            <div class="space-y-2">
-
-              <!-- ☕ Quiero ir -->
-              <form method="post"
-                    action="{% url 'reviews:set_cafe_status' cafe.id %}">
-                {% csrf_token %}
-                <input type="hidden" name="status" value="want_to_go">
-
-                <button type="submit"
-                        class="w-full text-left px-3 py-2 rounded-xl hover:bg-amber-50 transition">
-                  ☕ Quiero ir
-                </button>
-              </form>
-
-              <!-- ❤️ Quiero volver -->
-              <form method="post"
-                    action="{% url 'reviews:set_cafe_status' cafe.id %}">
-                {% csrf_token %}
-                <input type="hidden" name="status" value="want_to_return">
-
-                <button type="submit"
-                        class="w-full text-left px-3 py-2 rounded-xl hover:bg-rose-50 transition">
-                  ❤️ Quiero volver
-                </button>
-              </form>
-
-              <!-- ✔️ Ya fui -->
-              <form method="post"
-                    action="{% url 'reviews:set_cafe_status' cafe.id %}">
-                {% csrf_token %}
-                <input type="hidden" name="status" value="visited">
-
-                <button type="submit"
-                        class="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50 transition">
-                  ✔️ Ya fui
-                </button>
-              </form>
-
-            </div>
-
-          </div>
-
-        </details>
-
-        <!-- VER -->
+      <!-- VER -->
+      <div class="flex items-center justify-end">
         <a href="{% url 'reviews:cafe_detail' cafe.id %}"
           class="btn btn-primary btn-sm">
           Ver
         </a>
-
       </div>
-
     </div>
   </div>
 
