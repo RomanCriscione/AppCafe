@@ -1133,7 +1133,7 @@ def set_cafe_status(request, cafe_id):
 
     return redirect(
         request.META.get("HTTP_REFERER")
-        or reverse("reviews:cafe_list")
+        or reverse("reviews:cafe_detail", args=[cafe.id])
     )
 
 
