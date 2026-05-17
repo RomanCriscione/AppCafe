@@ -20,7 +20,7 @@ def calcular_score_cafe(
     score += min(reviews, 20) * 0.45
 
     # === B. Popularidad ===
-    score += min(cafe.favorites.count(), 30) * 0.4
+    score += min(cafe.relationships.count(), 30) * 0.4
 
     # === C. Fotos ===
     fotos = sum(bool(getattr(cafe, f"photo{i}", None)) for i in (1, 2, 3))

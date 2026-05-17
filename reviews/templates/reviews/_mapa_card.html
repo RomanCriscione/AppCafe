@@ -1,0 +1,94 @@
+{% load static %}
+
+<article class="bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all">
+
+  <!-- FOTO -->
+  <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block relative">
+
+    <div class="w-full h-40 overflow-hidden">
+
+      {% if cafe.photo1 and cafe.photo1.url %}
+        <img
+          src="{{ cafe.photo1.url }}"
+          alt="{{ cafe.name }}"
+          class="w-full h-full object-cover"
+          loading="lazy"
+        >
+      {% else %}
+        <img
+          src="{% static 'images/coffee-hero.jpg' %}"
+          alt="{{ cafe.name }}"
+          class="w-full h-full object-cover"
+          loading="lazy"
+        >
+      {% endif %}
+
+    </div>
+
+    <!-- RATING -->
+    <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-semibold shadow">
+
+      ☕
+      {% if cafe.avg_rating %}
+        {{ cafe.avg_rating|floatformat:1 }}
+      {% else %}
+        –
+      {% endif %}
+      / 5
+
+    </div>
+
+    <!-- RESEÑAS -->
+    <div class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs shadow">
+
+      ({{ cafe.num_reviews }} reseñas)
+
+    </div>
+
+  </a>
+
+  <!-- BODY -->
+  <div class="p-4 space-y-3">
+
+    <div>
+      <h3 class="text-xl font-bold text-[var(--text-1)]">
+        {{ cafe.name }}
+      </h3>
+
+      <p class="text-sm text-gray-500">
+        {{ cafe.location }}
+      </p>
+    </div>
+
+    <!-- ESTADO -->
+    <div>
+
+      {% if cafe.user_status == "want_to_go" %}
+        <span class="inline-flex items-center gap-1 text-sm bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full">
+          ☕ Quiero ir
+        </span>
+
+      {% elif cafe.user_status == "want_to_return" %}
+        <span class="inline-flex items-center gap-1 text-sm bg-rose-50 text-rose-700 border border-rose-200 px-3 py-1 rounded-full">
+          ❤️ Quiero volver
+        </span>
+
+      {% elif cafe.user_status == "visited" %}
+        <span class="inline-flex items-center gap-1 text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full">
+          ✔️ Ya fui
+        </span>
+      {% endif %}
+
+    </div>
+
+    <!-- CTA -->
+    <a href="{% url 'reviews:cafe_detail' cafe.id %}"
+       class="inline-flex items-center justify-center rounded-xl bg-[var(--brand)] text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition">
+
+      Ver café
+
+    </a>
+
+  </div>
+
+</article>
