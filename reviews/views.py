@@ -1148,7 +1148,10 @@ def set_cafe_status(request, cafe_id):
             )
 
         messages.error(request, "Estado inválido.")
-        return redirect(request.META.get("HTTP_REFERER") or reverse("reviews:cafe_list"))
+        return redirect(
+            "reviews:cafe_detail",
+            cafe_id=cafe.id
+        )
 
     relationship, created = CafeRelationship.objects.get_or_create(
         user=request.user,
