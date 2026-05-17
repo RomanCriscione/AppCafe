@@ -25,7 +25,7 @@ urlpatterns = [
     "founder/analytics/", views.founder_analytics, name="founder_analytics",),
 
     # Favoritos
-    # path('favoritos/', views.favorite_cafes, name='favorite_cafes'),
+    path('favoritos/', views.favorite_cafes, name='favorite_cafes'),
 
     # Panel del dueño
     path('perfil/', views.owner_dashboard, name='owner_dashboard'),
