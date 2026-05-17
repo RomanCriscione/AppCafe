@@ -563,9 +563,8 @@ def cafe_detail(request, cafe_id):
         ).first()
 
         if relationship:
-            if relationship:
-                user_status = relationship.status
-                user_note = relationship.private_note or ""
+            user_status = relationship.status
+            user_note = relationship.private_note or ""
 
     # texto de cabecera
     one_liner = None
@@ -1065,10 +1064,7 @@ def update_cafe_note(request, cafe_id):
     note = note[:500]
 
     relationship.private_note = note
-    relationship.save(update_fields=[
-        "private_note",
-        "updated_at",
-    ])
+    relationship.save(update_fields=["private_note",])
 
     if note:
 
@@ -1200,7 +1196,7 @@ def set_cafe_status(request, cafe_id):
             "removed": removed
         })
 
-    return redirect("reviews:favorite_cafes")
+    return redirect("reviews:cafe_detail",cafe_id=cafe.id)
 
 
 @login_required
