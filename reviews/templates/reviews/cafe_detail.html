@@ -261,6 +261,57 @@
 
 </section>
 
+{% if user.is_authenticated and user_status %}
+
+<section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-400">
+
+  <div class="mb-3">
+    <h3 class="text-lg font-semibold text-[var(--text-1)]">
+      ✍️ Tu nota personal
+    </h3>
+
+    <p class="text-sm text-gray-500 dark:text-[var(--text-2)] mt-1">
+      Un recuerdo, una sensación o algo para acordarte después.
+    </p>
+  </div>
+
+  <form
+    method="post"
+    action="{% url 'reviews:update_cafe_note' cafe.id %}"
+    class="space-y-3"
+  >
+
+    {% csrf_token %}
+
+    <textarea
+      name="private_note"
+      rows="4"
+      maxlength="500"
+      placeholder="Ej: ideal para leer un rato a la tarde ☕"
+      class="w-full rounded-2xl border border-gray-200 dark:border-[var(--border)] bg-white dark:bg-[var(--surface-2)] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand)] resize-none"
+    >{{ user_note }}</textarea>
+
+    <div class="flex items-center justify-between">
+
+      <p class="text-xs text-gray-400">
+        Privado · solo visible para vos
+      </p>
+
+      <button
+        type="submit"
+        class="btn btn-primary rounded-xl"
+      >
+        Guardar nota
+      </button>
+
+    </div>
+
+  </form>
+
+</section>
+
+{% endif %}
+
   {% if cafe.description %}
     <p class="text-base text-gray-700 dark:text-[var(--text-2)] leading-relaxed max-w-2xl">
       {{ cafe.description }}

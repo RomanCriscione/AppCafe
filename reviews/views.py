@@ -537,6 +537,7 @@ def cafe_detail(request, cafe_id):
     liked_ids = set()
     my_review = None
     user_status = None
+    user_note = ""
 
     if request.user.is_authenticated:
 
@@ -562,7 +563,9 @@ def cafe_detail(request, cafe_id):
         ).first()
 
         if relationship:
-            user_status = relationship.status
+            if relationship:
+                user_status = relationship.status
+                user_note = relationship.private_note or ""
 
     # texto de cabecera
     one_liner = None
@@ -603,6 +606,7 @@ def cafe_detail(request, cafe_id):
             "liked_ids": liked_ids,
             "my_review": my_review,
             "user_status": user_status,
+            "user_note": user_note,
             "one_liner": one_liner,
             "full_page_url": full_page_url,
             "full_image_url": full_image_url,
@@ -1028,6 +1032,62 @@ def favorite_cafes(request):
         }
     )
 
+@login_required
+@require_POST
+def update_cafe_note(request, cafe_id):
+
+    cafe = get_object_or_404(Cafe, id=cafe_id)
+
+    relationship = CafeRelationship.objects.filter(
+        user=request.user,
+        cafe=cafe,
+    ).first()
+
+    # ✨ no permitir notas sin relación emocional
+    if not relationship:
+
+        messages.warning(
+            request,
+            "Primero sumá este café a tu recorrido ☕"
+        )
+
+        return redirect(
+            "reviews:cafe_detail",
+            cafe_id=cafe.id
+        )
+
+    note = (
+        request.POST.get("private_note", "")
+        .strip()
+    )
+
+    # ✨ evitar notas enormes
+    note = note[:500]
+
+    relationship.private_note = note
+    relationship.save(update_fields=[
+        "private_note",
+        "updated_at",
+    ])
+
+    if note:
+
+        messages.success(
+            request,
+            "Tu nota personal quedó guardada ✨"
+        )
+
+    else:
+
+        messages.info(
+            request,
+            "Nota eliminada."
+        )
+
+    return redirect(
+        "reviews:cafe_detail",
+        cafe_id=cafe.id
+    )
 
 @login_required
 @require_POST

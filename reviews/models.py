@@ -233,10 +233,46 @@ class CafeRelationship(models.Model):
         choices=STATUS_CHOICES,
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    # ✨ nota personal privada
+    private_note = models.TextField(
+        blank=True,
+    )
+
+    # ✨ timestamps emocionales
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    last_status_change_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    # ✨ futuras features
+    visit_count = models.PositiveIntegerField(
+        default=0
+    )
+
+    would_return = models.BooleanField(
+        null=True,
+        blank=True,
+    )
+
+    would_return_answered_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         unique_together = ("user", "cafe")
+
+        indexes = [
+            models.Index(fields=["user", "status"]),
+            models.Index(fields=["updated_at"]),
+        ]
 
     def __str__(self):
         return f"{self.user} → {self.cafe} ({self.status})"
