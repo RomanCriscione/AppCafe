@@ -186,6 +186,81 @@
     {{ cafe.name }}
   </h1>
 
+  <!-- ESTADO DEL CAFÉ -->
+<section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-350">
+
+  <h3 class="text-lg font-semibold mb-3 text-[var(--text-1)]">
+    ☕ Sumalo a tu recorrido
+  </h3>
+
+  {% if user.is_authenticated %}
+
+    <div class="flex flex-wrap gap-3">
+
+      <!-- QUIERO IR -->
+      <form method="post"
+            action="{% url 'reviews:set_cafe_status' cafe.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="want_to_go">
+
+        <button type="submit"
+                class="btn rounded-xl
+                {% if user_status == 'want_to_go' %}
+                  btn-primary
+                {% else %}
+                  btn-outline
+                {% endif %}">
+          ☕ Quiero ir
+        </button>
+      </form>
+
+      <!-- QUIERO VOLVER -->
+      <form method="post"
+            action="{% url 'reviews:set_cafe_status' cafe.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="want_to_return">
+
+        <button type="submit"
+                class="btn rounded-xl
+                {% if user_status == 'want_to_return' %}
+                  btn-primary
+                {% else %}
+                  btn-outline
+                {% endif %}">
+          ❤️ Quiero volver
+        </button>
+      </form>
+
+      <!-- YA FUI -->
+      <form method="post"
+            action="{% url 'reviews:set_cafe_status' cafe.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="visited">
+
+        <button type="submit"
+                class="btn rounded-xl
+                {% if user_status == 'visited' %}
+                  btn-primary
+                {% else %}
+                  btn-outline
+                {% endif %}">
+          ✔️ Ya fui
+        </button>
+      </form>
+
+    </div>
+
+  {% else %}
+
+    <a class="btn btn-outline rounded-xl"
+       href="{% url 'account_login' %}?next={{ request.path }}">
+      ☕ Guardar este café
+    </a>
+
+  {% endif %}
+
+</section>
+
   {% if cafe.description %}
     <p class="text-base text-gray-700 dark:text-[var(--text-2)] leading-relaxed max-w-2xl">
       {{ cafe.description }}
@@ -589,81 +664,6 @@
   {% endcache %}
 
   {% include "reviews/includes/pagination.html" with page_obj=page_obj anchor="#reviews" %}
-
-<!-- ESTADO DEL CAFÉ -->
-<section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-350">
-
-  <h3 class="text-lg font-semibold mb-3 text-[var(--text-1)]">
-    ☕ Tu relación con este café
-  </h3>
-
-  {% if user.is_authenticated %}
-
-    <div class="flex flex-wrap gap-3">
-
-      <!-- QUIERO IR -->
-      <form method="post"
-            action="{% url 'reviews:set_cafe_status' cafe.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="status" value="want_to_go">
-
-        <button type="submit"
-                class="btn rounded-xl
-                {% if user_status == 'want_to_go' %}
-                  btn-primary
-                {% else %}
-                  btn-outline
-                {% endif %}">
-          ☕ Quiero ir
-        </button>
-      </form>
-
-      <!-- QUIERO VOLVER -->
-      <form method="post"
-            action="{% url 'reviews:set_cafe_status' cafe.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="status" value="want_to_return">
-
-        <button type="submit"
-                class="btn rounded-xl
-                {% if user_status == 'want_to_return' %}
-                  btn-primary
-                {% else %}
-                  btn-outline
-                {% endif %}">
-          ❤️ Quiero volver
-        </button>
-      </form>
-
-      <!-- YA FUI -->
-      <form method="post"
-            action="{% url 'reviews:set_cafe_status' cafe.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="status" value="visited">
-
-        <button type="submit"
-                class="btn rounded-xl
-                {% if user_status == 'visited' %}
-                  btn-primary
-                {% else %}
-                  btn-outline
-                {% endif %}">
-          ✔️ Ya fui
-        </button>
-      </form>
-
-    </div>
-
-  {% else %}
-
-    <a class="btn btn-outline rounded-xl"
-       href="{% url 'account_login' %}?next={{ request.path }}">
-      ☕ Guardar este café
-    </a>
-
-  {% endif %}
-
-</section>
 
 
   <!-- PORCENTAJE POSITIVAS -->

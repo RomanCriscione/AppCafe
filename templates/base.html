@@ -115,7 +115,7 @@
           <a href="{% url 'about' %}" class="nav-link">Acerca de</a>
           <a href="{% url 'contact' %}" class="nav-link">Contacto</a>
           {% if user.is_authenticated %}
-            <a href="{% url 'reviews:favorite_cafes' %}" class="nav-link">❤️ Favoritos</a>
+            <a href="{% url 'reviews:favorite_cafes' %}" class="nav-link">❤️ Mi mapa cafetero</a>
 
             <!-- ⚙️ Cuenta -->
             <a href="{% url 'my_account' %}" class="nav-link">⚙️ Cuenta</a>
@@ -165,7 +165,7 @@
         <a href="{% url 'contact' %}" class="block py-2">Contacto</a>
         <hr class="my-2">
         {% if user.is_authenticated %}
-          <a href="{% url 'reviews:favorite_cafes' %}" class="block py-2">❤️ Favoritos</a>
+          <a href="{% url 'reviews:favorite_cafes' %}" class="block py-2">❤️ Mi mapa cafetero</a>
 
           <!-- ⚙️ Cuenta -->
           <a href="{% url 'my_account' %}" class="nav-link">⚙️ Cuenta</a>
