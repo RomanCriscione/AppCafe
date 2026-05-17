@@ -1137,10 +1137,7 @@ def set_cafe_status(request, cafe_id):
             "removed": removed
         })
 
-    return redirect(
-        request.META.get("HTTP_REFERER")
-        or reverse("reviews:cafe_detail", args=[cafe.id])
-    )
+    return redirect("reviews:favorite_cafes")
 
 
 @login_required
