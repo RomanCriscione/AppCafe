@@ -991,6 +991,10 @@ def favorite_cafes(request):
         CafeRelationship.objects
         .filter(user=request.user)
         .select_related("cafe")
+        .annotate(
+            avg_rating=Avg("cafe__reviews__rating"),
+            num_reviews=Count("cafe__reviews", distinct=True),
+        )
     )
 
     want_to_go = []
@@ -1000,6 +1004,8 @@ def favorite_cafes(request):
     for rel in relationships:
 
         cafe = rel.cafe
+        cafe.avg_rating = rel.avg_rating
+        cafe.num_reviews = rel.num_reviews
 
         cafe.user_status = rel.status
 
