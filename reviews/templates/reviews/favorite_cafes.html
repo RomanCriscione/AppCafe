@@ -2,78 +2,118 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4">
-  <h1 class="text-2xl font-bold mb-6">❤️ Mis Cafeterías Favoritas</h1>
 
-  <form method="get" class="flex flex-wrap items-center gap-4 mb-6">
-    <label for="orden" class="font-medium">Ordenar por:</label>
-    <select name="orden" id="orden" onchange="this.form.submit()" class="p-2 border rounded">
-      <option value="">Nombre</option>
-      <option value="rating" {% if orden_actual == "rating" %}selected{% endif %}>Mayor puntaje</option>
-      <option value="reviews" {% if orden_actual == "reviews" %}selected{% endif %}>Más reseñas</option>
-    </select>
+<div class="max-w-6xl mx-auto px-4 py-8">
 
-    <label for="zona" class="font-medium">Filtrar por zona:</label>
-    <select name="zona" id="zona" onchange="this.form.submit()" class="p-2 border rounded">
-      <option value="">Todas</option>
-      {% for z in zonas_disponibles %}
-        <option value="{{ z }}" {% if zona_actual == z %}selected{% endif %}>{{ z }}</option>
-      {% endfor %}
-    </select>
-  </form>
+  <div class="mb-10">
+    <h1 class="text-3xl font-bold text-[var(--text-1)]">
+      ☕ Mi mapa cafetero
+    </h1>
 
-  {% if cafes %}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {% for cafe in cafes %}
-        <div class="relative bg-white rounded-xl shadow p-4 hover:shadow-lg transition-all animate-fade-in min-w-0">
-          {% if cafe.photo1 %}
-            <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}"
-                 loading="lazy" class="fav-card-img mb-4">
-          {% endif %}
+    <p class="text-[var(--text-2)] mt-2">
+      Tus cafés guardados para descubrir, volver o recordar.
+    </p>
+  </div>
 
-          <form action="{% url 'reviews:toggle_favorite' cafe.id %}" method="post" class="absolute top-2 right-2 z-10">
-            {% csrf_token %}
-            <button type="submit" class="text-red-500 text-xl" title="Quitar de favoritos">❤️</button>
-          </form>
+  <!-- QUIERO IR -->
+  <section class="mb-12">
 
-          <div>
-            <h3 class="text-lg font-semibold">{{ cafe.name }} <small class="text-gray-500">- {{ cafe.location }}</small></h3>
-            <p class="text-sm text-gray-700">📍 {{ cafe.address }}</p>
-            <p class="text-sm">☕ {{ cafe.average_rating|floatformat:1 }}</p>
+    <div class="flex items-center gap-2 mb-5">
+      <h2 class="text-2xl font-semibold">
+        ☕ Quiero ir
+      </h2>
 
-            {% if cafe.last_review %}
-              <p class="italic text-sm text-gray-600 mt-1">“{{ cafe.last_review.comment|truncatechars:80 }}”</p>
-            {% endif %}
-
-            <a href="{% url 'reviews:cafe_detail' cafe.id %}"
-               class="inline-block mt-3 bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition-all text-sm">Ver detalles</a>
-          </div>
-        </div>
-      {% endfor %}
+      <span class="text-sm text-gray-500">
+        ({{ want_to_go|length }})
+      </span>
     </div>
 
-    {% if cafes.has_other_pages %}
-      <div class="mt-6 flex justify-between items-center text-sm">
-        {% if cafes.has_previous %}
-          <a href="?{% if orden_actual %}orden={{ orden_actual }}&{% endif %}{% if zona_actual %}zona={{ zona_actual }}&{% endif %}page={{ cafes.previous_page_number }}"
-             class="text-blue-600 hover:underline">« Anterior</a>
-        {% endif %}
+    {% if want_to_go %}
 
-        <span>Página {{ cafes.number }} de {{ cafes.paginator.num_pages }}</span>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        {% if cafes.has_next %}
-          <a href="?{% if orden_actual %}orden={{ orden_actual }}&{% endif %}{% if zona_actual %}zona={{ zona_actual }}&{% endif %}page={{ cafes.next_page_number }}"
-              class="text-blue-600 hover:underline">Siguiente »</a>
-        {% endif %}
+        {% for cafe in want_to_go %}
+          {% include "reviews/partials/cafe_card.html" %}
+        {% endfor %}
+
       </div>
+
+    {% else %}
+
+      <div class="surface rounded-2xl p-6 text-gray-500">
+        Todavía no guardaste cafés para visitar.
+      </div>
+
     {% endif %}
-  {% else %}
-    <div class="text-center py-12">
-      <p class="text-gray-600 text-lg">{{ ui_messages.no_favorites }}</p>
-      <a href="{% url 'reviews:cafe_list' %}" class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-        Explorar cafés
-      </a>
+
+  </section>
+
+  <!-- QUIERO VOLVER -->
+  <section class="mb-12">
+
+    <div class="flex items-center gap-2 mb-5">
+      <h2 class="text-2xl font-semibold">
+        ❤️ Quiero volver
+      </h2>
+
+      <span class="text-sm text-gray-500">
+        ({{ want_to_return|length }})
+      </span>
     </div>
-  {% endif %}
+
+    {% if want_to_return %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        {% for cafe in want_to_return %}
+          {% include "reviews/partials/cafe_card.html" %}
+        {% endfor %}
+
+      </div>
+
+    {% else %}
+
+      <div class="surface rounded-2xl p-6 text-gray-500">
+        Los cafés a los que querés volver aparecerán acá.
+      </div>
+
+    {% endif %}
+
+  </section>
+
+  <!-- YA FUI -->
+  <section class="mb-12">
+
+    <div class="flex items-center gap-2 mb-5">
+      <h2 class="text-2xl font-semibold">
+        ✔️ Ya fui
+      </h2>
+
+      <span class="text-sm text-gray-500">
+        ({{ visited|length }})
+      </span>
+    </div>
+
+    {% if visited %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        {% for cafe in visited %}
+          {% include "reviews/partials/cafe_card.html" %}
+        {% endfor %}
+
+      </div>
+
+    {% else %}
+
+      <div class="surface rounded-2xl p-6 text-gray-500">
+        Tu historial cafetero todavía está vacío.
+      </div>
+
+    {% endif %}
+
+  </section>
+
 </div>
+
 {% endblock %}

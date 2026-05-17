@@ -24,7 +24,7 @@ from core.mixins import EmailVerifiedRequiredMixin
 from allauth.account.models import EmailAddress
 from core.rate_limit import rate_limit
 from reviews.utils.ranking import calcular_score_cafe
-from .models import Review, Cafe, ReviewLike, ReviewReport, Tag, CafeStat
+from .models import Review, Cafe, ReviewLike, ReviewReport, Tag, CafeStat, CafeRelationship
 from .forms import ReviewForm, CafeForm, ReviewReportForm
 from reviews.utils.geo import haversine_distance
 from core.messages import MESSAGES
@@ -193,13 +193,6 @@ class ReviewListView(ListView):
             *[request.GET.get(k) for k in boolean_keys],
         ])
 
-        if request.user.is_authenticated:
-            context['favoritos_ids'] = set(
-                request.user.favorite_cafes.values_list('id', flat=True)
-            )
-        else:
-            context['favoritos_ids'] = set()
-
         cafes = (
             Cafe.objects.only('id', 'name', 'latitude', 'longitude')
             .exclude(latitude__isnull=True).exclude(longitude__isnull=True)
@@ -269,7 +262,7 @@ class CafeListView(ListView):
             total_reviews=Count('reviews'),
             num_reviews=Count('reviews'),
             precio_promedio=Avg('reviews__precio_capuccino'),
-        ).prefetch_related('favorites')
+        ).prefetch_related('relationships')
 
         if orden == 'rating':
             cafes = cafes.order_by('-average_rating')
@@ -351,11 +344,23 @@ class CafeListView(ListView):
         ])
 
         if request.user.is_authenticated:
-            context['favoritos_ids'] = set(
-                request.user.favorite_cafes.values_list('id', flat=True)
+
+            user_relationships = CafeRelationship.objects.filter(
+                user=request.user
             )
+
+            status_map = {
+                rel.cafe_id: rel.status
+                for rel in user_relationships
+            }
+
+            for cafe in context.get("cafes", []):
+                cafe.user_status = status_map.get(cafe.id)
+
         else:
-            context['favoritos_ids'] = set()
+
+            for cafe in context.get("cafes", []):
+                cafe.user_status = None
 
         cafes = context.get('cafes', [])
         cafes_data = []
@@ -531,16 +536,33 @@ def cafe_detail(request, cafe_id):
     # likes del usuario + su review
     liked_ids = set()
     my_review = None
+    user_status = None
+
     if request.user.is_authenticated:
+
         liked_ids = set(
-            ReviewLike.objects.filter(user=request.user, review__cafe=cafe)
-            .values_list("review_id", flat=True)
+            ReviewLike.objects.filter(
+                user=request.user,
+                review__cafe=cafe
+            ).values_list("review_id", flat=True)
         )
+
         my_review = (
-            Review.objects.filter(user=request.user, cafe=cafe)
+            Review.objects.filter(
+                user=request.user,
+                cafe=cafe
+            )
             .order_by("-created_at", "-id")
             .first()
         )
+
+        relationship = CafeRelationship.objects.filter(
+            user=request.user,
+            cafe=cafe
+        ).first()
+
+        if relationship:
+            user_status = relationship.status
 
     # texto de cabecera
     one_liner = None
@@ -580,6 +602,7 @@ def cafe_detail(request, cafe_id):
             "more_tags": more_tags,
             "liked_ids": liked_ids,
             "my_review": my_review,
+            "user_status": user_status,
             "one_liner": one_liner,
             "full_page_url": full_page_url,
             "full_image_url": full_image_url,
@@ -963,46 +986,46 @@ def upload_photos(request, cafe_id):
 
 @login_required
 def favorite_cafes(request):
-    orden = request.GET.get('orden')
-    zona = request.GET.get('zona')
 
-    cafes = Cafe.objects.filter(favorites=request.user)
+    relationships = (
+        CafeRelationship.objects
+        .filter(user=request.user)
+        .select_related("cafe")
+    )
 
-    if zona:
-        cafes = cafes.filter(location=zona)
+    want_to_go = []
+    want_to_return = []
+    visited = []
 
-    cafes = cafes.annotate(
-        average_rating=Avg('reviews__rating'),
-        total_reviews=Count('reviews')
-    ).prefetch_related('reviews')
+    for rel in relationships:
 
-    if orden == 'rating':
-        cafes = cafes.order_by('-average_rating')
-    elif orden == 'reviews':
-        cafes = cafes.order_by('-total_reviews')
-    else:
-        cafes = cafes.order_by('name')
+        cafe = rel.cafe
 
-    for cafe in cafes:
-        cafe.last_review = cafe.reviews.order_by('-created_at').first()
+        cafe.user_status = rel.status
 
-    zonas_disponibles = Cafe.objects.filter(favorites=request.user).values_list('location', flat=True).distinct()
+        if rel.status == CafeRelationship.WANT_TO_GO:
+            want_to_go.append(cafe)
 
-    paginator = Paginator(cafes, 6)
-    pagina = request.GET.get('page')
-    cafes_paginados = paginator.get_page(pagina)
+        elif rel.status == CafeRelationship.WANT_TO_RETURN:
+            want_to_return.append(cafe)
 
-    return render(request, 'reviews/favorite_cafes.html', {
-        'cafes': cafes_paginados,
-        'orden_actual': orden,
-        'zona_actual': zona,
-        'zonas_disponibles': zonas_disponibles
-    })
+        elif rel.status == CafeRelationship.VISITED:
+            visited.append(cafe)
+
+    return render(
+        request,
+        "reviews/favorite_cafes.html",
+        {
+            "want_to_go": want_to_go,
+            "want_to_return": want_to_return,
+            "visited": visited,
+        }
+    )
 
 
 @login_required
 @require_POST
-def toggle_favorite(request, cafe_id):
+def set_cafe_status(request, cafe_id):
 
     # ⛔ Bloqueo si email no está verificado
     if not EmailAddress.objects.filter(
@@ -1015,45 +1038,103 @@ def toggle_favorite(request, cafe_id):
                 {
                     "ok": False,
                     "error": "email_not_verified",
-                    "message": "Confirmá tu email para usar favoritos."
+                    "message": "Confirmá tu email para guardar cafeterías."
                 },
                 status=403
             )
 
         messages.warning(
             request,
-            "Confirmá tu email para usar favoritos."
+            "Confirmá tu email para guardar cafeterías."
         )
         return redirect("account_email_verification_sent")
 
     rl = rate_limit(
-        key=f"fav:{request.user.id}",
+        key=f"cafe-status:{request.user.id}",
         limit=20,
         window_seconds=60,
         ajax=True,
-        message="Demasiados favoritos en poco tiempo."
+        message="Demasiadas acciones en poco tiempo."
     )
+
     if rl:
         return rl
 
     cafe = get_object_or_404(Cafe, id=cafe_id)
 
-    if request.user in cafe.favorites.all():
-        cafe.favorites.remove(request.user)
-        liked = False
-        messages.info(request, f"{cafe.name} eliminado de favoritos.")
+    status = request.POST.get("status")
+
+    valid_statuses = [
+        CafeRelationship.WANT_TO_GO,
+        CafeRelationship.WANT_TO_RETURN,
+        CafeRelationship.VISITED,
+    ]
+
+    if status not in valid_statuses:
+
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": "invalid_status"
+                },
+                status=400
+            )
+
+        messages.error(request, "Estado inválido.")
+        return redirect(request.META.get("HTTP_REFERER") or reverse("reviews:cafe_list"))
+
+    relationship, created = CafeRelationship.objects.get_or_create(
+        user=request.user,
+        cafe=cafe,
+        defaults={"status": status}
+    )
+
+    removed = False
+
+    if not created:
+
+        # mismo botón = desactivar
+        if relationship.status == status:
+            relationship.delete()
+            removed = True
+
+        else:
+            relationship.status = status
+            relationship.save()
+
+    status_labels = {
+        CafeRelationship.WANT_TO_GO: "☕ Quiero ir",
+        CafeRelationship.WANT_TO_RETURN: "❤️ Quiero volver",
+        CafeRelationship.VISITED: "✔️ Ya fui",
+    }
+
+    active_status = None if removed else status
+
+    # mensajes flash
+    if removed:
+        messages.info(
+            request,
+            f"{cafe.name} eliminado de tu lista."
+        )
     else:
-        cafe.favorites.add(request.user)
-        liked = True
-        messages.success(request, f"{cafe.name} agregado a favoritos. ❤️")
+        messages.success(
+            request,
+            f"{cafe.name}: {status_labels[status]}"
+        )
 
-    # AJAX (fetch)
+    # AJAX
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
-        return JsonResponse({"ok": True, "liked": liked})
+        return JsonResponse({
+            "ok": True,
+            "status": active_status,
+            "removed": removed
+        })
 
-    # Fallback sin JS
-    return redirect(request.META.get("HTTP_REFERER") or reverse("reviews:cafe_list"))
-
+    return redirect(
+        request.META.get("HTTP_REFERER")
+        or reverse("reviews:cafe_list")
+    )
 
 
 @login_required
@@ -1253,7 +1334,7 @@ def analytics_dashboard(request):
 
     totals = {
         "views": CafeStat.objects.filter(cafe=cafe).aggregate(s=Sum("views"))["s"] or 0,
-        "favorites": cafe.favorites.count(),
+        "favorites": CafeRelationship.objects.filter(cafe=cafe).count(),
         "reviews": cafe.reviews.count(),
     }
 
@@ -1370,7 +1451,7 @@ def founder_analytics(request):
 
     cafes = cafes.annotate(
         total_reviews=Count("reviews", distinct=True),
-        total_favorites=Count("favorites", distinct=True),
+        total_favorites=Count("relationships", distinct=True),
         avg_rating=Avg("reviews__rating"),
     ).order_by(F("total_views").desc(nulls_last=True))
     # === TOTALES GLOBALES (KPIs) ===

@@ -101,25 +101,71 @@
         <!-- FAVORITO -->
         <div class="flex items-center gap-2">
           {% if user.is_authenticated %}
-            <form method="post"
-                  action="{% url 'reviews:toggle_favorite' cafe.id %}"
-                  class="fav-form js-ajax-post"
-                  data-cafe="{{ cafe.id }}">
-              {% csrf_token %}
-              {% if cafe.is_favorite or user in cafe.favorites.all %}
+            <div class="flex items-center gap-2 flex-wrap">
+
+              <!-- ☕ Quiero ir -->
+              <form method="post"
+                    action="{% url 'reviews:set_cafe_status' cafe.id %}"
+                    class="js-status-form">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="want_to_go">
+
                 <button type="submit"
-                        class="btn btn-success btn-sm js-fav-btn"
-                        aria-pressed="true">❤️</button>
-              {% else %}
+                        class="btn btn-sm rounded-xl
+                        {% if cafe.user_status == 'want_to_go' %}
+                          btn-primary
+                        {% else %}
+                          btn-outline
+                        {% endif %}">
+                  ☕
+                </button>
+              </form>
+
+              <!-- ❤️ Quiero volver -->
+              <form method="post"
+                    action="{% url 'reviews:set_cafe_status' cafe.id %}"
+                    class="js-status-form">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="want_to_return">
+
                 <button type="submit"
-                        class="btn btn-outline btn-sm js-fav-btn"
-                        aria-pressed="false">🤍</button>
-              {% endif %}
-            </form>
+                        class="btn btn-sm rounded-xl
+                        {% if cafe.user_status == 'want_to_return' %}
+                          btn-primary
+                        {% else %}
+                          btn-outline
+                        {% endif %}">
+                  ❤️
+                </button>
+              </form>
+
+              <!-- ✔️ Ya fui -->
+              <form method="post"
+                    action="{% url 'reviews:set_cafe_status' cafe.id %}"
+                    class="js-status-form">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="visited">
+
+                <button type="submit"
+                        class="btn btn-sm rounded-xl
+                        {% if cafe.user_status == 'visited' %}
+                          btn-primary
+                        {% else %}
+                          btn-outline
+                        {% endif %}">
+                  ✔️
+                </button>
+              </form>
+
+            </div>
+
           {% else %}
+
             <a href="{% url 'account_login' %}?next={% url 'reviews:cafe_list' %}"
-               class="btn btn-outline btn-sm"
-               title="Iniciar sesión para guardar favoritos">🤍</a>
+              class="btn btn-outline btn-sm rounded-xl">
+              ☕
+            </a>
+
           {% endif %}
         </div>
 

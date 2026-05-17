@@ -17,7 +17,7 @@ urlpatterns = [
     path('cafes/<int:cafe_id>/review/', views.create_review, name='create_review'),
 
     # ✅ endpoint usado por los botones .fav-btn
-    path('cafes/<int:cafe_id>/toggle-favorite/', views.toggle_favorite, name='toggle_favorite'),
+    path('cafes/<int:cafe_id>/set-status/',views.set_cafe_status,name='set_cafe_status'),
 
     path('cafes/cercanos/', views.nearby_cafes, name='nearby_cafes'),
     path("owner/analytics/", views.analytics_dashboard, name="analytics_dashboard"),
@@ -25,7 +25,7 @@ urlpatterns = [
     "founder/analytics/", views.founder_analytics, name="founder_analytics",),
 
     # Favoritos
-    path('favoritos/', views.favorite_cafes, name='favorite_cafes'),
+    # path('favoritos/', views.favorite_cafes, name='favorite_cafes'),
 
     # Panel del dueño
     path('perfil/', views.owner_dashboard, name='owner_dashboard'),

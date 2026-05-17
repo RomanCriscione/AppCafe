@@ -97,7 +97,7 @@ class Cafe(models.Model):
 
 
     # Relaciones
-    favorites = models.ManyToManyField(User, related_name='favorite_cafes', blank=True)
+    
     tags = models.ManyToManyField('Tag', related_name='cafes', blank=True)
 
     # Ubicación
@@ -203,6 +203,43 @@ class Review(models.Model):
 
     def __str__(self):
         return f'Reseña de {self.user} en {self.cafe}'
+    
+class CafeRelationship(models.Model):
+
+    WANT_TO_GO = "want_to_go"
+    WANT_TO_RETURN = "want_to_return"
+    VISITED = "visited"
+
+    STATUS_CHOICES = [
+        (WANT_TO_GO, "☕ Quiero ir"),
+        (WANT_TO_RETURN, "❤️ Quiero volver"),
+        (VISITED, "✔️ Ya fui"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="cafe_relationships",
+    )
+
+    cafe = models.ForeignKey(
+        "Cafe",
+        on_delete=models.CASCADE,
+        related_name="relationships",
+    )
+
+    status = models.CharField(
+        max_length=30,
+        choices=STATUS_CHOICES,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "cafe")
+
+    def __str__(self):
+        return f"{self.user} → {self.cafe} ({self.status})"
 
 class CafeStat(models.Model):
     cafe = models.ForeignKey('Cafe', on_delete=models.CASCADE, related_name='stats')
