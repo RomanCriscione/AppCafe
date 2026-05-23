@@ -85,6 +85,28 @@
 
       </div>
 
+      {% if cafe.collection %}
+        <div class="text-sm text-gray-500 italic">
+
+          {% if cafe.collection == "read" %}
+            📚 Para leer
+
+          {% elif cafe.collection == "work" %}
+            💻 Para trabajar
+
+          {% elif cafe.collection == "slow" %}
+            🌿 Para bajar un cambio
+
+          {% elif cafe.collection == "rain" %}
+            ☁️ Para días grises
+
+          {% elif cafe.collection == "talk" %}
+            🫶 Para charlas largas
+          {% endif %}
+
+        </div>
+      {% endif %}
+
     {% endif %}
 
     <!-- SEGUNDA IMPRESIÓN -->
