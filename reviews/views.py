@@ -1015,6 +1015,9 @@ def favorite_cafes(request):
         cafe.num_reviews = rel.num_reviews
 
         cafe.user_status = rel.status
+        cafe.relationship_date = rel.updated_at
+        cafe.private_note = rel.private_note
+        cafe.second_impression = rel.second_impression
 
         if rel.status == CafeRelationship.WANT_TO_GO:
             want_to_go.append(cafe)

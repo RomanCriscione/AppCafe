@@ -25,9 +25,7 @@
 
     </div>
 
-    <!-- RATING -->
     <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-semibold shadow">
-
       ☕
       {% if cafe.avg_rating %}
         {{ cafe.avg_rating|floatformat:1 }}
@@ -35,20 +33,15 @@
         –
       {% endif %}
       / 5
-
     </div>
 
-    <!-- RESEÑAS -->
     <div class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs shadow">
-
-      ({{ cafe.num_reviews }} reseñas)
-
+      {{ cafe.relationship_date|timesince }}
     </div>
 
   </a>
 
-  <!-- BODY -->
-  <div class="p-4 space-y-3">
+  <div class="p-4 space-y-4">
 
     <div>
       <h3 class="text-xl font-bold text-[var(--text-1)]">
@@ -81,11 +74,45 @@
 
     </div>
 
+    <!-- NOTA -->
+    {% if cafe.private_note %}
+
+      <div class="rounded-2xl bg-gray-50 px-4 py-3">
+
+        <p class="text-sm italic text-gray-700 leading-relaxed">
+          “{{ cafe.private_note|truncatechars:90 }}”
+        </p>
+
+      </div>
+
+    {% endif %}
+
+    <!-- SEGUNDA IMPRESIÓN -->
+    {% if cafe.second_impression == "better" %}
+
+      <p class="text-sm text-emerald-700 italic">
+        ✨ Te sorprendió
+      </p>
+
+    {% elif cafe.second_impression == "as_expected" %}
+
+      <p class="text-sm text-amber-700 italic">
+        ☕ Fue como lo imaginabas
+      </p>
+
+    {% elif cafe.second_impression == "didnt_connect" %}
+
+      <p class="text-sm text-gray-500 italic">
+        🤍 No terminó de conectar
+      </p>
+
+    {% endif %}
+
     <!-- CTA -->
     <a href="{% url 'reviews:cafe_detail' cafe.id %}"
        class="inline-flex items-center justify-center rounded-xl bg-[var(--brand)] text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition">
 
-      Ver café
+      Volver al café
 
     </a>
 
