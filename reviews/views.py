@@ -538,6 +538,7 @@ def cafe_detail(request, cafe_id):
     my_review = None
     user_status = None
     user_note = ""
+    would_return = None
 
     if request.user.is_authenticated:
 
@@ -565,6 +566,7 @@ def cafe_detail(request, cafe_id):
         if relationship:
             user_status = relationship.status
             user_note = relationship.private_note or ""
+            would_return = relationship.would_return
 
     # texto de cabecera
     one_liner = None
@@ -606,6 +608,7 @@ def cafe_detail(request, cafe_id):
             "my_review": my_review,
             "user_status": user_status,
             "user_note": user_note,
+            "would_return": would_return,
             "one_liner": one_liner,
             "full_page_url": full_page_url,
             "full_image_url": full_image_url,
@@ -1078,6 +1081,64 @@ def update_cafe_note(request, cafe_id):
         messages.info(
             request,
             "Nota eliminada."
+        )
+
+    return redirect(
+        "reviews:cafe_detail",
+        cafe_id=cafe.id
+    )
+
+@login_required
+@require_POST
+def set_would_return(request, cafe_id):
+
+    cafe = get_object_or_404(Cafe, id=cafe_id)
+
+    relationship = get_object_or_404(
+        CafeRelationship,
+        user=request.user,
+        cafe=cafe,
+        status=CafeRelationship.VISITED,
+    )
+
+    value = request.POST.get("would_return")
+
+    if value == "yes":
+        relationship.would_return = True
+
+    elif value == "no":
+        relationship.would_return = False
+
+    else:
+        messages.error(
+            request,
+            "Respuesta inválida."
+        )
+
+        return redirect(
+            "reviews:cafe_detail",
+            cafe_id=cafe.id
+        )
+
+    relationship.would_return_answered_at = timezone.now()
+
+    relationship.save(update_fields=[
+        "would_return",
+        "would_return_answered_at",
+    ])
+
+    if relationship.would_return:
+
+        messages.success(
+            request,
+            "❤️ Qué lindo cuando un lugar deja ganas de volver."
+        )
+
+    else:
+
+        messages.info(
+            request,
+            "Gracias por registrarlo. También eso forma parte del recorrido."
         )
 
     return redirect(

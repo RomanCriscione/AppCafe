@@ -363,6 +363,64 @@
 
 {% endif %}
 
+{% if user.is_authenticated and user_status == "visited" %}
+
+<section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-500">
+
+  <div class="mb-3">
+    <h3 class="text-lg font-semibold text-[var(--text-1)]">
+      🤍 ¿Volverías?
+    </h3>
+
+    <p class="text-sm text-gray-500 mt-1">
+      A veces un lugar se queda dando vueltas unos días.
+    </p>
+  </div>
+
+  {% if would_return is None %}
+
+    <div class="flex flex-wrap gap-3">
+
+      <form method="post"
+            action="{% url 'reviews:set_would_return' cafe.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="would_return" value="yes">
+
+        <button type="submit" class="btn btn-primary rounded-xl">
+          ❤️ Sí volvería
+        </button>
+      </form>
+
+      <form method="post"
+            action="{% url 'reviews:set_would_return' cafe.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="would_return" value="no">
+
+        <button type="submit" class="btn btn-outline rounded-xl">
+          👋 No volvería
+        </button>
+      </form>
+
+    </div>
+
+  {% elif would_return %}
+
+    <p class="text-sm italic text-gray-600">
+      “Un lugar al que volverías.”
+    </p>
+
+  {% else %}
+
+    <p class="text-sm italic text-gray-600">
+      “Un café que fue parte del camino.”
+    </p>
+
+  {% endif %}
+
+</section>
+
+{% endif %}
+
   {% if cafe.description %}
     <p class="text-base text-gray-700 dark:text-[var(--text-2)] leading-relaxed max-w-2xl">
       {{ cafe.description }}
