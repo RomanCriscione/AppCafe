@@ -369,50 +369,75 @@
 
   <div class="mb-3">
     <h3 class="text-lg font-semibold text-[var(--text-1)]">
-      🤍 ¿Volverías?
+      ✨ Tu segunda impresión
     </h3>
 
     <p class="text-sm text-gray-500 mt-1">
-      A veces un lugar se queda dando vueltas unos días.
+      ¿Cómo te quedó este lugar después de vivirlo?
     </p>
   </div>
 
-  {% if would_return is None %}
+  {% if not second_impression %}
 
     <div class="flex flex-wrap gap-3">
 
       <form method="post"
-            action="{% url 'reviews:set_would_return' cafe.id %}">
+            action="{% url 'reviews:set_second_impression' cafe.id %}">
         {% csrf_token %}
-        <input type="hidden" name="would_return" value="yes">
+        <input type="hidden"
+               name="second_impression"
+               value="better">
 
-        <button type="submit" class="btn btn-primary rounded-xl">
-          ❤️ Sí volvería
+        <button type="submit"
+                class="btn btn-primary rounded-xl">
+          ✨ Superó lo que esperaba
         </button>
       </form>
 
       <form method="post"
-            action="{% url 'reviews:set_would_return' cafe.id %}">
+            action="{% url 'reviews:set_second_impression' cafe.id %}">
         {% csrf_token %}
-        <input type="hidden" name="would_return" value="no">
+        <input type="hidden"
+               name="second_impression"
+               value="as_expected">
 
-        <button type="submit" class="btn btn-outline rounded-xl">
-          👋 No volvería
+        <button type="submit"
+                class="btn btn-outline rounded-xl">
+          ☕ Fue como imaginaba
+        </button>
+      </form>
+
+      <form method="post"
+            action="{% url 'reviews:set_second_impression' cafe.id %}">
+        {% csrf_token %}
+        <input type="hidden"
+               name="second_impression"
+               value="didnt_connect">
+
+        <button type="submit"
+                class="btn btn-outline rounded-xl">
+          🤍 No conecté esta vez
         </button>
       </form>
 
     </div>
 
-  {% elif would_return %}
+  {% elif second_impression == "better" %}
 
     <p class="text-sm italic text-gray-600">
-      “Un lugar al que volverías.”
+      ✨ Este lugar te sorprendió.
+    </p>
+
+  {% elif second_impression == "as_expected" %}
+
+    <p class="text-sm italic text-gray-600">
+      ☕ Fue exactamente lo que esperabas.
     </p>
 
   {% else %}
 
     <p class="text-sm italic text-gray-600">
-      “Un café que fue parte del camino.”
+      🤍 Esta vez no terminó de conectar.
     </p>
 
   {% endif %}

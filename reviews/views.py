@@ -538,8 +538,8 @@ def cafe_detail(request, cafe_id):
     my_review = None
     user_status = None
     user_note = ""
-    would_return = None
-
+    second_impression = None
+    
     if request.user.is_authenticated:
 
         liked_ids = set(
@@ -566,7 +566,8 @@ def cafe_detail(request, cafe_id):
         if relationship:
             user_status = relationship.status
             user_note = relationship.private_note or ""
-            would_return = relationship.would_return
+            second_impression = relationship.second_impression
+            
 
     # texto de cabecera
     one_liner = None
@@ -608,7 +609,7 @@ def cafe_detail(request, cafe_id):
             "my_review": my_review,
             "user_status": user_status,
             "user_note": user_note,
-            "would_return": would_return,
+            "second_impression": second_impression,
             "one_liner": one_liner,
             "full_page_url": full_page_url,
             "full_image_url": full_image_url,
@@ -1090,7 +1091,7 @@ def update_cafe_note(request, cafe_id):
 
 @login_required
 @require_POST
-def set_would_return(request, cafe_id):
+def set_second_impression(request, cafe_id):
 
     cafe = get_object_or_404(Cafe, id=cafe_id)
 
@@ -1101,15 +1102,16 @@ def set_would_return(request, cafe_id):
         status=CafeRelationship.VISITED,
     )
 
-    value = request.POST.get("would_return")
+    value = request.POST.get("second_impression")
 
-    if value == "yes":
-        relationship.would_return = True
+    valid_values = [
+        "better",
+        "as_expected",
+        "didnt_connect",
+    ]
 
-    elif value == "no":
-        relationship.would_return = False
+    if value not in valid_values:
 
-    else:
         messages.error(
             request,
             "Respuesta inválida."
@@ -1120,26 +1122,16 @@ def set_would_return(request, cafe_id):
             cafe_id=cafe.id
         )
 
-    relationship.would_return_answered_at = timezone.now()
+    relationship.second_impression = value
 
     relationship.save(update_fields=[
-        "would_return",
-        "would_return_answered_at",
+        "second_impression",
     ])
 
-    if relationship.would_return:
-
-        messages.success(
-            request,
-            "❤️ Qué lindo cuando un lugar deja ganas de volver."
-        )
-
-    else:
-
-        messages.info(
-            request,
-            "Gracias por registrarlo. También eso forma parte del recorrido."
-        )
+    messages.success(
+        request,
+        "✨ Segunda impresión guardada."
+    )
 
     return redirect(
         "reviews:cafe_detail",
