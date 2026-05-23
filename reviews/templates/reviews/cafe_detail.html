@@ -279,18 +279,45 @@
 
     <div class="flex flex-wrap gap-2">
 
-      {% for value,label in "read:📚 Para leer,work:💻 Para trabajar,slow:🌿 Para bajar un cambio,rain:☁️ Para días grises,talk:🫶 Para charlas largas".split(",") %}
-
-      <form method="post"
-            action="{% url 'reviews:set_collection' cafe.id %}">
+      <form method="post" action="{% url 'reviews:set_collection' cafe.id %}">
         {% csrf_token %}
-        <input type="hidden" name="collection" value="{{ value|cut:':' }}">
+        <input type="hidden" name="collection" value="read">
         <button type="submit" class="btn btn-outline rounded-xl text-sm px-3 py-2">
-          {{ label }}
+          📚 Para leer
         </button>
       </form>
 
-      {% endfor %}
+      <form method="post" action="{% url 'reviews:set_collection' cafe.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="collection" value="work">
+        <button type="submit" class="btn btn-outline rounded-xl text-sm px-3 py-2">
+          💻 Para trabajar
+        </button>
+      </form>
+
+      <form method="post" action="{% url 'reviews:set_collection' cafe.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="collection" value="slow">
+        <button type="submit" class="btn btn-outline rounded-xl text-sm px-3 py-2">
+          🌿 Para bajar un cambio
+        </button>
+      </form>
+
+      <form method="post" action="{% url 'reviews:set_collection' cafe.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="collection" value="rain">
+        <button type="submit" class="btn btn-outline rounded-xl text-sm px-3 py-2">
+          ☁️ Para días grises
+        </button>
+      </form>
+
+      <form method="post" action="{% url 'reviews:set_collection' cafe.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="collection" value="talk">
+        <button type="submit" class="btn btn-outline rounded-xl text-sm px-3 py-2">
+          🫶 Para charlas largas
+        </button>
+      </form>
 
     </div>
 
