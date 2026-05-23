@@ -263,6 +263,47 @@
 
 {% if user.is_authenticated and user_status %}
 
+<section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-375">
+
+  <div class="mb-3">
+    <h3 class="text-lg font-semibold text-[var(--text-1)]">
+      🗺️ Tu colección
+    </h3>
+
+    <p class="text-sm text-gray-500 mt-1">
+      ¿Qué lugar ocupa este café en tu mapa?
+    </p>
+  </div>
+
+  {% if not collection %}
+
+    <div class="flex flex-wrap gap-2">
+
+      {% for value,label in "read:📚 Para leer,work:💻 Para trabajar,slow:🌿 Para bajar un cambio,rain:☁️ Para días grises,talk:🫶 Para charlas largas".split(",") %}
+
+      <form method="post"
+            action="{% url 'reviews:set_collection' cafe.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="collection" value="{{ value|cut:':' }}">
+        <button type="submit" class="btn btn-outline rounded-xl text-sm px-3 py-2">
+          {{ label }}
+        </button>
+      </form>
+
+      {% endfor %}
+
+    </div>
+
+  {% else %}
+
+    <p class="text-sm italic text-gray-600">
+      Guardado en tu mapa personal.
+    </p>
+
+  {% endif %}
+
+</section>
+
 <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-400">
 
   <div class="mb-3">

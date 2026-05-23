@@ -5,109 +5,104 @@
 
 <div class="max-w-6xl mx-auto px-4 py-8">
 
-  <div class="mb-10">
+  <!-- HEADER -->
+  <div class="mb-14">
     <h1 class="text-3xl font-bold text-[var(--text-1)]">
       ❤️ Mi mapa cafetero
     </h1>
 
     <p class="text-[var(--text-2)] mt-2">
-      Tus cafés guardados para descubrir, volver o recordar.
+      Un recorrido de lugares que te esperan, te acompañaron o dejaron huella.
     </p>
   </div>
 
-  <!-- QUIERO IR -->
-  <section class="mb-12">
+  <!-- PRÓXIMOS -->
+  <section class="mb-16">
 
-    <div class="flex items-center gap-2 mb-5">
+    <div class="mb-6">
+      <p class="text-sm uppercase tracking-[0.18em] text-gray-400 mb-2">
+        Próximas paradas
+      </p>
+
       <h2 class="text-2xl font-semibold">
-        ☕ Quiero ir
+        ☕ Cafés por descubrir
       </h2>
-
-      <span class="text-sm text-gray-500">
-        ({{ want_to_go|length }})
-      </span>
     </div>
 
     {% if want_to_go %}
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
         {% for cafe in want_to_go %}
           {% include "reviews/_mapa_card.html" %}
         {% endfor %}
-
       </div>
 
     {% else %}
 
       <div class="surface rounded-2xl p-6 text-gray-500">
-        Todavía no guardaste cafés para visitar.
+        Todavía no marcaste próximos descubrimientos.
       </div>
 
     {% endif %}
 
   </section>
 
-  <!-- QUIERO VOLVER -->
-  <section class="mb-12">
+  <!-- REGRESOS -->
+  <section class="mb-16">
 
-    <div class="flex items-center gap-2 mb-5">
+    <div class="mb-6">
+      <p class="text-sm uppercase tracking-[0.18em] text-gray-400 mb-2">
+        Lugares que quedaron
+      </p>
+
       <h2 class="text-2xl font-semibold">
-        ❤️ Quiero volver
+        ❤️ Cafés para volver
       </h2>
-
-      <span class="text-sm text-gray-500">
-        ({{ want_to_return|length }})
-      </span>
     </div>
 
     {% if want_to_return %}
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
         {% for cafe in want_to_return %}
           {% include "reviews/_mapa_card.html" %}
         {% endfor %}
-
       </div>
 
     {% else %}
 
       <div class="surface rounded-2xl p-6 text-gray-500">
-        Los cafés a los que querés volver aparecerán acá.
+        Los lugares que te den ganas de volver aparecerán acá.
       </div>
 
     {% endif %}
 
   </section>
 
-  <!-- YA FUI -->
-  <section class="mb-12">
+  <!-- HISTORIAL -->
+  <section>
 
-    <div class="flex items-center gap-2 mb-5">
+    <div class="mb-6">
+      <p class="text-sm uppercase tracking-[0.18em] text-gray-400 mb-2">
+        Tu recorrido
+      </p>
+
       <h2 class="text-2xl font-semibold">
-        ✔️ Ya fui
+        ✔️ Cafés vividos
       </h2>
-
-      <span class="text-sm text-gray-500">
-        ({{ visited|length }})
-      </span>
     </div>
 
     {% if visited %}
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
         {% for cafe in visited %}
           {% include "reviews/_mapa_card.html" %}
         {% endfor %}
-
       </div>
 
     {% else %}
 
       <div class="surface rounded-2xl p-6 text-gray-500">
-        Tu historial cafetero todavía está vacío.
+        Tu historia cafetera recién empieza.
       </div>
 
     {% endif %}

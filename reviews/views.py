@@ -539,6 +539,7 @@ def cafe_detail(request, cafe_id):
     user_status = None
     user_note = ""
     second_impression = None
+    collection = None
     
     if request.user.is_authenticated:
 
@@ -567,6 +568,7 @@ def cafe_detail(request, cafe_id):
             user_status = relationship.status
             user_note = relationship.private_note or ""
             second_impression = relationship.second_impression
+            collection = relationship.collection
             
 
     # texto de cabecera
@@ -610,6 +612,7 @@ def cafe_detail(request, cafe_id):
             "user_status": user_status,
             "user_note": user_note,
             "second_impression": second_impression,
+            "collection": collection,
             "one_liner": one_liner,
             "full_page_url": full_page_url,
             "full_image_url": full_image_url,
@@ -1086,6 +1089,44 @@ def update_cafe_note(request, cafe_id):
             request,
             "Nota eliminada."
         )
+
+    return redirect(
+        "reviews:cafe_detail",
+        cafe_id=cafe.id
+    )
+
+@login_required
+@require_POST
+def set_collection(request, cafe_id):
+
+    cafe = get_object_or_404(Cafe, id=cafe_id)
+
+    relationship = get_object_or_404(
+        CafeRelationship,
+        user=request.user,
+        cafe=cafe,
+    )
+
+    value = request.POST.get("collection")
+
+    valid = [
+        "read",
+        "work",
+        "slow",
+        "rain",
+        "talk",
+    ]
+
+    if value not in valid:
+        return redirect("reviews:cafe_detail", cafe_id=cafe.id)
+
+    relationship.collection = value
+    relationship.save(update_fields=["collection"])
+
+    messages.success(
+        request,
+        "✨ Guardado en tu mapa personal."
+    )
 
     return redirect(
         "reviews:cafe_detail",

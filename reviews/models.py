@@ -272,6 +272,12 @@ class CafeRelationship(models.Model):
         blank=True,
     )
 
+    collection = models.CharField(
+        max_length=30,
+        null=True,
+        blank=True,
+    )
+
     class Meta:
         unique_together = ("user", "cafe")
 
