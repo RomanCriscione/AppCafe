@@ -21,6 +21,8 @@ urlpatterns = [
     path('cafes/<int:cafe_id>/update-note/',views.update_cafe_note,name='update_cafe_note'),
     path('cafes/<int:cafe_id>/set-second-impression/',views.set_second_impression,name='set_second_impression'),
     path('cafes/<int:cafe_id>/set-collection/',views.set_collection,name='set_collection'),
+    path('cafes/<int:cafe_id>/save-whisper/', views.save_whisper, name='save_whisper'),
+    path('whispers/<int:whisper_id>/report/', views.report_whisper, name='report_whisper'),
 
     path('cafes/cercanos/', views.nearby_cafes, name='nearby_cafes'),
     path("owner/analytics/", views.analytics_dashboard, name="analytics_dashboard"),

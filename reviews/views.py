@@ -24,7 +24,7 @@ from core.mixins import EmailVerifiedRequiredMixin
 from allauth.account.models import EmailAddress
 from core.rate_limit import rate_limit
 from reviews.utils.ranking import calcular_score_cafe
-from .models import Review, Cafe, ReviewLike, ReviewReport, Tag, CafeStat, CafeRelationship
+from .models import Review, Cafe, ReviewLike, ReviewReport, Tag, CafeStat, CafeRelationship, CafeWhisper
 from .forms import ReviewForm, CafeForm, ReviewReportForm
 from reviews.utils.geo import haversine_distance
 from core.messages import MESSAGES
@@ -540,6 +540,10 @@ def cafe_detail(request, cafe_id):
     user_note = ""
     second_impression = None
     collection = None
+    whispers = CafeWhisper.objects.filter(
+            cafe=cafe,
+    is_hidden=False
+    )[:12]
     
     if request.user.is_authenticated:
 
@@ -613,6 +617,7 @@ def cafe_detail(request, cafe_id):
             "user_note": user_note,
             "second_impression": second_impression,
             "collection": collection,
+            "whispers": whispers,
             "one_liner": one_liner,
             "full_page_url": full_page_url,
             "full_image_url": full_image_url,
@@ -1132,6 +1137,70 @@ def set_collection(request, cafe_id):
         "reviews:cafe_detail",
         cafe_id=cafe.id
     )
+
+@login_required
+def save_whisper(request, cafe_id):
+
+    cafe = get_object_or_404(Cafe, id=cafe_id)
+
+    today = timezone.now().date()
+
+    already_left = CafeWhisper.objects.filter(
+        user=request.user,
+        cafe=cafe,
+        created_at__date=today,
+    ).exists()
+
+    if already_left:
+        messages.warning(
+            request,
+            "Ya dejaste tu huella hoy ☕"
+        )
+        return redirect("reviews:cafe_detail", cafe_id=cafe.id)
+
+    text = request.POST.get("text", "").strip()
+
+    if not text:
+        messages.warning(
+            request,
+            "Escribí una huella."
+        )
+        return redirect("reviews:cafe_detail", cafe_id=cafe.id)
+
+    CafeWhisper.objects.create(
+        user=request.user,
+        cafe=cafe,
+        text=text[:40],
+    )
+
+    messages.success(
+        request,
+        "Huella guardada ✨ Solo una por día."
+    )
+
+    return redirect("reviews:cafe_detail", cafe_id=cafe.id)
+
+
+@login_required
+def report_whisper(request, whisper_id):
+
+    whisper = get_object_or_404(CafeWhisper, id=whisper_id)
+
+    whisper.reports_count = F("reports_count") + 1
+    whisper.save(update_fields=["reports_count"])
+
+    whisper.refresh_from_db()
+
+    if whisper.reports_count >= 3:
+        whisper.is_hidden = True
+        whisper.save(update_fields=["is_hidden"])
+
+    messages.success(
+        request,
+        "Gracias. Revisaremos esa huella."
+    )
+
+    return redirect("reviews:cafe_detail", cafe_id=whisper.cafe.id)
 
 @login_required
 @require_POST

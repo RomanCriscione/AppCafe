@@ -586,6 +586,111 @@
     </section>
   {% endif %}
     
+  <section class="surface p-5 rounded-2xl animate-fade-in-up animate-delay-600">
+
+  <div class="mb-4 flex items-center justify-between">
+    <h3 class="text-lg font-semibold text-[var(--text-1)]">
+      🍃 Huellas de este lugar
+    </h3>
+
+    <span class="text-sm text-gray-500">
+      {{ whispers|length }} huellas
+    </span>
+  </div>
+
+  <p class="text-sm text-gray-500 mb-5">
+    Pequeñas sensaciones que este café dejó en alguien.
+  </p>
+
+  {% if user.is_authenticated %}
+
+  <form method="post"
+        action="{% url 'reviews:save_whisper' cafe.id %}"
+        class="mb-6 space-y-3">
+
+    {% csrf_token %}
+
+    <input
+      type="text"
+      name="text"
+      maxlength="40"
+      placeholder="Ej: Acá el tiempo baja"
+      class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
+    >
+
+    <div class="text-xs text-gray-500">
+      Máximo 40 caracteres · 1 huella por día
+    </div>
+
+    <div class="flex flex-wrap gap-2 text-xs">
+
+      <span class="px-3 py-1 rounded-full bg-gray-100">
+        Para volver lento
+      </span>
+
+      <span class="px-3 py-1 rounded-full bg-gray-100">
+        Ideal cuando llueve
+      </span>
+
+      <span class="px-3 py-1 rounded-full bg-gray-100">
+        Se escucha pensar
+      </span>
+
+      <span class="px-3 py-1 rounded-full bg-gray-100">
+        Acá pasa algo
+      </span>
+
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary rounded-xl">
+      🍃 Dejar huella
+    </button>
+
+  </form>
+
+  {% endif %}
+
+  {% if whispers %}
+
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+    {% for whisper in whispers %}
+
+    <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 shadow-sm rotate-[-1deg]">
+
+      <p class="text-sm italic text-[var(--text-1)]">
+        “{{ whisper.text }}”
+      </p>
+
+      <form method="post"
+            action="{% url 'reviews:report_whisper' whisper.id %}"
+            class="mt-3">
+
+        {% csrf_token %}
+
+        <button type="submit"
+                class="text-xs text-gray-400 hover:text-red-500 transition">
+          denunciar
+        </button>
+
+      </form>
+
+    </div>
+
+    {% endfor %}
+
+  </div>
+
+  {% else %}
+
+  <div class="text-sm text-gray-500 italic">
+    Todavía nadie dejó una huella acá.
+  </div>
+
+  {% endif %}
+
+</section>
 
   <!-- INFO PRINCIPAL -->
   <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-100">

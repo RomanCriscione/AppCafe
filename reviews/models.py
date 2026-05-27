@@ -336,6 +336,7 @@ class ReviewReport(models.Model):
         FALSE = "FALSE_INFO", "Información falsa"
         OTHER = "OTHER", "Otro"
 
+
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pendiente"
         ACCEPTED = "ACCEPTED", "Aceptado (acción tomada)"
@@ -376,3 +377,45 @@ class ReviewReport(models.Model):
 
     def __str__(self):
         return f"🚩 {self.review_id} por {self.user} ({self.reason})"
+
+class CafeWhisper(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="cafe_whispers",
+    )
+
+    cafe = models.ForeignKey(
+        "Cafe",
+        on_delete=models.CASCADE,
+        related_name="whispers",
+    )
+
+    text = models.CharField(
+        max_length=40,
+    )
+
+    reports_count = models.PositiveIntegerField(
+        default=0
+    )
+
+    is_hidden = models.BooleanField(
+        default=False
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+        indexes = [
+            models.Index(fields=["cafe"]),
+            models.Index(fields=["user"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user} → {self.cafe}: {self.text}"
