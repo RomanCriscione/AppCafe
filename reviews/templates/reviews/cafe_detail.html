@@ -653,69 +653,72 @@
 
   {% if whispers %}
 
-  <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+  <div class="flex flex-wrap gap-6 items-start">
 
-    {% for whisper in whispers %}
+{% for whisper in whispers|slice:":6" %}
 
-    <div class="relative
-    inline-block
-    w-[240px]
-    min-h-[140px]
-    bg-[#FFF3B8]
-    border border-[#E2CC83]
-    rounded-[1px]
-    p-6
-    shadow-[0_8px_18px_rgba(0,0,0,0.12)]
-    hover:-translate-y-1
-    transition-all duration-300
-    {% cycle '-rotate-2' 'rotate-1' '-rotate-1' %}
+<div class="relative
+inline-flex
+items-center
+justify-center
+text-center
 
-    before:absolute
-    before:top-2
-    before:left-1/2
-    before:-translate-x-1/2
-    before:w-4
-    before:h-4
-    before:bg-[#C94F4F]
-    before:rounded-full
-    before:shadow-md
+w-[200px]
+h-[150px]
 
-    after:absolute
-    after:bottom-0
-    after:right-0
-    after:w-7
-    after:h-7
-    after:bg-[#E8D27D]
-    after:rotate-45
-    after:translate-x-3
-    after:translate-y-3">
+p-5
 
-      <p class="text-lg italic text-[#5E4825] mt-8 leading-snug font-medium">
-          “{{ whisper.text }}”
-      </p>
+shadow-[0_10px_22px_rgba(0,0,0,0.14)]
+hover:-translate-y-1
+transition-all duration-300
 
-      {% if user.is_authenticated and cafe.owner == user %}
+{% cycle '-rotate-2' 'rotate-1' '-rotate-1' 'rotate-2' %}
 
-      <form method="post"
-            action="{% url 'reviews:report_whisper' whisper.id %}"
-            class="mt-4">
+{% cycle 'bg-[#FFF2B8]' 'bg-[#FDECC8]' 'bg-[#F6EFCF]' 'bg-[#EAF4D8]' 'bg-[#F9E1D8]' %}
 
-        {% csrf_token %}
+rounded-[4px]
 
-        <button
-            type="submit"
-            class="text-xs px-3 py-1 rounded-full bg-white/70 hover:bg-red-50 text-gray-500 hover:text-red-500 transition"
-        >
-            reportar
-        </button>
+after:absolute
+after:bottom-0
+after:right-0
+after:w-7
+after:h-7
+after:bg-[#E9D58E]
+after:rotate-45
+after:translate-x-3
+after:translate-y-3">
 
-      </form>
+  <!-- tachuela -->
+  <div class="absolute top-3 left-1/2 -translate-x-1/2
+              w-4 h-4 rounded-full bg-[#D85B5B] shadow-md">
+  </div>
 
-      {% endif %}
+  <p class="text-[20px] italic text-[#5B4728] leading-snug font-medium px-3">
+    “{{ whisper.text }}”
+  </p>
 
-    </div>
+  {% if user.is_authenticated and cafe.owner == user %}
 
-    {% endfor %}
+  <form method="post"
+        action="{% url 'reviews:report_whisper' whisper.id %}"
+        class="absolute bottom-3 right-3">
+
+    {% csrf_token %}
+
+    <button
+      type="submit"
+      class="text-[10px] text-gray-500 hover:text-red-500 transition"
+    >
+      reportar
+    </button>
+
+  </form>
+
+  {% endif %}
+
+</div>
+
+{% endfor %}
 
   </div>
 
