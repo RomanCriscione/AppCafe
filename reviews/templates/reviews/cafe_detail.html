@@ -662,58 +662,49 @@ inline-flex
 items-center
 justify-center
 text-center
-
-w-[200px]
-h-[150px]
-
-p-5
-
-shadow-[0_10px_22px_rgba(0,0,0,0.14)]
+w-[180px]
+h-[135px]
+px-5 py-4
+bg-gradient-to-br
+{% cycle 'from-[#FFF6C9] to-[#F5E6A8]' 'from-[#FDEFCF] to-[#F2DFB5]' 'from-[#F9F1D9] to-[#EADCB4]' %}
+shadow-[0_12px_18px_rgba(0,0,0,0.10)]
 hover:-translate-y-1
 transition-all duration-300
-
-{% cycle '-rotate-2' 'rotate-1' '-rotate-1' 'rotate-2' %}
-
-{% cycle 'bg-[#FFF2B8]' 'bg-[#FDECC8]' 'bg-[#F6EFCF]' 'bg-[#EAF4D8]' 'bg-[#F9E1D8]' %}
-
-rounded-[4px]
+{% cycle '-rotate-2' 'rotate-1' '-rotate-1' %}
+rounded-[2px]
 
 after:absolute
 after:bottom-0
 after:right-0
-after:w-7
-after:h-7
-after:bg-[#E9D58E]
-after:rotate-45
-after:translate-x-3
-after:translate-y-3">
+after:w-6
+after:h-6
+after:bg-[#E0C86E]
+after:shadow-[-2px_-2px_6px_rgba(0,0,0,0.08)]
+after:[clip-path:polygon(100%_0,0_100%,100%_100%)]">
 
   <!-- tachuela -->
   <div class="absolute top-3 left-1/2 -translate-x-1/2
-              w-4 h-4 rounded-full bg-[#D85B5B] shadow-md">
+              w-4 h-4 rounded-full
+              bg-[#D84C4C]
+              shadow-[0_3px_6px_rgba(0,0,0,0.25)]">
   </div>
 
-  <p class="text-[20px] italic text-[#5B4728] leading-snug font-medium px-3">
+  <p class="absolute inset-0 flex items-center justify-center px-5
+            text-[16px] italic text-[#4E3D24]
+            leading-tight font-medium">
     “{{ whisper.text }}”
   </p>
 
   {% if user.is_authenticated and cafe.owner == user %}
-
   <form method="post"
         action="{% url 'reviews:report_whisper' whisper.id %}"
         class="absolute bottom-3 right-3">
-
     {% csrf_token %}
-
-    <button
-      type="submit"
-      class="text-[10px] text-gray-500 hover:text-red-500 transition"
-    >
+    <button type="submit"
+            class="text-[10px] text-gray-500 hover:text-red-500 transition">
       reportar
     </button>
-
   </form>
-
   {% endif %}
 
 </div>
