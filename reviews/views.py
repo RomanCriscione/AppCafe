@@ -1043,6 +1043,10 @@ def favorite_cafes(request):
             "want_to_go": want_to_go,
             "want_to_return": want_to_return,
             "visited": visited,
+
+            "want_to_go_count": len(want_to_go),
+            "want_to_return_count": len(want_to_return),
+            "visited_count": len(visited),
         }
     )
 

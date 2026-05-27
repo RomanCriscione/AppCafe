@@ -1,6 +1,6 @@
 # reviews/admin.py
 from django.contrib import admin
-from .models import Cafe, Review, CafeStat, ReviewLike, ReviewReport
+from .models import Cafe, Review, CafeStat, ReviewLike, ReviewReport, CafeWhisper
 from .claims import ClaimRequest, ClaimEvidence, ClaimStatus, ClaimMethod
 from import_export.admin import ImportExportModelAdmin
 
@@ -159,3 +159,46 @@ class ReviewReportAdmin(admin.ModelAdmin):
         ("Estado", {"fields": ("status", "resolved_by", "resolved_at", "resolution_notes")}),
     )
 
+@admin.register(CafeWhisper)
+class CafeWhisperAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "cafe",
+        "user",
+        "text",
+        "reports_count",
+        "is_hidden",
+        "created_at",
+    )
+
+    list_filter = (
+        "is_hidden",
+        "created_at",
+        "cafe",
+    )
+
+    search_fields = (
+        "text",
+        "cafe__name",
+        "user__username",
+    )
+
+    raw_id_fields = (
+        "cafe",
+        "user",
+    )
+
+    date_hierarchy = "created_at"
+
+    actions = [
+        "hide_whispers",
+        "show_whispers",
+    ]
+
+    @admin.action(description="Ocultar huellas seleccionadas")
+    def hide_whispers(self, request, queryset):
+        queryset.update(is_hidden=True)
+
+    @admin.action(description="Mostrar huellas seleccionadas")
+    def show_whispers(self, request, queryset):
+        queryset.update(is_hidden=False)
