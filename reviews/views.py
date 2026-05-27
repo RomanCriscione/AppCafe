@@ -1154,7 +1154,7 @@ def save_whisper(request, cafe_id):
     if already_left:
         messages.warning(
             request,
-            "Ya dejaste tu huella hoy ☕"
+            "Ya dejaste tu huella hoy ☕ Volvé mañana."
         )
         return redirect("reviews:cafe_detail", cafe_id=cafe.id)
 
