@@ -568,6 +568,21 @@ def cafe_detail(request, cafe_id):
             cafe=cafe
         ).first()
 
+        want_to_go_count = CafeRelationship.objects.filter(
+            cafe=cafe,
+            status=CafeRelationship.WANT_TO_GO
+        ).count()
+
+        want_to_return_count = CafeRelationship.objects.filter(
+            cafe=cafe,
+            status=CafeRelationship.WANT_TO_RETURN
+        ).count()
+
+        visited_count = CafeRelationship.objects.filter(
+            cafe=cafe,
+            status=CafeRelationship.VISITED
+        ).count()
+
         if relationship:
             user_status = relationship.status
             user_note = relationship.private_note or ""
@@ -617,6 +632,9 @@ def cafe_detail(request, cafe_id):
             "user_note": user_note,
             "second_impression": second_impression,
             "collection": collection,
+            "want_to_go_count": want_to_go_count,
+            "want_to_return_count": want_to_return_count,
+            "visited_count": visited_count,
             "whispers": whispers,
             "one_liner": one_liner,
             "full_page_url": full_page_url,
