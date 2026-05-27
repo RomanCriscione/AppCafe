@@ -614,7 +614,7 @@
       type="text"
       name="text"
       maxlength="40"
-      placeholder="Ej: Acá el tiempo baja"
+      placeholder="Ej: Para charlas largas"
       class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
     >
 
@@ -657,30 +657,41 @@
 
     {% for whisper in whispers %}
 
-    <div class="relative bg-gradient-to-br from-[#FFF8D9] to-[#F7E9AE]
-    border border-[#E8D69C]
-    rounded-[2px]
-    p-5
-    shadow-[0_10px_18px_rgba(0,0,0,0.10)]
-    hover:shadow-[0_14px_22px_rgba(0,0,0,0.14)]
+    <div class="relative
+    inline-block
+    w-[240px]
+    min-h-[140px]
+    bg-[#FFF3B8]
+    border border-[#E2CC83]
+    rounded-[1px]
+    p-6
+    shadow-[0_8px_18px_rgba(0,0,0,0.12)]
+    hover:-translate-y-1
     transition-all duration-300
-    {% cycle 'rotate-[-1deg]' 'rotate-[1deg]' 'rotate-[-2deg]' %}
-    min-h-[170px]
-    overflow-hidden
+    {% cycle '-rotate-2' 'rotate-1' '-rotate-1' %}
 
-    before:absolute before:top-2 before:left-1/2 before:-translate-x-1/2
-    before:w-4 before:h-4 before:bg-[#D95F5F]
-    before:rounded-full before:shadow-md
+    before:absolute
+    before:top-2
+    before:left-1/2
+    before:-translate-x-1/2
+    before:w-4
+    before:h-4
+    before:bg-[#C94F4F]
+    before:rounded-full
+    before:shadow-md
 
-    after:absolute after:bottom-0 after:right-0
-    after:w-10 after:h-10
-    after:bg-[#EFD98A]
+    after:absolute
+    after:bottom-0
+    after:right-0
+    after:w-7
+    after:h-7
+    after:bg-[#E8D27D]
     after:rotate-45
-    after:translate-x-5 after:translate-y-5"
-    >
+    after:translate-x-3
+    after:translate-y-3">
 
-      <p class="text-[15px] italic text-[#5C4A2D] mt-6 leading-relaxed tracking-[0.01em] font-medium">
-        “{{ whisper.text }}”
+      <p class="text-lg italic text-[#5E4825] mt-8 leading-snug font-medium">
+          “{{ whisper.text }}”
       </p>
 
       {% if user.is_authenticated and cafe.owner == user %}
