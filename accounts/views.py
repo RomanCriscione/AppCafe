@@ -66,7 +66,39 @@ def register_owner(request):
     # return render(request, "accounts/register_owner.html", {"form": OwnerSignupForm(instance=request.user)})
     return render(request, "accounts/register_owner.html")
 
-
 @login_required
 def my_account(request):
-    return render(request, "accounts/my_account.html")
+
+    if request.method == "POST":
+        new_username = request.POST.get("username", "").strip()
+
+        if not new_username:
+            messages.warning(
+                request,
+                "El nombre no puede estar vacío."
+            )
+
+        elif type(request.user).objects.filter(
+            username=new_username
+        ).exclude(id=request.user.id).exists():
+
+            messages.warning(
+                request,
+                "Ese nombre ya está en uso."
+            )
+
+        else:
+            request.user.username = new_username
+            request.user.save(update_fields=["username"])
+
+            messages.success(
+                request,
+                "Nombre actualizado ✨"
+            )
+
+        return redirect("my_account")
+
+    return render(
+        request,
+        "accounts/my_account.html"
+    )

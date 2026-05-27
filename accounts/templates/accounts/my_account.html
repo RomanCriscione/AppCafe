@@ -30,6 +30,34 @@
     {% endif %}
   </div>
 
+  <div class="border rounded-xl p-4 space-y-3">
+
+  <p class="text-sm text-gray-500">
+    Nombre visible
+  </p>
+
+  <form method="post" class="space-y-3">
+    {% csrf_token %}
+
+    <input
+      type="text"
+      name="username"
+      value="{{ request.user.username }}"
+      class="w-full rounded-lg border border-[var(--border)] px-4 py-2
+             focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
+    >
+
+    <button
+      type="submit"
+      class="w-full bg-[var(--brand)] text-white py-2 rounded-lg font-semibold hover:opacity-90 transition"
+    >
+      Guardar cambios
+    </button>
+
+  </form>
+
+</div>
+
   <!-- Acciones -->
   <div class="space-y-3">
     <a
