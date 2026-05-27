@@ -658,40 +658,46 @@
 {% for whisper in whispers|slice:":6" %}
 
 <div class="relative
-inline-flex
-items-center
-justify-center
-text-center
-w-[220px]
-h-[120px]
-px-6
-py-5
-rounded-2xl
-bg-[#F8EFC8]
-border border-[#E8D9A3]
-shadow-sm
-hover:shadow-md
-hover:-translate-y-1
-transition-all duration-300
-{% cycle '-rotate-1' 'rotate-1' 'rotate-0' %}">
+            w-[220px]
+            h-[140px]
+            bg-[#F8EFC8]
+            border border-[#E7D69C]
+            rounded-xl
+            shadow-md
+            flex items-center justify-center
+            p-6
+            text-center
+            hover:-translate-y-1
+            hover:shadow-lg
+            transition-all duration-300
+            {% cycle '-rotate-1' 'rotate-1' 'rotate-0' %}">
 
   <!-- tachuela -->
   <div class="absolute top-3 left-1/2 -translate-x-1/2
               w-4 h-4 rounded-full
-              bg-[#D84C4C]
-              shadow-[0_3px_6px_rgba(0,0,0,0.25)]">
+              bg-[#D94A4A]
+              shadow-sm">
   </div>
 
-  <p class="absolute inset-0 flex items-center justify-center px-5
-            text-[16px] italic text-[#4E3D24]
-            leading-tight font-medium">
+  <!-- pliegue -->
+  <div class="absolute bottom-0 right-0
+              w-6 h-6
+              bg-[#EAD89C]
+              rounded-tl-lg">
+  </div>
+
+  <p class="text-[17px]
+            italic
+            text-[#5A472A]
+            leading-snug
+            font-medium mt-3">
     “{{ whisper.text }}”
   </p>
 
   {% if user.is_authenticated and cafe.owner == user %}
   <form method="post"
         action="{% url 'reviews:report_whisper' whisper.id %}"
-        class="absolute bottom-3 right-3">
+        class="absolute bottom-2 right-3">
     {% csrf_token %}
     <button type="submit"
             class="text-[10px] text-gray-500 hover:text-red-500 transition">
