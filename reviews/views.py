@@ -540,9 +540,15 @@ def cafe_detail(request, cafe_id):
     user_note = ""
     second_impression = None
     collection = None
+
+    # estadísticas públicas (para usuarios logueados o no)
+    want_to_go_count = 0
+    want_to_return_count = 0
+    visited_count = 0
+
     whispers = CafeWhisper.objects.filter(
-            cafe=cafe,
-    is_hidden=False
+        cafe=cafe,
+        is_hidden=False
     )[:12]
     
     if request.user.is_authenticated:
