@@ -551,6 +551,21 @@ def cafe_detail(request, cafe_id):
         is_hidden=False
     )[:12]
     
+    want_to_go_count = CafeRelationship.objects.filter(
+        cafe=cafe,
+        status=CafeRelationship.WANT_TO_GO
+    ).count()
+
+    want_to_return_count = CafeRelationship.objects.filter(
+        cafe=cafe,
+        status=CafeRelationship.WANT_TO_RETURN
+    ).count()
+
+    visited_count = CafeRelationship.objects.filter(
+        cafe=cafe,
+        status=CafeRelationship.VISITED
+    ).count()
+
     if request.user.is_authenticated:
 
         liked_ids = set(
@@ -573,21 +588,6 @@ def cafe_detail(request, cafe_id):
             user=request.user,
             cafe=cafe
         ).first()
-
-        want_to_go_count = CafeRelationship.objects.filter(
-            cafe=cafe,
-            status=CafeRelationship.WANT_TO_GO
-        ).count()
-
-        want_to_return_count = CafeRelationship.objects.filter(
-            cafe=cafe,
-            status=CafeRelationship.WANT_TO_RETURN
-        ).count()
-
-        visited_count = CafeRelationship.objects.filter(
-            cafe=cafe,
-            status=CafeRelationship.VISITED
-        ).count()
 
         if relationship:
             user_status = relationship.status
@@ -1182,7 +1182,7 @@ def save_whisper(request, cafe_id):
     if already_left:
         messages.warning(
             request,
-            "Ya dejaste tu huella hoy ☕ Volvé mañana."
+            "Ya dejaste tu huella de hoy. Mañana podés sumar otra ☕"
         )
         return redirect("reviews:cafe_detail", cafe_id=cafe.id)
 
@@ -1203,7 +1203,7 @@ def save_whisper(request, cafe_id):
 
     messages.success(
         request,
-        "Huella guardada ✨ Solo una por día."
+        "Esa sensación ya forma parte de este café ✨"
     )
 
     return redirect("reviews:cafe_detail", cafe_id=cafe.id)
