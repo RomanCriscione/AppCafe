@@ -47,10 +47,13 @@
             const localidad = locationInput?.value.trim();
             const provincia = provinceInput?.value.trim();
 
+            if (!direccion || direccion.length <= 5 || !localidad || localidad.length <= 1 || !provincia) {
+                return;
+            }
+
             const fullQuery =
                 `${direccion}, ${localidad}, ${provincia}, Argentina`;
 
-            if (direccion.length > 5 && localidad.length > 1) {
                 fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}`)
                     .then(res => res.json())
                     .then(data => {
@@ -58,8 +61,12 @@
 
                         if (data.length === 0) {
                             direccionGeolocalizada = false;
-                            alert("❌ No se pudo encontrar la dirección ingresada.");
-                            locationStatus.textContent = "❌ Dirección no reconocida.";
+                            alert(
+                                "❌ No pudimos ubicar esa dirección. Revisá la dirección, localidad o provincia."
+                            );
+
+                            locationStatus.textContent =
+                                "❌ No pudimos ubicar esa dirección. Revisá la dirección, localidad o provincia.";
                             return;
                         }
 
@@ -89,7 +96,6 @@
                             optionsContainer.appendChild(nota);
                         }
                     });
-            }
         }
 
         if (addressInput) addressInput.addEventListener("blur", geolocalizarDireccion);
