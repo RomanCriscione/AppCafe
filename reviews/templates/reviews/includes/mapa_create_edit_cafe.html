@@ -16,6 +16,7 @@
         const lonInput = document.getElementById("id_longitude");
         const addressInput = document.getElementById("id_address");
         const locationInput = document.getElementById("id_location");
+        const provinceInput = document.getElementById("id_province");
         const locationStatus = document.getElementById("location-status");
         const optionsContainer = document.getElementById("address-options");
 
@@ -44,7 +45,10 @@
         function geolocalizarDireccion() {
             const direccion = addressInput?.value.trim();
             const localidad = locationInput?.value.trim();
-            const fullQuery = `${direccion}, ${localidad}, Buenos Aires, Argentina`;
+            const provincia = provinceInput?.value.trim();
+
+            const fullQuery =
+                `${direccion}, ${localidad}, ${provincia}, Argentina`;
 
             if (direccion.length > 5 && localidad.length > 1) {
                 fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}`)
@@ -89,7 +93,11 @@
         }
 
         if (addressInput) addressInput.addEventListener("blur", geolocalizarDireccion);
-        if (locationInput) locationInput.addEventListener("change", geolocalizarDireccion);
+        if (locationInput)
+            locationInput.addEventListener("change", geolocalizarDireccion);
+
+        if (provinceInput)
+            provinceInput.addEventListener("change", geolocalizarDireccion);
 
         marker.on("dragend", function () {
             const pos = marker.getLatLng();

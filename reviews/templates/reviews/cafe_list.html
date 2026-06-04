@@ -155,22 +155,6 @@
 
 
 
-      <div class="flex gap-3 items-center">
-        <a href="{% url 'reviews:mapa_cafes' %}"
-          class="fixed bottom-5 right-5 z-40 bg-white text-brown hover:bg-brand-100 transition px-4 py-2 rounded-full shadow-md border border-brand-200 text-sm sm:text-base">
-          📍 Ver mapa
-        </a>
-        <form id="ubicacion-form" method="get" class="inline">
-          <input type="hidden" name="orden" value="algoritmo">
-          <input type="hidden" name="lat" id="lat">
-          <input type="hidden" name="lon" id="lon">
-          <button type="submit" class="btn btn-primary rounded-xl text-sm">📍 Cafés cerca mío</button>
-        </form>
-        {% if mostrar_boton_reset %}
-          <a href="{% url 'reviews:cafe_list' %}" class="btn btn-ghost rounded-xl text-sm">🔄 Ver todos los cafés</a>
-        {% endif %}
-      </div>
-
     <!-- Skeleton inicial -->
     <div id="grid-skeleton" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0">
       {% for _ in "123" %}

@@ -97,7 +97,7 @@ class CafeForm(forms.ModelForm):
         model = Cafe
         # ✅ SIN 'tags' (las etiquetas sensoriales se eligen en las reviews)
         fields = [
-            'name', 'address', 'location', 'description',
+            'name', 'address', 'location', 'province', 'description',
             'phone', 'email',
             'google_maps_url',
             'instagram',
@@ -162,6 +162,16 @@ class CafeForm(forms.ModelForm):
         }
 
         labels = {
+            'name': 'Nombre',
+            'address': 'Dirección',
+            'location': 'Localidad',
+            'province': 'Provincia',
+            'description': 'Descripción',
+            'phone': 'Teléfono',
+            'email': 'Email',
+            'instagram': 'Instagram',
+            'google_maps_url': 'Google Maps',
+            
             'has_wifi': 'Wi-Fi disponible',
             'has_air_conditioning': 'Aire acondicionado',
             'has_power_outlets': 'Enchufes disponibles',

@@ -33,6 +33,7 @@ class Cafe(models.Model):
     name = models.CharField(max_length=100, unique=True)
     address = models.CharField(max_length=255)
     location = models.CharField(max_length=100)
+    province = models.CharField(max_length=100,default="Buenos Aires",verbose_name="Provincia")
     description = models.TextField(blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     google_maps_url = models.URLField(blank=True, null=True)
