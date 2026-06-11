@@ -3,7 +3,6 @@ from rest_framework import serializers
 from reviews.models import Cafe, Tag
 
 
-
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -11,27 +10,36 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class CafeSerializer(serializers.ModelSerializer):
-    # Este campo viene anotado en la queryset (api.py)
     average_rating = serializers.FloatField(read_only=True)
 
-    # Tags
     tags = TagSerializer(many=True, read_only=True)
 
-    # Foto principal para Mobile
     photo1_url = serializers.SerializerMethodField()
+    photo2_url = serializers.SerializerMethodField()
+    photo3_url = serializers.SerializerMethodField()
+
     top_tags = serializers.SerializerMethodField()
 
-    def get_photo1_url(self, obj):
-        if obj.photo1:
+    def build_image_url(self, image_field):
+        if image_field:
             request = self.context.get("request")
 
             if request:
-                return request.build_absolute_uri(obj.photo1.url)
+                return request.build_absolute_uri(image_field.url)
 
-            return obj.photo1.url
+            return image_field.url
 
         return None
-    
+
+    def get_photo1_url(self, obj):
+        return self.build_image_url(obj.photo1)
+
+    def get_photo2_url(self, obj):
+        return self.build_image_url(obj.photo2)
+
+    def get_photo3_url(self, obj):
+        return self.build_image_url(obj.photo3)
+
     def get_top_tags(self, obj):
         return list(
             Tag.objects
@@ -55,6 +63,8 @@ class CafeSerializer(serializers.ModelSerializer):
             "is_vegan_friendly",
             "average_rating",
             "photo1_url",
+            "photo2_url",
+            "photo3_url",
             "top_tags",
             "tags",
         ]
