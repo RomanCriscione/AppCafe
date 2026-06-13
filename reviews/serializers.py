@@ -51,6 +51,7 @@ class CafeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cafe
+
         fields = [
             "id",
             "name",
@@ -58,9 +59,38 @@ class CafeSerializer(serializers.ModelSerializer):
             "location",
             "latitude",
             "longitude",
+
+            # infraestructura
             "has_wifi",
+            "has_air_conditioning",
+            "has_power_outlets",
+            "has_outdoor_seating",
+            "has_parking",
+            "is_accessible",
+            "has_baby_changing",
+
+            # mascotas
             "is_pet_friendly",
+
+            # gastronomía
+            "has_specialty_coffee",
+            "serves_brunch",
+            "serves_breakfast",
+            "serves_alcohol",
+            "has_artisanal_pastries",
+
+            # alimentación
             "is_vegan_friendly",
+            "has_vegetarian_options",
+            "has_gluten_free_options",
+
+            # uso del espacio
+            "laptop_friendly",
+            "quiet_space",
+
+            # extras
+            "has_books_or_games",
+
             "average_rating",
             "photo1_url",
             "photo2_url",
