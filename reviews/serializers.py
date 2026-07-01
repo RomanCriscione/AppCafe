@@ -104,11 +104,49 @@ class CafeRelationshipSerializer(serializers.ModelSerializer):
     cafe_id = serializers.IntegerField(source="cafe.id")
     cafe_name = serializers.CharField(source="cafe.name")
 
+    cafe_location = serializers.CharField(
+        source="cafe.location",
+        read_only=True,
+    )
+
+    cafe_address = serializers.CharField(
+        source="cafe.address",
+        read_only=True,
+    )
+
+    cafe_photo = serializers.SerializerMethodField()
+
+    average_rating = serializers.SerializerMethodField()
+
+    def get_cafe_photo(self, obj):
+        if obj.cafe.photo1:
+            request = self.context.get("request")
+
+            if request:
+                return request.build_absolute_uri(obj.cafe.photo1.url)
+
+            return obj.cafe.photo1.url
+
+        return None
+
+    def get_average_rating(self, obj):
+        from django.db.models import Avg
+
+        return (
+            obj.cafe.reviews.aggregate(
+                average=Avg("rating")
+            )["average"]
+        )
+
     class Meta:
         model = CafeRelationship
         fields = [
             "cafe_id",
             "cafe_name",
+            "cafe_location",
+            "cafe_address",
+            "cafe_photo",
+            "average_rating",
             "status",
             "collection",
             "private_note",
