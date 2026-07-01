@@ -33,6 +33,7 @@ urlpatterns = [
 
     # api
     path("api/", include(router.urls)),
+    path("api/mobile/", include("reviews.mobile_urls")),
 
     # robots.txt
     path(

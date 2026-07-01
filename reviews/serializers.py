@@ -1,6 +1,7 @@
 from django.db.models import Count
 from rest_framework import serializers
 from reviews.models import Cafe, Tag
+from reviews.models import CafeRelationship
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -97,4 +98,20 @@ class CafeSerializer(serializers.ModelSerializer):
             "photo3_url",
             "top_tags",
             "tags",
+        ]
+
+class CafeRelationshipSerializer(serializers.ModelSerializer):
+    cafe_id = serializers.IntegerField(source="cafe.id")
+    cafe_name = serializers.CharField(source="cafe.name")
+
+    class Meta:
+        model = CafeRelationship
+        fields = [
+            "cafe_id",
+            "cafe_name",
+            "status",
+            "collection",
+            "private_note",
+            "second_impression",
+            "updated_at",
         ]
