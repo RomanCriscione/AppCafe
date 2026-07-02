@@ -2,6 +2,7 @@ from django.db.models import Count
 from rest_framework import serializers
 from reviews.models import Cafe, Tag
 from reviews.models import CafeRelationship
+from django.contrib.auth import get_user_model
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -153,3 +154,31 @@ class CafeRelationshipSerializer(serializers.ModelSerializer):
             "second_impression",
             "updated_at",
         ]
+
+User = get_user_model()
+
+
+class MobileUserSerializer(serializers.ModelSerializer):
+    avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "avatar",
+            "is_owner",
+        ]
+
+    def get_avatar(self, obj):
+        if obj.avatar:
+            request = self.context.get("request")
+
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+
+            return obj.avatar.url
+
+        return None

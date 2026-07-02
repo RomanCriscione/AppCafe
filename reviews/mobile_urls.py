@@ -1,4 +1,5 @@
 from django.urls import path
+from .mobile_api import MeAPIView
 
 from .mobile_api import MyMapAPIView
 from .auth_api import (
@@ -7,11 +8,19 @@ from .auth_api import (
     MobileLogoutAPIView,
 )
 
+
+
 urlpatterns = [
     path(
         "my-map/",
         MyMapAPIView.as_view(),
         name="mobile-my-map",
+    ),
+
+    path(
+        "me/",
+        MeAPIView.as_view(),
+        name="mobile-me",
     ),
 
     path(
