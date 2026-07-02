@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
     # Third party
     "rest_framework",
+    "rest_framework.authtoken",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -52,6 +53,8 @@ INSTALLED_APPS = [
     "cloudinary_storage",
 
     "import_export",
+
+    
 
 ]
 
@@ -234,4 +237,5 @@ else:
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
+
 
