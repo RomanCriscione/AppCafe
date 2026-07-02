@@ -7,7 +7,6 @@ colorama==0.4.6
 coverage==7.9.2
 cryptography==43.0.1
 dj-database-url==3.0.1
-dj-rest-auth==7.2.0
 Django==5.2.4
 django-allauth==65.9.0
 django-ckeditor==6.7.2
@@ -42,3 +41,6 @@ sqlparse==0.5.3
 tzdata==2025.2
 urllib3==2.5.0
 whitenoise==6.9.0
+django-import-export==4.4.1
+diff-match-patch==20241021
+tablib==3.9.0
