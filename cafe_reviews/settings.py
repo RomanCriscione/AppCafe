@@ -182,6 +182,19 @@ MEDIA_URL = ""
 # ======================================================
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# ======================================================
+# DJANGO REST FRAMEWORK
+# ======================================================
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ],
+}
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
