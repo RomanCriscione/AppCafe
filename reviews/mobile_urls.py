@@ -1,13 +1,14 @@
 from django.urls import path
-from .mobile_api import MeAPIView
-
-from .mobile_api import MyMapAPIView
+from .mobile_api import (
+    MeAPIView,
+    MyMapAPIView,
+    SetCafeStatusAPIView,
+)
 from .auth_api import (
     MobileLoginAPIView,
     MobileRegisterAPIView,
     MobileLogoutAPIView,
 )
-
 
 
 urlpatterns = [
@@ -39,5 +40,11 @@ urlpatterns = [
         "logout/",
         MobileLogoutAPIView.as_view(),
         name="mobile-logout",
+    ),
+
+    path(
+        "cafes/<int:cafe_id>/set-status/",
+        SetCafeStatusAPIView.as_view(),
+        name="mobile-set-cafe-status",
     ),
 ]

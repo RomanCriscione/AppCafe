@@ -1,9 +1,15 @@
-from rest_framework import generics
+from django.shortcuts import get_object_or_404
+
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
-from reviews.models import CafeRelationship
-from reviews.serializers import CafeRelationshipSerializer
 from rest_framework.response import Response
-from reviews.serializers import MobileUserSerializer
+from rest_framework.views import APIView
+
+from reviews.models import Cafe, CafeRelationship
+from reviews.serializers import (
+    CafeRelationshipSerializer,
+    MobileUserSerializer,
+)
 
 
 class MyMapAPIView(generics.ListAPIView):
@@ -22,6 +28,79 @@ class MyMapAPIView(generics.ListAPIView):
             .filter(user=self.request.user)
             .select_related("cafe")
             .order_by("-updated_at")
+        )
+    
+class SetCafeStatusAPIView(APIView):
+    """
+    POST /api/mobile/cafes/<cafe_id>/set-status/
+
+    Crea, cambia o elimina el estado de una cafetería
+    dentro del mapa del usuario autenticado.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, cafe_id):
+        cafe = get_object_or_404(
+            Cafe,
+            id=cafe_id,
+        )
+
+        selected_status = request.data.get(
+            "status",
+            "",
+        )
+
+        valid_statuses = [
+            CafeRelationship.WANT_TO_GO,
+            CafeRelationship.WANT_TO_RETURN,
+            CafeRelationship.VISITED,
+        ]
+
+        if selected_status not in valid_statuses:
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_status",
+                    "message": "El estado enviado no es válido.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        relationship, created = (
+            CafeRelationship.objects.get_or_create(
+                user=request.user,
+                cafe=cafe,
+                defaults={
+                    "status": selected_status,
+                },
+            )
+        )
+
+        removed = False
+
+        if not created:
+            if relationship.status == selected_status:
+                relationship.delete()
+                removed = True
+            else:
+                relationship.status = selected_status
+                relationship.save()
+
+        active_status = (
+            None
+            if removed
+            else selected_status
+        )
+
+        return Response(
+            {
+                "success": True,
+                "cafe_id": cafe.id,
+                "status": active_status,
+                "removed": removed,
+            },
+            status=status.HTTP_200_OK,
         )
 
 class MeAPIView(generics.RetrieveAPIView):
