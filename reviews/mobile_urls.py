@@ -3,6 +3,7 @@ from .mobile_api import (
     MeAPIView,
     MyMapAPIView,
     SetCafeStatusAPIView,
+    SetCafeCollectionAPIView,
 )
 from .auth_api import (
     MobileLoginAPIView,
@@ -46,5 +47,10 @@ urlpatterns = [
         "cafes/<int:cafe_id>/set-status/",
         SetCafeStatusAPIView.as_view(),
         name="mobile-set-cafe-status",
+    ),
+    path(
+        "cafes/<int:cafe_id>/set-collection/",
+        SetCafeCollectionAPIView.as_view(),
+        name="mobile-set-cafe-collection",
     ),
 ]

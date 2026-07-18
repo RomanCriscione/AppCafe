@@ -102,6 +102,75 @@ class SetCafeStatusAPIView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+    
+class SetCafeCollectionAPIView(APIView):
+    """
+    POST /api/mobile/cafes/<cafe_id>/set-collection/
+
+    Guarda la colección de una cafetería
+    dentro del mapa del usuario autenticado.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, cafe_id):
+        cafe = get_object_or_404(
+            Cafe,
+            id=cafe_id,
+        )
+
+        collection = request.data.get(
+            "collection",
+            "",
+        )
+
+        valid_collections = [
+            "read",
+            "work",
+            "slow",
+            "rain",
+            "talk",
+        ]
+
+        if collection not in valid_collections:
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_collection",
+                    "message": "La colección enviada no es válida.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        relationship = CafeRelationship.objects.filter(
+            user=request.user,
+            cafe=cafe,
+        ).first()
+
+        if relationship is None:
+            return Response(
+                {
+                    "success": False,
+                    "error": "relationship_not_found",
+                    "message": "Primero agregá el café a tu mapa.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        relationship.collection = collection
+        relationship.save(
+            update_fields=["collection"],
+        )
+
+        return Response(
+            {
+                "success": True,
+                "cafe_id": cafe.id,
+                "collection": relationship.collection,
+            },
+            status=status.HTTP_200_OK,
+        )
+
 
 class MeAPIView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
