@@ -11,6 +11,108 @@ from reviews.serializers import (
     MobileUserSerializer,
 )
 
+class CafeDetailAPIView(APIView):
+    """
+    GET /api/mobile/cafes/<cafe_id>/
+
+    Devuelve el detalle completo de una cafetería.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, cafe_id):
+        cafe = get_object_or_404(
+            Cafe,
+            id=cafe_id,
+        )
+
+        fotos = []
+
+        for field_name in [
+            "photo1",
+            "photo2",
+            "photo3",
+        ]:
+            field = getattr(
+                cafe,
+                field_name,
+                None,
+            )
+
+            if field:
+                try:
+                    fotos.append(
+                        request.build_absolute_uri(
+                            field.url,
+                        )
+                    )
+                except ValueError:
+                    pass
+
+        tags = list(
+            cafe.tags.values_list(
+                "name",
+                flat=True,
+            )
+        )
+
+        return Response(
+            {
+                "id": cafe.id,
+                "name": cafe.name,
+                "location": cafe.location,
+                "province": cafe.province,
+                "address": cafe.address,
+                "description": cafe.description,
+                "phone": cafe.phone,
+                "google_maps_url": cafe.google_maps_url,
+                "instagram": cafe.instagram,
+                "average_rating": str(
+                    cafe.average_rating()
+                ),
+                "photos": fotos,
+                "latitude": cafe.latitude,
+                "longitude": cafe.longitude,
+                "has_wifi": cafe.has_wifi,
+                "has_air_conditioning":
+                    cafe.has_air_conditioning,
+                "has_power_outlets":
+                    cafe.has_power_outlets,
+                "has_outdoor_seating":
+                    cafe.has_outdoor_seating,
+                "has_parking": cafe.has_parking,
+                "is_accessible": cafe.is_accessible,
+                "has_baby_changing":
+                    cafe.has_baby_changing,
+                "is_pet_friendly":
+                    cafe.is_pet_friendly,
+                "has_specialty_coffee":
+                    cafe.has_specialty_coffee,
+                "serves_brunch":
+                    cafe.serves_brunch,
+                "serves_breakfast":
+                    cafe.serves_breakfast,
+                "serves_alcohol":
+                    cafe.serves_alcohol,
+                "has_artisanal_pastries":
+                    cafe.has_artisanal_pastries,
+                "is_vegan_friendly":
+                    cafe.is_vegan_friendly,
+                "has_vegetarian_options":
+                    cafe.has_vegetarian_options,
+                "has_gluten_free_options":
+                    cafe.has_gluten_free_options,
+                "laptop_friendly":
+                    cafe.laptop_friendly,
+                "quiet_space":
+                    cafe.quiet_space,
+                "has_books_or_games":
+                    cafe.has_books_or_games,
+                "tags": tags,
+            },
+            status=status.HTTP_200_OK,
+        )
+
 
 class MyMapAPIView(generics.ListAPIView):
     """

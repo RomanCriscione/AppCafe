@@ -1,5 +1,6 @@
 from django.urls import path
 from .mobile_api import (
+    CafeDetailAPIView,
     MeAPIView,
     MyMapAPIView,
     SetCafeStatusAPIView,
@@ -41,6 +42,12 @@ urlpatterns = [
         "logout/",
         MobileLogoutAPIView.as_view(),
         name="mobile-logout",
+    ),
+
+    path(
+        "cafes/<int:cafe_id>/",
+        CafeDetailAPIView.as_view(),
+        name="mobile-cafe-detail",
     ),
 
     path(
