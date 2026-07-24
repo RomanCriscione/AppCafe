@@ -83,7 +83,7 @@ class CafeDetailAPIView(APIView):
                     "rating": review.rating,
                     "comment": review.comment,
                     "created_at": review.created_at.strftime(
-                        "%Y-%m-%d"
+                        "%d/%m/%Y"
                     ),
                     "owner_reply": review.owner_reply,
                 }
