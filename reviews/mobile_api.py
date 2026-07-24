@@ -65,11 +65,16 @@ class CafeDetailAPIView(APIView):
         reviews_data = []
 
         for review in reviews:
+            full_name = review.user.get_full_name()
+
             user_name = (
-                review.user.get_full_name().strip()
-                or review.user.first_name
-                or "Usuario de Gota"
+                full_name.strip()
+                if full_name
+                else review.user.first_name
             )
+
+            if not user_name:
+                user_name = "Usuario de Gota"
 
             reviews_data.append(
                 {
