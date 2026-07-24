@@ -56,6 +56,34 @@ class CafeDetailAPIView(APIView):
             )
         )
 
+        reviews = (
+            cafe.reviews
+            .select_related("user")
+            .order_by("-created_at")[:5]
+        )
+
+        reviews_data = []
+
+        for review in reviews:
+            user_name = (
+                review.user.get_full_name().strip()
+                or review.user.first_name
+                or "Usuario de Gota"
+            )
+
+            reviews_data.append(
+                {
+                    "id": review.id,
+                    "user": user_name,
+                    "rating": review.rating,
+                    "comment": review.comment,
+                    "created_at": review.created_at.strftime(
+                        "%Y-%m-%d"
+                    ),
+                    "owner_reply": review.owner_reply,
+                }
+            )
+
         return Response(
             {
                 "id": cafe.id,
@@ -109,6 +137,8 @@ class CafeDetailAPIView(APIView):
                 "has_books_or_games":
                     cafe.has_books_or_games,
                 "tags": tags,
+                "reviews": reviews_data,
+                "reviews_count": cafe.reviews.count(),
             },
             status=status.HTTP_200_OK,
         )
