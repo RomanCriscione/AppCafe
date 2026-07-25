@@ -76,10 +76,21 @@ class CafeDetailAPIView(APIView):
             else:
                 user_name = "Usuario"
 
+            avatar_url = None
+
+            if review.user.avatar:
+                try:
+                    avatar_url = request.build_absolute_uri(
+                        review.user.avatar.url
+                    )
+                except ValueError:
+                    avatar_url = None
+
             reviews_data.append(
                 {
                     "id": review.id,
                     "user": user_name,
+                    "avatar": avatar_url,
                     "rating": review.rating,
                     "comment": review.comment,
                     "created_at": review.created_at.strftime(
