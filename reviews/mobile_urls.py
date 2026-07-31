@@ -1,11 +1,13 @@
 from django.urls import path
 from .mobile_api import (
     CafeDetailAPIView,
+    RelatedCafesAPIView,
     MeAPIView,
     MyMapAPIView,
     SetCafeStatusAPIView,
     SetCafeCollectionAPIView,
 )
+
 from .auth_api import (
     MobileLoginAPIView,
     MobileRegisterAPIView,
@@ -48,6 +50,12 @@ urlpatterns = [
         "cafes/<int:cafe_id>/",
         CafeDetailAPIView.as_view(),
         name="mobile-cafe-detail",
+    ),
+
+    path(
+        "cafes/<int:cafe_id>/related/",
+        RelatedCafesAPIView.as_view(),
+        name="mobile-related-cafes",
     ),
 
     path(

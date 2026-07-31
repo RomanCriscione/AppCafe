@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.db.models import Avg
 
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
@@ -7,6 +8,7 @@ from rest_framework.views import APIView
 
 from reviews.models import Cafe, CafeRelationship
 from reviews.serializers import (
+    CafeSerializer,
     CafeRelationshipSerializer,
     MobileUserSerializer,
 )
@@ -156,6 +158,82 @@ class CafeDetailAPIView(APIView):
                 "reviews": reviews_data,
                 "reviews_count": cafe.reviews.count(),
             },
+            status=status.HTTP_200_OK,
+        )
+
+class RelatedCafesAPIView(APIView):
+    """
+    GET /api/mobile/cafes/<cafe_id>/related/
+
+    Devuelve hasta 3 cafeterías relacionadas.
+    Prioriza misma zona y misma provincia.
+    Nunca incluye la cafetería actual.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, cafe_id):
+        cafe_actual = get_object_or_404(
+            Cafe,
+            id=cafe_id,
+        )
+
+        cafes_seleccionados = []
+        ids_seleccionados = [cafe_actual.id]
+
+        def agregar_cafes(queryset):
+            lugares_disponibles = 3 - len(cafes_seleccionados)
+
+            if lugares_disponibles <= 0:
+                return
+
+            nuevos_cafes = list(
+                queryset
+                .exclude(id__in=ids_seleccionados)
+                .annotate(
+                    average_rating=Avg("reviews__rating"),
+                )
+                .prefetch_related("tags")
+                .order_by("?")[:lugares_disponibles]
+            )
+
+            cafes_seleccionados.extend(nuevos_cafes)
+            ids_seleccionados.extend(
+                cafe.id
+                for cafe in nuevos_cafes
+            )
+
+        # 1. Misma zona
+        if cafe_actual.location:
+            agregar_cafes(
+                Cafe.objects.filter(
+                    location=cafe_actual.location,
+                )
+            )
+
+        # 2. Misma provincia
+        if cafe_actual.province:
+            agregar_cafes(
+                Cafe.objects.filter(
+                    province=cafe_actual.province,
+                )
+            )
+
+        # 3. Completar con otras cafeterías
+        agregar_cafes(
+            Cafe.objects.all()
+        )
+
+        serializer = CafeSerializer(
+            cafes_seleccionados,
+            many=True,
+            context={
+                "request": request,
+            },
+        )
+
+        return Response(
+            serializer.data,
             status=status.HTTP_200_OK,
         )
 
