@@ -6,6 +6,7 @@ from .mobile_api import (
     MyMapAPIView,
     SetCafeStatusAPIView,
     SetCafeCollectionAPIView,
+    CreateCafeAPIView,
 )
 
 from .auth_api import (
@@ -44,6 +45,12 @@ urlpatterns = [
         "logout/",
         MobileLogoutAPIView.as_view(),
         name="mobile-logout",
+    ),
+
+    path(
+        "cafes/create/",
+        CreateCafeAPIView.as_view(),
+        name="mobile-create-cafe",
     ),
 
     path(

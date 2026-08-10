@@ -5,6 +5,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from reviews.models import Cafe, CafeRelationship
 from reviews.serializers import (
@@ -12,6 +13,230 @@ from reviews.serializers import (
     CafeRelationshipSerializer,
     MobileUserSerializer,
 )
+
+class CreateCafeAPIView(APIView):
+    """
+    POST /api/mobile/cafes/create/
+
+    Crea una cafetería para el usuario autenticado.
+    La cafetería nace con plan Gratis y estado Sin reclamar.
+    """
+
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        if not getattr(request.user, "is_owner", False):
+            return Response(
+                {
+                    "success": False,
+                    "error": "not_owner",
+                    "message": (
+                        "Solo las cuentas de cafetería "
+                        "pueden agregar una cafetería."
+                    ),
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        nombre = str(
+            request.data.get("name", "")
+        ).strip()
+
+        direccion = str(
+            request.data.get("address", "")
+        ).strip()
+
+        localidad = str(
+            request.data.get("location", "")
+        ).strip()
+
+        provincia = str(
+            request.data.get("province", "")
+        ).strip()
+
+        if not nombre:
+            return Response(
+                {
+                    "success": False,
+                    "error": "name_required",
+                    "message": "Ingresá el nombre de la cafetería.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if Cafe.objects.filter(
+            name__iexact=nombre
+        ).exists():
+            return Response(
+                {
+                    "success": False,
+                    "error": "cafe_already_exists",
+                    "message": (
+                        "Ya existe una cafetería "
+                        "con ese nombre en Gota."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if len(direccion) < 5:
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_address",
+                    "message": (
+                        "La dirección debe tener "
+                        "al menos 5 caracteres."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not any(
+            caracter.isdigit()
+            for caracter in direccion
+        ):
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_address",
+                    "message": (
+                        "La dirección debe incluir un número."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not any(
+            caracter.isalpha()
+            for caracter in direccion
+        ):
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_address",
+                    "message": (
+                        "La dirección debe incluir "
+                        "un nombre de calle."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not localidad:
+            return Response(
+                {
+                    "success": False,
+                    "error": "location_required",
+                    "message": "Ingresá la localidad.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        foto = request.FILES.get("photo1")
+
+        if foto is None:
+            return Response(
+                {
+                    "success": False,
+                    "error": "photo_required",
+                    "message": (
+                        "Tenés que subir al menos "
+                        "una foto de la cafetería."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        max_size = 4 * 1024 * 1024
+
+        if foto.size > max_size:
+            return Response(
+                {
+                    "success": False,
+                    "error": "photo_too_large",
+                    "message": (
+                        "La imagen no puede superar los 4 MB."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        instagram = str(
+            request.data.get("instagram", "")
+        ).strip()
+
+        instagram = instagram.replace("@", "")
+        instagram = instagram.replace(
+            "https://instagram.com/",
+            "",
+        )
+        instagram = instagram.replace(
+            "https://www.instagram.com/",
+            "",
+        )
+        instagram = instagram.strip("/")
+
+        if " " in instagram:
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_instagram",
+                    "message": (
+                        "El usuario de Instagram "
+                        "no puede contener espacios."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        cafe = Cafe.objects.create(
+            owner=request.user,
+            name=nombre,
+            address=direccion,
+            location=localidad,
+            province=provincia,
+            description=request.data.get(
+                "description",
+                "",
+            ),
+            phone=request.data.get(
+                "phone",
+                "",
+            ),
+            email=request.data.get(
+                "email",
+                "",
+            ),
+            google_maps_url=request.data.get(
+                "google_maps_url",
+                "",
+            ),
+            instagram=instagram,
+            photo1=foto,
+            visibility_level=0,
+        )
+
+        return Response(
+            {
+                "success": True,
+                "message": (
+                    "Cafetería agregada correctamente."
+                ),
+                "cafe": {
+                    "id": cafe.id,
+                    "name": cafe.name,
+                    "location": cafe.location,
+                    "province": cafe.province,
+                    "visibility_level":
+                        cafe.visibility_level,
+                    "claim_status":
+                        cafe.claim_status,
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 class CafeDetailAPIView(APIView):
     """
