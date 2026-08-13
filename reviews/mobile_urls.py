@@ -7,6 +7,7 @@ from .mobile_api import (
     SetCafeStatusAPIView,
     SetCafeCollectionAPIView,
     CreateCafeAPIView,
+    BecomeOwnerAPIView,
 )
 
 from .auth_api import (
@@ -27,6 +28,11 @@ urlpatterns = [
         "me/",
         MeAPIView.as_view(),
         name="mobile-me",
+    ),
+    path(
+        "become-owner/",
+        BecomeOwnerAPIView.as_view(),
+        name="mobile-become-owner",
     ),
 
     path(
