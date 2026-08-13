@@ -634,3 +634,44 @@ class MeAPIView(generics.RetrieveAPIView):
         )
 
         return Response(serializer.data)
+
+class BecomeOwnerAPIView(APIView):
+    """
+    POST /api/mobile/become-owner/
+
+    Convierte al usuario autenticado
+    en una cuenta de dueño de cafetería.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        if user.is_owner:
+            return Response(
+                {
+                    "success": True,
+                    "already_owner": True,
+                    "message": (
+                        "Tu cuenta ya está configurada "
+                        "como dueño de cafetería."
+                    ),
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        user.is_owner = True
+        user.save(update_fields=["is_owner"])
+
+        return Response(
+            {
+                "success": True,
+                "already_owner": False,
+                "message": (
+                    "Tu cuenta ahora está configurada "
+                    "como dueño de cafetería."
+                ),
+            },
+            status=status.HTTP_200_OK,
+        )
