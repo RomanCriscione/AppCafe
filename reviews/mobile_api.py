@@ -134,7 +134,19 @@ class CreateCafeAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        if not provincia:
+            return Response(
+                {
+                    "success": False,
+                    "error": "province_required",
+                    "message": "Seleccioná una provincia.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         foto = request.FILES.get("photo1")
+        foto2 = request.FILES.get("photo2")
+        foto3 = request.FILES.get("photo3")
 
         if foto is None:
             return Response(
@@ -151,17 +163,18 @@ class CreateCafeAPIView(APIView):
 
         max_size = 4 * 1024 * 1024
 
-        if foto.size > max_size:
-            return Response(
-                {
-                    "success": False,
-                    "error": "photo_too_large",
-                    "message": (
-                        "La imagen no puede superar los 4 MB."
-                    ),
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        for imagen in [foto, foto2, foto3]:
+            if imagen is not None and imagen.size > max_size:
+                return Response(
+                    {
+                        "success": False,
+                        "error": "photo_too_large",
+                        "message": (
+                            "Cada imagen puede pesar como máximo 4 MB."
+                        ),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         instagram = str(
             request.data.get("instagram", "")
@@ -197,6 +210,7 @@ class CreateCafeAPIView(APIView):
             address=direccion,
             location=localidad,
             province=provincia,
+
             description=request.data.get(
                 "description",
                 "",
@@ -214,10 +228,41 @@ class CreateCafeAPIView(APIView):
                 "",
             ),
             instagram=instagram,
+
             photo1=foto,
+            photo2=foto2,
+            photo3=foto3,
+
+            latitude=request.data.get("latitude") or None,
+            longitude=request.data.get("longitude") or None,
+
+            has_wifi=request.data.get("has_wifi") == "true",
+            has_air_conditioning=request.data.get("has_air_conditioning") == "true",
+            has_power_outlets=request.data.get("has_power_outlets") == "true",
+            has_outdoor_seating=request.data.get("has_outdoor_seating") == "true",
+            has_parking=request.data.get("has_parking") == "true",
+            is_accessible=request.data.get("is_accessible") == "true",
+            has_baby_changing=request.data.get("has_baby_changing") == "true",
+
+            is_pet_friendly=request.data.get("is_pet_friendly") == "true",
+
+            has_specialty_coffee=request.data.get("has_specialty_coffee") == "true",
+            serves_brunch=request.data.get("serves_brunch") == "true",
+            serves_breakfast=request.data.get("serves_breakfast") == "true",
+            serves_alcohol=request.data.get("serves_alcohol") == "true",
+            has_artisanal_pastries=request.data.get("has_artisanal_pastries") == "true",
+
+            is_vegan_friendly=request.data.get("is_vegan_friendly") == "true",
+            has_vegetarian_options=request.data.get("has_vegetarian_options") == "true",
+            has_gluten_free_options=request.data.get("has_gluten_free_options") == "true",
+
+            laptop_friendly=request.data.get("laptop_friendly") == "true",
+            quiet_space=request.data.get("quiet_space") == "true",
+
+            has_books_or_games=request.data.get("has_books_or_games") == "true",
+
             visibility_level=0,
         )
-
         return Response(
             {
                 "success": True,
