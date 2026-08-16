@@ -288,6 +288,37 @@ class CreateCafeAPIView(APIView):
             status=status.HTTP_201_CREATED,
         )
 
+class ReviewTagsAPIView(APIView):
+    """
+    GET /api/mobile/review-tags/
+
+    Devuelve las etiquetas disponibles para crear una reseña.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        tags = Tag.objects.all().order_by(
+            "category",
+            "name",
+        )
+
+        return Response(
+            {
+                "tags": [
+                    {
+                        "id": tag.id,
+                        "name": tag.name,
+                        "category": tag.category,
+                        "category_label":
+                            tag.get_category_display(),
+                    }
+                    for tag in tags
+                ],
+            },
+            status=status.HTTP_200_OK,
+        )
+
 class CreateReviewAPIView(APIView):
     """
     POST /api/mobile/cafes/<cafe_id>/reviews/create/
@@ -408,7 +439,16 @@ class CreateReviewAPIView(APIView):
             precio_capuccino=precio_capuccino,
         )
 
-        tag_ids = request.data.getlist("tags")
+        tag_ids = request.data.get("tags", [])
+
+        if not isinstance(tag_ids, list):
+            tag_ids = [tag_ids]
+
+        tag_ids = [
+            tag_id
+            for tag_id in tag_ids
+            if str(tag_id).strip()
+        ]
 
         if tag_ids:
             tags = Tag.objects.filter(
