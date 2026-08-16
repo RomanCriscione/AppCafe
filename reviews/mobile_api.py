@@ -292,29 +292,71 @@ class ReviewTagsAPIView(APIView):
     """
     GET /api/mobile/review-tags/
 
-    Devuelve las etiquetas disponibles para crear una reseña.
+    Devuelve las etiquetas activas usadas
+    actualmente en el formulario web de reseñas.
     """
 
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        tags = Tag.objects.all().order_by(
-            "category",
-            "name",
+        manual_tag_groups = {
+            "conexion": [
+                "Podés ir solo sin sentirte solo",
+                "Ideal para charla de sobremesa",
+                "Ideal para una primera cita sin presión",
+            ],
+            "refugio": [
+                "Buen lugar para esperar sin ansiedad",
+                "Te dan ganas de desconectarte",
+                "Te vas y te dan ganas de volver",
+                "Pedirías otra taza solo para quedarte",
+            ],
+            "ritual": [
+                "Huele a café recién molido",
+                "Pan casero y café en taza pesada",
+                "Ventanales con luz todo el día",
+            ],
+            "inspiracion": [
+                "Ideal para escribir o leer un cuento",
+                "Paredes con historias",
+            ],
+        }
+
+        nombres = [
+            nombre
+            for grupo in manual_tag_groups.values()
+            for nombre in grupo
+        ]
+
+        tags = Tag.objects.filter(
+            name__in=nombres,
         )
 
-        return Response(
-            {
-                "tags": [
+        tags_por_nombre = {
+            tag.name: tag
+            for tag in tags
+        }
+
+        resultado = []
+
+        for grupo, nombres_grupo in manual_tag_groups.items():
+            for nombre in nombres_grupo:
+                tag = tags_por_nombre.get(nombre)
+
+                if tag is None:
+                    continue
+
+                resultado.append(
                     {
                         "id": tag.id,
                         "name": tag.name,
-                        "category": tag.category,
-                        "category_label":
-                            tag.get_category_display(),
+                        "group": grupo,
                     }
-                    for tag in tags
-                ],
+                )
+
+        return Response(
+            {
+                "tags": resultado,
             },
             status=status.HTTP_200_OK,
         )
