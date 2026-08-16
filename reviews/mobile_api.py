@@ -7,7 +7,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from reviews.models import Cafe, CafeRelationship
+from reviews.models import (
+    Cafe,
+    CafeRelationship,
+    Review,
+    Tag,
+)
 from reviews.serializers import (
     CafeSerializer,
     CafeRelationshipSerializer,
@@ -278,6 +283,151 @@ class CreateCafeAPIView(APIView):
                         cafe.visibility_level,
                     "claim_status":
                         cafe.claim_status,
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+class CreateReviewAPIView(APIView):
+    """
+    POST /api/mobile/cafes/<cafe_id>/reviews/create/
+
+    Crea una reseña para una cafetería.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, cafe_id):
+        cafe = get_object_or_404(
+            Cafe,
+            id=cafe_id,
+        )
+
+        rating = request.data.get("rating")
+        comment = str(
+            request.data.get("comment", "")
+        ).strip()
+
+        best_for_plan = str(
+            request.data.get("best_for_plan", "")
+        ).strip()
+
+        precio_capuccino = request.data.get(
+            "precio_capuccino"
+        )
+
+        try:
+            rating = int(rating)
+        except (TypeError, ValueError):
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_rating",
+                    "message": (
+                        "Seleccioná una calificación "
+                        "entre 1 y 5."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if rating < 1 or rating > 5:
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_rating",
+                    "message": (
+                        "Seleccioná una calificación "
+                        "entre 1 y 5."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        planes_validos = {
+            choice[0]
+            for choice in Review.PLAN_CHOICES
+        }
+
+        if best_for_plan not in planes_validos:
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_best_for_plan",
+                    "message": (
+                        "Elegí para qué plan es mejor "
+                        "esta cafetería."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if precio_capuccino in ("", None):
+            precio_capuccino = None
+        else:
+            try:
+                precio_capuccino = int(
+                    precio_capuccino
+                )
+            except (TypeError, ValueError):
+                return Response(
+                    {
+                        "success": False,
+                        "error": "invalid_price",
+                        "message": (
+                            "Ingresá un precio válido."
+                        ),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if (
+                precio_capuccino < 1000
+                or precio_capuccino > 15000
+            ):
+                return Response(
+                    {
+                        "success": False,
+                        "error": "invalid_price",
+                        "message": (
+                            "El precio del capuccino "
+                            "debe estar entre $1.000 "
+                            "y $15.000."
+                        ),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        review = Review.objects.create(
+            user=request.user,
+            cafe=cafe,
+            location=cafe.location,
+            rating=rating,
+            comment=comment,
+            best_for_plan=best_for_plan,
+            precio_capuccino=precio_capuccino,
+        )
+
+        tag_ids = request.data.getlist("tags")
+
+        if tag_ids:
+            tags = Tag.objects.filter(
+                id__in=tag_ids,
+            )
+
+            review.tags.set(tags)
+
+        return Response(
+            {
+                "success": True,
+                "message": "Reseña publicada correctamente.",
+                "review": {
+                    "id": review.id,
+                    "rating": review.rating,
+                    "comment": review.comment,
+                    "best_for_plan": review.best_for_plan,
+                    "precio_capuccino":
+                        review.precio_capuccino,
                 },
             },
             status=status.HTTP_201_CREATED,
