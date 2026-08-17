@@ -533,6 +533,171 @@ class CreateReviewAPIView(APIView):
             status=status.HTTP_201_CREATED,
         )
 
+class UpdateReviewAPIView(APIView):
+    """
+    PUT /api/mobile/reviews/<review_id>/
+
+    Actualiza una reseña del usuario autenticado.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, review_id):
+        review = get_object_or_404(
+            Review,
+            id=review_id,
+            user=request.user,
+        )
+
+        rating = request.data.get("rating")
+
+        comment = str(
+            request.data.get("comment", "")
+        ).strip()
+
+        best_for_plan = str(
+            request.data.get("best_for_plan", "")
+        ).strip()
+
+        precio_capuccino = request.data.get(
+            "precio_capuccino"
+        )
+
+        try:
+            rating = int(rating)
+        except (TypeError, ValueError):
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_rating",
+                    "message": (
+                        "Seleccioná una calificación "
+                        "entre 1 y 5."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if rating < 1 or rating > 5:
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_rating",
+                    "message": (
+                        "Seleccioná una calificación "
+                        "entre 1 y 5."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        planes_validos = {
+            choice[0]
+            for choice in Review.PLAN_CHOICES
+        }
+
+        if best_for_plan not in planes_validos:
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_best_for_plan",
+                    "message": (
+                        "Elegí para qué plan es mejor "
+                        "esta cafetería."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if precio_capuccino in ("", None):
+            precio_capuccino = None
+        else:
+            try:
+                precio_capuccino = int(
+                    precio_capuccino
+                )
+            except (TypeError, ValueError):
+                return Response(
+                    {
+                        "success": False,
+                        "error": "invalid_price",
+                        "message": (
+                            "Ingresá un precio válido."
+                        ),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if (
+                precio_capuccino < 1000
+                or precio_capuccino > 15000
+            ):
+                return Response(
+                    {
+                        "success": False,
+                        "error": "invalid_price",
+                        "message": (
+                            "El precio del capuccino "
+                            "debe estar entre $1.000 "
+                            "y $15.000."
+                        ),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        review.rating = rating
+        review.comment = comment
+        review.best_for_plan = best_for_plan
+        review.precio_capuccino = precio_capuccino
+
+        review.save(
+            update_fields=[
+                "rating",
+                "comment",
+                "best_for_plan",
+                "precio_capuccino",
+            ]
+        )
+
+        tag_ids = request.data.get(
+            "tags",
+            [],
+        )
+
+        if not isinstance(tag_ids, list):
+            tag_ids = [tag_ids]
+
+        tag_ids = [
+            tag_id
+            for tag_id in tag_ids
+            if str(tag_id).strip()
+        ]
+
+        tags = Tag.objects.filter(
+            id__in=tag_ids,
+        )
+
+        review.tags.set(tags)
+
+        return Response(
+            {
+                "success": True,
+                "message": (
+                    "Reseña actualizada correctamente."
+                ),
+                "review": {
+                    "id": review.id,
+                    "rating": review.rating,
+                    "comment": review.comment,
+                    "best_for_plan":
+                        review.best_for_plan,
+                    "precio_capuccino":
+                        review.precio_capuccino,
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
+
 class CafeDetailAPIView(APIView):
     """
     GET /api/mobile/cafes/<cafe_id>/
