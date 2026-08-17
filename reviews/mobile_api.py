@@ -578,6 +578,28 @@ class CafeDetailAPIView(APIView):
             )
         )
 
+        my_review = Review.objects.filter(
+            cafe=cafe,
+            user=request.user,
+        ).first()
+
+        my_review_data = None
+
+        if my_review:
+            my_review_data = {
+                "id": my_review.id,
+                "rating": my_review.rating,
+                "comment": my_review.comment,
+                "best_for_plan": my_review.best_for_plan,
+                "precio_capuccino": my_review.precio_capuccino,
+                "tags": list(
+                    my_review.tags.values_list(
+                        "id",
+                        flat=True,
+                    )
+                ),
+            }
+
         reviews = (
             cafe.reviews
             .select_related("user")
@@ -677,6 +699,7 @@ class CafeDetailAPIView(APIView):
                 "tags": tags,
                 "reviews": reviews_data,
                 "reviews_count": cafe.reviews.count(),
+                "my_review": my_review_data,
             },
             status=status.HTTP_200_OK,
         )
