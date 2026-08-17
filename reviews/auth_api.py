@@ -123,3 +123,23 @@ class MobileLogoutAPIView(APIView):
                 "success": True,
             }
         )
+
+
+class MobileDeleteAccountAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+
+        Token.objects.filter(user=user).delete()
+
+        user.delete()
+
+        return Response(
+            {
+                "success": True,
+                "message": "Tu cuenta fue eliminada correctamente.",
+            },
+            status=status.HTTP_200_OK,
+        )

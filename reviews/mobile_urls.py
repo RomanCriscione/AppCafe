@@ -17,6 +17,7 @@ from .auth_api import (
     MobileLoginAPIView,
     MobileRegisterAPIView,
     MobileLogoutAPIView,
+    MobileDeleteAccountAPIView,
 )
 
 
@@ -54,6 +55,12 @@ urlpatterns = [
         "logout/",
         MobileLogoutAPIView.as_view(),
         name="mobile-logout",
+    ),
+
+    path(
+        "delete-account/",
+        MobileDeleteAccountAPIView.as_view(),
+        name="mobile-delete-account",
     ),
 
     path(
