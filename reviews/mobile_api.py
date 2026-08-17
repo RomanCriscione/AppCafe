@@ -376,6 +376,24 @@ class CreateReviewAPIView(APIView):
             id=cafe_id,
         )
 
+        existing_review = Review.objects.filter(
+            user=request.user,
+            cafe=cafe,
+        ).first()
+
+        if existing_review:
+            return Response(
+                {
+                    "success": False,
+                    "error": "review_already_exists",
+                    "message": (
+                        "Ya dejaste una reseña para esta cafetería."
+                    ),
+                    "review_id": existing_review.id,
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+
         rating = request.data.get("rating")
         comment = str(
             request.data.get("comment", "")
