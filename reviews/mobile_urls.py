@@ -11,6 +11,7 @@ from .mobile_api import (
     CreateReviewAPIView,
     ReviewTagsAPIView,
     UpdateReviewAPIView,
+    CafeWhispersAPIView,
 )
 
 from .auth_api import (
@@ -91,6 +92,12 @@ urlpatterns = [
         "review-tags/",
         ReviewTagsAPIView.as_view(),
         name="mobile-review-tags",
+    ),
+
+    path(
+        "cafes/<int:cafe_id>/whispers/",
+        CafeWhispersAPIView.as_view(),
+        name="mobile-cafe-whispers",
     ),
 
     path(

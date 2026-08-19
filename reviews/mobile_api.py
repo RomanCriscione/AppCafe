@@ -6,10 +6,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.utils import timezone
 
 from reviews.models import (
     Cafe,
     CafeRelationship,
+    CafeWhisper,
     Review,
     Tag,
 )
@@ -359,6 +361,116 @@ class ReviewTagsAPIView(APIView):
                 "tags": resultado,
             },
             status=status.HTTP_200_OK,
+        )
+
+class CafeWhispersAPIView(APIView):
+    """
+    GET /api/mobile/cafes/<cafe_id>/whispers/
+    POST /api/mobile/cafes/<cafe_id>/whispers/
+
+    Lista huellas visibles y permite dejar
+    una huella por día por usuario.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, cafe_id):
+        cafe = get_object_or_404(
+            Cafe,
+            id=cafe_id,
+        )
+
+        whispers = (
+            CafeWhisper.objects
+            .filter(
+                cafe=cafe,
+                is_hidden=False,
+            )
+            .order_by("-created_at")[:12]
+        )
+
+        data = [
+            {
+                "id": whisper.id,
+                "text": whisper.text,
+                "created_at": whisper.created_at.strftime(
+                    "%d/%m/%Y"
+                ),
+            }
+            for whisper in whispers
+        ]
+
+        return Response(
+            {
+                "whispers": data,
+                "count": len(data),
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def post(self, request, cafe_id):
+        cafe = get_object_or_404(
+            Cafe,
+            id=cafe_id,
+        )
+
+        today = timezone.now().date()
+
+        already_left = CafeWhisper.objects.filter(
+            user=request.user,
+            cafe=cafe,
+            created_at__date=today,
+        ).exists()
+
+        if already_left:
+            return Response(
+                {
+                    "success": False,
+                    "error": "whisper_already_exists_today",
+                    "message": (
+                        "Ya dejaste tu huella de hoy. "
+                        "Mañana podés sumar otra ☕"
+                    ),
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        text = str(
+            request.data.get("text", "")
+        ).strip()
+
+        if not text:
+            return Response(
+                {
+                    "success": False,
+                    "error": "text_required",
+                    "message": "Escribí una huella.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        whisper = CafeWhisper.objects.create(
+            user=request.user,
+            cafe=cafe,
+            text=text[:40],
+        )
+
+        return Response(
+            {
+                "success": True,
+                "message": (
+                    "Esa sensación ya forma parte de este café ✨"
+                ),
+                "whisper": {
+                    "id": whisper.id,
+                    "text": whisper.text,
+                    "created_at":
+                        whisper.created_at.strftime(
+                            "%d/%m/%Y"
+                        ),
+                },
+            },
+            status=status.HTTP_201_CREATED,
         )
 
 class CreateReviewAPIView(APIView):
