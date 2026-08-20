@@ -13,6 +13,7 @@ from reviews.models import (
     CafeRelationship,
     CafeWhisper,
     Review,
+    ReviewReport,
     Tag,
 )
 from reviews.serializers import (
@@ -808,6 +809,96 @@ class UpdateReviewAPIView(APIView):
                 },
             },
             status=status.HTTP_200_OK,
+        )
+
+class ReportReviewAPIView(APIView):
+    """
+    POST /api/mobile/reviews/<review_id>/report/
+
+    Permite al usuario autenticado reportar una reseña.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, review_id):
+        review = get_object_or_404(
+            Review,
+            id=review_id,
+        )
+
+        if review.user_id == request.user.id:
+            return Response(
+                {
+                    "success": False,
+                    "error": "own_review",
+                    "message": "No podés reportar tu propia reseña.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        reason = str(
+            request.data.get("reason", "")
+        ).strip()
+
+        message = str(
+            request.data.get("message", "")
+        ).strip()
+
+        valid_reasons = {
+            choice[0]
+            for choice in ReviewReport.Reason.choices
+        }
+
+        if reason not in valid_reasons:
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_reason",
+                    "message": "Seleccioná un motivo válido.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        existing_report = ReviewReport.objects.filter(
+            user=request.user,
+            review=review,
+        ).first()
+
+        if existing_report is not None:
+            return Response(
+                {
+                    "success": False,
+                    "error": "already_reported",
+                    "message": (
+                        "Ya reportaste esta reseña. "
+                        "Gracias por ayudarnos a cuidar Gota."
+                    ),
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        report = ReviewReport.objects.create(
+            user=request.user,
+            review=review,
+            reason=reason,
+            message=message or None,
+        )
+
+        return Response(
+            {
+                "success": True,
+                "message": (
+                    "Gracias. Recibimos tu reporte "
+                    "y vamos a revisarlo."
+                ),
+                "report": {
+                    "id": report.id,
+                    "review_id": review.id,
+                    "reason": report.reason,
+                    "status": report.status,
+                },
+            },
+            status=status.HTTP_201_CREATED,
         )
 
 class CafeDetailAPIView(APIView):
