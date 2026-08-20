@@ -150,7 +150,18 @@ def contact_view(request):
 
     return render(request, "core/contact.html", {"success": success})
 
-
+def privacy_policy_view(request):
+    return render(
+        request,
+        "core/privacy_policy.html",
+        {
+            "meta_title": "Política de Privacidad · Gota",
+            "meta_description": (
+                "Conocé cómo Gota recopila, utiliza y protege "
+                "la información de sus usuarios."
+            ),
+        },
+    )
 
 # ✅ Sitemap dinámico
 def sitemap_xml(request):
