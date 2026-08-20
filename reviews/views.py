@@ -118,38 +118,40 @@ def get_manual_tag_choices():
     return grouped
 
 FEATURE_FIELDS = [
-    # Servicios / infraestructura
+    # ☕ Para comer y tomar
+    "has_specialty_coffee",
+    "has_artisanal_pastries",
+    "serves_brunch",
+    "serves_breakfast",
+    "has_healthy_options",
+    "has_sugar_free_options",
+    "has_gluten_free_options",
+    "has_plant_based_milk",
+    "is_vegan_friendly",
+    "has_vegetarian_options",
+
+    # 🌿 Espacio y entorno
+    "has_garden",
+    "has_water_view",
+    "has_mountain_view",
+    "surrounded_by_nature",
+    "has_rooftop",
+    "has_large_windows",
+    "is_old_house",
+    "is_historic_building",
+    "inside_bookstore",
+    "inside_cultural_space",
+
+    # 🐶 Servicios y comodidades
+    "is_pet_friendly",
+    "is_kids_friendly",
     "has_wifi",
-    "has_air_conditioning",
     "has_power_outlets",
     "has_outdoor_seating",
     "has_parking",
     "is_accessible",
-    "accepts_cards",
-    "accepts_reservations",
+    "has_air_conditioning",
     "has_baby_changing",
-
-    # Mascotas
-    "is_pet_friendly",
-
-    # Oferta gastronómica
-    "has_specialty_coffee",
-    "serves_brunch",
-    "serves_breakfast",
-    "serves_alcohol",
-    "has_artisanal_pastries",
-    "offers_ice_cream",
-
-    # Opciones alimentarias
-    "is_vegan_friendly",
-    "has_vegetarian_options",
-    "has_gluten_free_options",
-
-    # Uso del espacio
-    "laptop_friendly",
-    "quiet_space",
-
-    # Extras
     "has_books_or_games",
 ]
 
@@ -175,14 +177,7 @@ class ReviewListView(ListView):
         context['zona_seleccionada'] = request.GET.get('zona')
         context['orden_actual'] = request.GET.get('orden')
 
-        boolean_keys = [
-            'has_wifi', 'has_air_conditioning', 'serves_alcohol', 'is_pet_friendly',
-            'is_vegan_friendly', 'has_outdoor_seating', 'has_parking', 'is_accessible',
-            'has_vegetarian_options', 'has_books_or_games', 'serves_breakfast',
-            "accepts_cards", "has_gluten_free_options", "has_baby_changing",
-            "has_power_outlets", "laptop_friendly", "quiet_space",
-            "has_specialty_coffee", "serves_brunch", "accepts_reservations",
-        ]
+        boolean_keys = FEATURE_FIELDS
         context['campos_activos'] = {k: (request.GET.get(k) == 'on') for k in boolean_keys}
 
         context['mostrar_boton_reset'] = any([
@@ -333,6 +328,11 @@ class CafeListView(ListView):
             field: field in request.GET
             for field in FEATURE_FIELDS
         }
+
+        # Filtros agrupados para mostrarlos ordenados en la interfaz
+        context["filtros_comida"] = FEATURE_FIELDS[0:10]
+        context["filtros_entorno"] = FEATURE_FIELDS[10:20]
+        context["filtros_comodidades"] = FEATURE_FIELDS[20:30]
 
 
         context['mostrar_boton_reset'] = any([

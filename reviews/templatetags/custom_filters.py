@@ -22,57 +22,89 @@ def replace(value, arg):
 @register.filter
 def feature_label(key: str) -> str:
     labels = {
-        "has_wifi": "Wi-Fi disponible",
-        "has_air_conditioning": "Aire acondicionado",
-        "serves_alcohol": "Sirve alcohol",
-        "is_pet_friendly": "Apto mascotas",
+        # ☕ Para comer y tomar
+        "has_specialty_coffee": "Café de especialidad",
+        "has_artisanal_pastries": "Pastelería artesanal",
+        "serves_brunch": "Brunch",
+        "serves_breakfast": "Desayuno",
+        "has_healthy_options": "Opciones saludables",
+        "has_sugar_free_options": "Opciones sin azúcar",
+        "has_gluten_free_options": "Sin TACC",
+        "has_plant_based_milk": "Leches vegetales",
         "is_vegan_friendly": "Opciones veganas",
+        "has_vegetarian_options": "Opciones vegetarianas",
+
+        # 🌿 Espacio y entorno
+        "has_garden": "Con jardín",
+        "has_water_view": "Vista al agua",
+        "has_mountain_view": "Vista a las sierras / montañas",
+        "surrounded_by_nature": "Rodeado de naturaleza",
+        "has_rooftop": "Terraza o rooftop",
+        "has_large_windows": "Grandes ventanales",
+        "is_old_house": "En una casa antigua",
+        "is_historic_building": "En un edificio histórico",
+        "inside_bookstore": "Dentro de una librería",
+        "inside_cultural_space": "En un espacio cultural",
+
+        # 🐶 Servicios y comodidades
+        "is_pet_friendly": "Pet friendly",
+        "is_kids_friendly": "Kids friendly",
+        "has_wifi": "Wi-Fi",
+        "has_power_outlets": "Enchufes",
         "has_outdoor_seating": "Mesas al aire libre",
         "has_parking": "Estacionamiento",
-        "is_accessible": "Accesible s/ ruedas",
-        "has_vegetarian_options": "Opciones vegetarianas",
-        "has_books_or_games": "Libros / juegos",
-        "serves_breakfast": "Desayuno",
-
-        # ➕ Nuevas
-        "accepts_cards": "Acepta tarjetas",
-        "gluten_free_options": "Opciones sin gluten",
+        "is_accessible": "Accesible",
+        "has_air_conditioning": "Aire acondicionado",
         "has_baby_changing": "Cambiador para bebés",
-        "has_power_outlets": "Enchufes disponibles",
-        "laptop_friendly": "Apto para trabajar",
-        "quiet_space": "Espacio tranquilo",
-        "specialty_coffee": "Café de especialidad",
-        "brunch": "Brunch",
-        "accepts_reservations": "Acepta reservas",
+        "has_books_or_games": "Libros o juegos",
     }
-    return labels.get(key, key.replace("_", " ").capitalize())
+
+    return labels.get(
+        key,
+        key.replace("_", " ").capitalize(),
+    )
 
 # (Opcional) un emoji simpático por feature
 @register.filter
 def feature_emoji(key: str) -> str:
     emojis = {
+        # ☕ Para comer y tomar
+        "has_specialty_coffee": "☕",
+        "has_artisanal_pastries": "🥐",
+        "serves_brunch": "🥞",
+        "serves_breakfast": "🍳",
+        "has_healthy_options": "🥑",
+        "has_sugar_free_options": "🚫🍬",
+        "has_gluten_free_options": "🌾",
+        "has_plant_based_milk": "🥛",
+        "is_vegan_friendly": "🌱",
+        "has_vegetarian_options": "🥕",
+
+        # 🌿 Espacio y entorno
+        "has_garden": "🌿",
+        "has_water_view": "🌊",
+        "has_mountain_view": "⛰️",
+        "surrounded_by_nature": "🌳",
+        "has_rooftop": "🌇",
+        "has_large_windows": "🪟",
+        "is_old_house": "🏡",
+        "is_historic_building": "🏛️",
+        "inside_bookstore": "📚",
+        "inside_cultural_space": "🎨",
+
+        # 🐶 Servicios y comodidades
+        "is_pet_friendly": "🐶",
+        "is_kids_friendly": "👶",
         "has_wifi": "📶",
-        "has_air_conditioning": "❄️",
-        "serves_alcohol": "🍷",
-        "is_pet_friendly": "🐾",
-        "is_vegan_friendly": "🌿",
-        "has_outdoor_seating": "☀️",
+        "has_power_outlets": "🔌",
+        "has_outdoor_seating": "🌤️",
         "has_parking": "🅿️",
         "is_accessible": "♿",
-        "has_vegetarian_options": "🥗",
-        "has_books_or_games": "📚",
-        "serves_breakfast": "🍳",
-
-        "accepts_cards": "💳",
-        "gluten_free_options": "🌾❌",
+        "has_air_conditioning": "❄️",
         "has_baby_changing": "👶",
-        "has_power_outlets": "🔌",
-        "laptop_friendly": "💻",
-        "quiet_space": "🤫",
-        "specialty_coffee": "☕️⭐",
-        "brunch": "🥞",
-        "accepts_reservations": "📅",
+        "has_books_or_games": "🎲",
     }
+
     return emojis.get(key, "")
 
 # ===== Emojis para etiquetas sensoriales/ambiente/hacer/estética/emocional =====

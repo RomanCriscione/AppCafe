@@ -107,8 +107,15 @@ class Cafe(models.Model):
     accepts_reservations = models.BooleanField(default=False, verbose_name="Acepta reservas")
     has_baby_changing = models.BooleanField(default=False, verbose_name="Cambiador para bebés")
 
-    # Mascotas
-    is_pet_friendly = models.BooleanField(default=False, verbose_name="Apto mascotas")
+    # Mascotas / familias
+    is_pet_friendly = models.BooleanField(
+        default=False,
+        verbose_name="Pet friendly",
+    )
+    is_kids_friendly = models.BooleanField(
+        default=False,
+        verbose_name="Kids friendly",
+    )
 
     # Oferta gastronómica
     has_specialty_coffee = models.BooleanField(default=False, verbose_name="Café de especialidad")
@@ -119,9 +126,72 @@ class Cafe(models.Model):
     offers_ice_cream = models.BooleanField(default=False, verbose_name="Ofrece helados")
 
     # Opciones alimentarias
-    is_vegan_friendly = models.BooleanField(default=False, verbose_name="Opciones veganas")
-    has_vegetarian_options = models.BooleanField(default=False, verbose_name="Opciones vegetarianas")
-    has_gluten_free_options = models.BooleanField(default=False, verbose_name="Opciones sin gluten / Sin TACC")
+    is_vegan_friendly = models.BooleanField(
+        default=False,
+        verbose_name="Opciones veganas",
+    )
+    has_vegetarian_options = models.BooleanField(
+        default=False,
+        verbose_name="Opciones vegetarianas",
+    )
+    has_gluten_free_options = models.BooleanField(
+        default=False,
+        verbose_name="Opciones sin gluten / Sin TACC",
+    )
+    has_healthy_options = models.BooleanField(
+        default=False,
+        verbose_name="Opciones saludables",
+    )
+    has_sugar_free_options = models.BooleanField(
+        default=False,
+        verbose_name="Opciones sin azúcar",
+    )
+    has_plant_based_milk = models.BooleanField(
+        default=False,
+        verbose_name="Leches vegetales",
+    )
+
+    # Espacio y entorno
+    has_garden = models.BooleanField(
+        default=False,
+        verbose_name="Con jardín",
+    )
+    has_water_view = models.BooleanField(
+        default=False,
+        verbose_name="Vista al agua",
+    )
+    has_mountain_view = models.BooleanField(
+        default=False,
+        verbose_name="Vista a las sierras / montañas",
+    )
+    surrounded_by_nature = models.BooleanField(
+        default=False,
+        verbose_name="Rodeado de naturaleza",
+    )
+    has_rooftop = models.BooleanField(
+        default=False,
+        verbose_name="Terraza o rooftop",
+    )
+    has_large_windows = models.BooleanField(
+        default=False,
+        verbose_name="Grandes ventanales",
+    )
+    is_old_house = models.BooleanField(
+        default=False,
+        verbose_name="En una casa antigua",
+    )
+    is_historic_building = models.BooleanField(
+        default=False,
+        verbose_name="En un edificio histórico",
+    )
+    inside_bookstore = models.BooleanField(
+        default=False,
+        verbose_name="Dentro de una librería",
+    )
+    inside_cultural_space = models.BooleanField(
+        default=False,
+        verbose_name="En un espacio cultural",
+    )
 
     # Uso del espacio
     laptop_friendly = models.BooleanField(default=False, verbose_name="Apto para trabajar")

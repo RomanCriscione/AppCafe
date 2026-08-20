@@ -116,8 +116,9 @@ class CafeForm(forms.ModelForm):
             'accepts_reservations',
             'has_baby_changing',
 
-            # Mascotas
+            # Mascotas / familias
             'is_pet_friendly',
+            'is_kids_friendly',
 
             # Oferta gastronómica
             'has_specialty_coffee',
@@ -131,6 +132,21 @@ class CafeForm(forms.ModelForm):
             'is_vegan_friendly',
             'has_vegetarian_options',
             'has_gluten_free_options',
+            'has_healthy_options',
+            'has_sugar_free_options',
+            'has_plant_based_milk',
+
+            # Espacio y entorno
+            'has_garden',
+            'has_water_view',
+            'has_mountain_view',
+            'surrounded_by_nature',
+            'has_rooftop',
+            'has_large_windows',
+            'is_old_house',
+            'is_historic_building',
+            'inside_bookstore',
+            'inside_cultural_space',
 
             # Uso del espacio
             'laptop_friendly',
@@ -182,7 +198,8 @@ class CafeForm(forms.ModelForm):
             'accepts_reservations': 'Acepta reservas',
             'has_baby_changing': 'Cambiador para bebés',
 
-            'is_pet_friendly': 'Apto mascotas',
+            'is_pet_friendly': 'Pet friendly',
+            'is_kids_friendly': 'Kids friendly',
 
             'has_specialty_coffee': 'Café de especialidad',
             'serves_brunch': 'Brunch',
@@ -194,6 +211,20 @@ class CafeForm(forms.ModelForm):
             'is_vegan_friendly': 'Opciones veganas',
             'has_vegetarian_options': 'Opciones vegetarianas',
             'has_gluten_free_options': 'Opciones sin gluten / Sin TACC',
+            'has_healthy_options': 'Opciones saludables',
+            'has_sugar_free_options': 'Opciones sin azúcar',
+            'has_plant_based_milk': 'Leches vegetales',
+
+            'has_garden': 'Con jardín',
+            'has_water_view': 'Vista al agua',
+            'has_mountain_view': 'Vista a las sierras / montañas',
+            'surrounded_by_nature': 'Rodeado de naturaleza',
+            'has_rooftop': 'Terraza o rooftop',
+            'has_large_windows': 'Grandes ventanales',
+            'is_old_house': 'En una casa antigua',
+            'is_historic_building': 'En un edificio histórico',
+            'inside_bookstore': 'Dentro de una librería',
+            'inside_cultural_space': 'En un espacio cultural',
 
             'laptop_friendly': 'Apto para trabajar',
             'quiet_space': 'Espacio tranquilo',

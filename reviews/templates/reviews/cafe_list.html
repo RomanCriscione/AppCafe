@@ -67,14 +67,71 @@
         </select>
       </div>
 
-      <fieldset>
-        <legend class="font-medium mb-2">Características del café:</legend>
-        {% for key, activo in campos_activos.items %}
-          <label class="block">
-            <input type="checkbox" name="{{ key }}" {% if activo %}checked{% endif %}>
-            {{ key|feature_label }}
-          </label>
-        {% endfor %}
+      <fieldset class="space-y-5">
+
+        <div>
+          <legend class="font-semibold mb-2">
+            ☕ Para comer y tomar
+          </legend>
+
+          <div class="space-y-1">
+            {% for key in filtros_comida %}
+              <label class="block">
+                <input
+                  type="checkbox"
+                  name="{{ key }}"
+                  {% if campos_activos|get_item:key %}checked{% endif %}
+                >
+                <span class="ml-1">
+                  {{ key|feature_emoji }} {{ key|feature_label }}
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div>
+          <legend class="font-semibold mb-2">
+            🌿 Espacio y entorno
+          </legend>
+
+          <div class="space-y-1">
+            {% for key in filtros_entorno %}
+              <label class="block">
+                <input
+                  type="checkbox"
+                  name="{{ key }}"
+                  {% if campos_activos|get_item:key %}checked{% endif %}
+                >
+                <span class="ml-1">
+                  {{ key|feature_emoji }} {{ key|feature_label }}
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div>
+          <legend class="font-semibold mb-2">
+            🐶 Servicios y comodidades
+          </legend>
+
+          <div class="space-y-1">
+            {% for key in filtros_comodidades %}
+              <label class="block">
+                <input
+                  type="checkbox"
+                  name="{{ key }}"
+                  {% if campos_activos|get_item:key %}checked{% endif %}
+                >
+                <span class="ml-1">
+                  {{ key|feature_emoji }} {{ key|feature_label }}
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
       </fieldset>
 
       <button type="submit" class="mt-4 btn btn-primary rounded-xl w-full">Aplicar filtros</button>
