@@ -71,8 +71,9 @@ class CafeSerializer(serializers.ModelSerializer):
             "is_accessible",
             "has_baby_changing",
 
-            # mascotas
+            # mascotas / familias
             "is_pet_friendly",
+            "is_kids_friendly",
 
             # gastronomía
             "has_specialty_coffee",
@@ -82,11 +83,6 @@ class CafeSerializer(serializers.ModelSerializer):
             "has_artisanal_pastries",
 
             # alimentación
-            "is_vegan_friendly",
-            "has_vegetarian_options",
-            "has_gluten_free_options",
-
-            # uso del espacio
             "laptop_friendly",
             "quiet_space",
 

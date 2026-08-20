@@ -253,6 +253,7 @@ class CreateCafeAPIView(APIView):
             has_baby_changing=request.data.get("has_baby_changing") == "true",
 
             is_pet_friendly=request.data.get("is_pet_friendly") == "true",
+            is_kids_friendly=request.data.get("is_kids_friendly") == "true",
 
             has_specialty_coffee=request.data.get("has_specialty_coffee") == "true",
             serves_brunch=request.data.get("serves_brunch") == "true",
@@ -263,6 +264,20 @@ class CreateCafeAPIView(APIView):
             is_vegan_friendly=request.data.get("is_vegan_friendly") == "true",
             has_vegetarian_options=request.data.get("has_vegetarian_options") == "true",
             has_gluten_free_options=request.data.get("has_gluten_free_options") == "true",
+            has_healthy_options=request.data.get("has_healthy_options") == "true",
+            has_sugar_free_options=request.data.get("has_sugar_free_options") == "true",
+            has_plant_based_milk=request.data.get("has_plant_based_milk") == "true",
+
+            has_garden=request.data.get("has_garden") == "true",
+            has_water_view=request.data.get("has_water_view") == "true",
+            has_mountain_view=request.data.get("has_mountain_view") == "true",
+            surrounded_by_nature=request.data.get("surrounded_by_nature") == "true",
+            has_rooftop=request.data.get("has_rooftop") == "true",
+            has_large_windows=request.data.get("has_large_windows") == "true",
+            is_old_house=request.data.get("is_old_house") == "true",
+            is_historic_building=request.data.get("is_historic_building") == "true",
+            inside_bookstore=request.data.get("inside_bookstore") == "true",
+            inside_cultural_space=request.data.get("inside_cultural_space") == "true",
 
             laptop_friendly=request.data.get("laptop_friendly") == "true",
             quiet_space=request.data.get("quiet_space") == "true",
@@ -1042,6 +1057,8 @@ class CafeDetailAPIView(APIView):
                     cafe.has_baby_changing,
                 "is_pet_friendly":
                     cafe.is_pet_friendly,
+                "is_kids_friendly":
+                    cafe.is_kids_friendly,
                 "has_specialty_coffee":
                     cafe.has_specialty_coffee,
                 "serves_brunch":
@@ -1058,6 +1075,33 @@ class CafeDetailAPIView(APIView):
                     cafe.has_vegetarian_options,
                 "has_gluten_free_options":
                     cafe.has_gluten_free_options,
+                "has_healthy_options":
+                    cafe.has_healthy_options,
+                "has_sugar_free_options":
+                    cafe.has_sugar_free_options,
+                "has_plant_based_milk":
+                    cafe.has_plant_based_milk,
+
+                "has_garden":
+                    cafe.has_garden,
+                "has_water_view":
+                    cafe.has_water_view,
+                "has_mountain_view":
+                    cafe.has_mountain_view,
+                "surrounded_by_nature":
+                    cafe.surrounded_by_nature,
+                "has_rooftop":
+                    cafe.has_rooftop,
+                "has_large_windows":
+                    cafe.has_large_windows,
+                "is_old_house":
+                    cafe.is_old_house,
+                "is_historic_building":
+                    cafe.is_historic_building,
+                "inside_bookstore":
+                    cafe.inside_bookstore,
+                "inside_cultural_space":
+                    cafe.inside_cultural_space,
                 "laptop_friendly":
                     cafe.laptop_friendly,
                 "quiet_space":
