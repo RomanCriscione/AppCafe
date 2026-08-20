@@ -83,6 +83,26 @@ class CafeSerializer(serializers.ModelSerializer):
             "has_artisanal_pastries",
 
             # alimentación
+            "is_vegan_friendly",
+            "has_vegetarian_options",
+            "has_gluten_free_options",
+            "has_healthy_options",
+            "has_sugar_free_options",
+            "has_plant_based_milk",
+
+            # espacio y entorno
+            "has_garden",
+            "has_water_view",
+            "has_mountain_view",
+            "surrounded_by_nature",
+            "has_rooftop",
+            "has_large_windows",
+            "is_old_house",
+            "is_historic_building",
+            "inside_bookstore",
+            "inside_cultural_space",
+
+            # atributos anteriores que seguimos conservando
             "laptop_friendly",
             "quiet_space",
 
