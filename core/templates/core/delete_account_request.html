@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block head_title %}
+<title>Eliminar cuenta · Gota</title>
+{% endblock %}
+
+{% block head_description %}
+<meta
+  name="description"
+  content="Solicitá la eliminación de tu cuenta de Gota y los datos asociados."
+>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-4xl mx-auto py-8 sm:py-12">
+
+  <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
+
+    <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">
+      Eliminar tu cuenta de Gota
+    </h1>
+
+    <p class="text-slate-600 mb-8">
+      Podés solicitar en cualquier momento la eliminación de tu cuenta
+      de Gota y de los datos personales asociados.
+    </p>
+
+    <div class="space-y-8 text-slate-700 leading-relaxed">
+
+      <section>
+        <h2 class="text-xl font-semibold text-slate-900 mb-3">
+          Desde la aplicación
+        </h2>
+
+        <p>
+          Si todavía tenés acceso a Gota Mobile, podés eliminar tu cuenta
+          directamente desde la sección de tu cuenta o perfil.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-slate-900 mb-3">
+          Solicitar la eliminación desde la web
+        </h2>
+
+        <p>
+          Si ya no tenés instalada la aplicación o no podés acceder a tu cuenta,
+          podés solicitar su eliminación escribiéndonos desde la dirección de
+          correo electrónico asociada a tu cuenta de Gota.
+        </p>
+
+        <p class="mt-4">
+          Enviá un correo a:
+        </p>
+
+        <p class="mt-3">
+          <a
+            href="mailto:hola@gogota.ar?subject=Solicitud%20de%20eliminaci%C3%B3n%20de%20cuenta%20Gota"
+            class="text-blue-700 font-semibold hover:underline"
+          >
+            hola@gogota.ar
+          </a>
+        </p>
+
+        <p class="mt-4">
+          Indicá en el asunto o en el mensaje que querés eliminar tu cuenta de Gota.
+          Por seguridad, podremos solicitarte que confirmes que sos titular de la
+          cuenta antes de procesar la solicitud.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-slate-900 mb-3">
+          Qué datos se eliminan
+        </h2>
+
+        <p>
+          Al eliminar tu cuenta eliminaremos los datos personales asociados a ella,
+          incluidos los datos de identificación y cuenta almacenados por Gota.
+        </p>
+
+        <p class="mt-4">
+          También eliminaremos o desvincularemos los datos asociados a tu cuenta
+          cuando corresponda, de acuerdo con el funcionamiento de la plataforma
+          y las obligaciones legales aplicables.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-slate-900 mb-3">
+          Datos que podrían conservarse
+        </h2>
+
+        <p>
+          Determinada información podrá conservarse cuando sea necesario para
+          cumplir obligaciones legales, resolver controversias, prevenir fraude
+          o proteger la seguridad de Gota y de sus usuarios.
+        </p>
+
+        <p class="mt-4">
+          Esta información se conservará únicamente durante el tiempo necesario
+          para cumplir esas finalidades.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-slate-900 mb-3">
+          Plazo de procesamiento
+        </h2>
+
+        <p>
+          Procesaremos las solicitudes de eliminación en un plazo razonable una vez
+          que hayamos podido verificar la titularidad de la cuenta.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-slate-900 mb-3">
+          Más información
+        </h2>
+
+        <p>
+          Podés consultar nuestra
+          <a
+            href="{% url 'privacy_policy' %}"
+            class="text-blue-700 hover:underline"
+          >
+            Política de Privacidad
+          </a>
+          para conocer más sobre cómo tratamos tus datos.
+        </p>
+      </section>
+
+    </div>
+
+  </div>
+
+</section>
+{% endblock %}

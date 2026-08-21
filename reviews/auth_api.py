@@ -7,6 +7,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from reviews.claims import ClaimStatus
 
 
 User = get_user_model()
@@ -132,6 +133,12 @@ class MobileDeleteAccountAPIView(APIView):
     def delete(self, request):
         user = request.user
 
+        # Liberar las cafeterías asociadas a esta cuenta
+        user.cafes.update(
+            owner=None,
+            claim_status=ClaimStatus.UNCLAIMED,
+        )
+
         Token.objects.filter(user=user).delete()
 
         user.delete()
@@ -143,3 +150,4 @@ class MobileDeleteAccountAPIView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+

@@ -163,6 +163,19 @@ def privacy_policy_view(request):
         },
     )
 
+def delete_account_request_view(request):
+    return render(
+        request,
+        "core/delete_account_request.html",
+        {
+            "meta_title": "Eliminar cuenta · Gota",
+            "meta_description": (
+                "Información para solicitar la eliminación "
+                "de una cuenta de Gota y sus datos asociados."
+            ),
+        },
+    )
+
 # ✅ Sitemap dinámico
 def sitemap_xml(request):
     cafes = Cafe.objects.only("id").order_by("id")

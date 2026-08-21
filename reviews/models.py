@@ -227,10 +227,12 @@ class Cafe(models.Model):
     )
 
 
-    # Dueño (ya lo tenías)
+    # Dueño
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='cafes'
     )
 
