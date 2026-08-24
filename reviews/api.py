@@ -1,5 +1,5 @@
 # reviews/api.py
-from django.db.models import Avg
+from django.db.models import Avg, Count
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.permissions import AllowAny
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -12,6 +12,8 @@ except Exception:
 
 from reviews.models import Cafe
 from .serializers import CafeSerializer
+from reviews.utils.ranking import calcular_score_cafe
+from rest_framework.response import Response
 
 
 class CafeViewSet(ReadOnlyModelViewSet):
@@ -23,21 +25,68 @@ class CafeViewSet(ReadOnlyModelViewSet):
     permission_classes = [AllowAny]  # Público en desarrollo
     serializer_class = CafeSerializer
 
-    # Anotamos el promedio de rating tomando el related_name 'reviews'
     def get_queryset(self):
         return (
             Cafe.objects
-            .select_related("owner")           # opcional, por si se usa en el serializer
-            .prefetch_related("tags")          # para evitar N+1
-            .annotate(average_rating=Avg("reviews__rating"))
-            .order_by("name")
+            .select_related("owner")
+            .prefetch_related(
+                "tags",
+                "relationships",
+            )
+            .annotate(
+                average_rating=Avg("reviews__rating"),
+                total_reviews=Count("reviews"),
+            )
         )
+
+    # Anotamos el promedio de rating tomando el related_name 'reviews'
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(
+            self.get_queryset()
+        )
+
+        ordering = request.query_params.get("ordering")
+        search = request.query_params.get("search")
+
+        if not ordering and not search:
+            cafes = list(queryset)
+
+            for cafe in cafes:
+                cafe.score = calcular_score_cafe(
+                    cafe,
+                    user=(
+                        request.user
+                        if request.user.is_authenticated
+                        else None
+                    ),
+                    user_lat=None,
+                    user_lon=None,
+                    cafes_vistos_ids=[],
+                )
+
+            cafes.sort(
+                key=lambda cafe: cafe.score,
+                reverse=True,
+            )
+
+            serializer = self.get_serializer(
+                cafes,
+                many=True,
+            )
+
+            return Response(serializer.data)
+
+        serializer = self.get_serializer(
+            queryset,
+            many=True,
+        )
+
+        return Response(serializer.data)
 
     # Búsqueda & orden (opcional, ya mismo te suma valor)
     filter_backends = [SearchFilter, OrderingFilter] + ([DjangoFilterBackend] if HAS_DJANGO_FILTER else [])
     search_fields = ["name", "address", "location"]
     ordering_fields = ["name", "average_rating", "created_at"]
-    ordering = ["name"]
 
     # Si tenés django-filter, podés habilitar filtros booleanos básicos:
     if HAS_DJANGO_FILTER:
