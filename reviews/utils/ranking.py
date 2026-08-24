@@ -76,24 +76,32 @@ def calcular_score_cafe(
         score *= 1.08
 
     # === H. Cercanía ===
-    distance_boost = 0.0
-    if user_lat and user_lon and cafe.latitude and cafe.longitude:
+    if (
+        user_lat is not None
+        and user_lon is not None
+        and cafe.latitude is not None
+        and cafe.longitude is not None
+    ):
         from reviews.utils.geo import haversine_distance
+
         dist = haversine_distance(
-            user_lat, user_lon, cafe.latitude, cafe.longitude
+            user_lat,
+            user_lon,
+            cafe.latitude,
+            cafe.longitude,
         )
 
-        if dist <= 0.5:
-            distance_boost = 3.5
-        elif dist <= 1:
-            distance_boost = 2.5
-        elif dist <= 2:
-            distance_boost = 1.5
-        elif dist <= 3:
-            distance_boost = 0.8
-
-    score += min(distance_boost, 3.0)
-
+        if dist <= 10:
+            pass
+        elif dist <= 30:
+            score *= 0.95
+        elif dist <= 100:
+            score *= 0.80
+        elif dist <= 300:
+            score *= 0.60
+        else:
+            score *= 0.40
+            
     # === I. Afinidad ===
     if user and hasattr(user, "favorite_cafes"):
         favoritos = list(user.favorite_cafes.all()[:5])

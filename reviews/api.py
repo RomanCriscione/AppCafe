@@ -51,6 +51,16 @@ class CafeViewSet(ReadOnlyModelViewSet):
         if not ordering and not search:
             cafes = list(queryset)
 
+            lat = request.query_params.get("lat")
+            lon = request.query_params.get("lon")
+
+            try:
+                user_lat = float(lat) if lat else None
+                user_lon = float(lon) if lon else None
+            except (TypeError, ValueError):
+                user_lat = None
+                user_lon = None
+
             for cafe in cafes:
                 cafe.score = calcular_score_cafe(
                     cafe,
@@ -59,8 +69,8 @@ class CafeViewSet(ReadOnlyModelViewSet):
                         if request.user.is_authenticated
                         else None
                     ),
-                    user_lat=None,
-                    user_lon=None,
+                    user_lat=user_lat,
+                    user_lon=user_lon,
                     cafes_vistos_ids=[],
                 )
 
