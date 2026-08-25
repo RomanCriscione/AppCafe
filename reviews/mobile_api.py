@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -388,7 +388,7 @@ class CafeWhispersAPIView(APIView):
     una huella por día por usuario.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, cafe_id):
         cafe = get_object_or_404(
@@ -425,6 +425,15 @@ class CafeWhispersAPIView(APIView):
         )
 
     def post(self, request, cafe_id):
+        if not request.user.is_authenticated:
+            return Response(
+                {
+                    "success": False,
+                    "error": "authentication_required",
+                    "message": "Ingresá para dejar una huella.",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
         cafe = get_object_or_404(
             Cafe,
             id=cafe_id,
@@ -923,7 +932,7 @@ class CafeDetailAPIView(APIView):
     Devuelve el detalle completo de una cafetería.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, cafe_id):
         cafe = get_object_or_404(
@@ -961,10 +970,13 @@ class CafeDetailAPIView(APIView):
             )
         )
 
-        my_review = Review.objects.filter(
-            cafe=cafe,
-            user=request.user,
-        ).first()
+        my_review = None
+
+        if request.user.is_authenticated:
+            my_review = Review.objects.filter(
+                cafe=cafe,
+                user=request.user,
+            ).first()
 
         my_review_data = None
 
@@ -1125,7 +1137,7 @@ class RelatedCafesAPIView(APIView):
     Nunca incluye la cafetería actual.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, cafe_id):
         cafe_actual = get_object_or_404(
