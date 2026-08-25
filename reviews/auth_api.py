@@ -1,3 +1,6 @@
+from django.conf import settings
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 
@@ -57,6 +60,101 @@ class MobileLoginAPIView(APIView):
                     "name": user.first_name or user.username,
                 },
             }
+        )
+class MobileGoogleLoginAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        google_id_token = request.data.get(
+            "id_token",
+            "",
+        ).strip()
+
+        if not google_id_token:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Falta el token de Google.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            payload = id_token.verify_oauth2_token(
+                google_id_token,
+                google_requests.Request(),
+                settings.GOOGLE_MOBILE_CLIENT_ID,
+            )
+        except Exception:
+            return Response(
+                {
+                    "success": False,
+                    "message": "No pudimos validar tu cuenta de Google.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        email = (
+            payload.get("email", "")
+            .strip()
+            .lower()
+        )
+
+        email_verified = payload.get(
+            "email_verified",
+            False,
+        )
+
+        if not email or not email_verified:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Google no confirmó un email válido.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        name = (
+            payload.get("given_name")
+            or payload.get("name")
+            or email.split("@")[0]
+        )
+
+        user = User.objects.filter(
+            email__iexact=email,
+        ).first()
+
+        if user is None:
+            user = User.objects.create_user(
+                username=email,
+                email=email,
+                first_name=name,
+            )
+
+            user.set_unusable_password()
+            user.save(
+                update_fields=["password"],
+            )
+
+        token, _ = Token.objects.get_or_create(
+            user=user,
+        )
+
+        return Response(
+            {
+                "success": True,
+                "token": token.key,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "name": (
+                        user.first_name
+                        or user.username
+                    ),
+                },
+            },
+            status=status.HTTP_200_OK,
         )
 
 

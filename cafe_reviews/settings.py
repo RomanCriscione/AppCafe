@@ -130,6 +130,10 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+GOOGLE_MOBILE_CLIENT_ID = config(
+    "GOOGLE_MOBILE_CLIENT_ID",
+    default="",
+)
 
 # ======================================================
 # EMAIL (GMAIL)

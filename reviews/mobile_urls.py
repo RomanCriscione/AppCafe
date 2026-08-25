@@ -17,6 +17,7 @@ from .mobile_api import (
 
 from .auth_api import (
     MobileLoginAPIView,
+    MobileGoogleLoginAPIView,
     MobileRegisterAPIView,
     MobileLogoutAPIView,
     MobileDeleteAccountAPIView,
@@ -45,6 +46,12 @@ urlpatterns = [
         "login/",
         MobileLoginAPIView.as_view(),
         name="mobile-login",
+    ),
+
+    path(
+        "google-login/",
+        MobileGoogleLoginAPIView.as_view(),
+        name="mobile-google-login",
     ),
 
     path(
