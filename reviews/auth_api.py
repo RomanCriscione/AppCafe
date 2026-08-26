@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from reviews.claims import ClaimStatus
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from allauth.account.forms import ResetPasswordForm
 
 
 User = get_user_model()
@@ -208,6 +209,55 @@ class MobileRegisterAPIView(APIView):
                 },
             },
             status=status.HTTP_201_CREATED,
+        )
+
+class MobilePasswordResetAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        email = (
+            request.data.get("email", "")
+            .strip()
+            .lower()
+        )
+
+        if not email:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Ingresá tu email.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        form = ResetPasswordForm(
+            data={
+                "email": email,
+            }
+        )
+
+        if not form.is_valid():
+            return Response(
+                {
+                    "success": False,
+                    "message": "Ingresá un email válido.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        form.save(request)
+
+        return Response(
+            {
+                "success": True,
+                "message": (
+                    "Si existe una cuenta asociada a ese email, "
+                    "te enviamos las instrucciones para restablecer "
+                    "tu contraseña."
+                ),
+            },
+            status=status.HTTP_200_OK,
         )
 
 class MobileChangePasswordAPIView(APIView):
