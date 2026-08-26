@@ -11,6 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from reviews.claims import ClaimStatus
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 
 User = get_user_model()
@@ -206,6 +208,101 @@ class MobileRegisterAPIView(APIView):
                 },
             },
             status=status.HTTP_201_CREATED,
+        )
+
+class MobileChangePasswordAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        current_password = request.data.get(
+            "current_password",
+            "",
+        )
+
+        new_password = request.data.get(
+            "new_password",
+            "",
+        )
+
+        confirm_password = request.data.get(
+            "confirm_password",
+            "",
+        )
+
+        if not new_password or not confirm_password:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Completá la nueva contraseña.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if new_password != confirm_password:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Las contraseñas nuevas no coinciden.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if user.has_usable_password():
+            if not current_password:
+                return Response(
+                    {
+                        "success": False,
+                        "message": "Ingresá tu contraseña actual.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if not user.check_password(current_password):
+                return Response(
+                    {
+                        "success": False,
+                        "message": "La contraseña actual es incorrecta.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        try:
+            validate_password(
+                new_password,
+                user=user,
+            )
+        except ValidationError as error:
+            return Response(
+                {
+                    "success": False,
+                    "message": " ".join(error.messages),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(new_password)
+        user.save(
+            update_fields=["password"],
+        )
+
+        Token.objects.filter(
+            user=user,
+        ).delete()
+
+        token = Token.objects.create(
+            user=user,
+        )
+
+        return Response(
+            {
+                "success": True,
+                "message": "Contraseña actualizada correctamente.",
+                "token": token.key,
+            },
+            status=status.HTTP_200_OK,
         )
 
 

@@ -21,6 +21,7 @@ from .auth_api import (
     MobileRegisterAPIView,
     MobileLogoutAPIView,
     MobileDeleteAccountAPIView,
+    MobileChangePasswordAPIView,
 )
 
 
@@ -58,6 +59,12 @@ urlpatterns = [
         "register/",
         MobileRegisterAPIView.as_view(),
         name="mobile-register",
+    ),
+
+    path(
+        "change-password/",
+        MobileChangePasswordAPIView.as_view(),
+        name="mobile-change-password",
     ),
 
     path(
