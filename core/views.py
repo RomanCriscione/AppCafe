@@ -163,6 +163,18 @@ def privacy_policy_view(request):
         },
     )
 
+def terms_view(request):
+    return render(
+        request,
+        "core/terms.html",
+        {
+            "meta_title": "Términos y Condiciones · Gota",
+            "meta_description": (
+                "Conocé los términos y condiciones de uso de Gota."
+            ),
+        },
+    )
+
 def delete_account_request_view(request):
     return render(
         request,

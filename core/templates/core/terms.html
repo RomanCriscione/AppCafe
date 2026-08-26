@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Términos y Condiciones · Gota{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 900px;">
+    <h1 class="mb-4">Términos y Condiciones</h1>
+
+    <p class="text-muted">
+        Última actualización: agosto de 2026
+    </p>
+
+    <p>
+        Estos Términos y Condiciones regulan el acceso y uso de Gota,
+        disponible a través de gogota.ar y de sus aplicaciones móviles.
+        Al utilizar Gota, aceptás estos términos.
+    </p>
+
+    <h2 class="h4 mt-5">1. Sobre Gota</h2>
+
+    <p>
+        Gota es una plataforma para descubrir cafeterías, guardar lugares,
+        compartir experiencias y encontrar opciones de acuerdo con los gustos,
+        intereses y planes de cada persona.
+    </p>
+
+    <p>
+        La información disponible en Gota puede provenir de usuarios,
+        cafeterías, fuentes públicas y del propio equipo de Gota.
+    </p>
+
+    <h2 class="h4 mt-5">2. Cuentas de usuario</h2>
+
+    <p>
+        Algunas funciones requieren crear una cuenta. La persona usuaria es
+        responsable de mantener la confidencialidad de sus credenciales y de
+        la actividad realizada desde su cuenta.
+    </p>
+
+    <p>
+        La información proporcionada al registrarse debe ser válida y no debe
+        utilizarse una cuenta para suplantar la identidad de otra persona.
+    </p>
+
+    <h2 class="h4 mt-5">3. Contenido y reseñas</h2>
+
+    <p>
+        Las personas usuarias pueden publicar reseñas, comentarios y otra
+        información relacionada con sus experiencias en cafeterías.
+    </p>
+
+    <p>
+        Al publicar contenido en Gota, conservás la autoría sobre ese contenido
+        y autorizás a Gota a mostrarlo dentro de la plataforma y utilizarlo para
+        el funcionamiento, promoción y mejora del servicio.
+    </p>
+
+    <p>
+        No está permitido publicar contenido ilegal, engañoso, discriminatorio,
+        amenazante, ofensivo, fraudulento, que vulnere derechos de terceros o
+        que no guarde relación razonable con el propósito de la plataforma.
+    </p>
+
+    <p>
+        Gota podrá moderar, ocultar o eliminar contenido cuando resulte
+        necesario para proteger a la comunidad, cumplir estos términos o
+        atender obligaciones legales.
+    </p>
+
+    <h2 class="h4 mt-5">4. Información sobre cafeterías</h2>
+
+    <p>
+        Gota procura mantener información útil y actualizada sobre las
+        cafeterías, pero no garantiza que todos los datos publicados sean
+        siempre completos, exactos o estén actualizados.
+    </p>
+
+    <p>
+        Horarios, precios, servicios, productos, disponibilidad y demás
+        características pueden cambiar sin previo aviso. Ante información
+        especialmente importante para una visita, recomendamos verificarla
+        directamente con la cafetería.
+    </p>
+
+    <h2 class="h4 mt-5">5. Cafeterías y responsables de establecimientos</h2>
+
+    <p>
+        Las personas responsables de cafeterías pueden disponer de funciones
+        específicas para administrar o aportar información sobre sus
+        establecimientos.
+    </p>
+
+    <p>
+        Gota podrá solicitar información adicional para verificar la relación
+        entre una persona y una cafetería antes de habilitar determinadas
+        funciones.
+    </p>
+
+    <h2 class="h4 mt-5">6. Uso adecuado de Gota</h2>
+
+    <p>
+        No está permitido utilizar Gota para intentar afectar su funcionamiento,
+        acceder sin autorización a sistemas o información, realizar actividades
+        fraudulentas, recopilar datos de forma abusiva o utilizar la plataforma
+        de una manera que perjudique a otras personas.
+    </p>
+
+    <h2 class="h4 mt-5">7. Disponibilidad del servicio</h2>
+
+    <p>
+        Trabajamos para mantener Gota disponible y funcionando correctamente,
+        pero el servicio puede sufrir interrupciones, errores o modificaciones.
+    </p>
+
+    <p>
+        Algunas funciones pueden cambiar, incorporarse o dejar de estar
+        disponibles como parte de la evolución de la plataforma.
+    </p>
+
+    <h2 class="h4 mt-5">8. Privacidad</h2>
+
+    <p>
+        El tratamiento de datos personales se encuentra explicado en nuestra
+        <a href="{% url 'privacy_policy' %}">Política de Privacidad</a>.
+    </p>
+
+    <h2 class="h4 mt-5">9. Eliminación de cuenta</h2>
+
+    <p>
+        Las personas usuarias pueden solicitar o realizar la eliminación de su
+        cuenta mediante las opciones disponibles en Gota.
+    </p>
+
+    <p>
+        Para conocer más sobre este proceso, podés consultar la página de
+        <a href="{% url 'delete_account_request' %}">eliminación de cuenta</a>.
+    </p>
+
+    <h2 class="h4 mt-5">10. Cambios en estos términos</h2>
+
+    <p>
+        Estos Términos y Condiciones pueden actualizarse para reflejar cambios
+        en Gota, en sus funcionalidades o en las normas aplicables.
+    </p>
+
+    <p>
+        La versión vigente estará disponible en esta página indicando su fecha
+        de última actualización.
+    </p>
+
+    <h2 class="h4 mt-5">11. Contacto</h2>
+
+    <p>
+        Si tenés consultas sobre estos términos o sobre Gota, podés escribirnos
+        a <a href="mailto:hola@gogota.ar">hola@gogota.ar</a>.
+    </p>
+</div>
+{% endblock %}
