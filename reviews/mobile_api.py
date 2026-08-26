@@ -1377,6 +1377,55 @@ class MeAPIView(generics.RetrieveAPIView):
 
         return Response(serializer.data)
 
+    def patch(self, request):
+        user = request.user
+
+        first_name = str(
+            request.data.get(
+                "first_name",
+                user.first_name,
+            )
+        ).strip()
+
+        last_name = str(
+            request.data.get(
+                "last_name",
+                user.last_name,
+            )
+        ).strip()
+
+        if not first_name:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Ingresá tu nombre.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.first_name = first_name
+        user.last_name = last_name
+
+        user.save(
+            update_fields=[
+                "first_name",
+                "last_name",
+            ]
+        )
+
+        serializer = MobileUserSerializer(
+            user,
+            context={"request": request},
+        )
+
+        return Response(
+            {
+                "success": True,
+                "user": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
 class BecomeOwnerAPIView(APIView):
     """
     POST /api/mobile/become-owner/
