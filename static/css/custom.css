@@ -1519,3 +1519,261 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
     display: none;
   }
 }
+
+/* =========================================================
+   HOME · MAPA
+   ========================================================= */
+
+.gota-home-map {
+  width: 100%;
+  max-width: 1152px;
+  margin: 0 auto 40px;
+  padding: 32px 0;
+}
+
+.gota-home-map__search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+
+  margin-bottom: 14px;
+}
+
+.gota-home-map__input-wrap {
+  min-width: 0;
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 0 14px;
+
+  background: #FFFFFF;
+  border: 1px solid #DCE3EC;
+  border-radius: 13px;
+
+  transition:
+    border-color .15s ease,
+    box-shadow .15s ease;
+}
+
+.gota-home-map__input-wrap:focus-within {
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, .18);
+}
+
+.gota-home-map__input-wrap i {
+  flex-shrink: 0;
+  color: #94A3B8;
+  font-size: 13px;
+}
+
+.gota-home-map__input {
+  width: 100%;
+  min-width: 0;
+
+  padding: 0;
+
+  background: transparent;
+  border: 0;
+  outline: 0;
+
+  color: #172C6D;
+  font: inherit;
+  font-size: 14px;
+}
+
+.gota-home-map__input::placeholder {
+  color: #9CA3AF;
+}
+
+.gota-home-map__button,
+.gota-home-map__location-button {
+  min-height: 46px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0 17px;
+
+  border-radius: 13px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background-color .15s ease,
+    border-color .15s ease,
+    transform .15s ease;
+}
+
+.gota-home-map__button {
+  background: #172C6D;
+  border: 1px solid #172C6D;
+  color: #FFFFFF;
+}
+
+.gota-home-map__button:hover {
+  background: #1E3A8A;
+  transform: translateY(-1px);
+}
+
+.gota-home-map__location-button {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #172C6D;
+}
+
+.gota-home-map__location-button:hover {
+  background: #DBEAFE;
+  border-color: #93C5FD;
+  transform: translateY(-1px);
+}
+
+.gota-home-map__frame {
+  width: 100%;
+
+  padding: 5px;
+
+  background: #FFFFFF;
+  border: 1px solid #DCE3EC;
+  border-radius: 20px;
+
+  box-shadow: 0 5px 18px rgba(23, 44, 109, .06);
+
+  overflow: hidden;
+}
+
+#home-map {
+  width: 100%;
+  height: 390px;
+
+  border-radius: 15px;
+
+  z-index: 0;
+}
+
+.gota-home-map__nearby {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+
+  margin-top: 14px;
+}
+
+.gota-home-map__nearby:empty {
+  display: none;
+}
+
+@media (max-width: 768px) {
+
+  .gota-home-map__search {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .gota-home-map__input-wrap {
+    grid-column: 1 / -1;
+  }
+
+  .gota-home-map__nearby {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+@media (max-width: 640px) {
+
+  .gota-home-map {
+    padding: 20px 0;
+    margin-bottom: 24px;
+  }
+
+  #home-map {
+    height: 330px;
+  }
+
+  .gota-home-map__button,
+  .gota-home-map__location-button {
+    padding: 0 12px;
+  }
+
+  .gota-home-map__nearby {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+/* =========================================================
+   NAV · IDENTIDAD GOTA
+   ========================================================= */
+
+.gota-nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  color: #172C6D !important;
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.gota-nav-brand__logo {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 11px;
+}
+
+.gota-nav-brand__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Links principales */
+
+.site-nav a:not(.gota-nav-brand) {
+  transition:
+    color .15s ease,
+    background-color .15s ease;
+}
+
+.site-nav a:not(.gota-nav-brand):hover {
+  color: #172C6D;
+}
+
+/* Acción de cerrar sesión */
+
+.site-nav button[type="submit"] {
+  transition:
+    color .15s ease,
+    background-color .15s ease;
+}
+
+@media (max-width: 640px) {
+
+  .gota-nav-brand {
+    font-size: 20px;
+  }
+
+  .gota-nav-brand__logo {
+    width: 36px;
+    height: 36px;
+  }
+}

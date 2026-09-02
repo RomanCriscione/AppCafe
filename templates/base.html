@@ -90,7 +90,17 @@
       <div class="max-w-7xl mx-auto px-4 py-2 sm:py-3 flex items-center justify-between">
         <!-- Marca + Volver (Volver solo >= md) -->
         <div class="flex items-center gap-2 sm:gap-4">
-          <a href="{% url 'home' %}" class="text-2xl font-bold text-brand-800">Gota</a>
+          <a href="{% url 'home' %}" class="gota-nav-brand">
+            <span class="gota-nav-brand__logo">
+              <img
+                src="{% static 'images/gota-icon.png' %}"
+                alt=""
+                aria-hidden="true"
+              >
+            </span>
+
+            <span>Gota</span>
+          </a>
 
           <a id="back-link"
              href="{% url 'reviews:cafe_list' %}"

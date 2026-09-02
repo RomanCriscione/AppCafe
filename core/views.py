@@ -5,12 +5,10 @@ from django.urls import reverse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.mail import send_mail
 from django.conf import settings
-from django.db.models import Avg, Count
-import random
+from django.db.models import Count
 
 
 from reviews.models import Review, Cafe
-from reviews.utils.tags import get_tags_grouped_by_cafe
 from core import messages as core_messages
 
 import json
@@ -55,46 +53,26 @@ def home(request):
         for cafe in cafes_with_coords
     ]
 
-    # 🔥 Cafés destacados inteligentes
-    total_reviews = Review.objects.count()
-
-    if total_reviews < 150:
-        min_reviews = 2
-    elif total_reviews < 600:
-        min_reviews = 5
-    else:
-        min_reviews = 10
-
-    top_cafes_qs = (
-        Cafe.objects
-        .annotate(
-            avg_rating=Avg("reviews__rating"),
-            num_reviews=Count("reviews")
-        )
-        .filter(avg_rating__gte=4, num_reviews__gte=min_reviews)
-        .prefetch_related("tags")
-        .order_by("-avg_rating", "-num_reviews")[:20]
-    )
-
-    top_cafes = list(top_cafes_qs)
-    random.shuffle(top_cafes)
-    top_cafes = top_cafes[:6]
-
-    # Etiquetas por café
-    tag_data = get_tags_grouped_by_cafe(top_cafes)
 
     # Cafés vistos recientemente
     recently_viewed_cafes = get_recently_viewed_cafes(request)
 
-    # Zonas dinámicas
-    home_zones = Cafe.objects.values_list("location", flat=True).distinct()
+    # Zonas para descubrir desde la Home
+    home_zones = (
+        Cafe.objects
+        .exclude(location__isnull=True)
+        .exclude(location__exact="")
+        .values("location")
+        .annotate(cafe_count=Count("id"))
+        .order_by("-cafe_count", "location")[:12]
+    )
+
+    home_zones = [zona["location"] for zona in home_zones]
 
     context = {
         "latest_reviews": latest_reviews,
-        "top_cafes": top_cafes,
         "cafes_json": json.dumps(cafes_data, cls=DjangoJSONEncoder),
         "recently_viewed_cafes": recently_viewed_cafes,
-        "tag_data": tag_data,
         "home_zones": home_zones,
         "ui_messages": {
             "welcome": core_messages.MESSAGES.get("welcome_user"),

@@ -1,20 +1,72 @@
-<div class="bg-white py-12">
-  <div class="max-w-6xl mx-auto px-4">
-    <h2 class="text-2xl font-semibold mb-4">📍 Mapa de cafeterías</h2>
+<!-- Mapa de cafeterías -->
+<section class="gota-home-map">
 
-    <div class="mb-4 flex flex-col sm:flex-row gap-2 sm:items-center">
-      <input id="address-input" type="text" placeholder="Ingresá una dirección..." class="w-full sm:w-auto flex-1 px-4 py-2 border rounded-lg shadow-sm" />
-      <button id="search-address" class="bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg">Buscar cerca</button>
-      <button id="locate-me" class="bg-accent hover:bg-primary text-white px-4 py-2 rounded-lg">Buscar cerca mío</button>
+  <div class="gota-home-section-header">
+    <div>
+      <span class="gota-home-section-kicker">Cerca tuyo</span>
+
+      <h2 class="gota-home-section-title">
+        Explorá en el mapa
+      </h2>
+
+      <p class="gota-home-section-subtitle">
+        Buscá una dirección o usá tu ubicación para descubrir cafeterías cerca.
+      </p>
     </div>
 
-    <div id="home-map" class="w-full h-[500px] rounded-lg shadow-md z-0"></div>
-
-    <div id="nearby-list" class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      <!-- JS insertará aquí cafés cercanos -->
-    </div>
+    <a
+      href="{% url 'reviews:mapa_cafes' %}"
+      class="gota-home-section-link"
+    >
+      Ver mapa completo
+      <span aria-hidden="true">→</span>
+    </a>
   </div>
-</div>
+
+  <div class="gota-home-map__search">
+
+    <div class="gota-home-map__input-wrap">
+      <i class="fas fa-search" aria-hidden="true"></i>
+
+      <input
+        id="address-input"
+        type="text"
+        placeholder="Ingresá una dirección..."
+        class="gota-home-map__input"
+      >
+    </div>
+
+    <button
+      id="search-address"
+      type="button"
+      class="gota-home-map__button"
+    >
+      Buscar
+    </button>
+
+    <button
+      id="locate-me"
+      type="button"
+      class="gota-home-map__location-button"
+    >
+      <i class="fas fa-location-arrow" aria-hidden="true"></i>
+      Cerca mío
+    </button>
+
+  </div>
+
+  <div class="gota-home-map__frame">
+    <div id="home-map"></div>
+  </div>
+
+  <div
+    id="nearby-list"
+    class="gota-home-map__nearby"
+  >
+    <!-- JS insertará aquí cafés cercanos -->
+  </div>
+
+</section>
 
 {% block scripts %}
 <script>
