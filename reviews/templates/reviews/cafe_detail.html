@@ -146,186 +146,254 @@
 
 {% block content %}
 
-<div class="max-w-4xl mx-auto px-4 space-y-8">
+<div class="gota-cafe-detail">
 
 <!-- HEADER PRINCIPAL -->
 <section class="surface p-5 rounded-2xl space-y-4 animate-fade-in-up">
 
-  <!-- FILA SUPERIOR: rating / reseñas / precio -->
-  <div class="flex flex-wrap items-center gap-4 text-sm text-gray-700 dark:text-[var(--text-2)]">
+  <!-- IDENTIDAD PRINCIPAL DEL CAFÉ -->
+  <div class="gota-cafe-detail-hero">
 
-    {% if average_rating %}
-      <div class="flex items-center gap-1 font-semibold text-gray-900 dark:text-[var(--text-1)]">
-        {{ average_rating|floatformat:1 }}
-        <svg viewBox="0 0 24 24" class="w-5 h-5 inline align-[-2px] ml-1">
-          <path fill="#f59e0b" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
-          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
-                d="M4 8h11v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8z"/>
-          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
-                d="M15 9h3a3 3 0 0 1 0 6h-2"/>
-        </svg>
+    <div class="gota-cafe-detail-hero__main">
 
+      <span class="gota-home-section-kicker">
+        Descubrí este lugar
+      </span>
+
+      <h1 class="gota-cafe-detail-hero__title">
+        {{ cafe.name }}
+      </h1>
+
+      {% if cafe.location %}
+        <p class="gota-cafe-detail-hero__location">
+          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+          {{ cafe.location }}
+        </p>
+      {% endif %}
+
+    </div>
+
+    <div class="gota-cafe-detail-hero__stats">
+
+      {% if average_rating %}
+        <div class="gota-cafe-detail-stat">
+          <img
+            src="{% static 'images/gota-icon.png' %}"
+            alt=""
+            aria-hidden="true"
+          >
+
+          <div>
+            <strong>{{ average_rating|floatformat:1 }}</strong>
+            <span>valoración</span>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="gota-cafe-detail-stat">
+        <i class="far fa-comment" aria-hidden="true"></i>
+
+        <div>
+          <strong>{{ total_reviews }}</strong>
+          <span>reseña{{ total_reviews|pluralize }}</span>
+        </div>
       </div>
-    {% endif %}
 
-    {% if total_reviews %}
-      <div class="flex items-center gap-1">
-        🗳️ {{ total_reviews }} reseña{{ total_reviews|pluralize }}
-      </div>
-    {% endif %}
+      {% if precio_promedio %}
+        <div class="gota-cafe-detail-stat">
+          <i class="fas fa-receipt" aria-hidden="true"></i>
 
-    {% if precio_promedio %}
-      <div class="flex items-center gap-1">
-        💲 ${{ precio_promedio|floatformat:0 }}
-      </div>
-    {% endif %}
+          <div>
+            <strong>${{ precio_promedio|floatformat:0 }}</strong>
+            <span>capuccino promedio</span>
+          </div>
+        </div>
+      {% endif %}
 
-  </div>
+    </div>
 
-  <h1 class="text-3xl font-bold text-gray-900 dark:text-[var(--text-1)]">
-    {{ cafe.name }}
-  </h1>
-
-  <div class="flex flex-wrap gap-4 mt-3 text-sm text-gray-600">
-
-    <span>❤️ {{ want_to_return_count }} quieren volver</span>
-
-    <span>✔️ {{ visited_count }} ya fueron</span>
-
-    <span>☕ {{ want_to_go_count }} quieren ir</span>
+    <div class="gota-cafe-detail-hero__community">
+      <span>{{ want_to_go_count }} quieren ir</span>
+      <span>{{ visited_count }} ya fueron</span>
+      <span>{{ want_to_return_count }} quieren volver</span>
+    </div>
 
   </div>
 
   <!-- ESTADO DEL CAFÉ -->
-<section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-350">
+  <section class="gota-cafe-detail-map-state">
 
-  <h3 class="text-lg font-semibold mb-3 text-[var(--text-1)]">
-    ☕ Elegí qué lugar ocupa en tu mapa
-  </h3>
+    <div class="gota-cafe-detail-map-state__header">
+      <span class="gota-cafe-detail-map-state__icon">
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+      </span>
 
-  {% if user.is_authenticated %}
+      <div>
+        <h2 class="gota-cafe-detail-map-state__title">
+          ¿Qué lugar ocupa en tu mapa?
+        </h2>
 
-    <div class="flex flex-wrap gap-3">
-
-      <!-- QUIERO IR -->
-      <form method="post"
-            action="{% url 'reviews:set_cafe_status' cafe.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="status" value="want_to_go">
-
-        <button type="submit"
-                class="btn rounded-xl
-                {% if user_status == 'want_to_go' %}
-                  btn-primary
-                {% else %}
-                  btn-outline
-                {% endif %}">
-          ☕ Quiero ir
-        </button>
-      </form>
-
-      <!-- QUIERO VOLVER -->
-      <form method="post"
-            action="{% url 'reviews:set_cafe_status' cafe.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="status" value="want_to_return">
-
-        <button type="submit"
-                class="btn rounded-xl
-                {% if user_status == 'want_to_return' %}
-                  btn-primary
-                {% else %}
-                  btn-outline
-                {% endif %}">
-          ❤️ Quiero volver
-        </button>
-      </form>
-
-      <!-- YA FUI -->
-      <form method="post"
-            action="{% url 'reviews:set_cafe_status' cafe.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="status" value="visited">
-
-        <button type="submit"
-                class="btn rounded-xl
-                {% if user_status == 'visited' %}
-                  btn-primary
-                {% else %}
-                  btn-outline
-                {% endif %}">
-          ✔️ Ya fui
-        </button>
-      </form>
-
+        <p class="gota-cafe-detail-map-state__description">
+          Guardalo según el momento en el que estás con este café.
+        </p>
+      </div>
     </div>
 
-  {% else %}
+    {% if user.is_authenticated %}
 
-    <a class="btn btn-outline rounded-xl"
-       href="{% url 'account_login' %}?next={{ request.path }}">
-      ☕ Guardar este café
-    </a>
+      <div class="gota-cafe-detail-map-state__options">
 
-  {% endif %}
+        <form
+          method="post"
+          action="{% url 'reviews:set_cafe_status' cafe.id %}"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="status" value="want_to_go">
 
-</section>
+          <button
+            type="submit"
+            class="gota-cafe-detail-map-option
+            {% if user_status == 'want_to_go' %}gota-cafe-detail-map-option--active{% endif %}"
+          >
+            <span class="gota-cafe-detail-map-option__icon">
+              <img
+                src="{% static 'images/gota-icon.png' %}"
+                alt=""
+                aria-hidden="true"
+              >
+            </span>
+
+            <span>Quiero ir</span>
+          </button>
+        </form>
+
+        <form
+          method="post"
+          action="{% url 'reviews:set_cafe_status' cafe.id %}"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="status" value="visited">
+
+          <button
+            type="submit"
+            class="gota-cafe-detail-map-option
+            {% if user_status == 'visited' %}gota-cafe-detail-map-option--active{% endif %}"
+          >
+            <span class="gota-cafe-detail-map-option__icon">
+              <i class="fas fa-check" aria-hidden="true"></i>
+            </span>
+
+            <span>Ya fui</span>
+          </button>
+        </form>
+
+        <form
+          method="post"
+          action="{% url 'reviews:set_cafe_status' cafe.id %}"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="status" value="want_to_return">
+
+          <button
+            type="submit"
+            class="gota-cafe-detail-map-option
+            {% if user_status == 'want_to_return' %}gota-cafe-detail-map-option--active{% endif %}"
+          >
+            <span class="gota-cafe-detail-map-option__icon">
+              <i class="fas fa-heart" aria-hidden="true"></i>
+            </span>
+
+            <span>Quiero volver</span>
+          </button>
+        </form>
+
+      </div>
+
+    {% else %}
+
+      <a
+        class="gota-cafe-detail-map-state__login"
+        href="{% url 'account_login' %}?next={{ request.path }}"
+      >
+        Guardar este café
+        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+      </a>
+
+    {% endif %}
+
+  </section>
 
 {% if user.is_authenticated and user_status %}
 
-<section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-375">
+<section class="gota-cafe-detail-collection">
 
-  <div class="mb-3">
-    <h3 class="text-lg font-semibold text-[var(--text-1)]">
-      🗺️ Tu colección
-    </h3>
+  <div class="gota-cafe-detail-collection__header">
+    <div>
+      <h2 class="gota-cafe-detail-collection__title">
+        Tu colección
+      </h2>
 
-    <p class="text-sm text-gray-500 mt-1">
-      ¿Qué lugar ocupa este café en tu mapa?
-    </p>
+      <p class="gota-cafe-detail-collection__description">
+        Agrupá este café según el tipo de momento para el que lo guardarías.
+      </p>
+    </div>
   </div>
 
   {% if not collection %}
 
-    <div class="flex flex-wrap gap-2">
+    <div class="gota-cafe-detail-collection__options">
 
       <form method="post" action="{% url 'reviews:set_collection' cafe.id %}">
         {% csrf_token %}
         <input type="hidden" name="collection" value="read">
-        <button type="submit" class="btn btn-outline rounded-xl text-sm px-3 py-2">
-          📚 Para leer
+
+        <button type="submit" class="gota-cafe-detail-collection-option">
+          <i class="fas fa-book-open" aria-hidden="true"></i>
+          <span>Para leer</span>
         </button>
       </form>
 
       <form method="post" action="{% url 'reviews:set_collection' cafe.id %}">
         {% csrf_token %}
         <input type="hidden" name="collection" value="work">
-        <button type="submit" class="btn btn-outline rounded-xl text-sm px-3 py-2">
-          💻 Para trabajar
+
+        <button type="submit" class="gota-cafe-detail-collection-option">
+          <i class="fas fa-laptop" aria-hidden="true"></i>
+          <span>Para trabajar</span>
         </button>
       </form>
 
       <form method="post" action="{% url 'reviews:set_collection' cafe.id %}">
         {% csrf_token %}
         <input type="hidden" name="collection" value="slow">
-        <button type="submit" class="btn btn-outline rounded-xl text-sm px-3 py-2">
-          🌿 Para bajar un cambio
+
+        <button type="submit" class="gota-cafe-detail-collection-option">
+          <i class="fas fa-leaf" aria-hidden="true"></i>
+          <span>Para bajar un cambio</span>
         </button>
       </form>
 
       <form method="post" action="{% url 'reviews:set_collection' cafe.id %}">
         {% csrf_token %}
         <input type="hidden" name="collection" value="rain">
-        <button type="submit" class="btn btn-outline rounded-xl text-sm px-3 py-2">
-          ☁️ Para días grises
+
+        <button type="submit" class="gota-cafe-detail-collection-option">
+          <i class="fas fa-cloud" aria-hidden="true"></i>
+          <span>Para días grises</span>
         </button>
       </form>
 
       <form method="post" action="{% url 'reviews:set_collection' cafe.id %}">
         {% csrf_token %}
         <input type="hidden" name="collection" value="talk">
-        <button type="submit" class="btn btn-outline rounded-xl text-sm px-3 py-2">
-          🫶 Para charlas largas
+
+        <button type="submit" class="gota-cafe-detail-collection-option">
+          <i class="far fa-comments" aria-hidden="true"></i>
+          <span>Para charlas largas</span>
         </button>
       </form>
 
@@ -333,38 +401,46 @@
 
   {% else %}
 
-    <p class="text-sm italic text-gray-600">
-      Guardado en tu mapa personal.
-    </p>
+    <div class="gota-cafe-detail-collection__saved">
+      <i class="fas fa-check-circle" aria-hidden="true"></i>
+      <span>Guardado en tu mapa personal.</span>
+    </div>
 
   {% endif %}
 
 </section>
 
-<section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-400">
+<section class="gota-cafe-detail-note">
 
-  <div class="mb-3">
-    <h3 class="text-lg font-semibold text-[var(--text-1)]">
-      ✍️ Tu nota personal
-    </h3>
+  <div class="gota-cafe-detail-note__header">
+    <div>
+      <h2 class="gota-cafe-detail-note__title">
+        Tu nota personal
+      </h2>
 
-    <p class="text-sm text-gray-500 dark:text-[var(--text-2)] mt-1">
-      Un recuerdo, una sensación o algo para acordarte después.
-    </p>
+      <p class="gota-cafe-detail-note__description">
+        Un recuerdo, una sensación o algo para acordarte después.
+      </p>
+    </div>
+
+    <span class="gota-cafe-detail-note__private">
+      <i class="fas fa-lock" aria-hidden="true"></i>
+      Solo vos
+    </span>
   </div>
 
   {% if user_note %}
 
-    <div class="rounded-2xl border border-gray-200 dark:border-[var(--border)] bg-white dark:bg-[var(--surface-2)] p-4">
+    <div class="gota-cafe-detail-note__saved">
 
-      <p class="text-sm leading-relaxed text-gray-700 dark:text-[var(--text-2)] italic">
+      <p class="gota-cafe-detail-note__text">
         “{{ user_note }}”
       </p>
 
       <button
         type="button"
         onclick="document.getElementById('note-edit-form').classList.toggle('hidden')"
-        class="mt-3 text-sm text-gray-400 hover:text-gray-600 transition"
+        class="gota-cafe-detail-note__edit"
       >
         Editar nota
       </button>
@@ -375,7 +451,7 @@
       id="note-edit-form"
       method="post"
       action="{% url 'reviews:update_cafe_note' cafe.id %}"
-      class="space-y-3 hidden mt-4"
+      class="gota-cafe-detail-note__form hidden"
     >
 
       {% csrf_token %}
@@ -384,14 +460,18 @@
         name="private_note"
         rows="2"
         maxlength="500"
-        class="w-full max-h-32 rounded-2xl border border-gray-200 dark:border-[var(--border)] bg-white dark:bg-[var(--surface-2)] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand)] resize-none"
+        class="gota-cafe-detail-note__textarea"
       >{{ user_note|default_if_none:'' }}</textarea>
 
-      <div class="flex items-center justify-between">
+      <div class="gota-cafe-detail-note__form-footer">
+
+        <span class="gota-cafe-detail-note__hint">
+          Máximo 500 caracteres
+        </span>
 
         <button
           type="submit"
-          class="btn btn-primary rounded-xl"
+          class="gota-cafe-detail-note__save"
         >
           Guardar cambios
         </button>
@@ -405,7 +485,7 @@
     <form
       method="post"
       action="{% url 'reviews:update_cafe_note' cafe.id %}"
-      class="space-y-3"
+      class="gota-cafe-detail-note__form"
     >
 
       {% csrf_token %}
@@ -415,18 +495,18 @@
         rows="2"
         maxlength="500"
         placeholder="¿Querés acordarte algo de este lugar?"
-        class="w-full max-h-32 rounded-2xl border border-gray-200 dark:border-[var(--border)] bg-white dark:bg-[var(--surface-2)] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand)] resize-none"
+        class="gota-cafe-detail-note__textarea"
       ></textarea>
 
-      <div class="flex items-center justify-between">
+      <div class="gota-cafe-detail-note__form-footer">
 
-        <p class="text-xs text-gray-400">
+        <span class="gota-cafe-detail-note__hint">
           Privado · solo visible para vos
-        </p>
+        </span>
 
         <button
           type="submit"
-          class="btn btn-primary rounded-xl"
+          class="gota-cafe-detail-note__save"
         >
           Guardar nota
         </button>
@@ -443,58 +523,97 @@
 
 {% if user.is_authenticated and user_status == "visited" %}
 
-<section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-500">
+<section class="gota-cafe-detail-second-impression">
 
-  <div class="mb-3">
-    <h3 class="text-lg font-semibold text-[var(--text-1)]">
-      ✨ Tu segunda impresión
-    </h3>
+  <div class="gota-cafe-detail-second-impression__header">
+    <div>
+      <h2 class="gota-cafe-detail-second-impression__title">
+        Tu segunda impresión
+      </h2>
 
-    <p class="text-sm text-gray-500 mt-1">
-      ¿Cómo te quedó este lugar después de vivirlo?
-    </p>
+      <p class="gota-cafe-detail-second-impression__description">
+        ¿Cómo te quedó este lugar después de vivirlo?
+      </p>
+    </div>
   </div>
 
   {% if not second_impression %}
 
-    <div class="flex flex-wrap gap-3">
+    <div class="gota-cafe-detail-second-impression__options">
 
-      <form method="post"
-            action="{% url 'reviews:set_second_impression' cafe.id %}">
+      <form
+        method="post"
+        action="{% url 'reviews:set_second_impression' cafe.id %}"
+      >
         {% csrf_token %}
-        <input type="hidden"
-               name="second_impression"
-               value="better">
+        <input
+          type="hidden"
+          name="second_impression"
+          value="better"
+        >
 
-        <button type="submit"
-                class="btn btn-primary rounded-xl">
-          ✨ Superó lo que esperaba
+        <button
+          type="submit"
+          class="gota-cafe-detail-second-impression-option"
+        >
+          <i class="fas fa-sparkles" aria-hidden="true"></i>
+
+          <span>
+            <strong>Superó lo que esperaba</strong>
+            <small>Me sorprendió para bien.</small>
+          </span>
         </button>
       </form>
 
-      <form method="post"
-            action="{% url 'reviews:set_second_impression' cafe.id %}">
+      <form
+        method="post"
+        action="{% url 'reviews:set_second_impression' cafe.id %}"
+      >
         {% csrf_token %}
-        <input type="hidden"
-               name="second_impression"
-               value="as_expected">
+        <input
+          type="hidden"
+          name="second_impression"
+          value="as_expected"
+        >
 
-        <button type="submit"
-                class="btn btn-outline rounded-xl">
-          ☕ Fue como imaginaba
+        <button
+          type="submit"
+          class="gota-cafe-detail-second-impression-option"
+        >
+          <img
+            src="{% static 'images/gota-icon.png' %}"
+            alt=""
+            aria-hidden="true"
+          >
+
+          <span>
+            <strong>Fue como imaginaba</strong>
+            <small>La experiencia coincidió con lo que esperaba.</small>
+          </span>
         </button>
       </form>
 
-      <form method="post"
-            action="{% url 'reviews:set_second_impression' cafe.id %}">
+      <form
+        method="post"
+        action="{% url 'reviews:set_second_impression' cafe.id %}"
+      >
         {% csrf_token %}
-        <input type="hidden"
-               name="second_impression"
-               value="didnt_connect">
+        <input
+          type="hidden"
+          name="second_impression"
+          value="didnt_connect"
+        >
 
-        <button type="submit"
-                class="btn btn-outline rounded-xl">
-          🤍 No conecté esta vez
+        <button
+          type="submit"
+          class="gota-cafe-detail-second-impression-option"
+        >
+          <i class="far fa-heart" aria-hidden="true"></i>
+
+          <span>
+            <strong>No conecté esta vez</strong>
+            <small>Quizás no era el momento o el lugar para mí.</small>
+          </span>
         </button>
       </form>
 
@@ -502,21 +621,28 @@
 
   {% elif second_impression == "better" %}
 
-    <p class="text-sm italic text-gray-600">
-      ✨ Este lugar te sorprendió.
-    </p>
+    <div class="gota-cafe-detail-second-impression__saved">
+      <i class="fas fa-sparkles" aria-hidden="true"></i>
+      <span>Este lugar te sorprendió.</span>
+    </div>
 
   {% elif second_impression == "as_expected" %}
 
-    <p class="text-sm italic text-gray-600">
-      ☕ Fue exactamente lo que esperabas.
-    </p>
+    <div class="gota-cafe-detail-second-impression__saved">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+      <span>Fue exactamente lo que esperabas.</span>
+    </div>
 
   {% else %}
 
-    <p class="text-sm italic text-gray-600">
-      🤍 Esta vez no terminó de conectar.
-    </p>
+    <div class="gota-cafe-detail-second-impression__saved">
+      <i class="far fa-heart" aria-hidden="true"></i>
+      <span>Esta vez no terminó de conectar.</span>
+    </div>
 
   {% endif %}
 
@@ -524,77 +650,101 @@
 
 {% endif %}
 
-  {% if cafe.description %}
-    <p class="text-base text-gray-700 dark:text-[var(--text-2)] leading-relaxed max-w-2xl">
-      {{ cafe.description }}
-    </p>
+{% if cafe.description or one_liner %}
+    <div class="gota-cafe-detail-summary">
+
+      {% if cafe.description %}
+        <p class="gota-cafe-detail-summary__description">
+          {{ cafe.description }}
+        </p>
+      {% endif %}
+
+      {% if one_liner %}
+        <p class="gota-cafe-detail-summary__one-liner">
+          {{ one_liner }}
+        </p>
+      {% endif %}
+
+    </div>
   {% endif %}
 
-  {% if one_liner %}
-    <p class="text-sm text-gray-600 dark:text-[var(--text-2)]">
-      {{ one_liner }}
-    </p>
-  {% endif %}
-
-  <nav aria-label="Breadcrumb" class="text-sm text-gray-500 mb-3">
-    <ol class="flex flex-wrap items-center gap-1">
+  <nav aria-label="Breadcrumb" class="gota-cafe-detail-breadcrumb">
+    <ol>
       <li>
-        <a href="{% url 'home' %}" class="hover:underline">Inicio</a>
-        <span class="mx-1">›</span>
+        <a href="{% url 'home' %}">Inicio</a>
       </li>
 
+      <li aria-hidden="true">›</li>
+
       <li>
-        <a href="{{ cafe_list_abs }}" class="hover:underline">Cafés</a>
-        <span class="mx-1">›</span>
+        <a href="{{ cafe_list_abs }}">Cafés</a>
       </li>
 
       {% if cafe.location %}
+        <li aria-hidden="true">›</li>
+
         <li>
-          <a href="{{ cafe_list_abs }}?zona={{ cafe.location|urlencode }}"
-            class="hover:underline">
+          <a href="{{ cafe_list_abs }}?zona={{ cafe.location|urlencode }}">
             {{ cafe.location }}
           </a>
-          <span class="mx-1">›</span>
         </li>
       {% endif %}
 
-      <li class="text-gray-700 font-medium">
+      <li aria-hidden="true">›</li>
+
+      <li aria-current="page">
         {{ cafe.name }}
       </li>
     </ol>
   </nav>
 
-
- 
-  <!-- CTAs -->
-  <div class="flex flex-wrap gap-3 pt-2">
+  <div class="gota-cafe-detail-hero-actions">
 
     {% if user.is_authenticated %}
-      <a href="{% url 'reviews:create_review' cafe.id %}"
-         class="btn btn-primary rounded-xl">
-        ☕ Contá cómo fue
+      <a
+        href="{% url 'reviews:create_review' cafe.id %}"
+        class="gota-cafe-detail-hero-actions__primary"
+      >
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+        Contá cómo fue
       </a>
     {% else %}
-      <a href="{% url 'account_login' %}?next={% url 'reviews:create_review' cafe.id %}"
-         class="btn btn-primary rounded-xl">
-        ☕ Contá cómo fue
+      <a
+        href="{% url 'account_login' %}?next={% url 'reviews:create_review' cafe.id %}"
+        class="gota-cafe-detail-hero-actions__primary"
+      >
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+        Contá cómo fue
       </a>
     {% endif %}
 
-    <a href="#reviews" class="btn btn-outline rounded-xl">
+    <a
+      href="#reviews"
+      class="gota-cafe-detail-hero-actions__secondary"
+    >
       Leer experiencias
+      <i class="fas fa-arrow-down" aria-hidden="true"></i>
     </a>
+
   </div>
 
 </section>
 
 
     <!-- FOTOS -->
-  {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
-    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-200">
-      {% include "reviews/includes/cafe_photos.html" with cafe=cafe %}
-    </section>
-  {% endif %}
+    {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
+      <section class="gota-cafe-detail-photos">
+        {% include "reviews/includes/cafe_photos.html" with cafe=cafe %}
+      </section>
+    {% endif %}
     
   <section class="surface p-5 rounded-2xl animate-fade-in-up animate-delay-600">
 
