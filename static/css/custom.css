@@ -4260,3 +4260,81 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
     height: 300px;
   }
 }
+
+/* =========================================================
+   CAFÉ DETAIL · SOBRE ESTE LUGAR
+   ========================================================= */
+
+.gota-cafe-detail-about {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  padding: 24px 28px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(23, 44, 109, .04);
+}
+
+.gota-cafe-detail-about__header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gota-cafe-detail-about__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gota-cafe-detail-about__description {
+  margin: 0;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.gota-cafe-detail-about__description--collapsed {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.gota-cafe-detail-about__toggle {
+  align-self: flex-start;
+
+  padding: 0;
+  border: 0;
+  background: transparent;
+
+  color: #172C6D;
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-cafe-detail-about__toggle:hover {
+  text-decoration: underline;
+}
+
+.gota-cafe-detail-about__one-liner {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid #EEF2F7;
+
+  color: #64748B;
+  font-size: 13px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .gota-cafe-detail-about {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+}

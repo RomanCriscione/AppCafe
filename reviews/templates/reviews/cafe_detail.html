@@ -220,24 +220,7 @@
 
   </div>
 
-  {% if cafe.description or one_liner %}
-    <div class="gota-cafe-detail-summary">
-
-      {% if cafe.description %}
-        <p class="gota-cafe-detail-summary__description">
-          {{ cafe.description }}
-        </p>
-      {% endif %}
-
-      {% if one_liner %}
-        <p class="gota-cafe-detail-summary__one-liner">
-          {{ one_liner }}
-        </p>
-      {% endif %}
-
-    </div>
-  {% endif %}
-
+  
   <nav aria-label="Breadcrumb" class="gota-cafe-detail-breadcrumb">
     <ol>
       <li>
@@ -315,8 +298,198 @@
       </section>
     {% endif %}
 
+  <!-- INFORMACIÓN PRÁCTICA -->
+  <section class="gota-cafe-detail-info">
+
+    <div class="gota-cafe-detail-info__header">
+      <span class="gota-home-section-kicker">
+        Para tener a mano
+      </span>
+
+      <h2 class="gota-cafe-detail-info__title">
+        Información práctica
+      </h2>
+    </div>
+
+    <div class="gota-cafe-detail-info__grid">
+
+      <!-- DIRECCIÓN -->
+      <div class="gota-cafe-detail-info-item">
+        <span class="gota-cafe-detail-info-item__icon">
+          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+        </span>
+
+        <div>
+          <strong>Dirección</strong>
+          <span>
+            {{ cafe.address }}{% if cafe.location %}, {{ cafe.location }}{% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!-- TELÉFONO -->
+      <div class="gota-cafe-detail-info-item">
+        <span class="gota-cafe-detail-info-item__icon">
+          <i class="fas fa-phone" aria-hidden="true"></i>
+        </span>
+
+        <div>
+          <strong>Teléfono</strong>
+          <span>{{ cafe.phone|default:"—" }}</span>
+        </div>
+      </div>
+
+      {% if cafe.instagram %}
+        <div class="gota-cafe-detail-info-item">
+          <span class="gota-cafe-detail-info-item__icon">
+            <i class="fab fa-instagram" aria-hidden="true"></i>
+          </span>
+
+          <div>
+            <strong>Instagram</strong>
+
+            <a
+              href="https://www.instagram.com/{{ cafe.instagram }}/"
+              target="_blank"
+              rel="noopener"
+            >
+              @{{ cafe.instagram }}
+            </a>
+          </div>
+        </div>
+      {% endif %}
 
 
+        
+      <!-- ACCIONES -->
+      <div class="gota-cafe-detail-info-actions">
+
+        <div class="gota-cafe-detail-info-actions__main">
+
+          <button
+            type="button"
+            onclick="openQRModal()"
+            class="gota-cafe-detail-info-action gota-cafe-detail-info-action--primary"
+          >
+            <i class="fas fa-qrcode" aria-hidden="true"></i>
+            <span>QR para reseñas</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="toggleShareMenu()"
+            class="gota-cafe-detail-info-action"
+          >
+            <i class="fas fa-share-alt" aria-hidden="true"></i>
+            <span>Compartir</span>
+          </button>
+
+        </div>
+
+        <div id="shareMenu" class="gota-cafe-detail-info-share hidden">
+
+          <a
+            href="https://wa.me/?text=Mirá%20{{ cafe.name|urlencode }}%20en%20Gota%20☕%0A{{ full_page_url|urlencode }}"
+            target="_blank"
+            rel="noopener"
+            class="gota-cafe-detail-info-share__item"
+          >
+            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+            WhatsApp
+          </a>
+
+          <button
+            type="button"
+            onclick="copyCafeLink('{{ full_page_url }}', this)"
+            class="gota-cafe-detail-info-share__item"
+          >
+            <i class="fas fa-link" aria-hidden="true"></i>
+            Copiar link
+          </button>
+
+        </div>
+
+        <div class="gota-cafe-detail-info-actions__secondary">
+
+          {% if cafe.google_maps_url %}
+            <a
+              href="{{ cafe.google_maps_url }}"
+              target="_blank"
+              rel="noopener"
+            >
+              <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+              Ver en Google Maps
+            </a>
+
+          {% elif cafe.latitude and cafe.longitude %}
+            <a
+              href="https://www.google.com/maps/search/?api=1&query={{ cafe.latitude }},{{ cafe.longitude }}"
+              target="_blank"
+              rel="noopener"
+            >
+              <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+              Ver en Google Maps
+            </a>
+
+          {% else %}
+            <a
+              href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
+              target="_blank"
+              rel="noopener"
+            >
+              <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+              Ver en Google Maps
+            </a>
+          {% endif %}
+
+          {% if cafe.claim_status != 'VERIFIED' %}
+            <a href="{% url 'reviews:claim_start' cafe.id %}">
+              <i class="fas fa-store" aria-hidden="true"></i>
+              ¿Sos el dueño? Reclamalo
+            </a>
+          {% endif %}
+
+        </div>
+
+      </div>
+
+{% if cafe.description or one_liner %}
+  <section class="gota-cafe-detail-about">
+
+    <div class="gota-cafe-detail-about__header">
+      <span class="gota-home-section-kicker">
+        Sobre este lugar
+      </span>
+    </div>
+
+    {% if cafe.description %}
+      <div class="gota-cafe-detail-about__content">
+        <p
+          id="cafe-description"
+          class="gota-cafe-detail-about__description gota-cafe-detail-about__description--collapsed"
+        >
+          {{ cafe.description }}
+        </p>
+
+        <button
+          type="button"
+          id="cafe-description-toggle"
+          class="gota-cafe-detail-about__toggle"
+          onclick="toggleCafeDescription()"
+        >
+          Leer más
+        </button>
+      </div>
+    {% endif %}
+
+    {% if one_liner %}
+      <p class="gota-cafe-detail-about__one-liner">
+        {{ one_liner }}
+      </p>
+    {% endif %}
+
+  </section>
+{% endif %}
 
   <!-- DESCUBRIR SI ESTE CAFÉ VA CON VOS -->
   <section class="gota-cafe-detail-discovery">
@@ -1051,160 +1224,6 @@
 
 </section>
 
-  <!-- INFORMACIÓN PRÁCTICA -->
-  <section class="gota-cafe-detail-info">
-
-    <div class="gota-cafe-detail-info__header">
-      <span class="gota-home-section-kicker">
-        Para tener a mano
-      </span>
-
-      <h2 class="gota-cafe-detail-info__title">
-        Información práctica
-      </h2>
-    </div>
-
-    <div class="gota-cafe-detail-info__grid">
-
-      <!-- DIRECCIÓN -->
-      <div class="gota-cafe-detail-info-item">
-        <span class="gota-cafe-detail-info-item__icon">
-          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-        </span>
-
-        <div>
-          <strong>Dirección</strong>
-          <span>
-            {{ cafe.address }}{% if cafe.location %}, {{ cafe.location }}{% endif %}
-          </span>
-        </div>
-      </div>
-
-      <!-- TELÉFONO -->
-      <div class="gota-cafe-detail-info-item">
-        <span class="gota-cafe-detail-info-item__icon">
-          <i class="fas fa-phone" aria-hidden="true"></i>
-        </span>
-
-        <div>
-          <strong>Teléfono</strong>
-          <span>{{ cafe.phone|default:"—" }}</span>
-        </div>
-      </div>
-
-      {% if cafe.instagram %}
-        <div class="gota-cafe-detail-info-item">
-          <span class="gota-cafe-detail-info-item__icon">
-            <i class="fab fa-instagram" aria-hidden="true"></i>
-          </span>
-
-          <div>
-            <strong>Instagram</strong>
-
-            <a
-              href="https://www.instagram.com/{{ cafe.instagram }}/"
-              target="_blank"
-              rel="noopener"
-            >
-              @{{ cafe.instagram }}
-            </a>
-          </div>
-        </div>
-      {% endif %}
-
-
-        
-      <!-- ACCIONES -->
-      <div class="gota-cafe-detail-info-actions">
-
-        <div class="gota-cafe-detail-info-actions__main">
-
-          <button
-            type="button"
-            onclick="openQRModal()"
-            class="gota-cafe-detail-info-action gota-cafe-detail-info-action--primary"
-          >
-            <i class="fas fa-qrcode" aria-hidden="true"></i>
-            <span>QR para reseñas</span>
-          </button>
-
-          <button
-            type="button"
-            onclick="toggleShareMenu()"
-            class="gota-cafe-detail-info-action"
-          >
-            <i class="fas fa-share-alt" aria-hidden="true"></i>
-            <span>Compartir</span>
-          </button>
-
-        </div>
-
-        <div id="shareMenu" class="gota-cafe-detail-info-share hidden">
-
-          <a
-            href="https://wa.me/?text=Mirá%20{{ cafe.name|urlencode }}%20en%20Gota%20☕%0A{{ full_page_url|urlencode }}"
-            target="_blank"
-            rel="noopener"
-            class="gota-cafe-detail-info-share__item"
-          >
-            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-            WhatsApp
-          </a>
-
-          <button
-            type="button"
-            onclick="copyCafeLink('{{ full_page_url }}', this)"
-            class="gota-cafe-detail-info-share__item"
-          >
-            <i class="fas fa-link" aria-hidden="true"></i>
-            Copiar link
-          </button>
-
-        </div>
-
-        <div class="gota-cafe-detail-info-actions__secondary">
-
-          {% if cafe.google_maps_url %}
-            <a
-              href="{{ cafe.google_maps_url }}"
-              target="_blank"
-              rel="noopener"
-            >
-              <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
-              Ver en Google Maps
-            </a>
-
-          {% elif cafe.latitude and cafe.longitude %}
-            <a
-              href="https://www.google.com/maps/search/?api=1&query={{ cafe.latitude }},{{ cafe.longitude }}"
-              target="_blank"
-              rel="noopener"
-            >
-              <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
-              Ver en Google Maps
-            </a>
-
-          {% else %}
-            <a
-              href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
-              target="_blank"
-              rel="noopener"
-            >
-              <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
-              Ver en Google Maps
-            </a>
-          {% endif %}
-
-          {% if cafe.claim_status != 'VERIFIED' %}
-            <a href="{% url 'reviews:claim_start' cafe.id %}">
-              <i class="fas fa-store" aria-hidden="true"></i>
-              ¿Sos el dueño? Reclamalo
-            </a>
-          {% endif %}
-
-        </div>
-
-      </div>
 
   
   <!-- UBICACIÓN -->
@@ -1650,8 +1669,41 @@ document.addEventListener("click", function(e){
     closeQRModal();
   }
 });
+
+
+
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const description = document.getElementById("cafe-description");
+  const toggle = document.getElementById("cafe-description-toggle");
 
+  if (!description || !toggle) return;
+
+  const isOverflowing = description.scrollHeight > description.clientHeight + 2;
+
+  if (!isOverflowing) {
+    toggle.style.display = "none";
+  }
+});
+
+function toggleCafeDescription() {
+  const description = document.getElementById("cafe-description");
+  const toggle = document.getElementById("cafe-description-toggle");
+
+  if (!description || !toggle) return;
+
+  const isCollapsed = description.classList.contains(
+    "gota-cafe-detail-about__description--collapsed"
+  );
+
+  description.classList.toggle(
+    "gota-cafe-detail-about__description--collapsed"
+  );
+
+  toggle.textContent = isCollapsed ? "Leer menos" : "Leer más";
+}
+</script>
 
 {% endblock %}
