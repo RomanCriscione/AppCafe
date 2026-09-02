@@ -1,81 +1,140 @@
-
 {% load static %}
 
 <article
   id="review-{{ review.id }}"
-  class="review-card p-4 {% if highlight_id == review.id %}review-highlight{% endif %}">
-  <header class="review-head">
-    <div class="review-avatar" aria-hidden="true">
+  class="gota-review-card {% if highlight_id == review.id %}review-highlight{% endif %}"
+>
+
+  <header class="gota-review-card__header">
+
+    <div class="gota-review-card__avatar" aria-hidden="true">
       {{ review.user.username|default:"U"|slice:":1" }}
     </div>
-    <div class="flex-1">
-      <div class="flex items-start justify-between gap-2">
-        <div class="review-meta">
-          <div class="review-user">{{ review.user.username|default:"Usuario" }}</div>
-          <div class="review-date">{{ review.created_at|date:"d M Y" }}</div>
-        </div>
-        <div class="review-rating text-sm">
-          <span class="dot" aria-hidden="true"></span>
-          <strong class="flex items-center gap-1">
-            <img src="{% static 'images/gota-icon.png' %}" class="w-4 h-4">
-            {{ review.rating|floatformat:1 }}
-          </strong>
 
-        </div>
-      </div>
+    <div class="gota-review-card__identity">
+      <strong class="gota-review-card__user">
+        {{ review.user.username|default:"Usuario" }}
+      </strong>
+
+      <span class="gota-review-card__date">
+        {{ review.created_at|date:"d M Y" }}
+      </span>
     </div>
+
+    <div class="gota-review-card__rating">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+      <strong>{{ review.rating|floatformat:1 }}</strong>
+    </div>
+
   </header>
 
-  <div id="rev-{{ review.id }}" class="review-body mt-3 collapsed" data-collapsible>
-    <div class="review-text">
+
+  <div
+    id="rev-{{ review.id }}"
+    class="review-body gota-review-card__body collapsed"
+    data-collapsible
+  >
+
+    <div class="review-text gota-review-card__content">
+
       {% if review.comment %}
-        <p>{{ review.comment|linebreaksbr }}</p>
+        <p class="gota-review-card__comment">
+          {{ review.comment|linebreaksbr }}
+        </p>
       {% endif %}
+
 
       {% if review.best_for_plan %}
-        <div class="mt-2">
-          <span class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 border border-amber-200">
-            Ideal para: {{ review.get_best_for_plan_display }}
+        <div class="gota-review-card__plan">
+          <span>
+            Ideal para
           </span>
+
+          <strong>
+            {{ review.get_best_for_plan_display }}
+          </strong>
         </div>
       {% endif %}
+
 
       {% if review.sensory_tags.all %}
-        <div class="tags-inline">
+        <div class="gota-review-card__tags">
           {% for t in review.sensory_tags.all %}
-            <span class="badge badge-xs">{{ t.name }}</span>
+            <span class="gota-review-card__tag">
+              {{ t.name }}
+            </span>
           {% endfor %}
         </div>
+
       {% elif review.tags.all %}
-        <div class="tags-inline">
+        <div class="gota-review-card__tags">
           {% for t in review.tags.all %}
-            <span class="badge badge-xs">{{ t.name }}</span>
+            <span class="gota-review-card__tag">
+              {{ t.name }}
+            </span>
           {% endfor %}
         </div>
       {% endif %}
+
     </div>
+
     <div class="review-fade" aria-hidden="true"></div>
+
   </div>
 
-  <div class="flex items-center gap-3 mt-2">
-    <form method="post"
-          action="{% url 'reviews:toggle_review_like' review.id %}"
-          class="inline-flex items-center gap-1 like-form"
-          data-review="{{ review.id }}">
+
+  <footer class="gota-review-card__footer">
+
+    <form
+      method="post"
+      action="{% url 'reviews:toggle_review_like' review.id %}"
+      class="like-form"
+      data-review="{{ review.id }}"
+    >
       {% csrf_token %}
-      <button type="submit"
-              class="btn btn-sm {% if review.id in liked_ids %}btn-success{% else %}btn-outline{% endif %}"
-              aria-pressed="{% if review.id in liked_ids %}true{% else %}false{% endif %}"
-              aria-label="Me gusta">
-        <span class="like-icon" id="like-icon-{{ review.id }}">{% if review.id in liked_ids %}❤️{% else %}🤍{% endif %}</span>
-        <span class="ml-1" id="likes-count-{{ review.id }}">{{ review.likes_count }}</span>
+
+      <button
+        type="submit"
+        class="gota-review-card__like {% if review.id in liked_ids %}gota-review-card__like--active{% endif %}"
+        aria-pressed="{% if review.id in liked_ids %}true{% else %}false{% endif %}"
+        aria-label="Me gusta"
+      >
+        <span
+          class="like-icon"
+          id="like-icon-{{ review.id }}"
+        >
+          {% if review.id in liked_ids %}♥{% else %}♡{% endif %}
+        </span>
+
+        <span id="likes-count-{{ review.id }}">
+          {{ review.likes_count }}
+        </span>
       </button>
+
     </form>
 
-    <button type="button" class="btn btn-outline btn-sm review-toggle" data-target="rev-{{ review.id }}" hidden>
+
+    <button
+      type="button"
+      class="gota-review-card__more review-toggle"
+      data-target="rev-{{ review.id }}"
+      hidden
+    >
       Ver más
     </button>
 
-    <a href="{% url 'reviews:report_review' review.id %}" class="text-xs text-red-500 hover:underline ml-auto">Denunciar</a>
-  </div>
+
+    <a
+      href="{% url 'reviews:report_review' review.id %}"
+      class="gota-review-card__report"
+    >
+      Denunciar
+    </a>
+
+  </footer>
+
 </article>
