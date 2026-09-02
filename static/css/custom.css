@@ -1901,3 +1901,509 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
     flex-basis: 42px;
   }
 }
+
+/* =========================================================
+   CAFÉS · CABECERA Y BUSCADOR
+   ========================================================= */
+
+.gota-cafe-list-header {
+  margin-bottom: 28px;
+}
+
+.gota-cafe-list-header__intro {
+  margin-bottom: 22px;
+}
+
+.gota-cafe-list-header__title {
+  margin: 5px 0 7px;
+
+  color: #172C6D;
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.gota-cafe-list-header__description {
+  max-width: 650px;
+  margin: 0;
+
+  color: #6B7280;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+
+/* Buscador */
+
+.gota-cafe-list-search {
+  width: 100%;
+  max-width: 680px;
+
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.gota-cafe-list-search__field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.gota-cafe-list-search__icon {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+
+  color: #94A3B8;
+  font-size: 14px;
+
+  pointer-events: none;
+}
+
+.gota-cafe-list-search__input {
+  width: 100%;
+  height: 46px;
+
+  padding: 0 16px 0 43px;
+
+  background: #FFFFFF;
+  border: 1px solid #DCE3EC;
+  border-radius: 13px;
+
+  color: #172C6D;
+  font-size: 14px;
+
+  outline: none;
+
+  box-shadow: 0 2px 8px rgba(23, 44, 109, .04);
+
+  transition:
+    border-color .15s ease,
+    box-shadow .15s ease;
+}
+
+.gota-cafe-list-search__input::placeholder {
+  color: #94A3B8;
+}
+
+.gota-cafe-list-search__input:focus {
+  border-color: #93B4E8;
+  box-shadow: 0 0 0 3px rgba(191, 219, 254, .45);
+}
+
+.gota-cafe-list-search__button {
+  height: 46px;
+  flex: 0 0 auto;
+
+  padding: 0 22px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #172C6D;
+  border: 1px solid #172C6D;
+  border-radius: 13px;
+
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color .15s ease,
+    transform .15s ease,
+    box-shadow .15s ease;
+}
+
+.gota-cafe-list-search__button:hover {
+  background: #1E3A8A;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(23, 44, 109, .16);
+}
+
+@media (max-width: 640px) {
+
+  .gota-cafe-list-header__title {
+    font-size: 26px;
+  }
+
+  .gota-cafe-list-search {
+    gap: 8px;
+  }
+
+  .gota-cafe-list-search__button {
+    padding: 0 17px;
+  }
+}
+
+/* =========================================================
+   CAFÉS · PANEL DE FILTROS
+   ========================================================= */
+
+.gota-cafe-filters {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 18px;
+  padding: 18px;
+
+  box-shadow: 0 4px 14px rgba(23, 44, 109, .05);
+}
+
+.gota-cafe-filters__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+
+  border-bottom: 1px solid #EEF2F7;
+}
+
+.gota-cafe-filters__kicker {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #64748B;
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.gota-cafe-filters__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.gota-cafe-filters__close {
+  width: 34px;
+  height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+
+  color: #64748B;
+  font-size: 22px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.gota-cafe-filters__close:hover {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #172C6D;
+}
+
+.gota-cafe-filters__form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+@media (max-width: 1023px) {
+
+  .gota-cafe-filters {
+    border-radius: 0 18px 18px 0;
+    padding: 20px 18px;
+  }
+}
+
+/* =========================================================
+   CAFÉS · SELECTS DEL PANEL DE FILTROS
+   ========================================================= */
+
+.gota-cafe-filters__control {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.gota-cafe-filters__label {
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.gota-cafe-filters__select-wrap {
+  position: relative;
+}
+
+.gota-cafe-filters__select-wrap > i {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+
+  color: #64748B;
+  font-size: 13px;
+
+  pointer-events: none;
+}
+
+.gota-cafe-filters__select {
+  width: 100%;
+  height: 42px;
+
+  padding: 0 36px 0 38px;
+
+  appearance: none;
+
+  background:
+    linear-gradient(45deg, transparent 50%, #64748B 50%) calc(100% - 17px) 18px / 5px 5px no-repeat,
+    linear-gradient(135deg, #64748B 50%, transparent 50%) calc(100% - 12px) 18px / 5px 5px no-repeat,
+    #FFFFFF;
+
+  border: 1px solid #DCE3EC;
+  border-radius: 11px;
+
+  color: #172C6D;
+  font-size: 13px;
+  font-weight: 500;
+
+  outline: none;
+
+  transition:
+    border-color .15s ease,
+    box-shadow .15s ease,
+    background-color .15s ease;
+}
+
+.gota-cafe-filters__select:hover {
+  border-color: #BFDBFE;
+  background-color: #F8FAFF;
+}
+
+.gota-cafe-filters__select:focus {
+  border-color: #93B4E8;
+  box-shadow: 0 0 0 3px rgba(191, 219, 254, .4);
+}
+
+/* =========================================================
+   CAFÉS · GRUPOS Y OPCIONES DE FILTROS
+   ========================================================= */
+
+.gota-cafe-filters__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+}
+
+.gota-cafe-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.gota-cafe-filter-group__header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.gota-cafe-filter-group__icon {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 7px;
+
+  background: #EFF6FF;
+  border: 1px solid #DBEAFE;
+  border-radius: 9px;
+
+  color: #172C6D;
+  font-size: 12px;
+}
+
+.gota-cafe-filter-group__icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.gota-cafe-filter-group__title {
+  color: #172C6D;
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.gota-cafe-filter-group__options {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.gota-cafe-filter-option {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  min-height: 34px;
+  padding: 5px 7px;
+
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  transition: background-color .15s ease;
+}
+
+.gota-cafe-filter-option:hover {
+  background: #F8FAFF;
+}
+
+.gota-cafe-filter-option > input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gota-cafe-filter-option__check {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 5px;
+
+  color: transparent;
+  font-size: 9px;
+
+  transition:
+    background-color .15s ease,
+    border-color .15s ease,
+    color .15s ease,
+    box-shadow .15s ease;
+}
+
+.gota-cafe-filter-option > input:checked
+  + .gota-cafe-filter-option__check {
+  background: #172C6D;
+  border-color: #172C6D;
+  color: #FFFFFF;
+}
+
+.gota-cafe-filter-option > input:focus-visible
+  + .gota-cafe-filter-option__check {
+  box-shadow: 0 0 0 3px rgba(191, 219, 254, .55);
+}
+
+.gota-cafe-filter-option__label {
+  color: #475569;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   CAFÉS · ACCIONES DE FILTROS
+   ========================================================= */
+
+.gota-cafe-filters__submit {
+  width: 100%;
+  min-height: 44px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 18px;
+
+  background: #172C6D;
+  border: 1px solid #172C6D;
+  border-radius: 12px;
+
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color .15s ease,
+    transform .15s ease,
+    box-shadow .15s ease;
+}
+
+.gota-cafe-filters__submit:hover {
+  background: #1E3A8A;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(23, 44, 109, .15);
+}
+
+
+/* Botón flotante · mobile */
+
+.gota-cafe-filters-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1001;
+
+  min-height: 46px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0 18px;
+
+  background: #172C6D;
+  border: 1px solid #172C6D;
+  border-radius: 999px;
+
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 600;
+
+  box-shadow: 0 8px 24px rgba(23, 44, 109, .22);
+
+  cursor: pointer;
+}
+
+.gota-cafe-filters-toggle i {
+  font-size: 12px;
+}
+
+.gota-cafe-filters-toggle:hover {
+  background: #1E3A8A;
+}

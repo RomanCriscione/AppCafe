@@ -203,3 +203,17 @@ def tag_emoji(tag):
     if category in _FALLBACK_BY_CATEGORY:
         return _FALLBACK_BY_CATEGORY[category]
     return "🏷️"
+
+@register.simple_tag(takes_context=True)
+def querystring_without_page(context):
+    request = context.get("request")
+
+    if not request:
+        return ""
+
+    params = request.GET.copy()
+    params.pop("page", None)
+
+    query = params.urlencode()
+
+    return f"&{query}" if query else ""

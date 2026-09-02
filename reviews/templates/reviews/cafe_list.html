@@ -29,112 +29,247 @@
 {% block content %}
 <div class="page-cafe-list flex flex-col lg:flex-row gap-6 relative px-4 min-w-0">
   <!-- Botón filtros (mobile) -->
-  <button id="toggle-filtros" class="lg:hidden fixed bottom-4 right-4 z-[1001] btn btn-primary rounded-full shadow-lg">
-    🔍 Filtros
+  <button
+    id="toggle-filtros"
+    type="button"
+    class="gota-cafe-filters-toggle lg:hidden"
+  >
+    <i class="fas fa-sliders" aria-hidden="true"></i>
+    <span>Filtros</span>
   </button>
-
   <!-- Overlay filtros (mobile) -->
   <div id="filtros-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[1000] hidden opacity-0 transition-opacity duration-300 lg:hidden"></div>
 
   <!-- Panel filtros -->
-  <aside id="panel-filtros"
-  class="lg:static fixed lg:relative top-0 left-0 h-full w-4/5 max-w-xs bg-white p-4 rounded-lg shadow-lg z-[1001]
-  transform -translate-x-full transition-transform duration-300 ease-in-out
-  lg:translate-x-0 lg:w-1/4 lg:h-auto lg:shadow-none overflow-auto">
-    <div class="flex justify-between items-center lg:hidden mb-4">
-      <h2 class="text-xl font-semibold">🔍 Filtros</h2>
-      <button id="cerrar-filtros" class="text-gray-600 hover:text-black text-2xl">&times;</button>
+  <aside
+    id="panel-filtros"
+    class="gota-cafe-filters lg:static fixed lg:relative top-0 left-0 h-full w-4/5 max-w-xs z-[1001]
+    transform -translate-x-full transition-transform duration-300 ease-in-out
+    lg:translate-x-0 lg:w-1/4 lg:h-auto overflow-auto"
+  >
+
+    <div class="gota-cafe-filters__header">
+
+      <div>
+        <span class="gota-cafe-filters__kicker">
+          Afiná tu búsqueda
+        </span>
+
+        <h2 class="gota-cafe-filters__title">
+          Filtros
+        </h2>
+      </div>
+
+      <button
+        id="cerrar-filtros"
+        type="button"
+        class="gota-cafe-filters__close lg:hidden"
+        aria-label="Cerrar filtros"
+      >
+        &times;
+      </button>
+
     </div>
 
-    <form method="get" class="space-y-4">
-      <div>
-        <label for="zona" class="block font-medium">Zona:</label>
-        <select name="zona" id="zona" class="select mt-1">
-          <option value="">Todas</option>
+    <form method="get" class="gota-cafe-filters__form">
+    <div class="gota-cafe-filters__control">
+      <label for="zona" class="gota-cafe-filters__label">
+        Zona
+      </label>
+
+      <div class="gota-cafe-filters__select-wrap">
+        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+
+        <select
+          name="zona"
+          id="zona"
+          class="gota-cafe-filters__select"
+        >
+          <option value="">Todas las zonas</option>
+
           {% for z in zonas_disponibles %}
-            <option value="{{ z }}" {% if zona_seleccionada == z %}selected{% endif %}>{{ z }}</option>
+            <option
+              value="{{ z }}"
+              {% if zona_seleccionada == z %}selected{% endif %}
+            >
+              {{ z }}
+            </option>
           {% endfor %}
         </select>
       </div>
+    </div>
 
-      <div>
-        <label for="orden" class="block font-medium">Orden:</label>
-        <select name="orden" id="orden" class="select mt-1">
-          <option value="algoritmo" {% if orden_actual == 'algoritmo' or not orden_actual %}selected{% endif %}>✨ Recomendadas</option>
-          <option value="rating" {% if orden_actual == 'rating' %}selected{% endif %}>Puntuación</option>
-          <option value="reviews" {% if orden_actual == 'reviews' %}selected{% endif %}>Más reseñas</option>
-          <option value="" {% if orden_actual == '' %}selected{% endif %}>Nombre</option>
+    <div class="gota-cafe-filters__control">
+      <label for="orden" class="gota-cafe-filters__label">
+        Ordenar por
+      </label>
+
+      <div class="gota-cafe-filters__select-wrap">
+        <i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>
+
+        <select
+          name="orden"
+          id="orden"
+          class="gota-cafe-filters__select"
+        >
+          <option
+            value="algoritmo"
+            {% if orden_actual == 'algoritmo' or not orden_actual %}selected{% endif %}
+          >
+            Recomendadas
+          </option>
+
+          <option
+            value="rating"
+            {% if orden_actual == 'rating' %}selected{% endif %}
+          >
+            Puntuación
+          </option>
+
+          <option
+            value="reviews"
+            {% if orden_actual == 'reviews' %}selected{% endif %}
+          >
+            Más reseñas
+          </option>
+
+          <option
+            value=""
+            {% if orden_actual == '' %}selected{% endif %}
+          >
+            Nombre
+          </option>
         </select>
       </div>
+    </div>
 
-      <fieldset class="space-y-5">
+      <fieldset class="gota-cafe-filters__groups">
 
-        <div>
-          <legend class="font-semibold mb-2">
-            ☕ Para comer y tomar
-          </legend>
+        <!-- Para comer y tomar -->
+        <div class="gota-cafe-filter-group">
 
-          <div class="space-y-1">
+          <div class="gota-cafe-filter-group__header">
+            <span class="gota-cafe-filter-group__icon">
+              <img
+                src="{% static 'images/gota-icon.png' %}"
+                alt=""
+                aria-hidden="true"
+              >
+            </span>
+
+            <legend class="gota-cafe-filter-group__title">
+              Para comer y tomar
+            </legend>
+          </div>
+
+          <div class="gota-cafe-filter-group__options">
             {% for key in filtros_comida %}
-              <label class="block">
+              <label class="gota-cafe-filter-option">
+
                 <input
                   type="checkbox"
                   name="{{ key }}"
                   {% if campos_activos|get_item:key %}checked{% endif %}
                 >
-                <span class="ml-1">
-                  {{ key|feature_emoji }} {{ key|feature_label }}
+
+                <span class="gota-cafe-filter-option__check">
+                  <i class="fas fa-check" aria-hidden="true"></i>
                 </span>
+
+                <span class="gota-cafe-filter-option__label">
+                  {{ key|feature_label }}
+                </span>
+
               </label>
             {% endfor %}
           </div>
+
         </div>
 
-        <div>
-          <legend class="font-semibold mb-2">
-            🌿 Espacio y entorno
-          </legend>
 
-          <div class="space-y-1">
+        <!-- Espacio y entorno -->
+        <div class="gota-cafe-filter-group">
+
+          <div class="gota-cafe-filter-group__header">
+            <span class="gota-cafe-filter-group__icon">
+              <i class="fas fa-leaf" aria-hidden="true"></i>
+            </span>
+
+            <legend class="gota-cafe-filter-group__title">
+              Espacio y entorno
+            </legend>
+          </div>
+
+          <div class="gota-cafe-filter-group__options">
             {% for key in filtros_entorno %}
-              <label class="block">
+              <label class="gota-cafe-filter-option">
+
                 <input
                   type="checkbox"
                   name="{{ key }}"
                   {% if campos_activos|get_item:key %}checked{% endif %}
                 >
-                <span class="ml-1">
-                  {{ key|feature_emoji }} {{ key|feature_label }}
+
+                <span class="gota-cafe-filter-option__check">
+                  <i class="fas fa-check" aria-hidden="true"></i>
                 </span>
+
+                <span class="gota-cafe-filter-option__label">
+                  {{ key|feature_label }}
+                </span>
+
               </label>
             {% endfor %}
           </div>
+
         </div>
 
-        <div>
-          <legend class="font-semibold mb-2">
-            🐶 Servicios y comodidades
-          </legend>
 
-          <div class="space-y-1">
+        <!-- Servicios y comodidades -->
+        <div class="gota-cafe-filter-group">
+
+          <div class="gota-cafe-filter-group__header">
+            <span class="gota-cafe-filter-group__icon">
+              <i class="fas fa-sliders" aria-hidden="true"></i>
+            </span>
+
+            <legend class="gota-cafe-filter-group__title">
+              Servicios y comodidades
+            </legend>
+          </div>
+
+          <div class="gota-cafe-filter-group__options">
             {% for key in filtros_comodidades %}
-              <label class="block">
+              <label class="gota-cafe-filter-option">
+
                 <input
                   type="checkbox"
                   name="{{ key }}"
                   {% if campos_activos|get_item:key %}checked{% endif %}
                 >
-                <span class="ml-1">
-                  {{ key|feature_emoji }} {{ key|feature_label }}
+
+                <span class="gota-cafe-filter-option__check">
+                  <i class="fas fa-check" aria-hidden="true"></i>
                 </span>
+
+                <span class="gota-cafe-filter-option__label">
+                  {{ key|feature_label }}
+                </span>
+
               </label>
             {% endfor %}
           </div>
+
         </div>
 
       </fieldset>
 
-      <button type="submit" class="mt-4 btn btn-primary rounded-xl w-full">Aplicar filtros</button>
+      <button
+        type="submit"
+        class="gota-cafe-filters__submit"
+      >
+        Aplicar filtros
+      </button>
     </form>
   </aside>
 
@@ -143,58 +278,69 @@
     <a href="#resultados" class="sr-only">Saltar a resultados</a>
     <a href="#paginacion" class="sr-only">Saltar a paginación</a>
 
-    <div class="mb-6">
-      <h1 id="titulo-cafeterias" class="text-2xl font-bold mb-2">
-        {% if zona_seleccionada %}
-          Cafeterías en {{ zona_seleccionada }}
-        {% else %}
-          Cafeterías
-        {% endif %}
+    <div class="gota-cafe-list-header">
 
-        {% if campos_activos.has_wifi %} con Wi-Fi{% endif %}
-        {% if campos_activos.is_pet_friendly %} pet friendly{% endif %}
-        {% if campos_activos.has_outdoor_seating %} con mesas al aire libre{% endif %}
-        {% if campos_activos.serves_breakfast %} para desayunar{% endif %}
-      </h1>
+      <div class="gota-cafe-list-header__intro">
 
-      <p class="text-sm text-gray-600 max-w-2xl">
-        {% if zona_seleccionada %}
-          Explorá cafeterías{% if campos_activos.has_wifi %} con Wi-Fi{% endif %}
-          {% if campos_activos.is_pet_friendly %} pet friendly{% endif %}
-          {% if campos_activos.has_outdoor_seating %} con mesas al aire libre{% endif %}
-          en {{ zona_seleccionada }}, con reseñas reales, fotos y experiencias que se sienten.
-        {% else %}
-          Explorá cafeterías{% if campos_activos.has_wifi %} con Wi-Fi{% endif %}
-          {% if campos_activos.is_pet_friendly %} pet friendly{% endif %}
-          {% if campos_activos.has_outdoor_seating %} con mesas al aire libre{% endif %}
-          con reseñas reales, fotos y experiencias que se sienten.
-        {% endif %}
-      </p>
+        <span class="gota-home-section-kicker">
+          Descubrí tu próximo café
+        </span>
 
-      <!-- 🔎 BUSCADOR -->
-      <form method="get" class="mb-8 mt-4 max-w-xl">
-        <div class="flex gap-2">
+        <h1 id="titulo-cafeterias" class="gota-cafe-list-header__title">
+          {% if zona_seleccionada %}
+            Cafeterías en {{ zona_seleccionada }}
+          {% else %}
+            Explorá cafeterías
+          {% endif %}
+        </h1>
 
-          <input type="text"
+        <p class="gota-cafe-list-header__description">
+          {% if zona_seleccionada %}
+            Encontrá lugares en {{ zona_seleccionada }} según lo que estés buscando.
+          {% else %}
+            Encontrá lugares según tus gustos, el momento y lo que tengas ganas de hacer.
+          {% endif %}
+        </p>
+
+      </div>
+
+
+      <!-- Buscador -->
+      <form method="get" class="gota-cafe-list-search">
+
+        <div class="gota-cafe-list-search__field">
+
+          <i
+            class="fas fa-search gota-cafe-list-search__icon"
+            aria-hidden="true"
+          ></i>
+
+          <input
+            type="text"
             name="q"
-            placeholder="Buscar café por nombre..."
+            placeholder="Buscar una cafetería..."
             value="{{ request.GET.q }}"
-            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-amber-400 shadow-sm">
-
-          {% if request.GET.zona %}
-            <input type="hidden" name="zona" value="{{ request.GET.zona }}">
-          {% endif %}
-
-          {% if request.GET.orden %}
-            <input type="hidden" name="orden" value="{{ request.GET.orden }}">
-          {% endif %}
-
-          <button type="submit" class="btn btn-primary rounded-xl px-5">
-            Buscar
-          </button>
+            class="gota-cafe-list-search__input"
+          >
 
         </div>
+
+        {% for key, value in request.GET.items %}
+          {% if key != "q" and key != "page" %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+          {% endif %}
+        {% endfor %}
+
+        <button
+          type="submit"
+          class="gota-cafe-list-search__button"
+        >
+          Buscar
+        </button>
+
       </form>
+
+    </div>
 
       {% if cafes %}
         <p class="sr-only">
@@ -258,21 +404,39 @@
 
 
       {% if is_paginated %}
+        {% querystring_without_page as preserved_query %}
+
         <nav id="paginacion" class="mt-8 flex items-center justify-center gap-2" aria-label="Paginación de cafeterías">
           {% if page_obj.has_previous %}
-            <a rel="prev" href="?page={{ page_obj.previous_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}"
-               class="btn btn-outline btn-sm">← Anterior</a>
+            <a
+              rel="prev"
+              href="?page={{ page_obj.previous_page_number }}{{ preserved_query }}"
+              class="btn btn-outline btn-sm"
+            >
+              ← Anterior
+            </a>
           {% else %}
-            <span class="btn btn-ghost btn-sm" aria-disabled="true">← Anterior</span>
+            <span class="btn btn-ghost btn-sm" aria-disabled="true">
+              ← Anterior
+            </span>
           {% endif %}
 
-          <span class="text-muted text-sm px-2">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+          <span class="text-muted text-sm px-2">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+          </span>
 
           {% if page_obj.has_next %}
-            <a rel="next" href="?page={{ page_obj.next_page_number }}{% if request.GET.zona %}&zona={{ request.GET.zona }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}"
-               class="btn btn-outline btn-sm">Siguiente →</a>
+            <a
+              rel="next"
+              href="?page={{ page_obj.next_page_number }}{{ preserved_query }}"
+              class="btn btn-outline btn-sm"
+            >
+              Siguiente →
+            </a>
           {% else %}
-            <span class="btn btn-ghost btn-sm" aria-disabled="true">Siguiente →</span>
+            <span class="btn btn-ghost btn-sm" aria-disabled="true">
+              Siguiente →
+            </span>
           {% endif %}
         </nav>
       {% endif %}
