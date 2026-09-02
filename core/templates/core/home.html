@@ -34,10 +34,118 @@
       href="{% url 'reviews:cafe_list' %}"
       class="gota-home-hero__button"
     >
-      Explorar cafeterías
+      Encontrar mi próximo café
+    </a>
+
+    </div>
+</section>
+
+
+<!-- Descubrimiento rápido -->
+<section class="gota-home-discovery">
+
+  <div class="gota-home-section-header">
+    <div>
+      <span class="gota-home-section-kicker">Encontrá algo para vos</span>
+      <h2 class="gota-home-section-title">¿Qué tenés ganas de encontrar?</h2>
+      <p class="gota-home-section-subtitle">
+        Elegí algo y descubrí cafeterías que van con lo que estás buscando.
+      </p>
+    </div>
+  </div>
+
+  <div class="gota-home-discovery__grid">
+
+    <a
+      href="{% url 'reviews:cafe_list' %}?has_specialty_coffee=on"
+      class="gota-home-discovery-card"
+    >
+      <span class="gota-home-discovery-card__icon">
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+      </span>
+
+      <span class="gota-home-discovery-card__content">
+        <strong>Café de especialidad</strong>
+        <span>Para cuando el café importa.</span>
+      </span>
+    </a>
+
+    <a
+      href="{% url 'reviews:cafe_list' %}?surrounded_by_nature=on"
+      class="gota-home-discovery-card"
+    >
+      <span class="gota-home-discovery-card__icon">
+        <i class="fas fa-leaf"></i>
+      </span>
+
+      <span class="gota-home-discovery-card__content">
+        <strong>Rodeado de naturaleza</strong>
+        <span>Para bajar un cambio.</span>
+      </span>
+    </a>
+
+    <a
+      href="{% url 'reviews:cafe_list' %}?has_artisanal_pastries=on"
+      class="gota-home-discovery-card"
+    >
+      <span class="gota-home-discovery-card__icon">
+        <i class="fas fa-cookie-bite"></i>
+      </span>
+
+      <span class="gota-home-discovery-card__content">
+        <strong>Pastelería artesanal</strong>
+        <span>Algo rico para acompañar.</span>
+      </span>
+    </a>
+
+    <a
+      href="{% url 'reviews:cafe_list' %}?is_pet_friendly=on"
+      class="gota-home-discovery-card"
+    >
+      <span class="gota-home-discovery-card__icon">
+        <i class="fas fa-paw"></i>
+      </span>
+
+      <span class="gota-home-discovery-card__content">
+        <strong>Pet friendly</strong>
+        <span>Para ir con compañía de cuatro patas.</span>
+      </span>
+    </a>
+
+    <a
+      href="{% url 'reviews:cafe_list' %}?has_wifi=on&amp;has_power_outlets=on"
+      class="gota-home-discovery-card"
+    >
+      <span class="gota-home-discovery-card__icon">
+        <i class="fas fa-laptop"></i>
+      </span>
+
+      <span class="gota-home-discovery-card__content">
+        <strong>WiFi + enchufes</strong>
+        <span>Para instalarte un rato.</span>
+      </span>
+    </a>
+
+    <a
+      href="{% url 'reviews:cafe_list' %}?has_water_view=on"
+      class="gota-home-discovery-card"
+    >
+      <span class="gota-home-discovery-card__icon">
+        <i class="fas fa-water"></i>
+      </span>
+
+      <span class="gota-home-discovery-card__content">
+        <strong>Vista al agua</strong>
+        <span>Para tomar algo con otra vista.</span>
+      </span>
     </a>
 
   </div>
+
 </section>
 
 
