@@ -1,77 +1,152 @@
 {# reviews/templates/reviews/includes/cafe_features.html #}
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6" role="list">
 
-  {# Calidad/servicio principal #}
+<div class="gota-cafe-detail-features" role="list">
+
   {% if cafe.has_specialty_coffee or cafe.specialty_coffee %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-mug-hot text-amber-600" aria-hidden="true"></i> Café de especialidad</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-mug-hot" aria-hidden="true"></i>
+      <span>Café de especialidad</span>
+    </div>
   {% endif %}
+
   {% if cafe.has_artisanal_pastries %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-cookie text-orange-400" aria-hidden="true"></i> Pastelería artesanal</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-cookie" aria-hidden="true"></i>
+      <span>Pastelería artesanal</span>
+    </div>
   {% endif %}
 
-  {# Conectividad y trabajo #}
   {% if cafe.has_wifi %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-wifi text-blue-500" aria-hidden="true"></i> Wi-Fi disponible</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-wifi" aria-hidden="true"></i>
+      <span>Wi-Fi disponible</span>
+    </div>
   {% endif %}
+
   {% if cafe.has_power_outlets %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-plug text-gray-700" aria-hidden="true"></i> Enchufes disponibles</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-plug" aria-hidden="true"></i>
+      <span>Enchufes disponibles</span>
+    </div>
   {% endif %}
+
   {% if cafe.laptop_friendly %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-laptop text-slate-700" aria-hidden="true"></i> Apto para trabajar</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-laptop" aria-hidden="true"></i>
+      <span>Apto para trabajar</span>
+    </div>
   {% endif %}
+
   {% if cafe.quiet_space %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-volume-xmark text-slate-600" aria-hidden="true"></i> Espacio tranquilo</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-volume-xmark" aria-hidden="true"></i>
+      <span>Espacio tranquilo</span>
+    </div>
   {% endif %}
 
-  {# Opciones de comida/bebida #}
   {% if cafe.is_vegan_friendly %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-leaf text-green-500" aria-hidden="true"></i> Opciones veganas</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-leaf" aria-hidden="true"></i>
+      <span>Opciones veganas</span>
+    </div>
   {% endif %}
+
   {% if cafe.has_vegetarian_options %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-carrot text-green-500" aria-hidden="true"></i> Opciones vegetarianas</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-carrot" aria-hidden="true"></i>
+      <span>Opciones vegetarianas</span>
+    </div>
   {% endif %}
+
   {% if cafe.has_gluten_free or cafe.gluten_free_options %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-bread-slice text-yellow-600" aria-hidden="true"></i> Sin TACC</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-bread-slice" aria-hidden="true"></i>
+      <span>Sin TACC</span>
+    </div>
   {% endif %}
+
   {% if cafe.serves_breakfast %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-mug-saucer text-yellow-500" aria-hidden="true"></i> Desayuno</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-mug-saucer" aria-hidden="true"></i>
+      <span>Desayuno</span>
+    </div>
   {% endif %}
+
   {% if cafe.brunch %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-utensils text-orange-500" aria-hidden="true"></i> Brunch</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-utensils" aria-hidden="true"></i>
+      <span>Brunch</span>
+    </div>
   {% endif %}
+
   {% if cafe.serves_alcohol %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-wine-glass text-red-500" aria-hidden="true"></i> Bebidas alcohólicas</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-wine-glass" aria-hidden="true"></i>
+      <span>Bebidas alcohólicas</span>
+    </div>
   {% endif %}
 
-  {# Comodidades del lugar #}
   {% if cafe.has_outdoor_seating %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-chair text-orange-500" aria-hidden="true"></i> Mesas afuera</div>
-  {% endif %}
-  {% if cafe.has_parking %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-square-parking text-blue-500" aria-hidden="true"></i> Estacionamiento</div>
-  {% endif %}
-  {% if cafe.is_accessible %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-wheelchair text-purple-500" aria-hidden="true"></i> Accesible</div>
-  {% endif %}
-  {% if cafe.has_air_conditioning %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-snowflake text-blue-400" aria-hidden="true"></i> Aire acondicionado</div>
-  {% endif %}
-  {% if cafe.has_books_or_games %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-book text-indigo-500" aria-hidden="true"></i> Libros o juegos</div>
-  {% endif %}
-  {% if cafe.is_pet_friendly %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-paw text-pink-500" aria-hidden="true"></i> Pet friendly</div>
-  {% endif %}
-  {% if cafe.has_baby_changing %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-baby text-rose-500" aria-hidden="true"></i> Cambiador para bebés</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-chair" aria-hidden="true"></i>
+      <span>Mesas afuera</span>
+    </div>
   {% endif %}
 
-  {# Pagos y reservas #}
-  {% if cafe.accepts_cards %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-credit-card text-emerald-600" aria-hidden="true"></i> Acepta tarjetas</div>
+  {% if cafe.has_parking %}
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-square-parking" aria-hidden="true"></i>
+      <span>Estacionamiento</span>
+    </div>
   {% endif %}
+
+  {% if cafe.is_accessible %}
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-wheelchair" aria-hidden="true"></i>
+      <span>Accesible</span>
+    </div>
+  {% endif %}
+
+  {% if cafe.has_air_conditioning %}
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-snowflake" aria-hidden="true"></i>
+      <span>Aire acondicionado</span>
+    </div>
+  {% endif %}
+
+  {% if cafe.has_books_or_games %}
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-book" aria-hidden="true"></i>
+      <span>Libros o juegos</span>
+    </div>
+  {% endif %}
+
+  {% if cafe.is_pet_friendly %}
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-paw" aria-hidden="true"></i>
+      <span>Pet friendly</span>
+    </div>
+  {% endif %}
+
+  {% if cafe.has_baby_changing %}
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-baby" aria-hidden="true"></i>
+      <span>Cambiador para bebés</span>
+    </div>
+  {% endif %}
+
+  {% if cafe.accepts_cards %}
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-credit-card" aria-hidden="true"></i>
+      <span>Acepta tarjetas</span>
+    </div>
+  {% endif %}
+
   {% if cafe.accepts_reservations %}
-    <div class="badge" role="listitem"><i class="fa-solid fa-calendar-check text-emerald-600" aria-hidden="true"></i> Acepta reservas</div>
+    <div class="gota-cafe-detail-feature" role="listitem">
+      <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
+      <span>Acepta reservas</span>
+    </div>
   {% endif %}
 
 </div>

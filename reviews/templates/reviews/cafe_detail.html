@@ -451,7 +451,11 @@
 
         </div>
 
-      </div>
+            </div>
+
+    </div>
+
+  </section>
 
 {% if cafe.description or one_liner %}
   <section class="gota-cafe-detail-about">
@@ -508,107 +512,111 @@
       </p>
     </div>
 
-  <!-- FEATURES -->
-  <section class="mt-4 animate-fade-in-up animate-delay-150">
-    <div class="surface p-4 rounded-xl">
-      {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
+  <div class="gota-cafe-detail-discovery__layout">
+
+    <div class="gota-cafe-detail-discovery__column">
+
+      <!-- FEATURES -->
+      <section class="gota-cafe-detail-discovery-card">
+        <h3 class="gota-cafe-detail-discovery-card__title">
+          Lo que tiene
+        </h3>
+
+        {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
+      </section>
+
     </div>
-  </section>
+
+    <div class="gota-cafe-detail-discovery__column">
 
       <!-- TAGS -->
-  {% if top_tags %}
-    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-225">
+      {% if top_tags %}
+        <section class="gota-cafe-detail-discovery-card">
 
-      <h2 class="text-lg font-semibold mb-3 text-[var(--text-1)]">🧠 Lo que otros destacan</h2>
+          <h3 class="gota-cafe-detail-discovery-card__title">
+            Lo que otros destacan
+          </h3>
 
-      <!-- TOP TAGS -->
-      <ul class="flex flex-wrap gap-2">
-        {% for t in top_tags %}
-          <li>
-            <span class="tag-chip">
-              {{ t|tag_emoji }} {{ t.name }}
-            </span>
-          </li>
-        {% empty %}
-          <li class="text-gray-500 dark:text-[var(--text-2)]">Aún no hay etiquetas.</li>
-        {% endfor %}
-      </ul>
+          <ul class="gota-cafe-detail-tags">
+            {% for t in top_tags %}
+              <li>
+                <span class="gota-cafe-detail-tag">
+                  {{ t|tag_emoji }} {{ t.name }}
+                </span>
+              </li>
+            {% empty %}
+              <li class="gota-cafe-detail-tags__empty">
+                Aún no hay etiquetas.
+              </li>
+            {% endfor %}
+          </ul>
 
-      {% if more_tags %}
-      <details class="mt-3 group">
-        <summary class="text-sm text-primary cursor-pointer dark:text-[var(--accent)]">
-          Ver más
-        </summary>
+          {% if more_tags %}
+            <details class="gota-cafe-detail-tags-more">
+              <summary>
+                Ver más
+              </summary>
 
-        <ul class="mt-2 flex flex-wrap gap-2">
-          {% for t in more_tags %}
-            <li>
-              <span class="tag-chip tag-chip--small">
-                {{ t|tag_emoji }} {{ t.name }}
-              </span>
-            </li>
-          {% endfor %}
-        </ul>
+              <ul class="gota-cafe-detail-tags gota-cafe-detail-tags--more">
+                {% for t in more_tags %}
+                  <li>
+                    <span class="gota-cafe-detail-tag">
+                      {{ t|tag_emoji }} {{ t.name }}
+                    </span>
+                  </li>
+                {% endfor %}
+              </ul>
+            </details>
+          {% endif %}
 
-      </details>
+        </section>
       {% endif %}
 
-    </section>
+      <!-- PERFIL SENSORIAL -->
+      {% if radar_values and radar_labels %}
+        <section class="gota-cafe-detail-discovery-card">
 
-  {% endif %}
+          <div class="gota-cafe-detail-sensory__header">
+            <div>
+              <h3 class="gota-cafe-detail-discovery-card__title">
+                Cómo se siente este café
+              </h3>
 
+              {% if emotional_summary %}
+                <p class="gota-cafe-detail-sensory__summary">
+                  {{ emotional_summary }}
+                </p>
+              {% endif %}
+            </div>
+          </div>
 
-  <!-- PERFIL SENSORIAL -->
-  {% if radar_values and radar_labels %}
-    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-225">
-      <div class="flex items-center gap-2 mb-2">
-        <span>☕</span>
-        <div>
-          <h2 class="text-lg font-semibold text-[var(--text-1)]">
-            ☕ Cómo se siente este café
-          </h2>
+          {% if total_reviews == 1 %}
+            <p class="gota-cafe-detail-sensory__meta">
+              Primeras impresiones del lugar
+            </p>
 
-          {% if emotional_summary %}
-            <p class="text-sm text-gray-500 dark:text-[var(--text-2)] mt-1 italic">
-              {{ emotional_summary }}
+          {% elif total_reviews > 1 %}
+            <p class="gota-cafe-detail-sensory__meta">
+              Perfil construido con {{ total_reviews }} reseñas
             </p>
           {% endif %}
-        </div>
 
-        {% if total_reviews == 1 %}
-        <p class="text-sm text-gray-500 mt-1">
-        Primeras impresiones del lugar ☕
-        </p>
+          <div class="gota-cafe-detail-sensory__chart">
+            {% if total_reviews == 0 %}
+              <p class="gota-cafe-detail-sensory__empty">
+                Aún no hay datos suficientes para el perfil.
+              </p>
+            {% else %}
+              <canvas id="sensor-bars"></canvas>
+            {% endif %}
+          </div>
 
-        {% elif total_reviews > 1 %}
-        <p class="text-sm text-gray-500 mt-1 flex items-center gap-1">
-        Perfil construido con {{ total_reviews }} reseñas
+        </section>
+      {% endif %}
 
-        <svg viewBox="0 0 24 24" class="w-4 h-4 inline">
-          <path fill="#f59e0b" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
-          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
-                d="M4 8h11v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8z"/>
-          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
-                d="M15 9h3a3 3 0 0 1 0 6h-2"/>
-        </svg>
+    </div>
 
-        </p>
-        {% endif %}
-
-
-      </div>
-      <div class="h-56 sm:h-60 md:h-64">
-        {% if total_reviews == 0 %}
-        <p class="text-sm text-gray-400 text-center mt-6">
-        Aún no hay datos suficientes para el perfil ☕
-        </p>
-        {% else %}
-        <canvas id="sensor-bars"></canvas>
-        {% endif %}
-
-      </div>
-    </section>
-    {% endif %}
+  </div>
 
     </section>
 
@@ -645,32 +653,66 @@
     </section>
   {% endif %}
 
-  <!-- LISTA DE RESEÑAS -->
-  <h3 id="reviews" class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-400">Reseñas:</h3>
+  <!-- EXPERIENCIAS DE LA COMUNIDAD -->
+  <section class="gota-cafe-detail-reviews">
 
-  {% cache 600 cafe_reviews_list cafe.id user.id %}
-  <div id="review-container"
-       class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 max-h-[1056px] overflow-hidden relative animate-fade-in-up animate-delay-500">
+    <div class="gota-cafe-detail-reviews__header">
+      <div>
+        <span class="gota-home-section-kicker">
+          Lo que vivieron otros
+        </span>
 
-    {% for review in reviews %}
-      {% include "reviews/_review_card.html" with review=review %}
-    {% empty %}
-      <p class="text-gray-500 text-sm col-span-full">{{ ui_messages.no_reviews }}</p>
-    {% endfor %}
+        <h2 id="reviews" class="gota-cafe-detail-reviews__title">
+          Experiencias de la comunidad
+        </h2>
 
-    {% if reviews|length > 3 %}
-      <div id="fade-reviews" class="absolute bottom-0 left-0 w-full h-20 reviews-fade-gradient pointer-events-none"></div>
-    {% endif %}
+        <p class="gota-cafe-detail-reviews__description">
+          Mirá cómo fue la experiencia de quienes ya pasaron por este lugar.
+        </p>
+      </div>
 
-  </div>
+      <span class="gota-cafe-detail-reviews__count">
+        {{ total_reviews }} reseña{{ total_reviews|pluralize }}
+      </span>
+    </div>
 
-  {% if reviews|length > 3 %}
-    <button onclick="toggleReviews()" id="btn-reviews"
-            class="btn btn-outline btn-sm mt-2 animate-fade-in-up animate-delay-600">
-      Ver todas
-    </button>
-  {% endif %}
-  {% endcache %}
+    {% cache 600 cafe_reviews_list cafe.id user.id %}
+
+      <div
+        id="review-container"
+        class="gota-cafe-detail-reviews__grid max-h-[1056px] overflow-hidden relative"
+      >
+
+        {% for review in reviews %}
+          {% include "reviews/_review_card.html" with review=review %}
+        {% empty %}
+          <p class="gota-cafe-detail-reviews__empty">
+            {{ ui_messages.no_reviews }}
+          </p>
+        {% endfor %}
+
+        {% if reviews|length > 3 %}
+          <div
+            id="fade-reviews"
+            class="absolute bottom-0 left-0 w-full h-20 reviews-fade-gradient pointer-events-none"
+          ></div>
+        {% endif %}
+
+      </div>
+
+      {% if reviews|length > 3 %}
+        <button
+          onclick="toggleReviews()"
+          id="btn-reviews"
+          class="gota-cafe-detail-reviews__toggle"
+        >
+          Ver todas
+        </button>
+      {% endif %}
+
+    {% endcache %}
+
+  </section>
 
   {% include "reviews/includes/pagination.html" with page_obj=page_obj anchor="#reviews" %}
 
@@ -1372,14 +1414,14 @@
     const isDark = document.documentElement.classList.contains("dark");
 
   const baseColor = isDark
-    ? "rgba(196, 156, 108, "
-    : "rgba(143, 93, 60, ";
+    ? "rgba(96, 165, 250, "
+    : "rgba(23, 44, 109, ";
 
   const radarColors = [
     `${baseColor}0.95)`,
-    `${baseColor}0.80)`,
-    `${baseColor}0.68)`,
-    `${baseColor}0.55)`,
+    `${baseColor}0.78)`,
+    `${baseColor}0.62)`,
+    `${baseColor}0.46)`,
   ];
 
     const bg = radarColors.slice(0, labels.length);

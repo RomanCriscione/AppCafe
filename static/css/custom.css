@@ -4338,3 +4338,299 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
     border-radius: 16px;
   }
 }
+
+/* =========================================================
+   CAFÉ DETAIL · FEATURES
+   ========================================================= */
+
+.gota-cafe-detail-features {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.gota-cafe-detail-feature {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  padding: 10px 12px;
+
+  background: #FFFFFF;
+  border: 1px solid #DBEAFE;
+  border-radius: 12px;
+
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.gota-cafe-detail-feature i {
+  width: 18px;
+  flex-shrink: 0;
+
+  color: #172C6D;
+  font-size: 13px;
+  text-align: center;
+}
+
+.gota-cafe-detail-feature span {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .gota-cafe-detail-features {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* =========================================================
+   CAFÉ DETAIL · DISCOVERY · LAYOUT
+   ========================================================= */
+
+.gota-cafe-detail-discovery__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.gota-cafe-detail-discovery__column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gota-cafe-detail-discovery-card {
+  min-width: 0;
+  padding: 18px;
+
+  background: #FFFFFF;
+  border: 1px solid #DBEAFE;
+  border-radius: 16px;
+}
+
+.gota-cafe-detail-discovery-card__title {
+  margin: 0 0 14px;
+
+  color: #172C6D;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+/* TAGS */
+
+.gota-cafe-detail-tags {
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  list-style: none;
+}
+
+.gota-cafe-detail-tag {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 7px 10px;
+
+  background: #EFF6FF;
+  border: 1px solid #DBEAFE;
+  border-radius: 999px;
+
+  color: #334155;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.gota-cafe-detail-tags__empty {
+  color: #94A3B8;
+  font-size: 13px;
+}
+
+.gota-cafe-detail-tags-more {
+  margin-top: 12px;
+}
+
+.gota-cafe-detail-tags-more summary {
+  width: fit-content;
+
+  color: #172C6D;
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-cafe-detail-tags--more {
+  margin-top: 10px;
+}
+
+/* SENSORIAL */
+
+.gota-cafe-detail-sensory__summary {
+  margin: -6px 0 0;
+
+  color: #64748B;
+  font-size: 13px;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.gota-cafe-detail-sensory__meta {
+  margin: 10px 0 0;
+
+  color: #94A3B8;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.gota-cafe-detail-sensory__chart {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  margin-top: 12px;
+}
+
+.gota-cafe-detail-sensory__empty {
+  margin: 0;
+
+  color: #94A3B8;
+  font-size: 13px;
+}
+
+/* MOBILE */
+
+@media (max-width: 760px) {
+  .gota-cafe-detail-discovery__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .gota-cafe-detail-discovery-card {
+    padding: 16px;
+  }
+
+  .gota-cafe-detail-sensory__chart {
+    height: 200px;
+  }
+}
+
+/* =========================================================
+   CAFÉ DETAIL · EXPERIENCIAS DE LA COMUNIDAD
+   ========================================================= */
+
+.gota-cafe-detail-reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  padding: 28px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(23, 44, 109, .04);
+}
+
+.gota-cafe-detail-reviews__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.gota-cafe-detail-reviews__title {
+  margin: 5px 0 0;
+  color: #172C6D;
+  font-size: clamp(22px, 3vw, 28px);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.gota-cafe-detail-reviews__description {
+  margin: 7px 0 0;
+  color: #64748B;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.gota-cafe-detail-reviews__count {
+  flex-shrink: 0;
+
+  padding: 6px 10px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 999px;
+
+  color: #172C6D;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.gota-cafe-detail-reviews__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  margin-top: 2px;
+}
+
+.gota-cafe-detail-reviews__empty {
+  grid-column: 1 / -1;
+
+  margin: 0;
+  padding: 18px;
+
+  background: #F8FAFC;
+  border: 1px solid #EEF2F7;
+  border-radius: 14px;
+
+  color: #94A3B8;
+  font-size: 13px;
+  text-align: center;
+}
+
+.gota-cafe-detail-reviews__toggle {
+  align-self: flex-start;
+
+  min-height: 38px;
+  padding: 9px 13px;
+
+  background: #EFF6FF !important;
+  border: 1px solid #BFDBFE !important;
+  border-radius: 11px !important;
+
+  color: #172C6D !important;
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-cafe-detail-reviews__toggle:hover {
+  background: #DBEAFE !important;
+}
+
+@media (max-width: 760px) {
+  .gota-cafe-detail-reviews {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .gota-cafe-detail-reviews__header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .gota-cafe-detail-reviews__grid {
+    grid-template-columns: 1fr;
+  }
+}
