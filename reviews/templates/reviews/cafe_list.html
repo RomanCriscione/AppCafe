@@ -400,51 +400,58 @@
 
 
 
-      {% if is_paginated %}
-        {% querystring_without_page as preserved_query %}
+            {% if is_paginated %}
+              {% querystring_without_page as preserved_query %}
 
-        <nav id="paginacion" class="mt-8 flex items-center justify-center gap-2" aria-label="Paginación de cafeterías">
-          {% if page_obj.has_previous %}
-            <a
-              rel="prev"
-              href="?page={{ page_obj.previous_page_number }}{{ preserved_query }}"
-              class="btn btn-outline btn-sm"
-            >
-              ← Anterior
-            </a>
-          {% else %}
-            <span class="btn btn-ghost btn-sm" aria-disabled="true">
-              ← Anterior
-            </span>
-          {% endif %}
+              <nav
+                id="paginacion"
+                class="mt-8 flex items-center justify-center gap-2"
+                aria-label="Paginación de cafeterías"
+              >
+                {% if page_obj.has_previous %}
+                  <a
+                    rel="prev"
+                    href="?page={{ page_obj.previous_page_number }}{{ preserved_query }}"
+                    class="btn btn-outline btn-sm"
+                  >
+                    ← Anterior
+                  </a>
+                {% else %}
+                  <span class="btn btn-ghost btn-sm" aria-disabled="true">
+                    ← Anterior
+                  </span>
+                {% endif %}
 
-          <span class="text-muted text-sm px-2">
-            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-          </span>
+                <span class="text-muted text-sm px-2">
+                  Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </span>
 
-          {% if page_obj.has_next %}
-            <a
-              rel="next"
-              href="?page={{ page_obj.next_page_number }}{{ preserved_query }}"
-              class="btn btn-outline btn-sm"
-            >
-              Siguiente →
-            </a>
-          {% else %}
-            <span class="btn btn-ghost btn-sm" aria-disabled="true">
-              Siguiente →
-            </span>
-          {% endif %}
-        </nav>
+                {% if page_obj.has_next %}
+                  <a
+                    rel="next"
+                    href="?page={{ page_obj.next_page_number }}{{ preserved_query }}"
+                    class="btn btn-outline btn-sm"
+                  >
+                    Siguiente →
+                  </a>
+                {% else %}
+                  <span class="btn btn-ghost btn-sm" aria-disabled="true">
+                    Siguiente →
+                  </span>
+                {% endif %}
+              </nav>
             {% endif %}
-          </section>
 
-          <div class="bg-zinc-50 px-4 py-6 mt-10 text-gray-800 rounded-lg">
-    <p class="text-center text-sm">¿No encontraste lo que buscabas? Probá con otros filtros o explorá el mapa. ☕</p>
-  </div>
-  
-</div>
-{% endblock %}
+            <div class="bg-zinc-50 px-4 py-6 mt-10 text-gray-800 rounded-lg">
+              <p class="text-center text-sm">
+                ¿No encontraste lo que buscabas? Probá con otros filtros o explorá el mapa. ☕
+              </p>
+            </div>
+
+        </section>
+
+      </div>
+      {% endblock %}
 
 {% block scripts %}
   {{ block.super }}
