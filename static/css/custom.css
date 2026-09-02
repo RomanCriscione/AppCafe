@@ -1954,7 +1954,7 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
 .gota-cafe-list-search__icon {
   position: absolute;
   top: 50%;
-  left: 16px;
+  left: 18px;
   transform: translateY(-50%);
 
   color: #94A3B8;
@@ -1967,7 +1967,7 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
   width: 100%;
   height: 46px;
 
-  padding: 0 16px 0 43px;
+  padding: 0 16px 0 50px;
 
   background: #FFFFFF;
   border: 1px solid #DCE3EC;
