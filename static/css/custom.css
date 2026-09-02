@@ -832,3 +832,690 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
 }
 */
 
+/* =========================================================
+   HOME · HERO GOTA
+   ========================================================= */
+
+.gota-home-hero {
+  width: 100%;
+  max-width: 1152px;
+  margin: 0 auto 32px;
+  padding: 42px 44px;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 24px;
+}
+
+.gota-home-hero__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.gota-home-hero__logo {
+  width: 56px;
+  height: 56px;
+  padding: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #FFFFFF;
+  border-radius: 16px;
+}
+
+.gota-home-hero__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.gota-home-hero__name {
+  font-size: 32px;
+  line-height: 1;
+  font-weight: 700;
+  color: #172C6D;
+}
+
+.gota-home-hero__title {
+  margin: 24px 0 0;
+
+  font-size: clamp(28px, 3vw, 42px);
+  line-height: 1.15;
+  font-weight: 700;
+  color: #172C6D;
+}
+
+.gota-home-hero__subtitle {
+  max-width: 620px;
+  margin: 10px 0 0;
+
+  font-size: 16px;
+  line-height: 1.5;
+  color: #6B7280;
+}
+
+.gota-home-hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.gota-home-hero__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 46px;
+  padding: 0 20px;
+
+  background: #172C6D;
+  border: 1px solid #172C6D;
+  border-radius: 14px;
+
+  color: #FFFFFF !important;
+  font-size: 15px;
+  font-weight: 600;
+
+  transition:
+    transform .15s ease,
+    box-shadow .15s ease,
+    background-color .15s ease;
+}
+
+.gota-home-hero__button:hover {
+  background: #1E3A8A;
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(23, 44, 109, .16);
+}
+
+@media (max-width: 640px) {
+
+  .gota-home-hero {
+    padding: 22px;
+    margin-bottom: 24px;
+    border-radius: 24px;
+  }
+
+  .gota-home-hero__logo {
+    width: 52px;
+    height: 52px;
+  }
+
+  .gota-home-hero__name {
+    font-size: 32px;
+  }
+
+  .gota-home-hero__title {
+    margin-top: 18px;
+    font-size: 22px;
+  }
+
+  .gota-home-hero__subtitle {
+    font-size: 15px;
+  }
+
+  .gota-home-hero__actions {
+    margin-top: 18px;
+  }
+
+  .gota-home-hero__button {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   HOME · ÚLTIMAS EXPERIENCIAS
+   ========================================================= */
+
+.gota-home-reviews {
+  width: 100%;
+  max-width: 1152px;
+  margin: 0 auto 40px;
+  padding: 32px 0 38px;
+  overflow: hidden;
+}
+
+.gota-home-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.gota-home-section-kicker {
+  display: block;
+  margin-bottom: 5px;
+
+  color: #2563EB;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.gota-home-section-title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.gota-home-section-subtitle {
+  margin: 7px 0 0;
+
+  color: #6B7280;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.gota-reviews-swiper {
+  position: relative;
+  width: 100%;
+  padding: 2px 2px 38px;
+}
+
+.gota-review-card {
+  width: 320px !important;
+  height: auto;
+
+  padding: 18px;
+
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 18px;
+
+  box-shadow: 0 4px 16px rgba(23, 44, 109, .06);
+
+  box-sizing: border-box;
+}
+
+.gota-review-card__cafe {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  color: inherit;
+  text-decoration: none;
+}
+
+.gota-review-card__image,
+.gota-review-card__image-placeholder {
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.gota-review-card__image {
+  object-fit: cover;
+}
+
+.gota-review-card__image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 13px;
+  background: #EFF6FF;
+}
+
+.gota-review-card__image-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.gota-review-card__cafe-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.gota-review-card__name {
+  color: #172C6D;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gota-review-card__location {
+  color: #6B7280;
+  font-size: 12px;
+}
+
+.gota-review-card__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  width: fit-content;
+  margin-top: 16px;
+  padding: 6px 10px;
+
+  background: #EFF6FF;
+  border: 1px solid #DBEAFE;
+  border-radius: 999px;
+
+  color: #172C6D;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gota-review-card__rating img {
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+}
+
+.gota-review-card__comment {
+  min-height: 44px;
+  margin: 13px 0 16px;
+
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.gota-review-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  padding-top: 12px;
+  border-top: 1px solid #F1F5F9;
+
+  color: #9CA3AF;
+  font-size: 11px;
+}
+
+.gota-reviews-swiper .swiper-pagination-bullet-active {
+  background: #172C6D;
+}
+
+.gota-reviews-swiper .swiper-button-next,
+.gota-reviews-swiper .swiper-button-prev {
+  color: #172C6D;
+}
+
+.gota-home-empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 20px;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 18px;
+
+  color: #6B7280;
+  font-size: 14px;
+}
+
+.gota-home-empty img {
+  width: 28px;
+  height: 28px;
+}
+
+@media (max-width: 640px) {
+
+  .gota-home-reviews {
+    padding: 20px 0 28px;
+    margin-bottom: 24px;
+  }
+
+  .gota-home-section-title {
+    font-size: 22px;
+  }
+
+  .gota-review-card {
+    width: 285px !important;
+  }
+
+  .gota-reviews-swiper .swiper-button-next,
+  .gota-reviews-swiper .swiper-button-prev {
+    display: none;
+  }
+}
+
+/* =========================================================
+   HOME · EXPLORÁ POR ZONA
+   ========================================================= */
+
+.gota-home-zones {
+  width: 100%;
+  max-width: 1152px;
+  margin: 0 auto 40px;
+  padding: 32px 0;
+}
+
+.gota-home-section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  flex-shrink: 0;
+
+  color: #172C6D !important;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+
+  transition: gap .15s ease;
+}
+
+.gota-home-section-link:hover {
+  gap: 9px;
+}
+
+.gota-home-zones__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.gota-home-zone {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  min-height: 46px;
+  padding: 8px 16px 8px 10px;
+
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 14px;
+
+  color: #172C6D !important;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+
+  box-shadow: 0 2px 8px rgba(23, 44, 109, .04);
+
+  transition:
+    border-color .15s ease,
+    background-color .15s ease,
+    transform .15s ease,
+    box-shadow .15s ease;
+}
+
+.gota-home-zone__icon {
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #EFF6FF;
+  border-radius: 9px;
+
+  color: #172C6D;
+
+  transition: background-color .15s ease;
+}
+
+.gota-home-zone:hover {
+  background: #F8FAFF;
+  border-color: #BFDBFE;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(23, 44, 109, .07);
+}
+
+.gota-home-zone:hover .gota-home-zone__icon {
+  background: #DBEAFE;
+}
+
+@media (max-width: 640px) {
+
+  .gota-home-zones {
+    padding: 20px 0;
+    margin-bottom: 24px;
+  }
+
+  .gota-home-section-header {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .gota-home-section-link {
+    margin-top: 22px;
+  }
+
+  .gota-home-zones__list {
+    gap: 8px;
+  }
+
+  .gota-home-zone {
+    min-height: 44px;
+    padding: 7px 13px 7px 8px;
+    font-size: 13px;
+  }
+
+  .gota-home-zone__icon {
+    width: 29px;
+    height: 29px;
+  }
+}
+
+/* =========================================================
+   HOME · TU MAPA CAFETERO
+   ========================================================= */
+
+.gota-home-my-map {
+  width: 100%;
+  max-width: 1152px;
+  margin: 0 auto 40px;
+  padding: 36px;
+
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: 48px;
+  align-items: center;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 24px;
+}
+
+.gota-home-my-map__description {
+  max-width: 470px;
+  margin: 10px 0 0;
+
+  color: #6B7280;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.gota-home-my-map__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-top: 22px;
+  min-height: 44px;
+  padding: 0 18px;
+
+  background: #172C6D;
+  border-radius: 13px;
+
+  color: #FFFFFF !important;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+
+  transition:
+    gap .15s ease,
+    background-color .15s ease,
+    transform .15s ease;
+}
+
+.gota-home-my-map__button:hover {
+  gap: 11px;
+  background: #1E3A8A;
+  transform: translateY(-1px);
+}
+
+.gota-home-my-map__states {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gota-home-map-state {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 14px;
+
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+
+  box-shadow: 0 2px 8px rgba(23, 44, 109, .04);
+}
+
+.gota-home-map-state__icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  font-size: 16px;
+}
+
+.gota-home-map-state__icon img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.gota-home-map-state__icon--want {
+  background: #EFF6FF;
+}
+
+.gota-home-map-state__icon--visited {
+  background: #F3F4F6;
+  color: #172C6D;
+}
+
+.gota-home-map-state__icon--return {
+  background: #FFF1F2;
+  color: #E11D48;
+}
+
+.gota-home-map-state h3 {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.gota-home-map-state p {
+  margin: 3px 0 0;
+
+  color: #6B7280;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+
+  .gota-home-my-map {
+    grid-template-columns: 1fr;
+    gap: 28px;
+
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+
+  .gota-home-my-map {
+    padding: 22px;
+  }
+
+  .gota-home-my-map__button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .gota-home-map-state {
+    padding: 12px;
+  }
+}
+
+/* =========================================================
+   HOME · VISTOS RECIENTEMENTE
+   ========================================================= */
+
+.gota-home-recent {
+  width: 100%;
+  max-width: 1152px;
+  margin: 0 auto 24px;
+  padding: 32px 0;
+  overflow: hidden;
+}
+
+.gota-recent-swiper {
+  position: relative;
+  width: 100%;
+  padding: 2px 2px 38px;
+}
+
+.gota-recent-swiper .swiper-slide {
+  border-radius: 18px;
+  overflow: hidden;
+
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+
+  box-shadow: 0 4px 16px rgba(23, 44, 109, .06);
+}
+
+.gota-recent-swiper .swiper-button-next,
+.gota-recent-swiper .swiper-button-prev {
+  color: #172C6D;
+}
+
+.gota-recent-swiper .swiper-pagination-bullet-active {
+  background: #172C6D;
+}
+
+@media (max-width: 640px) {
+
+  .gota-home-recent {
+    padding: 20px 0;
+    margin-bottom: 16px;
+  }
+
+  .gota-recent-swiper .swiper-button-next,
+  .gota-recent-swiper .swiper-button-prev {
+    display: none;
+  }
+}

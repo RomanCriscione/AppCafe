@@ -5,190 +5,291 @@
 {% block content %}
 
 <!-- Hero Section -->
-<section class="section-hero relative bg-no-repeat bg-center bg-cover w-full h-[52vh] sm:h-[420px] text-center text-white"
-          style="background-image: url('{% static 'images/coffee-hero.jpg' %}');">
-  <div class="relative max-w-2xl mx-auto z-10 pt-20">
-    <h1 class="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">
-      Descubrí y recomendá cafeterías reales
-    </h1>
-      <p class="mb-6 text-lg opacity-95">
-        Reseñas que cuentan sensaciones
-        para encontrar lugares donde el café, el espacio y el momento importan.
+<section class="gota-home-hero">
+  <div class="gota-home-hero__brand">
+
+    <div class="gota-home-hero__logo">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+    </div>
+
+    <span class="gota-home-hero__name">Gota</span>
+
+  </div>
+
+  <h1 class="gota-home-hero__title">
+    Descubrí tu próximo café
+  </h1>
+
+  <p class="gota-home-hero__subtitle">
+    Encontrá lugares según el momento que querés vivir.
+  </p>
+
+  <div class="gota-home-hero__actions">
+
+    <a
+      href="{% url 'reviews:cafe_list' %}"
+      class="gota-home-hero__button"
+    >
+      Explorar cafeterías
+    </a>
+
+  </div>
+</section>
+
+
+<!-- Últimas experiencias -->
+<section class="gota-home-reviews">
+
+  <div class="gota-home-section-header">
+    <div>
+      <span class="gota-home-section-kicker">Comunidad Gota</span>
+      <h2 class="gota-home-section-title">Últimas experiencias</h2>
+      <p class="gota-home-section-subtitle">
+        Lo que la comunidad está contando sobre los lugares que visita.
       </p>
-    <a href="{% url 'reviews:cafe_list' %}" class="btn btn-primary rounded-xl">
-      ✨ Explorá Cafeterías
-    </a>
+    </div>
   </div>
-</section>
 
+  {% if latest_reviews %}
+    <div class="swiper-reviews gota-reviews-swiper">
+      <div class="swiper-wrapper">
 
-<!-- Últimas Reseñas -->
-<section class="py-12 bg-orange-50 overflow-x-hidden">
-  <div class="max-w-6xl mx-auto px-4">
-    <h2 class="text-2xl font-semibold mb-6">📣 Últimas reseñas</h2>
-    {% if latest_reviews %}
-      <div class="swiper-reviews w-full">
-        <div class="swiper-wrapper">
-          {% for review in latest_reviews %}
-            <div class="swiper-slide w-[280px] sm:w-[300px] bg-white rounded-lg shadow-md p-4 box-border">
-              <div class="flex gap-4 items-start">
-                {% if review.cafe.photo1 %}
-                  <img alt="{{ review.cafe.name }}" class="w-20 h-20 object-cover rounded-md" 
-                      loading="lazy" src="{{ review.cafe.photo1.url }}"/>
-                {% endif %}
-                <div class="flex flex-col justify-between">
-                  <p class="font-semibold leading-snug">
-                    {{ review.user.username }} reseñó 
-                    <a class="text-blue-600 hover:underline"
-                      href="{% url 'reviews:cafe_detail' review.cafe.id %}">{{ review.cafe.name }}</a>
-                  </p>
-                  <p class="text-sm">☕ {{ review.rating }}</p>
-                  <p class="text-sm text-gray-700">{{ review.comment|truncatewords:20 }}</p>
-                  <p class="text-xs text-gray-500">{{ review.created_at|date:"d/m/Y H:i" }}</p>
+        {% for review in latest_reviews %}
+          <div class="swiper-slide gota-review-card">
+
+            <a
+              href="{% url 'reviews:cafe_detail' review.cafe.id %}"
+              class="gota-review-card__cafe"
+            >
+              {% if review.cafe.photo1 %}
+                <img
+                  src="{{ review.cafe.photo1.url }}"
+                  alt="{{ review.cafe.name }}"
+                  class="gota-review-card__image"
+                  loading="lazy"
+                >
+              {% else %}
+                <div class="gota-review-card__image-placeholder">
+                  <img
+                    src="{% static 'images/gota-icon.png' %}"
+                    alt=""
+                    aria-hidden="true"
+                  >
                 </div>
+              {% endif %}
+
+              <div class="gota-review-card__cafe-info">
+                <span class="gota-review-card__name">
+                  {{ review.cafe.name }}
+                </span>
+
+                {% if review.cafe.location %}
+                  <span class="gota-review-card__location">
+                    {{ review.cafe.location }}
+                  </span>
+                {% endif %}
               </div>
-            </div>
-          {% endfor %}
-        </div>
-        <div class="swiper-button-next text-brown-900"></div>
-        <div class="swiper-button-prev text-brown-900"></div>
-        <div class="swiper-pagination"></div>
-      </div>
-    {% else %}
-      <p class="text-gray-600">No hay reseñas aún.</p>
-    {% endif %}
-  </div>
-</section>
-
-<!-- CTA: Dejá tu reseña -->
-<section class="py-12 bg-white text-center">
-  <div class="max-w-xl mx-auto">
-    <h3 class="text-xl font-semibold mb-4">✨ ¿Todavía no calificaste tu café favorito?</h3>
-    <p class="mb-6 text-gray-700">Animate a dejar tu primera reseña y ayudá a otros a descubrir buenos lugares.</p>
-    <a href="{% url 'reviews:cafe_list' %}" 
-       class="bg-primary text-white font-semibold px-6 py-3 rounded-lg shadow 
-              transition-transform transform hover:scale-105 hover:bg-primary/90">
-       Dejar una reseña
-    </a>
-  </div>
-</section>
-
-<!-- Cafeterías destacadas -->
-<section class="py-12 bg-white mb-12">
-  <div class="max-w-6xl mx-auto px-4 text-center">
-    <h2 class="text-2xl font-semibold mb-6">🏆 Cafeterías destacadas</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {% for cafe in top_cafes %}
-        <div class="relative bg-gray-50 rounded-lg shadow hover:shadow-lg p-4 transition-transform transform hover:-translate-y-1">
-          <span class="absolute top-2 left-2 bg-yellow-400 text-xs font-bold px-2 py-1 rounded-full shadow text-white">TOP {{ forloop.counter }} ⭐</span>
-          {% if cafe.photo1 %}
-            <img alt="{{ cafe.name }}" class="w-full h-40 object-cover rounded-md mb-3" 
-                 loading="lazy" src="{{ cafe.photo1.url }}"/>
-          {% else %}
-            <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-2xl rounded-md mb-3">📷</div>
-          {% endif %}
-          <h3 class="text-lg font-semibold mb-1">
-            <a class="hover:underline text-primary" href="{% url 'reviews:cafe_detail' cafe.id %}">
-              {{ cafe.name }}
             </a>
-          </h3>
-          <p class="text-sm text-gray-600">
-            ☕ <span class="font-bold text-yellow-600">{{ cafe.avg_rating|floatformat:1|default:"-" }}/5</span> · {{ cafe.location }}
-          </p>
-          {% if cafe.tags.exists %}
-            <div class="mt-2 flex flex-wrap justify-center gap-2">
-              {% for tag in cafe.tags.all|slice:":3" %}
-                <span class="bg-primary text-white text-xs px-2 py-1 rounded-full">{{ tag.name }}</span>
-              {% endfor %}
+
+            <div class="gota-review-card__rating">
+              <img
+                src="{% static 'images/gota-icon.png' %}"
+                alt=""
+                aria-hidden="true"
+              >
+              <span>{{ review.rating }}</span>
             </div>
-          {% endif %}
-          {% with tag_data|get_item:cafe.id as cafe_tags %}
-            {% if cafe_tags %}
-              <div class="mt-3">
-                <h4 class="text-xs font-semibold mb-1 text-gray-700">🪄 Cómo lo perciben los visitantes:</h4>
-                {% for category, tags in cafe_tags.items %}
-                  <div class="mb-1">
-                    <p class="text-[11px] font-medium text-gray-600">{{ category|title }}</p>
-                    <div class="flex flex-wrap justify-center gap-1 mt-1">
-                      {% for tag in tags|slice:":3" %}
-                        <span class="bg-blue-100 text-blue-800 text-[11px] px-2 py-0.5 rounded-full">
-                          {{ tag.name }} ({{ tag.count }})
-                        </span>
-                      {% endfor %}
-                    </div>
-                  </div>
-                {% endfor %}
-              </div>
+
+            {% if review.comment %}
+              <p class="gota-review-card__comment">
+                “{{ review.comment|truncatewords:24 }}”
+              </p>
             {% endif %}
-          {% endwith %}
-        </div>
-      {% endfor %}
+
+            <div class="gota-review-card__footer">
+              <span>{{ review.user.username }}</span>
+              <span>{{ review.created_at|date:"d/m/Y" }}</span>
+            </div>
+
+          </div>
+        {% endfor %}
+
+      </div>
+
+      <div class="swiper-button-next gota-swiper-next"></div>
+      <div class="swiper-button-prev gota-swiper-prev"></div>
+      <div class="swiper-pagination"></div>
     </div>
-    <div class="mt-8">
-      <a href="{% url 'reviews:cafe_list' %}" 
-         class="bg-primary text-white font-semibold px-6 py-3 rounded-full shadow 
-                transition-transform transform hover:scale-105 hover:bg-primary/90">
-        Ver más cafeterías →
-      </a>
+
+  {% else %}
+
+    <div class="gota-home-empty">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+      <p>Todavía no hay experiencias para mostrar.</p>
     </div>
-  </div>
+
+  {% endif %}
+
 </section>
+
 
 <!-- Mapa interactivo -->
 {% include "core/includes/mapa_home.html" %}
 
-<!-- Zona -->
-<section class="py-12 bg-orange-50 text-center">
-  <h2 class="text-2xl font-semibold mb-4">🗺️ Explorá por zona</h2>
-  <p class="text-gray-700 mb-6">Filtrá las mejores cafeterías por barrio o cercanía.</p>
-  <div class="flex flex-wrap justify-center gap-4">
+<!-- Explorá por zona -->
+<section class="gota-home-zones">
+
+  <div class="gota-home-section-header">
+    <div>
+      <span class="gota-home-section-kicker">Encontrá tu lugar</span>
+      <h2 class="gota-home-section-title">Explorá por zona</h2>
+      <p class="gota-home-section-subtitle">
+        Descubrí cafeterías según dónde tengas ganas de ir.
+      </p>
+    </div>
+
+    <a
+      href="{% url 'reviews:cafe_list' %}"
+      class="gota-home-section-link"
+    >
+      Ver todas
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+
+  <div class="gota-home-zones__list">
     {% for zona in home_zones %}
-      <a href="{% url 'reviews:cafe_list' %}?zona={{ zona }}" 
-         class="bg-white border border-primary text-primary px-4 py-2 rounded 
-                hover:bg-primary hover:text-white transition">
-         {{ zona }}
+      <a
+        href="{% url 'reviews:cafe_list' %}?zona={{ zona|urlencode }}"
+        class="gota-home-zone"
+      >
+        <span class="gota-home-zone__icon">
+          <i class="fas fa-map-marker-alt"></i>
+        </span>
+
+        <span>{{ zona }}</span>
       </a>
     {% endfor %}
   </div>
+
 </section>
 
-<!-- Beneficios -->
-<section class="py-16 bg-white">
-  <div class="container mx-auto text-center px-4">
-    <h2 class="text-3xl font-bold mb-10 text-primary">☕ ¿Por qué elegir Gota?</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      <div class="p-6 bg-orange-50 rounded-xl shadow hover:shadow-lg transition">
-        <i class="fas fa-map-marker-alt text-4xl text-accent mb-4"></i>
-        <h3 class="text-xl font-semibold mb-2">Explorá Cafeterías</h3>
-        <p>Encontrá los mejores cafés de tu zona con reseñas reales y fotos.</p>
+<!-- Tu mapa cafetero -->
+<section class="gota-home-my-map">
+
+  <div class="gota-home-my-map__intro">
+
+    <span class="gota-home-section-kicker">Tu recorrido en Gota</span>
+
+    <h2 class="gota-home-section-title">
+      Armá tu mapa cafetero
+    </h2>
+
+    <p class="gota-home-my-map__description">
+      Guardá los lugares que querés conocer y llevá un registro de las cafeterías
+      que forman parte de tu recorrido.
+    </p>
+
+    {% if user.is_authenticated %}
+      <a
+        href="{% url 'reviews:my_map' %}"
+        class="gota-home-my-map__button"
+      >
+        Ver mi mapa
+        <span aria-hidden="true">→</span>
+      </a>
+    {% else %}
+      <a
+        href="{% url 'account_signup' %}"
+        class="gota-home-my-map__button"
+      >
+        Crear mi mapa
+        <span aria-hidden="true">→</span>
+      </a>
+    {% endif %}
+
+  </div>
+
+  <div class="gota-home-my-map__states">
+
+    <div class="gota-home-map-state">
+      <div class="gota-home-map-state__icon gota-home-map-state__icon--want">
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
       </div>
-      <div class="p-6 bg-orange-50 rounded-xl shadow hover:shadow-lg transition">
-        <i class="fas fa-heart text-4xl text-accent mb-4"></i>
-        <h3 class="text-xl font-semibold mb-2">Guardá tus Favoritos</h3>
-        <p>Marcá tus lugares preferidos y volvé cuando quieras.</p>
-      </div>
-      <div class="p-6 bg-orange-50 rounded-xl shadow hover:shadow-lg transition">
-        <i class="fas fa-star text-4xl text-accent mb-4"></i>
-        <h3 class="text-xl font-semibold mb-2">Dejá tu Opinión</h3>
-        <p>Compartí tu experiencia con la comunidad cafetera.</p>
+
+      <div>
+        <h3>Quiero ir</h3>
+        <p>Guardá cafeterías que querés conocer.</p>
       </div>
     </div>
+
+    <div class="gota-home-map-state">
+      <div class="gota-home-map-state__icon gota-home-map-state__icon--visited">
+        <i class="fas fa-check"></i>
+      </div>
+
+      <div>
+        <h3>Ya fui</h3>
+        <p>Recordá los lugares que ya visitaste.</p>
+      </div>
+    </div>
+
+    <div class="gota-home-map-state">
+      <div class="gota-home-map-state__icon gota-home-map-state__icon--return">
+        <i class="fas fa-heart"></i>
+      </div>
+
+      <div>
+        <h3>Quiero volver</h3>
+        <p>Tené a mano esos lugares a los que volverías.</p>
+      </div>
+    </div>
+
   </div>
+
 </section>
 
 <!-- Cafés vistos recientemente -->
-<section class="py-12 bg-orange-50">
-  <div class="max-w-6xl mx-auto px-4">
-    <h2 class="text-2xl font-semibold mb-6">👀 Cafés que visitaste recientemente</h2>
-    <div id="recently-viewed-container" class="swiper-container">
-      <div class="swiper-wrapper flex" id="recently-viewed-list">
-        <!-- JS insertará los cafés acá -->
-      </div>
-      <div class="swiper-button-next text-brown-900"></div>
-      <div class="swiper-button-prev text-brown-900"></div>
-      <div class="swiper-pagination"></div>
+<section class="gota-home-recent">
+
+  <div class="gota-home-section-header">
+    <div>
+      <span class="gota-home-section-kicker">Seguí explorando</span>
+      <h2 class="gota-home-section-title">Vistos recientemente</h2>
+      <p class="gota-home-section-subtitle">
+        Volvé rápido a las cafeterías que estuviste mirando.
+      </p>
     </div>
   </div>
+
+  <div
+    id="recently-viewed-container"
+    class="swiper-container gota-recent-swiper"
+  >
+    <div
+      class="swiper-wrapper"
+      id="recently-viewed-list"
+    >
+      <!-- JS insertará los cafés acá -->
+    </div>
+
+    <div class="swiper-button-next gota-swiper-next"></div>
+    <div class="swiper-button-prev gota-swiper-prev"></div>
+    <div class="swiper-pagination"></div>
+  </div>
+
 </section>
 
 {% endblock %}
