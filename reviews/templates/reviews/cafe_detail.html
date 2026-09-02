@@ -220,7 +220,288 @@
 
   </div>
 
-  <!-- ESTADO DEL CAFÉ -->
+  {% if cafe.description or one_liner %}
+    <div class="gota-cafe-detail-summary">
+
+      {% if cafe.description %}
+        <p class="gota-cafe-detail-summary__description">
+          {{ cafe.description }}
+        </p>
+      {% endif %}
+
+      {% if one_liner %}
+        <p class="gota-cafe-detail-summary__one-liner">
+          {{ one_liner }}
+        </p>
+      {% endif %}
+
+    </div>
+  {% endif %}
+
+  <nav aria-label="Breadcrumb" class="gota-cafe-detail-breadcrumb">
+    <ol>
+      <li>
+        <a href="{% url 'home' %}">Inicio</a>
+      </li>
+
+      <li aria-hidden="true">›</li>
+
+      <li>
+        <a href="{{ cafe_list_abs }}">Cafés</a>
+      </li>
+
+      {% if cafe.location %}
+        <li aria-hidden="true">›</li>
+
+        <li>
+          <a href="{{ cafe_list_abs }}?zona={{ cafe.location|urlencode }}">
+            {{ cafe.location }}
+          </a>
+        </li>
+      {% endif %}
+
+      <li aria-hidden="true">›</li>
+
+      <li aria-current="page">
+        {{ cafe.name }}
+      </li>
+    </ol>
+  </nav>
+
+  <div class="gota-cafe-detail-hero-actions">
+
+    {% if user.is_authenticated %}
+      <a
+        href="{% url 'reviews:create_review' cafe.id %}"
+        class="gota-cafe-detail-hero-actions__primary"
+      >
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+        Contá cómo fue
+      </a>
+    {% else %}
+      <a
+        href="{% url 'account_login' %}?next={% url 'reviews:create_review' cafe.id %}"
+        class="gota-cafe-detail-hero-actions__primary"
+      >
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+        Contá cómo fue
+      </a>
+    {% endif %}
+
+    <a
+      href="#reviews"
+      class="gota-cafe-detail-hero-actions__secondary"
+    >
+      Leer experiencias
+      <i class="fas fa-arrow-down" aria-hidden="true"></i>
+    </a>
+
+  </div>
+
+  </section>
+
+      <!-- FOTOS -->
+    {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
+      <section class="gota-cafe-detail-photos">
+        {% include "reviews/includes/cafe_photos.html" with cafe=cafe %}
+      </section>
+    {% endif %}
+
+
+
+
+  <!-- DESCUBRIR SI ESTE CAFÉ VA CON VOS -->
+  <section class="gota-cafe-detail-discovery">
+
+    <div class="gota-cafe-detail-discovery__header">
+      <span class="gota-home-section-kicker">
+        Antes de elegirlo
+      </span>
+
+      <h2 class="gota-cafe-detail-discovery__title">
+        ¿Este lugar va con vos?
+      </h2>
+
+      <p class="gota-cafe-detail-discovery__description">
+        Mirá qué tiene, qué destaca la comunidad y cómo se siente estar acá.
+      </p>
+    </div>
+
+  <!-- FEATURES -->
+  <section class="mt-4 animate-fade-in-up animate-delay-150">
+    <div class="surface p-4 rounded-xl">
+      {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
+    </div>
+  </section>
+
+      <!-- TAGS -->
+  {% if top_tags %}
+    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-225">
+
+      <h2 class="text-lg font-semibold mb-3 text-[var(--text-1)]">🧠 Lo que otros destacan</h2>
+
+      <!-- TOP TAGS -->
+      <ul class="flex flex-wrap gap-2">
+        {% for t in top_tags %}
+          <li>
+            <span class="tag-chip">
+              {{ t|tag_emoji }} {{ t.name }}
+            </span>
+          </li>
+        {% empty %}
+          <li class="text-gray-500 dark:text-[var(--text-2)]">Aún no hay etiquetas.</li>
+        {% endfor %}
+      </ul>
+
+      {% if more_tags %}
+      <details class="mt-3 group">
+        <summary class="text-sm text-primary cursor-pointer dark:text-[var(--accent)]">
+          Ver más
+        </summary>
+
+        <ul class="mt-2 flex flex-wrap gap-2">
+          {% for t in more_tags %}
+            <li>
+              <span class="tag-chip tag-chip--small">
+                {{ t|tag_emoji }} {{ t.name }}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+
+      </details>
+      {% endif %}
+
+    </section>
+
+  {% endif %}
+
+
+  <!-- PERFIL SENSORIAL -->
+  {% if radar_values and radar_labels %}
+    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-225">
+      <div class="flex items-center gap-2 mb-2">
+        <span>☕</span>
+        <div>
+          <h2 class="text-lg font-semibold text-[var(--text-1)]">
+            ☕ Cómo se siente este café
+          </h2>
+
+          {% if emotional_summary %}
+            <p class="text-sm text-gray-500 dark:text-[var(--text-2)] mt-1 italic">
+              {{ emotional_summary }}
+            </p>
+          {% endif %}
+        </div>
+
+        {% if total_reviews == 1 %}
+        <p class="text-sm text-gray-500 mt-1">
+        Primeras impresiones del lugar ☕
+        </p>
+
+        {% elif total_reviews > 1 %}
+        <p class="text-sm text-gray-500 mt-1 flex items-center gap-1">
+        Perfil construido con {{ total_reviews }} reseñas
+
+        <svg viewBox="0 0 24 24" class="w-4 h-4 inline">
+          <path fill="#f59e0b" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
+          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
+                d="M4 8h11v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8z"/>
+          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
+                d="M15 9h3a3 3 0 0 1 0 6h-2"/>
+        </svg>
+
+        </p>
+        {% endif %}
+
+
+      </div>
+      <div class="h-56 sm:h-60 md:h-64">
+        {% if total_reviews == 0 %}
+        <p class="text-sm text-gray-400 text-center mt-6">
+        Aún no hay datos suficientes para el perfil ☕
+        </p>
+        {% else %}
+        <canvas id="sensor-bars"></canvas>
+        {% endif %}
+
+      </div>
+    </section>
+    {% endif %}
+
+    </section>
+
+  <!-- RESEÑA DESTACADA -->
+  {% if best_review %}
+    <section class="gota-cafe-detail-featured-review">
+
+      <span class="gota-home-section-kicker">
+        Una experiencia para destacar
+      </span>
+
+      <div class="gota-cafe-detail-featured-review__card">
+
+        <div class="gota-cafe-detail-featured-review__meta">
+          <strong>{{ best_review.user.username }}</strong>
+          <span>{{ best_review.created_at|date:"d M Y" }}</span>
+
+          <span class="gota-cafe-detail-featured-review__rating">
+            <img
+              src="{% static 'images/gota-icon.png' %}"
+              alt=""
+              aria-hidden="true"
+            >
+            {{ best_review.rating|floatformat:1 }}
+          </span>
+        </div>
+
+        <p class="gota-cafe-detail-featured-review__text">
+          “{{ best_review.comment }}”
+        </p>
+
+      </div>
+
+    </section>
+  {% endif %}
+
+  <!-- LISTA DE RESEÑAS -->
+  <h3 id="reviews" class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-400">Reseñas:</h3>
+
+  {% cache 600 cafe_reviews_list cafe.id user.id %}
+  <div id="review-container"
+       class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 max-h-[1056px] overflow-hidden relative animate-fade-in-up animate-delay-500">
+
+    {% for review in reviews %}
+      {% include "reviews/_review_card.html" with review=review %}
+    {% empty %}
+      <p class="text-gray-500 text-sm col-span-full">{{ ui_messages.no_reviews }}</p>
+    {% endfor %}
+
+    {% if reviews|length > 3 %}
+      <div id="fade-reviews" class="absolute bottom-0 left-0 w-full h-20 reviews-fade-gradient pointer-events-none"></div>
+    {% endif %}
+
+  </div>
+
+  {% if reviews|length > 3 %}
+    <button onclick="toggleReviews()" id="btn-reviews"
+            class="btn btn-outline btn-sm mt-2 animate-fade-in-up animate-delay-600">
+      Ver todas
+    </button>
+  {% endif %}
+  {% endcache %}
+
+  {% include "reviews/includes/pagination.html" with page_obj=page_obj anchor="#reviews" %}
+
+    <!-- ESTADO DEL CAFÉ -->
   <section class="gota-cafe-detail-map-state">
 
     <div class="gota-cafe-detail-map-state__header">
@@ -650,117 +931,29 @@
 
 {% endif %}
 
-{% if cafe.description or one_liner %}
-    <div class="gota-cafe-detail-summary">
+  <section class="gota-cafe-detail-whispers">
 
-      {% if cafe.description %}
-        <p class="gota-cafe-detail-summary__description">
-          {{ cafe.description }}
-        </p>
-      {% endif %}
+    <div class="gota-cafe-detail-whispers__header">
 
-      {% if one_liner %}
-        <p class="gota-cafe-detail-summary__one-liner">
-          {{ one_liner }}
+      <div>
+        <span class="gota-home-section-kicker">
+          Lo que queda
+        </span>
+
+        <h2 class="gota-cafe-detail-whispers__title">
+          Huellas de este lugar
+        </h2>
+
+        <p class="gota-cafe-detail-whispers__description">
+          Pequeñas sensaciones que este café dejó en alguien.
         </p>
-      {% endif %}
+      </div>
+
+      <span class="gota-cafe-detail-whispers__count">
+        {{ whispers|length }} huellas
+      </span>
 
     </div>
-  {% endif %}
-
-  <nav aria-label="Breadcrumb" class="gota-cafe-detail-breadcrumb">
-    <ol>
-      <li>
-        <a href="{% url 'home' %}">Inicio</a>
-      </li>
-
-      <li aria-hidden="true">›</li>
-
-      <li>
-        <a href="{{ cafe_list_abs }}">Cafés</a>
-      </li>
-
-      {% if cafe.location %}
-        <li aria-hidden="true">›</li>
-
-        <li>
-          <a href="{{ cafe_list_abs }}?zona={{ cafe.location|urlencode }}">
-            {{ cafe.location }}
-          </a>
-        </li>
-      {% endif %}
-
-      <li aria-hidden="true">›</li>
-
-      <li aria-current="page">
-        {{ cafe.name }}
-      </li>
-    </ol>
-  </nav>
-
-  <div class="gota-cafe-detail-hero-actions">
-
-    {% if user.is_authenticated %}
-      <a
-        href="{% url 'reviews:create_review' cafe.id %}"
-        class="gota-cafe-detail-hero-actions__primary"
-      >
-        <img
-          src="{% static 'images/gota-icon.png' %}"
-          alt=""
-          aria-hidden="true"
-        >
-        Contá cómo fue
-      </a>
-    {% else %}
-      <a
-        href="{% url 'account_login' %}?next={% url 'reviews:create_review' cafe.id %}"
-        class="gota-cafe-detail-hero-actions__primary"
-      >
-        <img
-          src="{% static 'images/gota-icon.png' %}"
-          alt=""
-          aria-hidden="true"
-        >
-        Contá cómo fue
-      </a>
-    {% endif %}
-
-    <a
-      href="#reviews"
-      class="gota-cafe-detail-hero-actions__secondary"
-    >
-      Leer experiencias
-      <i class="fas fa-arrow-down" aria-hidden="true"></i>
-    </a>
-
-  </div>
-
-</section>
-
-
-    <!-- FOTOS -->
-    {% if cafe.photo1 or cafe.photo2 or cafe.photo3 %}
-      <section class="gota-cafe-detail-photos">
-        {% include "reviews/includes/cafe_photos.html" with cafe=cafe %}
-      </section>
-    {% endif %}
-    
-  <section class="surface p-5 rounded-2xl animate-fade-in-up animate-delay-600">
-
-  <div class="mb-4 flex items-center justify-between">
-    <h3 class="text-lg font-semibold text-[var(--text-1)]">
-      🍃 Huellas de este lugar
-    </h3>
-
-    <span class="text-sm text-gray-500">
-      {{ whispers|length }} huellas
-    </span>
-  </div>
-
-  <p class="text-sm text-gray-500 mb-5">
-    Pequeñas sensaciones que este café dejó en alguien.
-  </p>
 
   {% if user.is_authenticated %}
 
@@ -817,57 +1010,33 @@
 
 {% for whisper in whispers|slice:":6" %}
 
-<div class="relative
-            w-[220px]
-            h-[140px]
-            bg-[#F8EFC8]
-            border border-[#E7D69C]
-            rounded-xl
-            shadow-md
-            flex items-center justify-center
-            p-6
-            text-center
-            hover:-translate-y-1
-            hover:shadow-lg
-            transition-all duration-300
-            {% cycle '-rotate-1' 'rotate-1' 'rotate-0' %}">
+<div class="gota-cafe-detail-whisper">
 
-  <!-- tachuela -->
-  <div class="absolute top-3 left-1/2 -translate-x-1/2
-              w-4 h-4 rounded-full
-              bg-[#D94A4A]
-              shadow-sm">
+  <div class="gota-cafe-detail-whisper__icon">
+    <i class="fas fa-leaf" aria-hidden="true"></i>
   </div>
 
-  <!-- pliegue -->
-  <div class="absolute bottom-0 right-0
-              w-6 h-6
-              bg-[#EAD89C]
-              rounded-tl-lg">
-  </div>
-
-  <p class="text-[17px]
-            italic
-            text-[#5A472A]
-            leading-snug
-            font-medium mt-3">
+  <p class="gota-cafe-detail-whisper__text">
     “{{ whisper.text }}”
   </p>
 
   {% if user.is_authenticated and cafe.owner == user %}
-  <form method="post"
-        action="{% url 'reviews:report_whisper' whisper.id %}"
-        class="absolute bottom-2 right-3">
-    {% csrf_token %}
-    <button type="submit"
-            class="text-[10px] text-gray-500 hover:text-red-500 transition">
-      reportar
-    </button>
-  </form>
+    <form
+      method="post"
+      action="{% url 'reviews:report_whisper' whisper.id %}"
+      class="gota-cafe-detail-whisper__report"
+    >
+      {% csrf_token %}
+
+      <button type="submit">
+        reportar
+      </button>
+    </form>
   {% endif %}
 
 </div>
 
+  
 {% endfor %}
 
   </div>
@@ -882,132 +1051,154 @@
 
 </section>
 
-  <!-- INFO PRINCIPAL -->
-  <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-100">
-    <div class="grid gap-4 sm:grid-cols-2">
+  <!-- INFORMACIÓN PRÁCTICA -->
+  <section class="gota-cafe-detail-info">
+
+    <div class="gota-cafe-detail-info__header">
+      <span class="gota-home-section-kicker">
+        Para tener a mano
+      </span>
+
+      <h2 class="gota-cafe-detail-info__title">
+        Información práctica
+      </h2>
+    </div>
+
+    <div class="gota-cafe-detail-info__grid">
 
       <!-- DIRECCIÓN -->
-      <div class="flex items-start gap-2">
-        <span>📍</span>
+      <div class="gota-cafe-detail-info-item">
+        <span class="gota-cafe-detail-info-item__icon">
+          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+        </span>
+
         <div>
-          <div class="font-semibold text-gray-900 dark:text-[var(--text-1)]">
-            Dirección
-          </div>
-          <div class="text-sm text-gray-600 dark:text-[var(--text-2)]">
+          <strong>Dirección</strong>
+          <span>
             {{ cafe.address }}{% if cafe.location %}, {{ cafe.location }}{% endif %}
-          </div>
+          </span>
         </div>
       </div>
 
       <!-- TELÉFONO -->
-      <div class="flex items-start gap-2">
-        <span>☎</span>
+      <div class="gota-cafe-detail-info-item">
+        <span class="gota-cafe-detail-info-item__icon">
+          <i class="fas fa-phone" aria-hidden="true"></i>
+        </span>
+
         <div>
-          <div class="font-semibold text-gray-900 dark:text-[var(--text-1)]">
-            Teléfono
-          </div>
-          <div class="text-sm text-gray-600 dark:text-[var(--text-2)]">
-            {{ cafe.phone|default:"—" }}
-          </div>
+          <strong>Teléfono</strong>
+          <span>{{ cafe.phone|default:"—" }}</span>
         </div>
       </div>
 
       {% if cafe.instagram %}
-      <div class="flex items-start gap-2">
-        <span>📸</span>
-        <div>
-          <div class="font-semibold text-gray-900 dark:text-[var(--text-1)]">
-            Instagram
-          </div>
-          <div class="text-sm">
+        <div class="gota-cafe-detail-info-item">
+          <span class="gota-cafe-detail-info-item__icon">
+            <i class="fab fa-instagram" aria-hidden="true"></i>
+          </span>
+
+          <div>
+            <strong>Instagram</strong>
+
             <a
               href="https://www.instagram.com/{{ cafe.instagram }}/"
               target="_blank"
               rel="noopener"
-              class="text-pink-600 hover:underline"
             >
               @{{ cafe.instagram }}
             </a>
           </div>
         </div>
-      </div>
       {% endif %}
 
 
         
-      <!-- BOTONES ORDENADOS -->
-      <div class="sm:col-span-2 space-y-3">
+      <!-- ACCIONES -->
+      <div class="gota-cafe-detail-info-actions">
 
-        <!-- FILA PRINCIPAL -->
-        <div class="flex flex-wrap gap-3">
+        <div class="gota-cafe-detail-info-actions__main">
 
-          <!-- QR reseñas -->
-          <button onclick="openQRModal()"
-                  class="btn btn-primary rounded-xl">
-            ⭐ QR para reseñas
+          <button
+            type="button"
+            onclick="openQRModal()"
+            class="gota-cafe-detail-info-action gota-cafe-detail-info-action--primary"
+          >
+            <i class="fas fa-qrcode" aria-hidden="true"></i>
+            <span>QR para reseñas</span>
           </button>
 
-          <!-- Compartir -->
-          <button onclick="toggleShareMenu()"
-                  class="btn btn-outline rounded-xl">
-            📤 Compartir
+          <button
+            type="button"
+            onclick="toggleShareMenu()"
+            class="gota-cafe-detail-info-action"
+          >
+            <i class="fas fa-share-alt" aria-hidden="true"></i>
+            <span>Compartir</span>
           </button>
 
         </div>
 
-        <!-- MENU SHARE -->
-        <div id="shareMenu"
-            class="hidden flex flex-wrap gap-2 bg-gray-50 dark:bg-[var(--surface-2)] p-3 rounded-xl">
+        <div id="shareMenu" class="gota-cafe-detail-info-share hidden">
 
-          <!-- WhatsApp -->
-          <a href="https://wa.me/?text=Mirá%20{{ cafe.name|urlencode }}%20en%20Gota%20☕%0A{{ full_page_url|urlencode }}"
+          <a
+            href="https://wa.me/?text=Mirá%20{{ cafe.name|urlencode }}%20en%20Gota%20☕%0A{{ full_page_url|urlencode }}"
             target="_blank"
-            class="btn btn-outline btn-sm rounded-lg">
-            🟢 WhatsApp
+            rel="noopener"
+            class="gota-cafe-detail-info-share__item"
+          >
+            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+            WhatsApp
           </a>
 
-          <!-- Copiar -->
-          <button onclick="copyCafeLink('{{ full_page_url }}', this)"
-                  class="btn btn-outline btn-sm rounded-lg">
-            🔗 Copiar link
+          <button
+            type="button"
+            onclick="copyCafeLink('{{ full_page_url }}', this)"
+            class="gota-cafe-detail-info-share__item"
+          >
+            <i class="fas fa-link" aria-hidden="true"></i>
+            Copiar link
           </button>
 
         </div>
 
-        <!-- FILA SECUNDARIA -->
-        <div class="flex flex-wrap gap-4 pt-2 border-t border-gray-200 dark:border-[var(--border)]">
+        <div class="gota-cafe-detail-info-actions__secondary">
 
           {% if cafe.google_maps_url %}
-            <a href="{{ cafe.google_maps_url }}"
+            <a
+              href="{{ cafe.google_maps_url }}"
               target="_blank"
               rel="noopener"
-              class="text-sm text-gray-500 hover:underline">
-              📍 Ver en Google Maps
+            >
+              <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+              Ver en Google Maps
             </a>
 
           {% elif cafe.latitude and cafe.longitude %}
-            <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.latitude }},{{ cafe.longitude }}"
+            <a
+              href="https://www.google.com/maps/search/?api=1&query={{ cafe.latitude }},{{ cafe.longitude }}"
               target="_blank"
               rel="noopener"
-              class="text-sm text-gray-500 hover:underline">
-              📍 Ver en Google Maps
+            >
+              <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+              Ver en Google Maps
             </a>
 
           {% else %}
-            <a href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
+            <a
+              href="https://www.google.com/maps/search/?api=1&query={{ cafe.address|urlencode }}+{{ cafe.location|urlencode }}"
               target="_blank"
               rel="noopener"
-              class="text-sm text-gray-500 hover:underline">
-              📍 Ver en Google Maps
+            >
+              <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+              Ver en Google Maps
             </a>
           {% endif %}
-
-
 
           {% if cafe.claim_status != 'VERIFIED' %}
-            <a href="{% url 'reviews:claim_start' cafe.id %}"
-              class="text-sm text-gray-500 hover:underline">
-              🏷️ ¿Sos el dueño? Reclamalo
+            <a href="{% url 'reviews:claim_start' cafe.id %}">
+              <i class="fas fa-store" aria-hidden="true"></i>
+              ¿Sos el dueño? Reclamalo
             </a>
           {% endif %}
 
@@ -1015,232 +1206,46 @@
 
       </div>
 
-
-    </div>
-  </section>
-
-
-  <!-- FEATURES -->
-  <section class="mt-4 animate-fade-in-up animate-delay-150">
-    <div class="surface p-4 rounded-xl">
-      {% include "reviews/includes/cafe_features.html" with cafe=cafe %}
-    </div>
-  </section>
-
-      <!-- TAGS -->
-  {% if top_tags %}
-    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-225">
-
-      <h2 class="text-lg font-semibold mb-3 text-[var(--text-1)]">🧠 Lo que otros destacan</h2>
-
-      <!-- TOP TAGS -->
-      <ul class="flex flex-wrap gap-2">
-        {% for t in top_tags %}
-          <li>
-            <span class="tag-chip">
-              {{ t|tag_emoji }} {{ t.name }}
-            </span>
-          </li>
-        {% empty %}
-          <li class="text-gray-500 dark:text-[var(--text-2)]">Aún no hay etiquetas.</li>
-        {% endfor %}
-      </ul>
-
-      {% if more_tags %}
-      <details class="mt-3 group">
-        <summary class="text-sm text-primary cursor-pointer dark:text-[var(--accent)]">
-          Ver más
-        </summary>
-
-        <ul class="mt-2 flex flex-wrap gap-2">
-          {% for t in more_tags %}
-            <li>
-              <span class="tag-chip tag-chip--small">
-                {{ t|tag_emoji }} {{ t.name }}
-              </span>
-            </li>
-          {% endfor %}
-        </ul>
-
-      </details>
-      {% endif %}
-
-    </section>
-
-  {% endif %}
-
-
-  <!-- PERFIL SENSORIAL -->
-  {% if radar_values and radar_labels %}
-    <section class="surface p-4 rounded-xl animate-fade-in-up animate-delay-225">
-      <div class="flex items-center gap-2 mb-2">
-        <span>☕</span>
-        <div>
-          <h2 class="text-lg font-semibold text-[var(--text-1)]">
-            ☕ Cómo se siente este café
-          </h2>
-
-          {% if emotional_summary %}
-            <p class="text-sm text-gray-500 dark:text-[var(--text-2)] mt-1 italic">
-              {{ emotional_summary }}
-            </p>
-          {% endif %}
-        </div>
-
-        {% if total_reviews == 1 %}
-        <p class="text-sm text-gray-500 mt-1">
-        Primeras impresiones del lugar ☕
-        </p>
-
-        {% elif total_reviews > 1 %}
-        <p class="text-sm text-gray-500 mt-1 flex items-center gap-1">
-        Perfil construido con {{ total_reviews }} reseñas
-
-        <svg viewBox="0 0 24 24" class="w-4 h-4 inline">
-          <path fill="#f59e0b" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
-          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
-                d="M4 8h11v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8z"/>
-          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
-                d="M15 9h3a3 3 0 0 1 0 6h-2"/>
-        </svg>
-
-        </p>
-        {% endif %}
-
-
-      </div>
-      <div class="h-56 sm:h-60 md:h-64">
-        {% if total_reviews == 0 %}
-        <p class="text-sm text-gray-400 text-center mt-6">
-        Aún no hay datos suficientes para el perfil ☕
-        </p>
-        {% else %}
-        <canvas id="sensor-bars"></canvas>
-        {% endif %}
-
-      </div>
-    </section>
-  {% endif %}
-
-  <!-- PROMEDIO + PRECIO + BEST REVIEW -->
-  <div class="animate-fade-in-up animate-delay-300">
-
-    {% if average_rating %}
-      <p class="mb-4">
-        <strong>Calificación promedio:</strong> {{ average_rating|floatformat:1 }}
-        <svg viewBox="0 0 24 24" class="w-5 h-5 inline align-[-2px] ml-1">
-          <path fill="#f59e0b" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
-          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
-                d="M4 8h11v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8z"/>
-          <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
-                d="M15 9h3a3 3 0 0 1 0 6h-2"/>
-        </svg>
-      </p>
-
-      {% if precio_promedio %}
-        <div class="px-4 py-3 rounded-xl mt-4 border
-                    bg-white dark:bg-[var(--surface-2)]
-                    border-amber-200 dark:border-[var(--border)]
-                    text-amber-800 dark:text-[var(--text-1)]">
-          <p class="text-sm font-semibold">Capuccino mediano (promedio):</p>
-          <p class="text-lg font-bold">${{ precio_promedio|floatformat:0 }}</p>
-          <p class="text-xs text-gray-600 dark:text-[var(--text-2)]">
-            Basado en precios reales cargados por usuarios
-          </p>
-        </div>
-
-      {% endif %}
-
-      {% if best_review %}
-        <div class="p-4 rounded-xl border-l-4 mb-6 animate-fade-in
-                    bg-white dark:bg-[var(--surface-2)]
-                    border-accent/30 dark:border-accent/50">
-          
-          <p class="font-semibold text-accent">✨ Reseña destacada</p>
-
-          <p class="text-sm text-gray-600 dark:text-[var(--text-2)]">
-            {{ best_review.user.username }} ({{ best_review.created_at|date:"d M Y" }})
-            — {{ best_review.rating|floatformat:1 }}
-            <svg viewBox="0 0 24 24" class="w-4 h-4 inline align-[-2px] ml-1">
-              <path fill="#f59e0b" d="M5 9h9v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/>
-              <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
-                    d="M4 8h11v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8z"/>
-              <path fill="none" stroke="#9aa0a6" stroke-width="1.6"
-                    d="M15 9h3a3 3 0 0 1 0 6h-2"/>
-            </svg>
-
-          </p>
-
-          <p class="mt-1 text-gray-800 dark:text-[var(--text-1)]">
-            “{{ best_review.comment }}”
-          </p>
-
-        </div>
-
-      {% endif %}
-
-    {% else %}
-      <p class="mb-4"><strong>Calificación promedio:</strong> Sin reseñas todavía.</p>
-    {% endif %}
-  </div>
-
-  <!-- LISTA DE RESEÑAS -->
-  <h3 id="reviews" class="text-xl font-semibold mt-6 mb-4 animate-fade-in-up animate-delay-400">Reseñas:</h3>
-
-  {% cache 600 cafe_reviews_list cafe.id user.id %}
-  <div id="review-container"
-       class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 max-h-[1056px] overflow-hidden relative animate-fade-in-up animate-delay-500">
-
-    {% for review in reviews %}
-      {% include "reviews/_review_card.html" with review=review %}
-    {% empty %}
-      <p class="text-gray-500 text-sm col-span-full">{{ ui_messages.no_reviews }}</p>
-    {% endfor %}
-
-    {% if reviews|length > 3 %}
-      <div id="fade-reviews" class="absolute bottom-0 left-0 w-full h-20 reviews-fade-gradient pointer-events-none"></div>
-    {% endif %}
-
-  </div>
-
-  {% if reviews|length > 3 %}
-    <button onclick="toggleReviews()" id="btn-reviews"
-            class="btn btn-outline btn-sm mt-2 animate-fade-in-up animate-delay-600">
-      Ver todas
-    </button>
-  {% endif %}
-  {% endcache %}
-
-  {% include "reviews/includes/pagination.html" with page_obj=page_obj anchor="#reviews" %}
-
-
-  <!-- PORCENTAJE POSITIVAS -->
-  {% if total_reviews %}
-    <div class="cup-float">
-      <span class="cup-emoji">
-        <img 
-          src="{% static 'images/gota-icon.png' %}" 
-          class="w-5 h-5 inline-block {% if positive_pct < 50 %}opacity-40{% endif %}">
-      </span>
-      <span class="text-sm text-gray-700">Positivas: <strong>{{ positive_pct }}%</strong></span>
-    </div>
-  {% endif %}
-
-  <!-- MAPA -->
+  
+  <!-- UBICACIÓN -->
   {% if cafe.latitude and cafe.longitude %}
-  <section aria-labelledby="ubicacion" class="mt-10">
-    <h3 id="ubicacion" class="text-xl font-semibold mb-2">📍 Ubicación</h3>
+  <section class="gota-cafe-detail-location" aria-labelledby="ubicacion">
 
-    <button type="button" id="btn-toggle-map" onclick="toggleMap(this)"
-            class="mb-4 text-sm text-blue-600 hover:underline">
-      Mostrar mapa
-    </button>
+    <div class="gota-cafe-detail-location__header">
 
-    <div id="map-container" class="hidden">
-      <div id="map"
-           class="relative w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[550px]
-                  rounded-xl overflow-hidden shadow-lg mb-10"></div>
+      <div>
+        <span class="gota-home-section-kicker">
+          Dónde encontrarlo
+        </span>
+
+        <h2 id="ubicacion" class="gota-cafe-detail-location__title">
+          Ubicación
+        </h2>
+
+        {% if cafe.address or cafe.location %}
+          <p class="gota-cafe-detail-location__address">
+            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+            {{ cafe.address }}{% if cafe.location %}, {{ cafe.location }}{% endif %}
+          </p>
+        {% endif %}
+      </div>
+
+      <button
+        type="button"
+        id="btn-toggle-map"
+        onclick="toggleMap(this)"
+        class="gota-cafe-detail-location__toggle"
+      >
+        <i class="fas fa-map" aria-hidden="true"></i>
+        <span>Mostrar mapa</span>
+      </button>
+
     </div>
+
+    <div id="map-container" class="gota-cafe-detail-location__map-container hidden">
+      <div id="map" class="gota-cafe-detail-location__map"></div>
+    </div>
+
   </section>
 
   <style>
@@ -1258,7 +1263,8 @@
       const willShow = mapContainer.classList.contains('hidden');
       if (willShow) {
         mapContainer.classList.remove('hidden');
-        btn.textContent = 'Ocultar mapa';
+        const label = btn.querySelector('span');
+        if (label) label.textContent = 'Ocultar mapa';
 
         setTimeout(() => {
           if (typeof L === 'undefined') return;
@@ -1293,7 +1299,8 @@
 
       } else {
         mapContainer.classList.add('hidden');
-        btn.textContent = 'Mostrar mapa';
+        const label = btn.querySelector('span');
+        if (label) label.textContent = 'Mostrar mapa';
       }
     }
   </script>
