@@ -2407,3 +2407,290 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
 .gota-cafe-filters-toggle:hover {
   background: #1E3A8A;
 }
+
+/* =========================================================
+   CAFÉS · ACCESO AL MAPA
+   ========================================================= */
+
+.gota-cafe-list-map-action {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-bottom: 18px;
+}
+
+.gota-cafe-list-map-link {
+  min-height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0 16px;
+
+  background: #FFFFFF;
+  border: 1px solid #BFDBFE;
+  border-radius: 12px;
+
+  color: #172C6D;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+
+  box-shadow: 0 2px 8px rgba(23, 44, 109, .05);
+
+  transition:
+    background-color .15s ease,
+    border-color .15s ease,
+    transform .15s ease,
+    box-shadow .15s ease;
+}
+
+.gota-cafe-list-map-link i {
+  font-size: 13px;
+}
+
+.gota-cafe-list-map-link:hover {
+  background: #EFF6FF;
+  border-color: #93C5FD;
+  color: #172C6D;
+
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(23, 44, 109, .10);
+}
+
+/* =========================================================
+   CAFÉS · CARD BASE
+   ========================================================= */
+
+.gota-cafe-card {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+  overflow: hidden;
+
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 18px;
+
+  box-shadow: 0 4px 14px rgba(23, 44, 109, .05);
+
+  transition:
+    transform .15s ease,
+    border-color .15s ease,
+    box-shadow .15s ease;
+}
+
+.gota-cafe-card:hover {
+  transform: translateY(-2px);
+  border-color: #BFDBFE;
+  box-shadow: 0 8px 20px rgba(23, 44, 109, .09);
+}
+
+.gota-cafe-card__media {
+  position: relative;
+
+  width: 100%;
+  aspect-ratio: 4 / 3;
+
+  overflow: hidden;
+
+  background: #F1F5F9;
+}
+
+.gota-cafe-card__image {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+@media (max-width: 640px) {
+
+  .gota-cafe-card__media {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+/* =========================================================
+   CAFÉS · CARD · CONTENIDO PRINCIPAL
+   ========================================================= */
+
+.gota-cafe-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  padding: 16px;
+}
+
+.gota-cafe-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.gota-cafe-card__heading {
+  display: block;
+  min-width: 0;
+
+  color: inherit;
+  text-decoration: none;
+}
+
+.gota-cafe-card__heading:hover .gota-cafe-card__title {
+  color: #1E3A8A;
+}
+
+.gota-cafe-card__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+
+  transition: color .15s ease;
+}
+
+.gota-cafe-card__location {
+  margin: 4px 0 0;
+
+  color: #64748B;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.gota-cafe-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  min-height: 25px;
+}
+
+.gota-cafe-card__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  color: #172C6D;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.gota-cafe-card__rating img {
+  width: 18px;
+  height: 18px;
+
+  object-fit: contain;
+}
+
+.gota-cafe-card__reviews {
+  padding-left: 9px;
+
+  border-left: 1px solid #E2E8F0;
+
+  color: #94A3B8;
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+
+/* =========================================================
+   CAFÉS · CARD · ACCIONES
+   ========================================================= */
+
+.gota-cafe-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gota-cafe-card__price {
+  width: fit-content;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 7px 10px;
+
+  background: #F8FAFF;
+  border: 1px solid #DBEAFE;
+  border-radius: 10px;
+
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.gota-cafe-card__price img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.gota-cafe-card__price strong {
+  color: #172C6D;
+  font-weight: 700;
+}
+
+.gota-cafe-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.gota-cafe-card__tag {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 25px;
+  padding: 4px 9px;
+
+  background: #EFF6FF;
+  border: 1px solid #DBEAFE;
+  border-radius: 999px;
+
+  color: #1E3A8A;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.gota-cafe-card__footer {
+  display: flex;
+  justify-content: flex-end;
+
+  padding-top: 2px;
+}
+
+.gota-cafe-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  color: #172C6D;
+  font-size: 12.5px;
+  line-height: 1.3;
+  font-weight: 700;
+  text-decoration: none;
+
+  transition:
+    color .15s ease,
+    gap .15s ease;
+}
+
+.gota-cafe-card__link i {
+  font-size: 10px;
+}
+
+.gota-cafe-card__link:hover {
+  gap: 10px;
+  color: #1E3A8A;
+}

@@ -374,11 +374,15 @@
     </div>
 
       <!-- Botón para ver mapa -->
-  <div class="flex justify-end mb-4">
-    <a href="{% url 'reviews:mapa_cafes' %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-200 text-amber-900 font-semibold hover:bg-amber-300 transition-all shadow-sm">
-      <i class="fas fa-map-marked-alt"></i> Ver mapa
-    </a>
-  </div>
+      <div class="gota-cafe-list-map-action">
+        <a
+          href="{% url 'reviews:mapa_cafes' %}"
+          class="gota-cafe-list-map-link"
+        >
+          <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+          <span>Ver mapa</span>
+        </a>
+      </div>
 
   <!-- Grid real -->
   <div id="grid-cafes" class="hidden min-w-0" tabindex="-1" aria-labelledby="titulo-cafeterias">

@@ -1,11 +1,11 @@
 {% load static %}
 
-<article class="card cafe-card focus:outline-none min-w-0 min-h-[450px] sm:min-h-[500px]">
+<article class="gota-cafe-card focus:outline-none min-w-0">
 
   <!-- FOTO + OVERLAY -->
   <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block min-w-0 relative">
 
-    <div class="w-full h-48 sm:h-60 lg:h-72 overflow-hidden rounded-t-[16px] relative">
+    <div class="gota-cafe-card__media">
       
       <!-- FOTO -->
       {% if cafe.photo1 and cafe.photo1.url %}
@@ -15,7 +15,7 @@
           loading="lazy"
           decoding="async"
           fetchpriority="low"
-          class="w-full h-full object-cover block"
+          class="gota-cafe-card__image"
         >
       {% else %}
         <img
@@ -24,62 +24,89 @@
           loading="lazy"
           decoding="async"
           fetchpriority="low"
-          class="w-full h-full object-cover block"
+          class="gota-cafe-card__image"
         >
       {% endif %}
 
-      <!-- OVERLAY: RATING IZQUIERDA + RESEÑAS DERECHA -->
-      <div class="absolute top-2 left-2 flex items-center">
-        <div class="bg-white/90 backdrop-blur px-2 py-1 rounded-md shadow text-xs font-semibold flex items-center gap-1 text-gray-800">
-          ☕ 
-          {% if cafe.avg_rating %}
-            {{ cafe.avg_rating|floatformat:1 }}
-          {% else %}
-            –
-          {% endif %}
-          <span class="text-gray-500">/ 5</span>
-        </div>
-      </div>
-
-      <div class="absolute top-2 right-2">
-        <div class="bg-white/90 backdrop-blur px-2 py-1 rounded-md shadow text-xs text-gray-700">
-          ({{ cafe.num_reviews }} reseñas)
-        </div>
-      </div>
-
+      
     </div>
   </a>
 
   <!-- CUERPO DE LA CARD -->
-  <div class="card-body">
+  <div class="gota-cafe-card__body">
 
-    <!-- NOMBRE + UBICACIÓN -->
-    <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block hover:underline">
-      <h3 class="card-title">{{ cafe.name }}</h3>
+    <div class="gota-cafe-card__main">
 
-      {% if cafe.location %}
-        <p class="card-sub">{{ cafe.location }}</p>
-      {% elif cafe.neighborhood %}
-        <p class="card-sub">{{ cafe.neighborhood }}</p>
-      {% elif cafe.address %}
-        <p class="card-sub">{{ cafe.address }}</p>
-      {% endif %}
-    </a>
+      <a
+        href="{% url 'reviews:cafe_detail' cafe.id %}"
+        class="gota-cafe-card__heading"
+      >
+        <h3 class="gota-cafe-card__title">
+          {{ cafe.name }}
+        </h3>
 
-    <div class="card-actions space-y-3">
+        {% if cafe.location %}
+          <p class="gota-cafe-card__location">
+            {{ cafe.location }}
+          </p>
+        {% elif cafe.neighborhood %}
+          <p class="gota-cafe-card__location">
+            {{ cafe.neighborhood }}
+          </p>
+        {% elif cafe.address %}
+          <p class="gota-cafe-card__location">
+            {{ cafe.address }}
+          </p>
+        {% endif %}
+      </a>
 
-      <!-- PRECIO (opcional) -->
+      <div class="gota-cafe-card__meta">
+
+        <div class="gota-cafe-card__rating">
+          <img
+            src="{% static 'images/gota-icon.png' %}"
+            alt=""
+            aria-hidden="true"
+          >
+
+          <span>
+            {% if cafe.avg_rating %}
+              {{ cafe.avg_rating|floatformat:1 }}
+            {% else %}
+              –
+            {% endif %}
+          </span>
+        </div>
+
+        <span class="gota-cafe-card__reviews">
+          {{ cafe.num_reviews }} reseñas
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="gota-cafe-card__actions">
+
       {% if cafe.precio_promedio %}
-        <div class="text-sm text-amber-900 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg w-fit">
-          ☕ Capuccino mediano:
-          <strong>${{ cafe.precio_promedio|floatformat:0 }}</strong>
+        <div class="gota-cafe-card__price">
+          <img
+            src="{% static 'images/gota-icon.png' %}"
+            alt=""
+            aria-hidden="true"
+          >
+
+          <span>
+            Capuccino mediano:
+            <strong>${{ cafe.precio_promedio|floatformat:0 }}</strong>
+          </span>
         </div>
       {% endif %}
 
       {% if cafe.tags.exists %}
-        <div class="flex flex-wrap gap-1">
+        <div class="gota-cafe-card__tags">
           {% for tag in cafe.tags.all|slice:":3" %}
-            <span class="bg-blue-100 text-blue-800 text-[11px] px-2 py-0.5 rounded-full">
+            <span class="gota-cafe-card__tag">
               {{ tag.name }}
             </span>
           {% endfor %}
@@ -94,14 +121,16 @@
         </span>
       {% endif %}
 
-
-      <!-- VER -->
-      <div class="flex items-center justify-end">
-        <a href="{% url 'reviews:cafe_detail' cafe.id %}"
-          class="btn btn-primary btn-sm">
-          Ver
+      <div class="gota-cafe-card__footer">
+        <a
+          href="{% url 'reviews:cafe_detail' cafe.id %}"
+          class="gota-cafe-card__link"
+        >
+          Ver cafetería
+          <i class="fas fa-arrow-right" aria-hidden="true"></i>
         </a>
       </div>
+
     </div>
   </div>
 
