@@ -79,14 +79,23 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Mostrar todos los cafés en el mapa
+    // Mostrar todos los cafés agrupados en clusters
+    const markers = L.markerClusterGroup();
+
     cafesData.forEach(cafe => {
       if (cafe.latitude && cafe.longitude) {
-        L.marker([cafe.latitude, cafe.longitude])
-          .addTo(map)
-          .bindPopup(`<a href="${cafe.url}" class="text-primary font-semibold">${cafe.name}</a>`);
+        const marker = L.marker([cafe.latitude, cafe.longitude])
+          .bindPopup(`
+            <a href="${cafe.url}" class="text-primary font-semibold">
+              ${cafe.name}
+            </a>
+          `);
+
+        markers.addLayer(marker);
       }
     });
+
+    map.addLayer(markers);
 
     // Buscar por dirección
     document.getElementById('search-address').addEventListener('click', () => {
