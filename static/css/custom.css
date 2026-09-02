@@ -2694,3 +2694,28 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
   gap: 10px;
   color: #1E3A8A;
 }
+
+/* =========================================================
+   CAFÉS · CONTROLES DE FILTROS SOLO MOBILE
+   ========================================================= */
+
+@media (min-width: 1024px) {
+  .gota-cafe-filters__close,
+  .gota-cafe-filters-toggle {
+    display: none;
+  }
+}
+
+.gota-cafe-list-search__button,
+.gota-cafe-filters__submit {
+  background: #172C6D !important;
+  border-color: #172C6D !important;
+  color: #FFFFFF !important;
+}
+
+.gota-cafe-list-search__button:hover,
+.gota-cafe-filters__submit:hover {
+  background: #1E3A8A !important;
+  border-color: #1E3A8A !important;
+  color: #FFFFFF !important;
+}
