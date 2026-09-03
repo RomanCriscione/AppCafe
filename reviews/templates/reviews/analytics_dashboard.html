@@ -2,89 +2,372 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
 
-  <div class="flex items-center justify-between gap-3">
-    <div class="flex items-center gap-3">
-      <span class="text-2xl">📊</span>
-      <h1 class="text-3xl font-bold">Analíticas</h1>
+<div class="gota-analytics">
+
+  <!-- HEADER -->
+  <header class="gota-analytics__header">
+
+    <div class="gota-analytics__header-main">
+
+      <div class="gota-analytics__header-icon">
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+      </div>
+
+      <div>
+        <span class="gota-analytics__kicker">
+          Actividad
+        </span>
+
+        <h1 class="gota-analytics__title">
+          Analíticas
+        </h1>
+
+        <p class="gota-analytics__description">
+          Una mirada simple a cómo se mueve tu cafetería dentro de Gota.
+        </p>
+      </div>
+
     </div>
+
 
     {% if cafes|length > 0 %}
-      <form method="get" class="flex items-center gap-2">
-        <label class="text-sm text-gray-600">Cafetería:</label>
-        <select name="cafe"
-                class="border rounded px-3 py-2 text-sm"
-                onchange="this.form.submit()">
+
+      <form
+        method="get"
+        class="gota-analytics__selector"
+      >
+
+        <label for="analytics-cafe">
+          Cafetería
+        </label>
+
+        <select
+          id="analytics-cafe"
+          name="cafe"
+          onchange="this.form.submit()"
+        >
+
           {% for c in cafes %}
-            <option value="{{ c.id }}" {% if cafe and c.id == cafe.id %}selected{% endif %}>
+
+            <option
+              value="{{ c.id }}"
+              {% if cafe and c.id == cafe.id %}selected{% endif %}
+            >
               {{ c.name }}
             </option>
+
           {% endfor %}
+
         </select>
+
       </form>
+
     {% endif %}
-  </div>
+
+  </header>
+
 
   {% if cafes|length == 0 %}
-    <div class="border rounded-xl bg-white p-4 text-gray-700">
-      Todavía no tenés cafeterías cargadas.
-    </div>
-  {% else %}
-    <!-- KPIs -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div class="p-4 rounded-xl border bg-white">
-        <p class="text-sm text-gray-500">Vistas (total)</p>
-        <p class="text-2xl font-semibold">{{ totals.views }}</p>
-      </div>
-      <div class="p-4 rounded-xl border bg-white">
-        <p class="text-sm text-gray-500">Favoritos</p>
-        <p class="text-2xl font-semibold">{{ totals.favorites }}</p>
-      </div>
-      <div class="p-4 rounded-xl border bg-white">
-        <p class="text-sm text-gray-500">Reseñas</p>
-        <p class="text-2xl font-semibold">{{ totals.reviews }}</p>
-      </div>
-    </div>
 
-    <!-- Gráfico: vistas últimos 30 días -->
-    <div class="p-4 rounded-xl border bg-white">
-      <h2 class="text-lg font-semibold mb-3">Vistas (últimos 30 días)</h2>
-      <canvas id="viewsChart" height="110"></canvas>
-    </div>
+    <!-- EMPTY -->
+    <section class="gota-analytics__empty">
+
+      <div class="gota-analytics__empty-icon">
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+      </div>
+
+      <h2>
+        Todavía no tenés cafeterías
+      </h2>
+
+      <p>
+        Cuando agregues tu primera cafetería vas a poder ver su actividad desde acá.
+      </p>
+
+      <a
+        href="{% url 'reviews:create_cafe' %}"
+        class="gota-analytics__empty-cta"
+      >
+        <i class="fas fa-plus" aria-hidden="true"></i>
+        <span>Agregar cafetería</span>
+      </a>
+
+    </section>
+
+  {% else %}
+
+    <!-- CAFÉ ACTUAL -->
+    {% if cafe %}
+
+      <div class="gota-analytics__current">
+
+        <div>
+
+          <span class="gota-analytics__current-label">
+            Viendo actividad de
+          </span>
+
+          <strong>
+            {{ cafe.name }}
+          </strong>
+
+        </div>
+
+        <a
+          href="{% url 'reviews:cafe_detail' cafe.id %}"
+          class="gota-analytics__public-link"
+        >
+          <span>Ver cafetería</span>
+          <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </a>
+
+      </div>
+
+    {% endif %}
+
+
+    <!-- KPIs -->
+    <section class="gota-analytics__kpis">
+
+      <article class="gota-analytics__kpi">
+
+        <div class="gota-analytics__kpi-icon">
+          <i class="far fa-eye" aria-hidden="true"></i>
+        </div>
+
+        <div>
+
+          <span>
+            Vistas totales
+          </span>
+
+          <strong>
+            {{ totals.views }}
+          </strong>
+
+        </div>
+
+      </article>
+
+
+      <article class="gota-analytics__kpi">
+
+        <div class="gota-analytics__kpi-icon">
+          <i class="far fa-bookmark" aria-hidden="true"></i>
+        </div>
+
+        <div>
+
+          <span>
+            Guardados
+          </span>
+
+          <strong>
+            {{ totals.favorites }}
+          </strong>
+
+        </div>
+
+      </article>
+
+
+      <article class="gota-analytics__kpi">
+
+        <div class="gota-analytics__kpi-icon">
+          <i class="far fa-comment-alt" aria-hidden="true"></i>
+        </div>
+
+        <div>
+
+          <span>
+            Reseñas
+          </span>
+
+          <strong>
+            {{ totals.reviews }}
+          </strong>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- GRÁFICO -->
+    <section class="gota-analytics__chart-card">
+
+      <div class="gota-analytics__chart-heading">
+
+        <div>
+
+          <span class="gota-analytics__chart-kicker">
+            Últimos 30 días
+          </span>
+
+          <h2>
+            Vistas de la cafetería
+          </h2>
+
+        </div>
+
+        <div class="gota-analytics__chart-legend">
+          <span></span>
+          Vistas
+        </div>
+
+      </div>
+
+
+      <div class="gota-analytics__chart">
+
+        <canvas
+          id="viewsChart"
+          aria-label="Gráfico de vistas de los últimos 30 días"
+          role="img"
+        ></canvas>
+
+      </div>
+
+    </section>
+
   {% endif %}
+
 </div>
+
 {% endblock %}
+
 
 {% block scripts %}
 {{ block.super }}
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-(function(){
-  const el = document.getElementById('viewsChart');
-  if (!el) return;
+(function () {
+
+  const canvas = document.getElementById('viewsChart');
+
+  if (!canvas) {
+    return;
+  }
 
   const labels = {{ labels_json|safe }};
-  const data = {{ views_json|safe }};
+  const values = {{ views_json|safe }};
 
-  new Chart(el.getContext('2d'), {
+  new Chart(canvas.getContext('2d'), {
+
     type: 'line',
+
     data: {
-      labels,
+
+      labels: labels,
+
       datasets: [{
         label: 'Vistas',
-        data,
-        tension: 0.3,
-        fill: false,
-        borderWidth: 2
+        data: values,
+        tension: 0.35,
+        fill: true,
+        borderColor: '#172C6D',
+        backgroundColor: 'rgba(239, 246, 255, 0.7)',
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        pointBackgroundColor: '#172C6D',
+        pointBorderColor: '#FFFFFF',
+        pointBorderWidth: 1.5
       }]
+
     },
+
     options: {
+
       responsive: true,
-      plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+
+      maintainAspectRatio: false,
+
+      interaction: {
+        intersect: false,
+        mode: 'index'
+      },
+
+      plugins: {
+
+        legend: {
+          display: false
+        },
+
+        tooltip: {
+          displayColors: false,
+          backgroundColor: '#172C6D',
+          titleColor: '#FFFFFF',
+          bodyColor: '#FFFFFF',
+          padding: 10,
+          cornerRadius: 8
+        }
+
+      },
+
+      scales: {
+
+        x: {
+
+          grid: {
+            display: false
+          },
+
+          border: {
+            display: false
+          },
+
+          ticks: {
+            color: '#94A3B8',
+            font: {
+              size: 9
+            },
+            maxTicksLimit: 10
+          }
+
+        },
+
+        y: {
+
+          beginAtZero: true,
+
+          border: {
+            display: false
+          },
+
+          grid: {
+            color: '#E2E8F0'
+          },
+
+          ticks: {
+            color: '#94A3B8',
+            precision: 0,
+            font: {
+              size: 9
+            }
+          }
+
+        }
+
+      }
+
     }
+
   });
+
 })();
 </script>
+
 {% endblock %}

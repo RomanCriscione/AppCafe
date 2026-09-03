@@ -2,65 +2,194 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto px-6 py-10 animate-fade-in">
-  <h1 class="text-4xl font-bold mb-6 text-primary text-center">☕ Sobre Gota</h1>
 
-  <p class="mb-6 text-gray-700 text-lg text-center">
-    Una plataforma para descubrir y recomendar cafeterías.
-    Lugares reales, buen café y experiencias que se sienten.
-  </p>
+<div class="gota-about">
 
-  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-    <h2 class="text-2xl font-semibold mb-4 text-secondary">💧 La idea detrás de Gota</h2>
+  <!-- HERO -->
+  <header class="gota-about__hero">
 
-    <p class="text-gray-700 leading-relaxed mb-4">
-      Gota nace de Roma, una persona curiosa, amante del café y de las ciudades caminables.
-      La idea es simple: “crear una herramienta clara para explorar cafeterías de especialidad, 
-      compartir experiencias reales y poner en valor aquellos lugares donde el café, el espacio y el momento importan.”
+    <div class="gota-about__icon">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+    </div>
+
+    <span class="gota-about__kicker">
+      Sobre Gota
+    </span>
+
+    <h1 class="gota-about__title">
+      Descubrí tu próximo café
+    </h1>
+
+    <p class="gota-about__lead">
+      Gota es una forma de descubrir cafeterías teniendo en cuenta algo que muchas veces queda afuera: qué estás buscando en ese momento.
     </p>
 
-    <p class="text-gray-700 leading-relaxed">
-      Gota no busca rankings perfectos ni promesas vacías.
-      Busca buenas sensaciones, buenos cafés y lugares con identidad.
-    </p>
-  </div>
+  </header>
 
-  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-    <h2 class="text-2xl font-semibold mb-4 text-secondary">🌱 Un proyecto en crecimiento</h2>
 
-    <p class="text-gray-700 leading-relaxed">
-      Gota es un proyecto en desarrollo activo.
-      Estamos lanzando una primera versión para probar, aprender y mejorar
-      junto a quienes aman el café tanto como nosotros.
-    </p>
+  <!-- IDEA -->
+  <section class="gota-about__section">
 
-    <p class="text-gray-700 leading-relaxed mt-2">
-      Algunas funciones pueden cambiar, ajustarse o ampliarse con el tiempo.
-      Las opiniones y sugerencias son más que bienvenidas.
-    </p>
-  </div>
+    <div class="gota-about__section-number">
+      01
+    </div>
 
-  <div class="bg-white rounded-lg shadow-md p-6">
-    <h2 class="text-2xl font-semibold mb-4 text-secondary">📬 Contacto</h2>
+    <div class="gota-about__section-content">
 
-    <p class="text-gray-700 mb-2">
-      Podés escribirnos a:
-      <a href="mailto:hola@gogota.ar" class="text-blue-600 hover:underline font-medium">
-        hola@gogota.ar
+      <h2>
+        No existe una cafetería perfecta para todos
+      </h2>
+
+      <p>
+        No elegimos el mismo lugar si queremos trabajar un par de horas, charlar con alguien, tener una cita, leer tranquilos o simplemente tomar algo rápido.
+      </p>
+
+      <p>
+        Por eso Gota no busca decirte cuál es “la mejor cafetería”. Busca ayudarte a encontrar la que puede ir mejor con vos, con tus gustos y con el plan que tenés.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- EXPERIENCIAS -->
+  <section class="gota-about__section">
+
+    <div class="gota-about__section-number">
+      02
+    </div>
+
+    <div class="gota-about__section-content">
+
+      <h2>
+        Experiencias que ayudan a descubrir
+      </h2>
+
+      <p>
+        Cada experiencia compartida suma información sobre cómo se siente un lugar: si es tranquilo, cómodo para trabajar, ideal para charlar, si tiene algo rico para acompañar el café o si simplemente invita a quedarse.
+      </p>
+
+      <p>
+        La idea no es reducir todo a un número. Es construir, entre todos, una mirada más humana y útil sobre cada cafetería.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- MAPA -->
+  <section class="gota-about__highlight">
+
+    <div class="gota-about__highlight-icon">
+      <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+    </div>
+
+    <div>
+
+      <span class="gota-about__highlight-kicker">
+        Tu propio mapa
+      </span>
+
+      <h2>
+        Cafeterías que querés conocer, lugares a los que volverías y experiencias que ya forman parte de tu recorrido.
+      </h2>
+
+      <p>
+        Gota también es una forma de guardar esos lugares y construir, con el tiempo, tu propio mapa cafetero.
+      </p>
+
+      <a
+        href="{% url 'reviews:cafe_list' %}"
+        class="gota-about__cta"
+      >
+        <span>Explorar cafeterías</span>
+        <i class="fas fa-arrow-right" aria-hidden="true"></i>
       </a>
+
+    </div>
+
+  </section>
+
+
+  <!-- PROYECTO -->
+  <section class="gota-about__section">
+
+    <div class="gota-about__section-number">
+      03
+    </div>
+
+    <div class="gota-about__section-content">
+
+      <h2>
+        Un mapa que sigue creciendo
+      </h2>
+
+      <p>
+        Gota nació como un proyecto independiente y sigue creciendo cafetería por cafetería, experiencia por experiencia y ciudad por ciudad.
+      </p>
+
+      <p>
+        La idea es simple: que cada vez sea más fácil descubrir lugares con identidad en cualquier parte de Argentina.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- CONTACTO -->
+  <section class="gota-about__contact">
+
+    <span class="gota-about__contact-kicker">
+      Hablemos
+    </span>
+
+    <h2>
+      ¿Querés escribirnos?
+    </h2>
+
+    <p>
+      Si tenés una sugerencia, encontraste algo para mejorar o simplemente querés contarnos algo sobre Gota, estamos del otro lado.
     </p>
 
-    <p class="text-gray-700">
-      También nos encontrás en Instagram:
+
+    <div class="gota-about__contact-links">
+
+      <a
+        href="mailto:hola@gogota.ar"
+        class="gota-about__contact-link"
+      >
+        <i class="far fa-envelope" aria-hidden="true"></i>
+
+        <span>
+          hola@gogota.ar
+        </span>
+      </a>
+
+
       <a
         href="https://www.instagram.com/app.gota/"
         target="_blank"
         rel="noopener noreferrer"
-        class="text-blue-600 hover:underline font-medium"
+        class="gota-about__contact-link"
       >
-        @app.gota
+        <i class="fab fa-instagram" aria-hidden="true"></i>
+
+        <span>
+          @app.gota
+        </span>
       </a>
-    </p>
-  </div>
+
+    </div>
+
+  </section>
+
 </div>
+
 {% endblock %}

@@ -2,64 +2,204 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto px-4 py-10 animate-fade-in">
-  <h1 class="text-4xl font-bold text-center mb-10 text-primary">📬 Contactanos</h1>
 
-  <!-- Formulario -->
-  <form method="post" class="bg-white shadow-lg rounded-lg p-8 space-y-6">
-    {% csrf_token %}
-    <div>
-      <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
-      <input type="text" name="name" id="name" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-    </div>
+<div class="gota-contact">
 
-    <div>
-      <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-      <input type="email" name="email" id="email" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-    </div>
+  <!-- HEADER -->
+  <header class="gota-contact__header">
 
-    <div>
-      <label for="message" class="block text-sm font-medium text-gray-700">Mensaje</label>
-      <textarea name="message" id="message" rows="5" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"></textarea>
-    </div>
-
-    <div class="text-center">
-      <button type="submit" class="bg-primary hover:bg-secondary text-white font-semibold py-2 px-6 rounded-md transition-colors shadow-md">Enviar</button>
-    </div>
-  </form>
-
-  <!-- Mensaje de éxito -->
-  {% if success %}
-    <div class="mt-6 rounded-lg bg-green-50 border border-green-200 p-4 text-green-800 text-sm text-center">
-      Gracias por escribirnos.  
-      <br>
-      Si no recibís respuesta en 24 horas, revisá la carpeta de spam
-      o escribinos a <strong>hola@gogota.ar</strong>.
-    </div>
-  {% endif %}
-
-
-  <!-- Otros medios de contacto -->
-  <div class="mt-10 text-center">
-    <h2 class="text-xl font-semibold mb-4">📱 También podés escribirnos a:</h2>
-    <p class="mb-2">
-      <i class="fas fa-envelope text-accent mr-2"></i>
-      <a href="mailto:hola@gogota.ar" class="text-blue-600 hover:underline">
-        hola@gogota.ar
-      </a>
-
-    </p>
-    <p>
-      <i class="fab fa-instagram text-accent mr-2"></i>
-      <a
-        href="https://www.instagram.com/app.gota/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-blue-600 hover:underline"
+    <div class="gota-contact__icon">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
       >
-        @app.gota
-      </a>
+    </div>
+
+    <span class="gota-contact__kicker">
+      Contacto
+    </span>
+
+    <h1 class="gota-contact__title">
+      Hablemos
+    </h1>
+
+    <p class="gota-contact__description">
+      Si tenés una sugerencia, encontraste algo para mejorar o querés contarnos algo sobre Gota, escribinos.
     </p>
+
+  </header>
+
+
+  <div class="gota-contact__layout">
+
+    <!-- FORMULARIO -->
+    <section class="gota-contact__card">
+
+      <form method="post" class="gota-contact__form">
+        {% csrf_token %}
+
+        <div class="gota-contact__field">
+
+          <label for="name">
+            Nombre
+          </label>
+
+          <input
+            type="text"
+            name="name"
+            id="name"
+            required
+            autocomplete="name"
+            placeholder="Tu nombre"
+          >
+
+        </div>
+
+
+        <div class="gota-contact__field">
+
+          <label for="email">
+            Email
+          </label>
+
+          <input
+            type="email"
+            name="email"
+            id="email"
+            required
+            autocomplete="email"
+            placeholder="tu@email.com"
+          >
+
+        </div>
+
+
+        <div class="gota-contact__field">
+
+          <label for="message">
+            Mensaje
+          </label>
+
+          <textarea
+            name="message"
+            id="message"
+            rows="6"
+            required
+            placeholder="¿Qué nos querés contar?"
+          ></textarea>
+
+        </div>
+
+
+        <button
+          type="submit"
+          class="gota-contact__submit"
+        >
+          <span>Enviar mensaje</span>
+
+          <i
+            class="fas fa-arrow-right"
+            aria-hidden="true"
+          ></i>
+        </button>
+
+      </form>
+
+
+      {% if success %}
+
+        <div class="gota-contact__success">
+
+          <div class="gota-contact__success-icon">
+            <i
+              class="fas fa-check"
+              aria-hidden="true"
+            ></i>
+          </div>
+
+          <div>
+            <strong>Mensaje enviado</strong>
+
+            <p>
+              Gracias por escribirnos. Si no recibís respuesta en 24 horas,
+              revisá la carpeta de spam o escribinos directamente a
+              <a href="mailto:hola@gogota.ar">hola@gogota.ar</a>.
+            </p>
+          </div>
+
+        </div>
+
+      {% endif %}
+
+    </section>
+
+
+    <!-- OTROS CANALES -->
+    <aside class="gota-contact__aside">
+
+      <span class="gota-contact__aside-kicker">
+        Otros canales
+      </span>
+
+      <h2>
+        También nos encontrás acá
+      </h2>
+
+      <p>
+        Si preferís escribirnos directamente, podés hacerlo por email o Instagram.
+      </p>
+
+
+      <div class="gota-contact__channels">
+
+        <a
+          href="mailto:hola@gogota.ar"
+          class="gota-contact__channel"
+        >
+
+          <div class="gota-contact__channel-icon">
+            <i
+              class="far fa-envelope"
+              aria-hidden="true"
+            ></i>
+          </div>
+
+          <div>
+            <span>Email</span>
+            <strong>hola@gogota.ar</strong>
+          </div>
+
+        </a>
+
+
+        <a
+          href="https://www.instagram.com/app.gota/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="gota-contact__channel"
+        >
+
+          <div class="gota-contact__channel-icon">
+            <i
+              class="fab fa-instagram"
+              aria-hidden="true"
+            ></i>
+          </div>
+
+          <div>
+            <span>Instagram</span>
+            <strong>@app.gota</strong>
+          </div>
+
+        </a>
+
+      </div>
+
+    </aside>
+
   </div>
+
 </div>
+
 {% endblock %}

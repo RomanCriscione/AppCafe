@@ -1,57 +1,295 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto px-4 py-6 space-y-6">
 
-  <h1 class="text-2xl font-semibold">Planes</h1>
-  <p class="text-gray-600">Por ahora sólo está activo el plan gratuito. Cuando habilitemos los planes pagos, podrás contratarlos desde acá.</p>
+<div class="gota-plans">
 
-  {% for cafe in cafes %}
-    <div class="surface p-4 rounded-xl">
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="font-semibold">{{ cafe.name }}</h2>
-          <p class="text-sm text-gray-500">Plan actual:
-            {% if cafe.visibility_level == 0 %}Gratuito{% elif cafe.visibility_level == 1 %}Barista{% else %}Maestro{% endif %}
-          </p>
-        </div>
+  <!-- HEADER -->
+  <header class="gota-plans__header">
 
-        <form method="post" action="{% url 'reviews:planes' %}">
-          {% csrf_token %}
-          <input type="hidden" name="cafe_id" value="{{ cafe.id }}">
-          <input type="hidden" name="nivel" value="0">
-          <button class="btn btn-primary">Usar plan gratuito</button>
-        </form>
-      </div>
-
-      <div class="grid sm:grid-cols-2 gap-4 mt-4">
-        <div class="p-4 rounded-lg border">
-          <h3 class="font-medium">Plan Barista</h3>
-          <p class="text-sm text-gray-500">Más visibilidad (+10%).</p>
-
-          {% if upgrades_enabled %}
-            <a class="btn btn-outline mt-2"
-               href="{% url 'reviews:plan_checkout_redirect' cafe.id 1 %}">Contratar</a>
-          {% else %}
-            <button class="btn btn-outline mt-2" disabled>Próximamente</button>
-          {% endif %}
-        </div>
-
-        <div class="p-4 rounded-lg border">
-          <h3 class="font-medium">Plan Maestro</h3>
-          <p class="text-sm text-gray-500">Máxima visibilidad (+20%).</p>
-
-          {% if upgrades_enabled %}
-            <a class="btn btn-outline mt-2"
-               href="{% url 'reviews:plan_checkout_redirect' cafe.id 2 %}">Contratar</a>
-          {% else %}
-            <button class="btn btn-outline mt-2" disabled>Próximamente</button>
-          {% endif %}
-        </div>
-      </div>
+    <div class="gota-plans__header-icon">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
     </div>
-  {% empty %}
-    <p>No tenés cafés todavía.</p>
-  {% endfor %}
+
+    <div>
+      <span class="gota-plans__kicker">
+        Presencia en Gota
+      </span>
+
+      <h1 class="gota-plans__title">
+        Planes para tu cafetería
+      </h1>
+
+      <p class="gota-plans__description">
+        Elegí cómo querés mostrar tu cafetería dentro de Gota.
+        Por ahora, el plan gratuito está disponible para todos.
+      </p>
+    </div>
+
+  </header>
+
+
+  {% if cafes %}
+
+    <div class="gota-plans__cafes">
+
+      {% for cafe in cafes %}
+
+        <section class="gota-plans__cafe">
+
+          <!-- CAFÉ -->
+          <header class="gota-plans__cafe-header">
+
+            <div class="gota-plans__cafe-main">
+
+              {% if cafe.photo1 %}
+
+                <img
+                  src="{{ cafe.photo1.url }}"
+                  alt="Foto de {{ cafe.name }}"
+                  class="gota-plans__cafe-photo"
+                  loading="lazy"
+                >
+
+              {% else %}
+
+                <div class="gota-plans__cafe-placeholder">
+                  <img
+                    src="{% static 'images/gota-icon.png' %}"
+                    alt=""
+                    aria-hidden="true"
+                  >
+                </div>
+
+              {% endif %}
+
+              <div>
+                <span class="gota-plans__cafe-label">
+                  Cafetería
+                </span>
+
+                <h2>
+                  {{ cafe.name }}
+                </h2>
+
+                <p>
+                  Plan actual:
+                  <strong>
+                    {% if cafe.visibility_level == 0 %}
+                      Gratuito
+                    {% elif cafe.visibility_level == 1 %}
+                      Barista
+                    {% else %}
+                      Maestro
+                    {% endif %}
+                  </strong>
+                </p>
+              </div>
+
+            </div>
+
+          </header>
+
+
+          <!-- PLANES -->
+          <div class="gota-plans__grid">
+
+            <!-- GRATUITO -->
+            <article class="gota-plan-card gota-plan-card--active">
+
+              <div class="gota-plan-card__top">
+
+                <span class="gota-plan-card__eyebrow">
+                  Disponible
+                </span>
+
+                <h3>
+                  Plan gratuito
+                </h3>
+
+                <p>
+                  Tu cafetería sigue formando parte de Gota y puede ser descubierta por la comunidad.
+                </p>
+
+              </div>
+
+              <div class="gota-plan-card__status">
+                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                <span>Activo hoy</span>
+              </div>
+
+              <form
+                method="post"
+                action="{% url 'reviews:planes' %}"
+                class="gota-plan-card__form"
+              >
+                {% csrf_token %}
+
+                <input
+                  type="hidden"
+                  name="cafe_id"
+                  value="{{ cafe.id }}"
+                >
+
+                <input
+                  type="hidden"
+                  name="nivel"
+                  value="0"
+                >
+
+                <button
+                  type="submit"
+                  class="gota-plan-card__button gota-plan-card__button--primary"
+                >
+                  Usar plan gratuito
+                </button>
+
+              </form>
+
+            </article>
+
+
+            <!-- BARISTA -->
+            <article class="gota-plan-card">
+
+              <div class="gota-plan-card__top">
+
+                <span class="gota-plan-card__eyebrow">
+                  Más presencia
+                </span>
+
+                <h3>
+                  Plan Barista
+                </h3>
+
+                <p>
+                  Una opción pensada para darle mayor visibilidad a tu cafetería dentro de Gota.
+                </p>
+
+              </div>
+
+              <div class="gota-plan-card__benefit">
+                <strong>+10%</strong>
+                <span>de visibilidad</span>
+              </div>
+
+              {% if upgrades_enabled %}
+
+                <a
+                  href="{% url 'reviews:plan_checkout_redirect' cafe.id 1 %}"
+                  class="gota-plan-card__button"
+                >
+                  Contratar Barista
+                </a>
+
+              {% else %}
+
+                <button
+                  type="button"
+                  class="gota-plan-card__button gota-plan-card__button--disabled"
+                  disabled
+                >
+                  Próximamente
+                </button>
+
+              {% endif %}
+
+            </article>
+
+
+            <!-- MAESTRO -->
+            <article class="gota-plan-card">
+
+              <div class="gota-plan-card__top">
+
+                <span class="gota-plan-card__eyebrow">
+                  Máxima presencia
+                </span>
+
+                <h3>
+                  Plan Maestro
+                </h3>
+
+                <p>
+                  El nivel más alto de visibilidad para cafeterías que quieran destacarse más.
+                </p>
+
+              </div>
+
+              <div class="gota-plan-card__benefit">
+                <strong>+20%</strong>
+                <span>de visibilidad</span>
+              </div>
+
+              {% if upgrades_enabled %}
+
+                <a
+                  href="{% url 'reviews:plan_checkout_redirect' cafe.id 2 %}"
+                  class="gota-plan-card__button"
+                >
+                  Contratar Maestro
+                </a>
+
+              {% else %}
+
+                <button
+                  type="button"
+                  class="gota-plan-card__button gota-plan-card__button--disabled"
+                  disabled
+                >
+                  Próximamente
+                </button>
+
+              {% endif %}
+
+            </article>
+
+          </div>
+
+        </section>
+
+      {% endfor %}
+
+    </div>
+
+  {% else %}
+
+    <!-- EMPTY -->
+    <section class="gota-plans__empty">
+
+      <div class="gota-plans__empty-icon">
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+      </div>
+
+      <h2>
+        Todavía no tenés cafeterías
+      </h2>
+
+      <p>
+        Cuando agregues una cafetería vas a poder gestionar su plan desde acá.
+      </p>
+
+      <a
+        href="{% url 'reviews:create_cafe' %}"
+        class="gota-plans__empty-cta"
+      >
+        <i class="fas fa-plus" aria-hidden="true"></i>
+        <span>Agregar cafetería</span>
+      </a>
+
+    </section>
+
+  {% endif %}
+
 </div>
+
 {% endblock %}

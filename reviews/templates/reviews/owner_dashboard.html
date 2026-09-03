@@ -2,173 +2,509 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8 animate-fade-in">
 
-  <h1 class="text-3xl font-bold mb-8 text-center">📊 Panel del dueño</h1>
-  <p class="text-center text-gray-600 mb-8">{{ ui_messages.welcome_owner }}</p>
+<div class="gota-owner">
 
-  <!-- CTAs unificados -->
-  <div id="owner-actions" class="actions flex flex-col sm:flex-row flex-wrap justify-center gap-4 mb-10">
-    <a href="{% url 'reviews:create_cafe' %}" class="cta cta-green">
-      ➕ <span>Agregar nueva cafetería</span>
-    </a>
+  <!-- HEADER -->
+  <header class="gota-owner-header">
 
-    <a href="{% url 'reviews:owner_reviews' %}" class="cta cta-blue">
-      📝 <span>Ver todas las reseñas</span>
-    </a>
-
-    <a href="{% url 'reviews:analytics_dashboard' %}" class="cta cta-indigo">
-      📊 <span>Ver analíticas</span>
-    </a>
-
-    <a href="{% url 'reviews:planes' %}" class="cta cta-orange">
-      💼 <span>Planes para crecer</span>
-    </a>
-  </div>
-
-  {% if no_cafes %}
-    <div class="text-center py-12 animate-fade-in-up">
-      <p class="text-gray-600 text-lg">{{ ui_messages.owner_no_cafes }}</p>
-      <a href="{% url 'reviews:create_cafe' %}" 
-         class="mt-4 inline-block bg-green-600 hover:bg-green-700 hover:scale-105 text-white px-4 py-2 rounded shadow transition-all duration-200">
-        Agregar mi primer café
-      </a>
+    <div class="gota-owner-header__icon">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
     </div>
+
+    <div>
+      <span class="gota-owner-header__kicker">
+        Espacio para cafeterías
+      </span>
+
+      <h1 class="gota-owner-header__title">
+        Panel del dueño
+      </h1>
+
+      <p class="gota-owner-header__description">
+        Gestioná tus cafeterías, fotos, reseñas y analíticas desde un solo lugar.
+      </p>
+    </div>
+
+  </header>
+
+
+  <!-- ACCESOS -->
+  <section class="gota-owner-actions">
+
+    <a
+      href="{% url 'reviews:create_cafe' %}"
+      class="gota-owner-action gota-owner-action--primary"
+    >
+      <div class="gota-owner-action__icon">
+        <i class="fas fa-plus" aria-hidden="true"></i>
+      </div>
+
+      <div>
+        <strong>Agregar cafetería</strong>
+        <span>Sumá un nuevo lugar a Gota.</span>
+      </div>
+
+      <i
+        class="fas fa-arrow-right gota-owner-action__arrow"
+        aria-hidden="true"
+      ></i>
+    </a>
+
+
+    <a
+      href="{% url 'reviews:owner_reviews' %}"
+      class="gota-owner-action"
+    >
+      <div class="gota-owner-action__icon">
+        <i class="far fa-comment-alt" aria-hidden="true"></i>
+      </div>
+
+      <div>
+        <strong>Reseñas</strong>
+        <span>Mirá qué cuentan quienes visitaron tus cafés.</span>
+      </div>
+
+      <i
+        class="fas fa-arrow-right gota-owner-action__arrow"
+        aria-hidden="true"
+      ></i>
+    </a>
+
+
+    <a
+      href="{% url 'reviews:analytics_dashboard' %}"
+      class="gota-owner-action"
+    >
+      <div class="gota-owner-action__icon">
+        <i class="fas fa-chart-line" aria-hidden="true"></i>
+      </div>
+
+      <div>
+        <strong>Analíticas</strong>
+        <span>Consultá la actividad de tus cafeterías.</span>
+      </div>
+
+      <i
+        class="fas fa-arrow-right gota-owner-action__arrow"
+        aria-hidden="true"
+      ></i>
+    </a>
+
+
+    <a
+      href="{% url 'reviews:planes' %}"
+      class="gota-owner-action"
+    >
+      <div class="gota-owner-action__icon">
+        <i class="far fa-gem" aria-hidden="true"></i>
+      </div>
+
+      <div>
+        <strong>Planes</strong>
+        <span>Conocé las opciones disponibles para tu café.</span>
+      </div>
+
+      <i
+        class="fas fa-arrow-right gota-owner-action__arrow"
+        aria-hidden="true"
+      ></i>
+    </a>
+
+  </section>
+
+
+  <!-- EMPTY STATE -->
+  {% if no_cafes %}
+
+    <section class="gota-owner-empty">
+
+      <div class="gota-owner-empty__icon">
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+      </div>
+
+      <h2>
+        Tu espacio está listo
+      </h2>
+
+      <p>
+        Agregá tu primera cafetería para empezar a gestionarla desde Gota.
+      </p>
+
+      <a
+        href="{% url 'reviews:create_cafe' %}"
+        class="gota-owner-empty__cta"
+      >
+        <i class="fas fa-plus" aria-hidden="true"></i>
+        <span>Agregar mi primera cafetería</span>
+      </a>
+
+    </section>
+
   {% endif %}
 
+
+  <!-- CAFETERÍAS -->
   {% if cafes %}
-    <ul class="space-y-8">
-      {% for cafe in cafes %}
-        <li class="bg-white border border-gray-200 rounded-2xl shadow-md hover:shadow-xl transition-all duration-200 p-6">
-          <div class="flex flex-col md:flex-row gap-6 items-start">
-            {% if cafe.photo1 %}
-              <img src="{{ cafe.photo1.url }}" alt="Foto de {{ cafe.name }}"
-                  class="w-32 h-32 object-cover rounded-lg shadow">
-            {% endif %}
 
-            <div class="flex-1 space-y-3">
-              <h2 class="text-xl font-bold text-brown-800">
-                {{ cafe.name }} –
-                {% if cafe.visibility_level == 2 %}
-                  ☕☕ <span class="text-yellow-600 font-medium">Plan Maestro</span>
-                {% elif cafe.visibility_level == 1 %}
-                  ☕ <span class="text-blue-500 font-medium">Plan Barista</span>
-                {% else %}
-                  ☕ <span class="text-gray-500 font-medium">Gratuito</span>
-                {% endif %}
-              </h2>
+    <section class="gota-owner-cafes">
 
-              <p class="text-sm text-gray-600">📍 {{ cafe.address }}, {{ cafe.location }}</p>
-              <p class="text-sm">☕ Promedio: {{ cafe.average_rating|floatformat:1|default:"Sin puntuar" }}</p>
-              <p class="text-sm">🧾 Reseñas: {{ cafe.total_reviews }}</p>
+      <div class="gota-owner-cafes__heading">
 
-              {% if cafe.tags_summary %}
-                <div class="mt-2">
-                  <h4 class="text-sm font-semibold mb-1 text-gray-700">🪄 Cómo lo perciben los visitantes:</h4>
-                  {% for category, tags in cafe.tags_summary.items %}
-                    <div class="mb-1">
-                      <p class="text-xs font-medium text-gray-600">{{ category|title }}</p>
-                      <div class="flex flex-wrap gap-2 mt-1">
-                        {% for tag in tags|slice:":5" %}
-                          <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                            {{ tag.name }} ({{ tag.count }})
-                          </span>
-                        {% endfor %}
-                      </div>
-                    </div>
-                  {% endfor %}
+        <div>
+          <span class="gota-owner-cafes__kicker">
+            Tus lugares
+          </span>
+
+          <h2>
+            Cafeterías
+          </h2>
+        </div>
+
+      </div>
+
+
+      <div class="gota-owner-cafes__list">
+
+        {% for cafe in cafes %}
+
+          <article class="gota-owner-cafe">
+
+            <!-- FOTO -->
+            <div class="gota-owner-cafe__media">
+
+              {% if cafe.photo1 %}
+
+                <img
+                  src="{{ cafe.photo1.url }}"
+                  alt="Foto de {{ cafe.name }}"
+                  loading="lazy"
+                >
+
+              {% else %}
+
+                <div class="gota-owner-cafe__no-photo">
+                  <img
+                    src="{% static 'images/gota-icon.png' %}"
+                    alt=""
+                    aria-hidden="true"
+                  >
+                  <span>Sin foto</span>
                 </div>
+
               {% endif %}
 
-              {% with owner_tags=cafe.tags.all %}
-                {% if owner_tags %}
-                  <div class="mt-2">
-                    <h4 class="text-sm font-semibold mb-1 text-gray-700">🏷️ Etiquetas del dueño:</h4>
-                    <div class="flex flex-wrap gap-2">
-                      {% for tag in owner_tags %}
-                        <span class="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-full">{{ tag.name }}</span>
-                      {% endfor %}
-                    </div>
-                  </div>
-                {% endif %}
-              {% endwith %}
+            </div>
 
-              {# --- Plan actual + acciones --- #}
-              <div class="mt-3">
-                <div class="text-sm text-gray-600">
-                  Plan actual:
-                  <strong>
-                    {% if cafe.visibility_level == 0 %}Gratuito{% elif cafe.visibility_level == 1 %}Barista{% else %}Maestro{% endif %}
-                  </strong>
+
+            <!-- CONTENIDO -->
+            <div class="gota-owner-cafe__body">
+
+              <div class="gota-owner-cafe__top">
+
+                <div>
+
+                  <span class="gota-owner-cafe__plan">
+
+                    {% if cafe.visibility_level == 2 %}
+                      Plan Maestro
+                    {% elif cafe.visibility_level == 1 %}
+                      Plan Barista
+                    {% else %}
+                      Plan gratuito
+                    {% endif %}
+
+                  </span>
+
+                  <h3>
+                    {{ cafe.name }}
+                  </h3>
+
+                  <p class="gota-owner-cafe__location">
+                    <i
+                      class="fas fa-map-marker-alt"
+                      aria-hidden="true"
+                    ></i>
+
+                    {{ cafe.address }}{% if cafe.location %}, {{ cafe.location }}{% endif %}
+                  </p>
+
                 </div>
 
-                <div class="flex flex-wrap gap-2 mt-2 items-center">
-                  {# ✅ cambia el plan a gratuito (POST real) #}
-                  <form method="post" action="{% url 'reviews:cambiar_visibilidad' cafe.id %}">
+              </div>
+
+
+              <!-- MÉTRICAS -->
+              <div class="gota-owner-cafe__metrics">
+
+                <div class="gota-owner-cafe__metric">
+
+                  <span>
+                    Promedio
+                  </span>
+
+                  <strong>
+                    {% if cafe.average_rating %}
+                      {{ cafe.average_rating|floatformat:1 }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </strong>
+
+                </div>
+
+
+                <div class="gota-owner-cafe__metric">
+
+                  <span>
+                    Reseñas
+                  </span>
+
+                  <strong>
+                    {{ cafe.total_reviews|default:"0" }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              <!-- PERCEPCIÓN -->
+              {% if cafe.tags_summary %}
+
+                <div class="gota-owner-cafe__perception">
+
+                  <span class="gota-owner-cafe__section-label">
+                    Cómo lo perciben los visitantes
+                  </span>
+
+                  <div class="gota-owner-cafe__tag-groups">
+
+                    {% for category, tags in cafe.tags_summary.items %}
+
+                      {% if tags %}
+
+                        <div class="gota-owner-cafe__tag-group">
+
+                          <span class="gota-owner-cafe__tag-category">
+                            {{ category|title }}
+                          </span>
+
+                          <div class="gota-owner-cafe__tags">
+
+                            {% for tag in tags|slice:":5" %}
+
+                              <span class="gota-owner-cafe__tag">
+                                {{ tag.name }}
+
+                                <small>
+                                  {{ tag.count }}
+                                </small>
+                              </span>
+
+                            {% endfor %}
+
+                          </div>
+
+                        </div>
+
+                      {% endif %}
+
+                    {% endfor %}
+
+                  </div>
+
+                </div>
+
+              {% endif %}
+
+
+              <!-- PLAN -->
+              <div class="gota-owner-cafe__plan-section">
+
+                <div>
+
+                  <span class="gota-owner-cafe__section-label">
+                    Plan actual
+                  </span>
+
+                  <strong class="gota-owner-cafe__current-plan">
+
+                    {% if cafe.visibility_level == 0 %}
+                      Gratuito
+                    {% elif cafe.visibility_level == 1 %}
+                      Barista
+                    {% else %}
+                      Maestro
+                    {% endif %}
+
+                  </strong>
+
+                </div>
+
+
+                <div class="gota-owner-cafe__plan-actions">
+
+                  <form
+                    method="post"
+                    action="{% url 'reviews:cambiar_visibilidad' cafe.id %}"
+                  >
                     {% csrf_token %}
-                    <input type="hidden" name="visibility_level" value="0">
-                    <button type="submit" class="btn btn-primary btn-sm">
-                      Plan gratuito
+
+                    <input
+                      type="hidden"
+                      name="visibility_level"
+                      value="0"
+                    >
+
+                    <button
+                      type="submit"
+                      class="gota-owner-cafe__plan-button"
+                    >
+                      Gratuito
                     </button>
+
                   </form>
 
-                  {# 🟡 planes pagos: cartel por ahora #}
-                  <button type="button" class="btn btn-outline btn-sm btn-upgrade" data-plan="barista">
-                    Plan Barista
+
+                  <button
+                    type="button"
+                    class="gota-owner-cafe__plan-button gota-owner-upgrade"
+                    data-plan="barista"
+                  >
+                    Barista
                   </button>
-                  <button type="button" class="btn btn-outline btn-sm btn-upgrade" data-plan="maestro">
-                    Plan Maestro
+
+
+                  <button
+                    type="button"
+                    class="gota-owner-cafe__plan-button gota-owner-upgrade"
+                    data-plan="maestro"
+                  >
+                    Maestro
                   </button>
+
                 </div>
+
               </div>
 
-              {# === Acciones unificadas === #}
-              <div class="owner-card-actions mt-4">
-                <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="btn btn-outline btn-sm">
-                  🔍 Ver detalles
+
+              <!-- ACCIONES -->
+              <div class="gota-owner-cafe__actions">
+
+                <a
+                  href="{% url 'reviews:cafe_detail' cafe.id %}"
+                  class="gota-owner-cafe__action"
+                >
+                  <i class="far fa-eye" aria-hidden="true"></i>
+                  <span>Ver</span>
                 </a>
 
-                <a href="{% url 'reviews:edit_cafe' cafe.id %}" class="btn btn-outline btn-sm">
-                  ✏️ Editar
+
+                <a
+                  href="{% url 'reviews:edit_cafe' cafe.id %}"
+                  class="gota-owner-cafe__action"
+                >
+                  <i class="far fa-edit" aria-hidden="true"></i>
+                  <span>Editar</span>
                 </a>
 
-                <a href="{% url 'reviews:upload_photos' cafe.id %}" class="btn btn-outline btn-sm">
-                  📷 Fotos
+
+                <a
+                  href="{% url 'reviews:upload_photos' cafe.id %}"
+                  class="gota-owner-cafe__action"
+                >
+                  <i class="far fa-images" aria-hidden="true"></i>
+                  <span>Fotos</span>
                 </a>
 
-                <form action="{% url 'reviews:delete_cafe' cafe.id %}" method="post"
-                      onsubmit="return confirm('¿Estás seguro de eliminar esta cafetería?')">
-                  {% csrf_token %}
-                  <button type="submit" class="btn btn-danger btn-sm">
-                    🗑️ Eliminar
-                  </button>
-                </form>
+
+                <a
+                  href="{% url 'reviews:delete_cafe' cafe.id %}"
+                  class="gota-owner-cafe__action gota-owner-cafe__action--danger"
+                >
+                  <i class="far fa-trash-alt" aria-hidden="true"></i>
+                  <span>Eliminar</span>
+                </a>
+
               </div>
+
             </div>
-          </div>
-        </li>
-      {% endfor %}
-    </ul>
+
+          </article>
+
+        {% endfor %}
+
+      </div>
+
+    </section>
+
   {% endif %}
+
 </div>
+
 {% endblock %}
+
 
 {% block scripts %}
   {{ block.super }}
+
   <script>
-    (function(){
-      function toast(msg){
-        const t = document.createElement('div');
-        t.className = 'toast';
-        t.textContent = msg;
-        document.body.appendChild(t);
-        setTimeout(()=>t.remove(), 2400);
-      }
-      document.querySelectorAll('.btn-upgrade').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          toast('Los planes pagos estarán disponibles pronto.');
+    (function () {
+
+      function showOwnerToast(message) {
+
+        const existing = document.querySelector('.gota-owner-toast');
+
+        if (existing) {
+          existing.remove();
+        }
+
+        const toast = document.createElement('div');
+
+        toast.className = 'gota-owner-toast';
+        toast.textContent = message;
+
+        document.body.appendChild(toast);
+
+        requestAnimationFrame(() => {
+          toast.classList.add('gota-owner-toast--visible');
         });
+
+        setTimeout(() => {
+
+          toast.classList.remove('gota-owner-toast--visible');
+
+          setTimeout(() => {
+            toast.remove();
+          }, 200);
+
+        }, 2400);
+
+      }
+
+
+      document.querySelectorAll('.gota-owner-upgrade').forEach((button) => {
+
+        button.addEventListener('click', () => {
+
+          showOwnerToast(
+            'Los planes pagos estarán disponibles pronto.'
+          );
+
+        });
+
       });
+
     })();
   </script>
+
 {% endblock %}

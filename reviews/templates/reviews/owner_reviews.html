@@ -2,69 +2,401 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 py-6">
-  <h1 class="text-2xl font-bold mb-6">📋 Reseñas de tus cafeterías</h1>
+
+<div class="gota-owner-reviews">
+
+  <!-- HEADER -->
+  <header class="gota-owner-reviews__header">
+
+    <div class="gota-owner-reviews__header-icon">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+    </div>
+
+    <div>
+      <span class="gota-owner-reviews__kicker">
+        Experiencias
+      </span>
+
+      <h1 class="gota-owner-reviews__title">
+        Reseñas de tus cafeterías
+      </h1>
+
+      <p class="gota-owner-reviews__description">
+        Conocé qué cuentan quienes visitaron tus lugares y respondé directamente desde acá.
+      </p>
+    </div>
+
+  </header>
+
 
   {% if reseñas_por_cafe %}
-    {% for cafe, data in reseñas_por_cafe.items %}
-      <div class="mb-10 p-4 bg-gray-100 rounded-lg shadow-sm">
-        <div class="flex items-start gap-4 mb-4 flex-wrap">
-          {% if cafe.photo1 %}
-            <img alt="Foto de {{ cafe.name }}" class="w-24 h-24 object-cover rounded-lg shadow" loading="lazy" src="{{ cafe.photo1.url }}"/>
-          {% endif %}
-          <div>
-            <h2 class="text-lg font-semibold">
-              {{ cafe.name }} <span class="text-gray-500 text-sm">({{ cafe.location }})</span>
-            </h2>
-            <p class="text-sm text-gray-600 mt-1">
-              🧾 {{ data.reviews|length }} reseña{{ data.reviews|length|pluralize }}
-              |
-              ☕ {% if data.average_rating %}{{ data.average_rating|floatformat:1 }}{% else %}Sin calificación{% endif %}
-              |
-              <a class="text-blue-600 hover:underline font-medium" href="{% url 'reviews:cafe_detail' cafe.id %}">🔎 Ver vista pública</a>
-            </p>
-          </div>
-        </div>
-        <ul class="space-y-4">
-          {% for review in data.reviews %}
-            <li class="bg-white p-4 rounded border border-gray-300 shadow-sm">
-              <p class="text-sm text-gray-700">
-                <strong>{{ review.user.username }}</strong>
-                <span class="text-gray-500 text-xs">({{ review.created_at|date:"d M Y" }})</span>
-              </p>
-              <p class="text-sm mt-1">☕ {{ review.rating|floatformat:1 }}</p>
-              <p class="mt-2 text-gray-800">{{ review.comment }}</p>
 
-              {% if review.owner_reply %}
-                <p class="mt-2"><strong>☕ Respuesta de {{ cafe.name }}:</strong> {{ review.owner_reply }}</p>
-                <button class="mt-2 text-white bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded text-sm" onclick="toggleReplyForm('{{ review.id }}')" type="button">✏️ Editar respuesta</button>
+    <div class="gota-owner-reviews__cafes">
+
+      {% for cafe, data in reseñas_por_cafe.items %}
+
+        <section class="gota-owner-reviews__cafe">
+
+          <!-- CAFETERÍA -->
+          <header class="gota-owner-reviews__cafe-header">
+
+            <div class="gota-owner-reviews__cafe-main">
+
+              {% if cafe.photo1 %}
+
+                <img
+                  src="{{ cafe.photo1.url }}"
+                  alt="Foto de {{ cafe.name }}"
+                  class="gota-owner-reviews__cafe-photo"
+                  loading="lazy"
+                >
+
               {% else %}
-                <button class="mt-2 text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm" onclick="toggleReplyForm('{{ review.id }}')" type="button">💬 Responder</button>
+
+                <div class="gota-owner-reviews__cafe-placeholder">
+                  <img
+                    src="{% static 'images/gota-icon.png' %}"
+                    alt=""
+                    aria-hidden="true"
+                  >
+                </div>
+
               {% endif %}
 
-              <form action="{% url 'reviews:edit_owner_reply' review.id %}" class="hidden mt-3" id="reply-form-{{ review.id }}" method="post">
-                {% csrf_token %}
-                <textarea class="w-full border border-gray-300 rounded p-2 text-sm" name="reply" rows="2">{{ review.owner_reply }}</textarea>
-                <button class="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm" type="submit">Guardar respuesta</button>
-              </form>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-    {% endfor %}
-  {% else %}
-    <div class="text-center py-12">
-      <p class="text-gray-600 text-lg">{{ ui_messages.owner_no_reviews }}</p>
-      <a href="{% url 'reviews:cafe_list' %}" class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-        Explorar cafés
-      </a>
+
+              <div class="gota-owner-reviews__cafe-info">
+
+                <span class="gota-owner-reviews__cafe-label">
+                  Cafetería
+                </span>
+
+                <h2>
+                  {{ cafe.name }}
+                </h2>
+
+                {% if cafe.location %}
+                  <p>
+                    <i
+                      class="fas fa-map-marker-alt"
+                      aria-hidden="true"
+                    ></i>
+                    {{ cafe.location }}
+                  </p>
+                {% endif %}
+
+              </div>
+
+            </div>
+
+
+            <a
+              href="{% url 'reviews:cafe_detail' cafe.id %}"
+              class="gota-owner-reviews__public-link"
+            >
+              <span>Ver vista pública</span>
+              <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
+
+          </header>
+
+
+          <!-- RESUMEN -->
+          <div class="gota-owner-reviews__summary">
+
+            <div class="gota-owner-reviews__summary-item">
+
+              <span>Reseñas</span>
+
+              <strong>
+                {{ data.reviews|length }}
+              </strong>
+
+            </div>
+
+
+            <div class="gota-owner-reviews__summary-item">
+
+              <span>Promedio</span>
+
+              <div class="gota-owner-reviews__rating">
+
+                <img
+                  src="{% static 'images/gota-icon.png' %}"
+                  alt=""
+                  aria-hidden="true"
+                >
+
+                <strong>
+                  {% if data.average_rating %}
+                    {{ data.average_rating|floatformat:1 }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- RESEÑAS -->
+          <div class="gota-owner-reviews__list">
+
+            {% for review in data.reviews %}
+
+              <article class="gota-owner-review">
+
+                <!-- CABECERA -->
+                <div class="gota-owner-review__header">
+
+                  <div>
+
+                    <strong class="gota-owner-review__user">
+                      {{ review.user.username }}
+                    </strong>
+
+                    <span class="gota-owner-review__date">
+                      {{ review.created_at|date:"d M Y" }}
+                    </span>
+
+                  </div>
+
+
+                  <div class="gota-owner-review__rating">
+
+                    <img
+                      src="{% static 'images/gota-icon.png' %}"
+                      alt=""
+                      aria-hidden="true"
+                    >
+
+                    <strong>
+                      {{ review.rating|floatformat:1 }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <!-- COMENTARIO -->
+                {% if review.comment %}
+
+                  <p class="gota-owner-review__comment">
+                    {{ review.comment }}
+                  </p>
+
+                {% else %}
+
+                  <p class="gota-owner-review__comment gota-owner-review__comment--empty">
+                    Esta experiencia no tiene comentario.
+                  </p>
+
+                {% endif %}
+
+
+                <!-- RESPUESTA -->
+                {% if review.owner_reply %}
+
+                  <div class="gota-owner-review__reply">
+
+                    <div class="gota-owner-review__reply-icon">
+                      <img
+                        src="{% static 'images/gota-icon.png' %}"
+                        alt=""
+                        aria-hidden="true"
+                      >
+                    </div>
+
+                    <div>
+
+                      <span>
+                        Respuesta de {{ cafe.name }}
+                      </span>
+
+                      <p>
+                        {{ review.owner_reply }}
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                {% endif %}
+
+
+                <!-- ACCIÓN RESPONDER -->
+                <button
+                  type="button"
+                  class="gota-owner-review__reply-toggle"
+                  onclick="toggleReplyForm('{{ review.id }}')"
+                  aria-controls="reply-form-{{ review.id }}"
+                  aria-expanded="false"
+                  id="reply-toggle-{{ review.id }}"
+                >
+
+                  {% if review.owner_reply %}
+
+                    <i
+                      class="far fa-edit"
+                      aria-hidden="true"
+                    ></i>
+
+                    <span>Editar respuesta</span>
+
+                  {% else %}
+
+                    <i
+                      class="far fa-comment"
+                      aria-hidden="true"
+                    ></i>
+
+                    <span>Responder</span>
+
+                  {% endif %}
+
+                </button>
+
+
+                <!-- FORMULARIO RESPUESTA -->
+                <form
+                  action="{% url 'reviews:edit_owner_reply' review.id %}"
+                  method="post"
+                  class="gota-owner-review__reply-form"
+                  id="reply-form-{{ review.id }}"
+                  hidden
+                >
+                  {% csrf_token %}
+
+                  <label for="reply-{{ review.id }}">
+                    Tu respuesta
+                  </label>
+
+                  <textarea
+                    id="reply-{{ review.id }}"
+                    name="reply"
+                    rows="3"
+                    placeholder="Escribí una respuesta..."
+                  >{{ review.owner_reply }}</textarea>
+
+                  <div class="gota-owner-review__reply-actions">
+
+                    <button
+                      type="submit"
+                      class="gota-owner-review__reply-save"
+                    >
+                      Guardar respuesta
+                    </button>
+
+                    <button
+                      type="button"
+                      class="gota-owner-review__reply-cancel"
+                      onclick="toggleReplyForm('{{ review.id }}')"
+                    >
+                      Cancelar
+                    </button>
+
+                  </div>
+
+                </form>
+
+              </article>
+
+            {% endfor %}
+
+          </div>
+
+        </section>
+
+      {% endfor %}
+
     </div>
+
+
+  {% else %}
+
+    <!-- EMPTY -->
+    <section class="gota-owner-reviews__empty">
+
+      <div class="gota-owner-reviews__empty-icon">
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+      </div>
+
+      <h2>
+        Todavía no hay reseñas
+      </h2>
+
+      <p>
+        {{ ui_messages.owner_no_reviews }}
+      </p>
+
+      <a
+        href="{% url 'reviews:cafe_list' %}"
+        class="gota-owner-reviews__empty-cta"
+      >
+        <span>Explorar cafeterías</span>
+        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+      </a>
+
+    </section>
+
   {% endif %}
+
 </div>
-<script>
-  function toggleReplyForm(id) {
-    const form = document.getElementById('reply-form-' + id);
-    form.classList.toggle('hidden');
-  }
-</script>
+
+{% endblock %}
+
+
+{% block scripts %}
+  {{ block.super }}
+
+  <script>
+    function toggleReplyForm(id) {
+
+      const form = document.getElementById('reply-form-' + id);
+      const button = document.getElementById('reply-toggle-' + id);
+
+      if (!form) {
+        return;
+      }
+
+      const isHidden = form.hasAttribute('hidden');
+
+      if (isHidden) {
+
+        form.removeAttribute('hidden');
+
+        if (button) {
+          button.setAttribute('aria-expanded', 'true');
+        }
+
+        const textarea = form.querySelector('textarea');
+
+        if (textarea) {
+          textarea.focus();
+        }
+
+      } else {
+
+        form.setAttribute('hidden', '');
+
+        if (button) {
+          button.setAttribute('aria-expanded', 'false');
+        }
+
+      }
+
+    }
+  </script>
+
 {% endblock %}

@@ -2,15 +2,78 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-md mx-auto mt-20 p-6 bg-white rounded-lg shadow-lg text-center">
-<h1 class="text-2xl font-bold mb-4">👋 ¿Seguro que querés cerrar sesión?</h1>
-<p class="mb-6 text-gray-600">Podés volver a iniciar sesión en cualquier momento.</p>
-<form action="{% url 'account_logout' %}" class="space-y-4" method="POST">
-    {% csrf_token %}
-    <button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded transition" type="submit">
-      🔒 Cerrar sesión
-    </button>
-</form>
-<a class="mt-4 inline-block text-blue-600 hover:underline" href="/">← Volver al inicio</a>
+
+<div class="gota-auth-page">
+
+  <div class="gota-auth-card">
+
+    <!-- HEADER -->
+    <header class="gota-auth-header">
+
+      <div class="gota-auth-header__icon">
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+      </div>
+
+      <span class="gota-auth-header__kicker">
+        Tu cuenta
+      </span>
+
+      <h1 class="gota-auth-header__title">
+        ¿Querés cerrar sesión?
+      </h1>
+
+      <p class="gota-auth-header__description">
+        Podés volver a iniciar sesión cuando quieras.
+      </p>
+
+    </header>
+
+
+    <!-- CERRAR SESIÓN -->
+    <form
+      action="{% url 'account_logout' %}"
+      method="POST"
+      class="gota-auth-form"
+    >
+      {% csrf_token %}
+
+      <button
+        type="submit"
+        class="gota-auth-submit"
+      >
+        <span>Cerrar sesión</span>
+
+        <i
+          class="fas fa-sign-out-alt"
+          aria-hidden="true"
+        ></i>
+      </button>
+
+    </form>
+
+
+    <!-- CANCELAR -->
+    <div class="gota-auth-footer">
+
+      <a href="/">
+
+        <i
+          class="fas fa-arrow-left"
+          aria-hidden="true"
+        ></i>
+
+        Volver al inicio
+
+      </a>
+
+    </div>
+
+  </div>
+
 </div>
+
 {% endblock %}
