@@ -4,6 +4,9 @@ from google.oauth2 import id_token
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 
+import jwt
+import requests
+
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
@@ -138,6 +141,113 @@ class MobileGoogleLoginAPIView(APIView):
             user.set_unusable_password()
             user.save(
                 update_fields=["password"],
+            )
+
+        token, _ = Token.objects.get_or_create(
+            user=user,
+        )
+
+        return Response(
+            {
+                "success": True,
+                "token": token.key,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "name": (
+                        user.first_name
+                        or user.username
+                    ),
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
+
+class MobileAppleLoginAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        apple_id_token = request.data.get(
+            "id_token",
+            "",
+        ).strip()
+
+        name = request.data.get(
+            "name",
+            "",
+        ).strip()
+
+        if not apple_id_token:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Falta el token de Apple.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            jwks_client = jwt.PyJWKClient(
+                "https://appleid.apple.com/auth/keys"
+            )
+
+            signing_key = jwks_client.get_signing_key_from_jwt(
+                apple_id_token
+            )
+
+            payload = jwt.decode(
+                apple_id_token,
+                signing_key.key,
+                algorithms=["RS256"],
+                audience="ar.gogota.app",
+                issuer="https://appleid.apple.com",
+            )
+
+        except Exception:
+            return Response(
+                {
+                    "success": False,
+                    "message": "No pudimos validar tu cuenta de Apple.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        email = (
+            payload.get("email", "")
+            .strip()
+            .lower()
+        )
+
+        if not email:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Apple no confirmó un email válido.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.filter(
+            email__iexact=email,
+        ).first()
+
+        if user is None:
+            user = User.objects.create_user(
+                username=email,
+                email=email,
+                first_name=name or email.split("@")[0],
+            )
+
+            user.set_unusable_password()
+            user.save(
+                update_fields=["password"],
+            )
+
+        elif name and not user.first_name:
+            user.first_name = name
+            user.save(
+                update_fields=["first_name"],
             )
 
         token, _ = Token.objects.get_or_create(
