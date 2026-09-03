@@ -8628,3 +8628,1378 @@ select.gota-create-field__input {
   }
 
 }
+
+/* =========================================================
+   CREAR RESEÑA
+   ========================================================= */
+
+.gota-review-create {
+  width: min(100% - 32px, 820px);
+  margin: 46px auto 80px;
+}
+
+
+/* VOLVER */
+
+.gota-review-create__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  margin-bottom: 22px;
+
+  color: #64748B !important;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.gota-review-create__back:hover {
+  color: #172C6D !important;
+}
+
+.gota-review-create__back i {
+  font-size: 9px;
+}
+
+
+/* HEADER */
+
+.gota-review-create__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+
+  margin-bottom: 26px;
+}
+
+.gota-review-create__header-icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 14px;
+}
+
+.gota-review-create__header-icon img {
+  width: 25px;
+  height: 25px;
+
+  object-fit: contain;
+}
+
+.gota-review-create__header-content {
+  min-width: 0;
+}
+
+.gota-review-create__kicker {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #64748B;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.gota-review-create__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 31px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.gota-review-create__description {
+  max-width: 650px;
+
+  margin: 7px 0 0;
+
+  color: #64748B;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.gota-review-create__description strong {
+  color: #475569;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   PROGRESO
+   ========================================================= */
+
+.gota-review-progress {
+  display: flex;
+  align-items: center;
+
+  padding: 14px 17px;
+  margin-bottom: 18px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 15px;
+}
+
+.gota-review-progress__step {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  min-width: 0;
+
+  opacity: .45;
+
+  transition: opacity .2s ease;
+}
+
+.gota-review-progress__step > span {
+  width: 27px;
+  height: 27px;
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #F1F5F9;
+  border-radius: 50%;
+
+  color: #64748B;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.gota-review-progress__step > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.gota-review-progress__step strong {
+  color: #475569;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.gota-review-progress__step small {
+  margin-top: 1px;
+
+  color: #94A3B8;
+  font-size: 8.5px;
+}
+
+.gota-review-progress__step--active {
+  opacity: 1;
+}
+
+.gota-review-progress__step--active > span {
+  background: #172C6D;
+  color: #FFFFFF;
+}
+
+.gota-review-progress__step--active strong {
+  color: #172C6D;
+}
+
+.gota-review-progress__step--done {
+  opacity: .75;
+}
+
+.gota-review-progress__step--done > span {
+  background: #DBEAFE;
+  color: #172C6D;
+}
+
+.gota-review-progress__line {
+  height: 1px;
+  flex: 1;
+
+  margin: 0 15px;
+
+  background: #E2E8F0;
+}
+
+
+/* =========================================================
+   ERRORES
+   ========================================================= */
+
+.gota-review-error-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  padding: 11px 13px;
+  margin-bottom: 16px;
+
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 11px;
+
+  color: #B91C1C;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.gota-review-field-error {
+  margin: 7px 0 0;
+
+  color: #B91C1C;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   PASOS
+   ========================================================= */
+
+.gota-review-step {
+  padding: 23px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 18px;
+
+  box-shadow: 0 2px 10px rgba(15, 23, 42, .035);
+}
+
+.gota-review-step__heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  padding-bottom: 19px;
+  margin-bottom: 4px;
+
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.gota-review-step__number {
+  min-width: 31px;
+
+  color: #93C5FD;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+.gota-review-step__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.gota-review-step__description {
+  margin: 4px 0 0;
+
+  color: #94A3B8;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+
+/* =========================================================
+   BLOQUES
+   ========================================================= */
+
+.gota-review-block {
+  padding: 21px 0;
+
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.gota-review-block--compact {
+  border-bottom: 0;
+}
+
+.gota-review-block__heading {
+  margin-bottom: 13px;
+}
+
+.gota-review-block__title {
+  margin: 0;
+
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.gota-review-block__help {
+  margin: 4px 0 0;
+
+  color: #94A3B8;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.gota-review-title-with-badge {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.gota-review-optional {
+  padding: 3px 7px;
+
+  background: #F8FAFC;
+  border-radius: 999px;
+
+  color: #94A3B8;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+
+/* =========================================================
+   RATING
+   ========================================================= */
+
+.gota-review-rating {
+  display: flex;
+  gap: 8px;
+}
+
+.gota-review-rating__input {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gota-review-rating__cup {
+  width: 46px;
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    transform .15s ease,
+    opacity .15s ease;
+}
+
+.gota-review-rating__cup:hover {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  transform: translateY(-1px);
+}
+
+.gota-review-rating__cup img {
+  width: 27px;
+  height: 27px;
+
+  object-fit: contain;
+
+  opacity: .25;
+  filter: grayscale(1);
+
+  transition:
+    opacity .15s ease,
+    filter .15s ease;
+}
+
+.gota-review-rating__cup.active {
+  background: #EFF6FF;
+  border-color: #93C5FD;
+}
+
+.gota-review-rating__cup.active img {
+  opacity: 1;
+  filter: none;
+}
+
+.gota-review-rating__cup.dim img {
+  opacity: .2;
+}
+
+.gota-review-rating__feedback {
+  min-height: 17px;
+
+  margin: 8px 0 0;
+
+  color: #64748B;
+  font-size: 10px;
+  font-style: italic;
+}
+
+@keyframes gotaReviewCupPop {
+
+  0% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(1.13);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+
+}
+
+.gota-review-rating__cup--pop {
+  animation: gotaReviewCupPop .22s ease;
+}
+
+
+/* =========================================================
+   PLANES
+   ========================================================= */
+
+.gota-review-plans {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.gota-review-plan {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  min-height: 45px;
+  padding: 10px 11px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 11px;
+
+  cursor: pointer;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease;
+}
+
+.gota-review-plan:hover {
+  background: #F8FAFC;
+  border-color: #BFDBFE;
+}
+
+.gota-review-plan input {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gota-review-plan__radio {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  border-radius: 50%;
+
+  color: transparent;
+  font-size: 7px;
+}
+
+.gota-review-plan__label {
+  color: #475569;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.gota-review-plan:has(input:checked) {
+  background: #EFF6FF;
+  border-color: #93C5FD;
+}
+
+.gota-review-plan:has(input:checked)
+.gota-review-plan__radio {
+  background: #172C6D;
+  border-color: #172C6D;
+  color: #FFFFFF;
+}
+
+.gota-review-plan:has(input:checked)
+.gota-review-plan__label {
+  color: #172C6D;
+}
+
+
+/* =========================================================
+   COMENTARIO
+   ========================================================= */
+
+.gota-review-comment-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 6px;
+
+  color: #94A3B8;
+  font-size: 9px;
+}
+
+.gota-review-textarea {
+  width: 100% !important;
+  min-height: 125px;
+
+  padding: 11px 12px !important;
+
+  background: #FFFFFF !important;
+  border: 1px solid #DBEAFE !important;
+  border-radius: 11px !important;
+
+  color: #334155 !important;
+  font-size: 11.5px !important;
+  line-height: 1.55;
+
+  resize: vertical;
+
+  box-shadow: none !important;
+}
+
+.gota-review-textarea:focus {
+  outline: none !important;
+
+  border-color: #93C5FD !important;
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, .10) !important;
+}
+
+.gota-review-textarea::placeholder {
+  color: #CBD5E1;
+}
+
+
+/* =========================================================
+   PRECIO
+   ========================================================= */
+
+.gota-review-price {
+  position: relative;
+
+  max-width: 240px;
+}
+
+.gota-review-price__symbol {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+
+  transform: translateY(-50%);
+
+  color: #64748B;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.gota-review-price__input {
+  width: 100% !important;
+  min-height: 43px;
+
+  padding: 9px 11px 9px 27px !important;
+
+  background: #FFFFFF !important;
+  border: 1px solid #DBEAFE !important;
+  border-radius: 11px !important;
+
+  color: #334155 !important;
+  font-size: 11.5px !important;
+
+  box-shadow: none !important;
+}
+
+.gota-review-price__input:focus {
+  outline: none !important;
+  border-color: #93C5FD !important;
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, .10) !important;
+}
+
+
+/* =========================================================
+   TOP TAGS
+   ========================================================= */
+
+.gota-review-popular {
+  padding: 16px;
+  margin: 20px 0 16px;
+
+  background: #EFF6FF;
+  border: 1px solid #DBEAFE;
+  border-radius: 13px;
+}
+
+.gota-review-popular__kicker {
+  display: block;
+
+  margin-bottom: 9px;
+
+  color: #64748B;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.gota-review-popular__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.gota-review-popular-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  min-height: 30px;
+  padding: 5px 9px;
+
+  background: #FFFFFF !important;
+  border: 1px solid #BFDBFE !important;
+  border-radius: 999px !important;
+
+  color: #475569 !important;
+  font-size: 9.5px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.gota-review-popular-tag small {
+  color: #94A3B8;
+  font-size: 8px;
+}
+
+.gota-review-popular-tag--active {
+  background: #172C6D !important;
+  border-color: #172C6D !important;
+  color: #FFFFFF !important;
+}
+
+.gota-review-popular-tag--active small {
+  color: #DBEAFE;
+}
+
+@keyframes gotaReviewTagPop {
+
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.04);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+
+}
+
+.gota-review-popular-tag--pop {
+  animation: gotaReviewTagPop .18s ease;
+}
+
+
+/* =========================================================
+   TODAS LAS ETIQUETAS
+   ========================================================= */
+
+.gota-review-tags {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+
+  margin-top: 18px;
+}
+
+.gota-review-tag {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  min-height: 42px;
+  padding: 9px 10px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease;
+}
+
+.gota-review-tag:hover {
+  background: #F8FAFC;
+  border-color: #BFDBFE;
+}
+
+.gota-review-tag input {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gota-review-tag__check {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  border-radius: 5px;
+
+  color: transparent;
+  font-size: 7px;
+}
+
+.gota-review-tag__label {
+  color: #475569;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.gota-review-tag:has(input:checked) {
+  background: #EFF6FF;
+  border-color: #93C5FD;
+}
+
+.gota-review-tag:has(input:checked)
+.gota-review-tag__check {
+  background: #172C6D;
+  border-color: #172C6D;
+  color: #FFFFFF;
+}
+
+.gota-review-tag:has(input:checked)
+.gota-review-tag__label {
+  color: #172C6D;
+}
+
+
+/* =========================================================
+   ACCIONES
+   ========================================================= */
+
+.gota-review-step__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+
+  padding-top: 22px;
+  margin-top: 4px;
+
+  border-top: 1px solid #F1F5F9;
+}
+
+.gota-review-step__actions--end {
+  justify-content: flex-end;
+}
+
+.gota-review-primary-button,
+.gota-review-secondary-button {
+  min-height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 9px 14px;
+
+  border-radius: 10px !important;
+
+  font-size: 10.5px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-review-primary-button {
+  background: #172C6D !important;
+  border: 1px solid #172C6D !important;
+
+  color: #FFFFFF !important;
+}
+
+.gota-review-primary-button:hover {
+  background: #203983 !important;
+  border-color: #203983 !important;
+}
+
+.gota-review-primary-button:disabled {
+  opacity: .7;
+  cursor: wait;
+}
+
+.gota-review-primary-button img {
+  width: 19px;
+  height: 19px;
+
+  object-fit: contain;
+
+  filter: brightness(0) invert(1);
+}
+
+.gota-review-secondary-button {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+
+  color: #64748B !important;
+}
+
+.gota-review-secondary-button:hover {
+  background: #F8FAFC !important;
+  border-color: #BFDBFE !important;
+
+  color: #172C6D !important;
+}
+
+
+/* LOADING */
+
+.gota-review-submit-spinner {
+  width: 13px;
+  height: 13px;
+
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #FFFFFF;
+  border-radius: 50%;
+
+  animation: gotaReviewSpin .65s linear infinite;
+}
+
+@keyframes gotaReviewSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   BORRADOR
+   ========================================================= */
+
+.gota-review-draft-status {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 6px 9px;
+
+  background: #172C6D;
+  border-radius: 999px;
+
+  color: #FFFFFF;
+  font-size: 8.5px;
+  font-weight: 700;
+
+  opacity: 0;
+  transform: translateY(5px);
+
+  pointer-events: none;
+
+  transition:
+    opacity .2s ease,
+    transform .2s ease;
+}
+
+.gota-review-draft-status--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* FEEDBACK CAMBIO DE PASO */
+
+.gota-review-step-feedback {
+  position: fixed;
+  top: 22px;
+  left: 50%;
+  z-index: 2000;
+
+  padding: 7px 11px;
+
+  background: #172C6D;
+  border-radius: 999px;
+
+  color: #FFFFFF;
+  font-size: 9.5px;
+  font-weight: 700;
+
+  opacity: 0;
+  transform: translate(-50%, -5px);
+
+  transition:
+    opacity .2s ease,
+    transform .2s ease;
+}
+
+.gota-review-step-feedback--visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+  .gota-review-create {
+    width: min(100% - 28px, 820px);
+    margin-top: 30px;
+  }
+
+  .gota-review-create__back {
+    margin-bottom: 18px;
+  }
+
+  .gota-review-create__header {
+    gap: 12px;
+  }
+
+  .gota-review-create__header-icon {
+    width: 41px;
+    height: 41px;
+
+    border-radius: 12px;
+  }
+
+  .gota-review-create__header-icon img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .gota-review-create__title {
+    font-size: 27px;
+  }
+
+
+  /* PROGRESO */
+
+  .gota-review-progress {
+    padding: 12px;
+  }
+
+  .gota-review-progress__step small {
+    display: none;
+  }
+
+  .gota-review-progress__step strong {
+    font-size: 9.5px;
+  }
+
+  .gota-review-progress__line {
+    margin: 0 9px;
+  }
+
+
+  /* CARD */
+
+  .gota-review-step {
+    padding: 17px;
+
+    border-radius: 16px;
+  }
+
+
+  /* RATING */
+
+  .gota-review-rating {
+    gap: 6px;
+  }
+
+  .gota-review-rating__cup {
+    width: 43px;
+    height: 43px;
+  }
+
+  .gota-review-rating__cup img {
+    width: 25px;
+    height: 25px;
+  }
+
+
+  /* PLANES */
+
+  .gota-review-plans {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* TAGS */
+
+  .gota-review-tags {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* ACCIONES */
+
+  .gota-review-step__actions {
+    flex-direction: column-reverse;
+  }
+
+  .gota-review-step__actions--end {
+    flex-direction: column;
+  }
+
+  .gota-review-primary-button,
+  .gota-review-secondary-button {
+    width: 100%;
+  }
+
+}
+
+/* =========================================================
+   AUTH · LOGIN
+   ========================================================= */
+
+.gota-auth-page {
+  width: min(100% - 32px, 460px);
+  margin: 54px auto 72px;
+}
+
+.gota-auth-card {
+  padding: 26px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+
+  box-shadow: 0 4px 18px rgba(15, 23, 42, .05);
+}
+
+
+/* HEADER */
+
+.gota-auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin-bottom: 24px;
+
+  text-align: center;
+}
+
+.gota-auth-header__icon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 13px;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 15px;
+}
+
+.gota-auth-header__icon img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.gota-auth-header__kicker {
+  margin-bottom: 4px;
+
+  color: #64748B;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.gota-auth-header__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 27px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.gota-auth-header__description {
+  max-width: 360px;
+
+  margin: 8px 0 0;
+
+  color: #64748B;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+
+/* GOOGLE */
+
+.gota-auth-google {
+  width: 100%;
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 9px 12px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 11px;
+
+  color: #334155 !important;
+  font-size: 11px;
+  font-weight: 700;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease;
+}
+
+.gota-auth-google:hover {
+  background: #F8FAFC;
+  border-color: #BFDBFE;
+}
+
+.gota-auth-google i {
+  color: #EA4335;
+  font-size: 14px;
+}
+
+
+/* DIVISOR */
+
+.gota-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin: 18px 0;
+}
+
+.gota-auth-divider > span {
+  height: 1px;
+  flex: 1;
+
+  background: #E2E8F0;
+}
+
+.gota-auth-divider small {
+  color: #94A3B8;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+
+/* FORM */
+
+.gota-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.gota-auth-field {
+  min-width: 0;
+}
+
+.gota-auth-field__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.gota-auth-field__label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #475569;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.gota-auth-field__forgot {
+  margin-bottom: 6px;
+
+  color: #64748B !important;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.gota-auth-field__forgot:hover {
+  color: #172C6D !important;
+}
+
+.gota-auth-field__input {
+  width: 100% !important;
+  min-height: 44px;
+
+  padding: 10px 12px !important;
+
+  background: #FFFFFF !important;
+  border: 1px solid #DBEAFE !important;
+  border-radius: 11px !important;
+
+  color: #334155 !important;
+  font-size: 11.5px !important;
+
+  box-shadow: none !important;
+}
+
+.gota-auth-field__input:focus {
+  outline: none !important;
+
+  border-color: #93C5FD !important;
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, .10) !important;
+}
+
+.gota-auth-field__input::placeholder {
+  color: #CBD5E1;
+}
+
+
+/* SUBMIT */
+
+.gota-auth-submit {
+  width: 100%;
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  margin-top: 2px;
+  padding: 9px 13px;
+
+  background: #172C6D !important;
+  border: 1px solid #172C6D !important;
+  border-radius: 11px !important;
+
+  color: #FFFFFF !important;
+  font-size: 11.5px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-auth-submit:hover {
+  background: #203983 !important;
+  border-color: #203983 !important;
+}
+
+.gota-auth-submit i {
+  font-size: 9px;
+}
+
+
+/* FOOTER */
+
+.gota-auth-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 5px;
+
+  padding-top: 18px;
+  margin-top: 19px;
+
+  border-top: 1px solid #F1F5F9;
+
+  color: #94A3B8;
+  font-size: 9.5px;
+}
+
+.gota-auth-footer a {
+  color: #172C6D !important;
+  font-weight: 700;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 640px) {
+
+  .gota-auth-page {
+    width: min(100% - 28px, 460px);
+    margin-top: 34px;
+  }
+
+  .gota-auth-card {
+    padding: 21px 17px;
+    border-radius: 17px;
+  }
+
+  .gota-auth-header__title {
+    font-size: 25px;
+  }
+
+}

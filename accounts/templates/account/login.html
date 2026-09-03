@@ -1,82 +1,163 @@
 {% extends "base.html" %}
 {% load socialaccount %}
 {% load i18n %}
+{% load static %}
 
 {% block content %}
-<div class="max-w-md mx-auto mt-12 bg-white p-6 rounded-lg shadow-lg">
 
-  <h1 class="text-2xl font-bold mb-6 text-center">
-    🔐 Iniciar sesión
-  </h1>
+<div class="gota-auth-page">
 
-  {% get_providers as socialaccount_providers %}
+  <div class="gota-auth-card">
 
-  {% if socialaccount_providers %}
-    {% for provider in socialaccount_providers %}
-      {% if provider.id == "google" %}
-        <a
-          href="{% provider_login_url provider.id %}"
-          class="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-md py-2 mb-4 hover:bg-gray-50 transition font-medium"
+    <!-- HEADER -->
+    <header class="gota-auth-header">
+
+      <div class="gota-auth-header__icon">
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
         >
-          <i class="fab fa-google text-red-500"></i>
-          Continuar con Google
-        </a>
-      {% endif %}
-    {% endfor %}
+      </div>
 
-    <div class="my-4 flex items-center">
-      <div class="flex-1 h-px bg-gray-200"></div>
-      <span class="px-3 text-xs uppercase tracking-wide text-gray-400">
-        o con email
+      <span class="gota-auth-header__kicker">
+        Bienvenido de nuevo
       </span>
-      <div class="flex-1 h-px bg-gray-200"></div>
-    </div>
-  {% endif %}
 
-  <form method="post" action="{% url 'account_login' %}" class="space-y-4">
-    {% csrf_token %}
+      <h1 class="gota-auth-header__title">
+        Iniciar sesión
+      </h1>
 
-    <div>
-      <label class="block font-medium">Email</label>
-      <input
-        type="email"
-        name="login"
-        required
-        class="w-full px-3 py-2 border rounded-md"
-        placeholder="tu@email.com"
-      />
-    </div>
+      <p class="gota-auth-header__description">
+        Entrá a Gota para guardar cafeterías, compartir experiencias y seguir armando tu mapa cafetero.
+      </p>
 
-    <div>
-      <label class="block font-medium">Contraseña</label>
-      <input
-        type="password"
-        name="password"
-        required
-        class="w-full px-3 py-2 border rounded-md"
-        placeholder="Contraseña"
-      />
-    </div>
+    </header>
 
-    <button
-      type="submit"
-      class="w-full bg-[var(--brand)] text-white py-2 rounded-md font-semibold"
+
+    {% get_providers as socialaccount_providers %}
+
+    <!-- GOOGLE -->
+    {% if socialaccount_providers %}
+      {% for provider in socialaccount_providers %}
+        {% if provider.id == "google" %}
+
+          <a
+            href="{% provider_login_url provider.id %}"
+            class="gota-auth-google"
+          >
+            <i class="fab fa-google" aria-hidden="true"></i>
+            <span>Continuar con Google</span>
+          </a>
+
+        {% endif %}
+      {% endfor %}
+
+
+      <div class="gota-auth-divider">
+
+        <span></span>
+
+        <small>
+          o con email
+        </small>
+
+        <span></span>
+
+      </div>
+    {% endif %}
+
+
+    <!-- FORM -->
+    <form
+      method="post"
+      action="{% url 'account_login' %}"
+      class="gota-auth-form"
     >
-      Entrar
-    </button>
-  </form>
+      {% csrf_token %}
 
-  <div class="mt-4 text-center text-sm">
-    <a href="{% url 'account_reset_password' %}" class="text-amber-700 hover:underline">
-      ¿Olvidaste tu contraseña?
-    </a>
+
+      <div class="gota-auth-field">
+
+        <label
+          for="id_login"
+          class="gota-auth-field__label"
+        >
+          Email
+        </label>
+
+        <input
+          type="email"
+          id="id_login"
+          name="login"
+          required
+          autocomplete="email"
+          class="gota-auth-field__input"
+          placeholder="tu@email.com"
+        >
+
+      </div>
+
+
+      <div class="gota-auth-field">
+
+        <div class="gota-auth-field__heading">
+
+          <label
+            for="id_password"
+            class="gota-auth-field__label"
+          >
+            Contraseña
+          </label>
+
+          <a
+            href="{% url 'account_reset_password' %}"
+            class="gota-auth-field__forgot"
+          >
+            ¿La olvidaste?
+          </a>
+
+        </div>
+
+        <input
+          type="password"
+          id="id_password"
+          name="password"
+          required
+          autocomplete="current-password"
+          class="gota-auth-field__input"
+          placeholder="Tu contraseña"
+        >
+
+      </div>
+
+
+      <button
+        type="submit"
+        class="gota-auth-submit"
+      >
+        <span>Entrar</span>
+        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+      </button>
+
+    </form>
+
+
+    <!-- REGISTRO -->
+    <div class="gota-auth-footer">
+
+      <span>
+        ¿Todavía no tenés cuenta?
+      </span>
+
+      <a href="{% url 'account_signup' %}">
+        Crear cuenta
+      </a>
+
+    </div>
+
   </div>
 
-  <p class="mt-4 text-center text-sm">
-    ¿No tenés cuenta?
-    <a href="{% url 'account_signup' %}" class="text-blue-600 font-medium">
-      Registrate aquí
-    </a>
-  </p>
 </div>
+
 {% endblock %}
