@@ -2,28 +2,165 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-lg mx-auto px-4 py-8">
-  <h1 class="text-2xl font-semibold mb-4">Denunciar reseña</h1>
 
-  <div class="surface p-4 rounded-xl mb-6">
-    <p class="text-sm text-gray-700"><strong>Reseña:</strong> {{ review.user.username }} — ☕ {{ review.rating }}</p>
-    <p class="mt-2 text-gray-800">{{ review.comment }}</p>
-  </div>
+<div class="gota-report-page">
 
-  <form method="post" class="space-y-4">
+  <header class="gota-report-header">
+
+    <div class="gota-report-header__icon">
+      <i class="far fa-flag" aria-hidden="true"></i>
+    </div>
+
+    <div>
+      <span class="gota-report-header__kicker">
+        Comunidad
+      </span>
+
+      <h1 class="gota-report-header__title">
+        Reportar reseña
+      </h1>
+
+      <p class="gota-report-header__description">
+        Contanos qué sucede con esta reseña para que podamos revisarla.
+      </p>
+    </div>
+
+  </header>
+
+
+  <!-- RESEÑA -->
+  <section class="gota-report-review">
+
+    <div class="gota-report-review__header">
+
+      <div>
+
+        <span class="gota-report-review__label">
+          Reseña reportada
+        </span>
+
+        <strong>
+          {{ review.user.first_name|default:review.user.username }}
+        </strong>
+
+      </div>
+
+
+      <div class="gota-report-review__rating">
+
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+
+        <strong>
+          {{ review.rating|floatformat:1 }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    {% if review.comment %}
+
+      <p class="gota-report-review__comment">
+        {{ review.comment }}
+      </p>
+
+    {% else %}
+
+      <p class="gota-report-review__comment gota-report-review__comment--empty">
+        Esta experiencia no tiene comentario.
+      </p>
+
+    {% endif %}
+
+  </section>
+
+
+  <!-- FORM -->
+  <form
+    method="post"
+    class="gota-report-form"
+  >
     {% csrf_token %}
-    <div>
-      <label class="block font-medium mb-1">Motivo</label>
+
+
+    {% if form.non_field_errors %}
+
+      <div class="gota-report-form__general-error">
+        {{ form.non_field_errors }}
+      </div>
+
+    {% endif %}
+
+
+    <div class="gota-report-field">
+
+      <label for="{{ form.reason.id_for_label }}">
+        Motivo
+      </label>
+
+      <p class="gota-report-field__help">
+        Elegí la opción que mejor describa el problema.
+      </p>
+
       {{ form.reason }}
-      {% if form.reason.errors %}<p class="text-red-600 text-sm">{{ form.reason.errors }}</p>{% endif %}
+
+      {% if form.reason.errors %}
+        <div class="gota-report-field__error">
+          {{ form.reason.errors }}
+        </div>
+      {% endif %}
+
     </div>
-    <div>
-      <label class="block font-medium mb-1">Comentario (opcional)</label>
+
+
+    <div class="gota-report-field">
+
+      <label for="{{ form.comment.id_for_label }}">
+        Comentario
+        <span>Opcional</span>
+      </label>
+
+      <p class="gota-report-field__help">
+        Podés agregar información que nos ayude a entender mejor el reporte.
+      </p>
+
       {{ form.comment }}
-      {% if form.comment.errors %}<p class="text-red-600 text-sm">{{ form.comment.errors }}</p>{% endif %}
+
+      {% if form.comment.errors %}
+        <div class="gota-report-field__error">
+          {{ form.comment.errors }}
+        </div>
+      {% endif %}
+
     </div>
-    <button type="submit" class="btn btn-primary">Enviar denuncia</button>
-    <a href="{% url 'reviews:cafe_detail' review.cafe_id %}" class="btn btn-ghost">Cancelar</a>
+
+
+    <div class="gota-report-actions">
+
+      <button
+        type="submit"
+        class="gota-report-actions__submit"
+      >
+        <i class="far fa-flag" aria-hidden="true"></i>
+        <span>Enviar reporte</span>
+      </button>
+
+      <a
+        href="{% url 'reviews:cafe_detail' review.cafe_id %}"
+        class="gota-report-actions__cancel"
+      >
+        Cancelar
+      </a>
+
+    </div>
+
   </form>
+
 </div>
+
 {% endblock %}

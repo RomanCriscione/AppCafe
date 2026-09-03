@@ -1,203 +1,503 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block content %}
 
-<h1 class="text-2xl font-bold mb-4">📊 Founder Analytics – Gota</h1>
+<div class="gota-founder">
 
-{% if request.user.is_superuser %}
-<div class="mb-6 p-4 border rounded bg-gray-50">
-  <h2 class="text-lg font-semibold mb-3">⬇️ Descargar QR por tandas</h2>
+  <header class="gota-founder__header">
 
-  <form method="get" action="{% url 'reviews:descargar_qrs' %}" class="flex flex-wrap gap-3 items-end">
-    
-    <div>
-      <label class="text-xs block mb-1">Cantidad</label>
-      <select name="limit" class="border px-3 py-2 rounded text-sm">
-        <option value="20">20</option>
-        <option value="50" selected>50</option>
-        <option value="100">100</option>
-      </select>
+    <div class="gota-founder__header-icon">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
     </div>
 
     <div>
-      <label class="text-xs block mb-1">Desde</label>
-      <input type="number" name="offset" value="0" min="0" class="border px-3 py-2 rounded text-sm w-24">
+      <span class="gota-founder__kicker">
+        Administración
+      </span>
+
+      <h1 class="gota-founder__title">
+        Founder Analytics
+      </h1>
+
+      <p class="gota-founder__description">
+        Métricas generales, actividad de cafeterías y herramientas internas de Gota.
+      </p>
     </div>
 
-    <div>
-      <label class="text-xs block mb-1">Zona (opcional)</label>
-      <input type="text" name="zona" placeholder="Palermo" class="border px-3 py-2 rounded text-sm">
-    </div>
-
-    <button type="submit" class="bg-black text-white px-4 py-2 rounded">
-      Descargar tanda
-    </button>
-  </form>
-
-  <p class="text-xs text-gray-500 mt-2">
-    Ejemplo: limit 50 + offset 0 descarga los primeros 50. Luego usás offset 50 para los siguientes 50.
-  </p>
-</div>
-{% endif %}
-
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-
-  <div class="p-4 border rounded">
-    <div class="text-xs text-gray-500">Visitas</div>
-    <div class="text-xl font-bold">{{ totals.views }}</div>
-  </div>
-
-  <div class="p-4 border rounded">
-    <div class="text-xs text-gray-500">Reviews</div>
-    <div class="text-xl font-bold">{{ totals.reviews }}</div>
-  </div>
-
-  <div class="p-4 border rounded">
-    <div class="text-xs text-gray-500">Favoritos</div>
-    <div class="text-xl font-bold">{{ totals.favorites }}</div>
-  </div>
-
-  <div class="p-4 border rounded">
-    <div class="text-xs text-gray-500">Rating promedio</div>
-    <div class="text-xl font-bold">
-      {% if totals.avg_rating %}{{ totals.avg_rating }}{% else %}—{% endif %}
-    </div>
-  </div>
-
-</div>
-
-{% if top_cafes %}
-<h2 class="text-lg font-semibold mb-2">🔥 Cafés más visitados</h2>
-
-<div class="overflow-x-auto mb-6">
-  <table class="min-w-full text-sm border">
-    <thead>
-      <tr class="bg-gray-100">
-        <th>#</th>
-        <th>Café</th>
-        <th>Zona</th>
-        <th>Visitas</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for c in top_cafes %}
-      <tr class="border-t">
-        <td class="font-medium">{{ forloop.counter }}</td>
-        <td>{{ c.name }}</td>
-        <td>{{ c.location }}</td>
-        <td class="font-semibold">{{ c.total_views|default:0 }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% endif %}
-
-<h2 class="text-lg font-semibold mb-2">📈 Evolución de visitas</h2>
-
-<div class="mb-8">
-  <canvas id="visitsChart" height="100"></canvas>
-</div>
+  </header>
 
 
-<form method="get" class="flex flex-wrap gap-2 mb-4 items-end">
+  {% if request.user.is_superuser %}
 
-  <div>
-    <label class="text-xs block">Rango rápido</label>
-    <select name="range" class="border px-2 py-1 text-sm">
-      <option value="">—</option>
-      <option value="7" {% if range == "7" %}selected{% endif %}>Últimos 7 días</option>
-      <option value="30" {% if range == "30" %}selected{% endif %}>Últimos 30 días</option>
-    </select>
-  </div>
+    <section class="gota-founder__tool">
 
-  <div>
-    <label class="text-xs block">Desde</label>
-    <input type="date" name="from" value="{{ from }}" class="border px-2 py-1 text-sm">
-  </div>
+      <div class="gota-founder__section-heading">
+        <div>
+          <span>Herramienta interna</span>
+          <h2>Descargar QR por tandas</h2>
+        </div>
+      </div>
 
-  <div>
-    <label class="text-xs block">Hasta</label>
-    <input type="date" name="to" value="{{ to }}" class="border px-2 py-1 text-sm">
-  </div>
+      <form
+        method="get"
+        action="{% url 'reviews:descargar_qrs' %}"
+        class="gota-founder__qr-form"
+      >
 
-  <button class="px-3 py-1 bg-black text-white text-sm rounded">
-    Aplicar
-  </button>
+        <div class="gota-founder__field">
 
-</form>
+          <label for="qr-limit">
+            Cantidad
+          </label>
 
-<a
-  href="?export=excel{% if range %}&range={{ range }}{% endif %}{% if from %}&from={{ from }}{% endif %}{% if to %}&to={{ to }}{% endif %}"
-  class="inline-block mb-4 ml-2 px-4 py-2 bg-gray-700 text-white rounded"
->
-  Descargar Excel
-</a>
+          <select
+            id="qr-limit"
+            name="limit"
+          >
+            <option value="20">20</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
 
-<div class="overflow-x-auto">
-<table class="min-w-full text-sm border">
-  <thead>
-    <tr class="bg-gray-100">
-      <th>Café</th>
-      <th>Dueño</th>
-      <th>Zona</th>
-      <th>Plan</th>
-      <th>Visitas</th>
-      <th>Reviews</th>
-      <th>Favoritos</th>
-      <th>Rating</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for c in cafes %}
-    <tr class="border-t">
-      <td class="font-medium">{{ c.name }}</td>
-      <td>{{ c.owner.email }}</td>
-      <td>{{ c.location }}</td>
-      <td>{{ c.get_visibility_level_display }}</td>
-      <td>{{ c.total_views|default:0 }}</td>
-      <td>{{ c.total_reviews }}</td>
-      <td>{{ c.total_favorites }}</td>
-      <td>
-        {% if c.avg_rating %}
-          {{ c.avg_rating|floatformat:1 }}
+        </div>
+
+
+        <div class="gota-founder__field">
+
+          <label for="qr-offset">
+            Desde
+          </label>
+
+          <input
+            id="qr-offset"
+            type="number"
+            name="offset"
+            value="0"
+            min="0"
+          >
+
+        </div>
+
+
+        <div class="gota-founder__field gota-founder__field--zone">
+
+          <label for="qr-zone">
+            Zona
+            <span>Opcional</span>
+          </label>
+
+          <input
+            id="qr-zone"
+            type="text"
+            name="zona"
+            placeholder="Ej. Palermo"
+          >
+
+        </div>
+
+
+        <button
+          type="submit"
+          class="gota-founder__primary-button"
+        >
+          Descargar tanda
+        </button>
+
+      </form>
+
+
+      <p class="gota-founder__hint">
+        Ejemplo: 50 con offset 0 descarga los primeros 50.
+        Después usá offset 50 para descargar los siguientes.
+      </p>
+
+    </section>
+
+  {% endif %}
+
+
+  <!-- KPIs -->
+  <section class="gota-founder__kpis">
+
+    <article class="gota-founder__kpi">
+      <span>Visitas</span>
+      <strong>{{ totals.views }}</strong>
+    </article>
+
+    <article class="gota-founder__kpi">
+      <span>Reseñas</span>
+      <strong>{{ totals.reviews }}</strong>
+    </article>
+
+    <article class="gota-founder__kpi">
+      <span>Guardados</span>
+      <strong>{{ totals.favorites }}</strong>
+    </article>
+
+    <article class="gota-founder__kpi">
+      <span>Promedio</span>
+
+      <strong>
+        {% if totals.avg_rating %}
+          {{ totals.avg_rating }}
         {% else %}
           —
         {% endif %}
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+      </strong>
+    </article>
+
+  </section>
+
+
+  {% if top_cafes %}
+
+    <section class="gota-founder__section">
+
+      <div class="gota-founder__section-heading">
+
+        <div>
+          <span>Actividad</span>
+          <h2>Cafeterías más visitadas</h2>
+        </div>
+
+      </div>
+
+
+      <div class="gota-founder__table-wrap">
+
+        <table class="gota-founder__table">
+
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Cafetería</th>
+              <th>Zona</th>
+              <th>Visitas</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {% for c in top_cafes %}
+
+              <tr>
+                <td>{{ forloop.counter }}</td>
+
+                <td>
+                  <strong>{{ c.name }}</strong>
+                </td>
+
+                <td>
+                  {{ c.location|default:"—" }}
+                </td>
+
+                <td>
+                  {{ c.total_views|default:0 }}
+                </td>
+              </tr>
+
+            {% endfor %}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  {% endif %}
+
+
+  <!-- GRÁFICO -->
+  <section class="gota-founder__section">
+
+    <div class="gota-founder__section-heading">
+
+      <div>
+        <span>Evolución</span>
+        <h2>Visitas</h2>
+      </div>
+
+    </div>
+
+
+    <div class="gota-founder__chart">
+      <canvas id="visitsChart"></canvas>
+    </div>
+
+  </section>
+
+
+  <!-- FILTROS -->
+  <section class="gota-founder__section">
+
+    <div class="gota-founder__section-heading">
+
+      <div>
+        <span>Detalle</span>
+        <h2>Actividad por cafetería</h2>
+      </div>
+
+    </div>
+
+
+    <div class="gota-founder__filters-row">
+
+      <form
+        method="get"
+        class="gota-founder__filters"
+      >
+
+        <div class="gota-founder__field">
+
+          <label for="analytics-range">
+            Rango rápido
+          </label>
+
+          <select
+            id="analytics-range"
+            name="range"
+          >
+            <option value="">—</option>
+
+            <option
+              value="7"
+              {% if range == "7" %}selected{% endif %}
+            >
+              Últimos 7 días
+            </option>
+
+            <option
+              value="30"
+              {% if range == "30" %}selected{% endif %}
+            >
+              Últimos 30 días
+            </option>
+          </select>
+
+        </div>
+
+
+        <div class="gota-founder__field">
+
+          <label for="analytics-from">
+            Desde
+          </label>
+
+          <input
+            id="analytics-from"
+            type="date"
+            name="from"
+            value="{{ from }}"
+          >
+
+        </div>
+
+
+        <div class="gota-founder__field">
+
+          <label for="analytics-to">
+            Hasta
+          </label>
+
+          <input
+            id="analytics-to"
+            type="date"
+            name="to"
+            value="{{ to }}"
+          >
+
+        </div>
+
+
+        <button
+          type="submit"
+          class="gota-founder__primary-button"
+        >
+          Aplicar
+        </button>
+
+      </form>
+
+
+      <a
+        href="?export=excel{% if range %}&range={{ range }}{% endif %}{% if from %}&from={{ from }}{% endif %}{% if to %}&to={{ to }}{% endif %}"
+        class="gota-founder__secondary-button"
+      >
+        <i class="fas fa-download" aria-hidden="true"></i>
+        Descargar Excel
+      </a>
+
+    </div>
+
+
+    <div class="gota-founder__table-wrap">
+
+      <table class="gota-founder__table">
+
+        <thead>
+          <tr>
+            <th>Cafetería</th>
+            <th>Dueño</th>
+            <th>Zona</th>
+            <th>Plan</th>
+            <th>Visitas</th>
+            <th>Reseñas</th>
+            <th>Guardados</th>
+            <th>Promedio</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for c in cafes %}
+
+            <tr>
+
+              <td>
+                <strong>{{ c.name }}</strong>
+              </td>
+
+              <td>
+                {{ c.owner.email }}
+              </td>
+
+              <td>
+                {{ c.location|default:"—" }}
+              </td>
+
+              <td>
+                {{ c.get_visibility_level_display }}
+              </td>
+
+              <td>
+                {{ c.total_views|default:0 }}
+              </td>
+
+              <td>
+                {{ c.total_reviews }}
+              </td>
+
+              <td>
+                {{ c.total_favorites }}
+              </td>
+
+              <td>
+                {% if c.avg_rating %}
+                  {{ c.avg_rating|floatformat:1 }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+
+            </tr>
+
+          {% empty %}
+
+            <tr>
+              <td colspan="8" class="gota-founder__empty-row">
+                No hay cafeterías para mostrar.
+              </td>
+            </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
 </div>
 
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-  const ctx = document.getElementById('visitsChart');
-  if (ctx) {
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: {{ labels|safe }},
-        datasets: [{
-          label: 'Visitas',
-          data: {{ values|safe }},
-          borderWidth: 2,
-          tension: 0.3,
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          y: { beginAtZero: true }
-        }
-      }
-    });
+document.addEventListener("DOMContentLoaded", function () {
+
+  const ctx = document.getElementById("visitsChart");
+
+  if (!ctx || typeof Chart === "undefined") {
+    return;
   }
+
+  new Chart(ctx, {
+
+    type: "line",
+
+    data: {
+
+      labels: {{ labels|safe }},
+
+      datasets: [{
+        label: "Visitas",
+        data: {{ values|safe }},
+        borderColor: "#172C6D",
+        backgroundColor: "rgba(191, 219, 254, 0.28)",
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        fill: true,
+        tension: 0.3
+      }]
+
+    },
+
+    options: {
+
+      responsive: true,
+      maintainAspectRatio: false,
+
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+
+      scales: {
+
+        x: {
+          grid: {
+            display: false
+          },
+          ticks: {
+            color: "#94A3B8",
+            font: {
+              size: 9
+            }
+          }
+        },
+
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: "#94A3B8",
+            precision: 0,
+            font: {
+              size: 9
+            }
+          },
+          grid: {
+            color: "#E2E8F0"
+          }
+        }
+
+      }
+
+    }
+
+  });
+
+});
 </script>
 
-
 {% endblock %}
-

@@ -2,93 +2,374 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4">
-  <h1 class="text-2xl font-bold mb-4">✨ Últimas reseñas</h1>
+
+<div class="gota-review-list">
+
+  <!-- HEADER -->
+  <header class="gota-review-list__header">
+
+    <div class="gota-review-list__header-icon">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+    </div>
+
+    <div>
+      <span class="gota-review-list__kicker">
+        Comunidad Gota
+      </span>
+
+      <h1 class="gota-review-list__title">
+        Últimas experiencias
+      </h1>
+
+      <p class="gota-review-list__description">
+        Lugares, momentos y experiencias compartidas por quienes usan Gota.
+      </p>
+    </div>
+
+  </header>
+
 
   {% if user.is_authenticated and user.is_owner %}
-    <p class="mb-4">
-      <a href="{% url 'reviews:create_cafe' %}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow transition-all">
-        ➕ Agregar nueva cafetería
+
+    <div class="gota-review-list__owner-action">
+
+      <a href="{% url 'reviews:create_cafe' %}">
+        <i class="fas fa-plus" aria-hidden="true"></i>
+        <span>Agregar cafetería</span>
       </a>
-    </p>
+
+    </div>
+
   {% endif %}
 
-  <div class="space-y-4">
-    {% for review in reviews %}
-      <div class="flex flex-col sm:flex-row bg-white p-4 rounded-xl shadow animate-fade-in">
-        {% if review.cafe.photo1 %}
-          <img src="{{ review.cafe.photo1.url }}"
-               alt="Foto de {{ review.cafe.name }}"
-               loading="lazy"
-               class="w-32 h-auto rounded mr-4 mb-4 sm:mb-0 sm:mr-6">
-        {% endif %}
-        <div>
-          <p class="font-semibold">{{ review.user.first_name|default:review.user.username }} dijo sobre
-            <a href="{% url 'reviews:cafe_detail' review.cafe.id %}" class="text-blue-600 hover:underline">{{ review.cafe.name }}</a>:
-          </p>
-          <p class="text-sm">☕ {{ review.rating }}</p>
-          <p class="mt-1">{{ review.comment }}</p>
-          <p class="text-xs text-gray-500 mt-2">{{ review.created_at|date:"d/m/Y H:i" }}</p>
-        </div>
+
+  <!-- RESEÑAS -->
+  {% if reviews %}
+
+    <section class="gota-review-list__reviews">
+
+      {% for review in reviews %}
+
+        <article class="gota-review-list__card">
+
+          <!-- FOTO -->
+          <a
+            href="{% url 'reviews:cafe_detail' review.cafe.id %}"
+            class="gota-review-list__media"
+            aria-label="Ver {{ review.cafe.name }}"
+          >
+
+            {% if review.cafe.photo1 %}
+
+              <img
+                src="{{ review.cafe.photo1.url }}"
+                alt="Foto de {{ review.cafe.name }}"
+                loading="lazy"
+              >
+
+            {% else %}
+
+              <div class="gota-review-list__placeholder">
+                <img
+                  src="{% static 'images/gota-icon.png' %}"
+                  alt=""
+                  aria-hidden="true"
+                >
+              </div>
+
+            {% endif %}
+
+          </a>
+
+
+          <!-- CONTENIDO -->
+          <div class="gota-review-list__body">
+
+            <div class="gota-review-list__top">
+
+              <div>
+
+                <span class="gota-review-list__user">
+                  {{ review.user.first_name|default:review.user.username }}
+                </span>
+
+                <span class="gota-review-list__context">
+                  compartió su experiencia en
+                </span>
+
+              </div>
+
+
+              <div class="gota-review-list__rating">
+
+                <img
+                  src="{% static 'images/gota-icon.png' %}"
+                  alt=""
+                  aria-hidden="true"
+                >
+
+                <strong>
+                  {{ review.rating|floatformat:1 }}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <a
+              href="{% url 'reviews:cafe_detail' review.cafe.id %}"
+              class="gota-review-list__cafe"
+            >
+              {{ review.cafe.name }}
+            </a>
+
+
+            {% if review.cafe.location %}
+
+              <p class="gota-review-list__location">
+                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                {{ review.cafe.location }}
+              </p>
+
+            {% endif %}
+
+
+            {% if review.comment %}
+
+              <p class="gota-review-list__comment">
+                {{ review.comment }}
+              </p>
+
+            {% else %}
+
+              <p class="gota-review-list__comment gota-review-list__comment--empty">
+                Esta experiencia no tiene comentario.
+              </p>
+
+            {% endif %}
+
+
+            <div class="gota-review-list__footer">
+
+              <span class="gota-review-list__date">
+                {{ review.created_at|date:"d/m/Y" }}
+              </span>
+
+              <a
+                href="{% url 'reviews:cafe_detail' review.cafe.id %}"
+                class="gota-review-list__more"
+              >
+                <span>Ver cafetería</span>
+                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+              </a>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      {% endfor %}
+
+    </section>
+
+
+  {% else %}
+
+    <section class="gota-review-list__empty">
+
+      <div class="gota-review-list__empty-icon">
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
       </div>
-    {% empty %}
-      <p class="text-gray-500">{{ ui_messages.no_reviews }}</p>
-    {% endfor %}
-  </div>
+
+      <h2>
+        Todavía no hay experiencias
+      </h2>
+
+      <p>
+        {{ ui_messages.no_reviews }}
+      </p>
+
+      <a
+        href="{% url 'reviews:cafe_list' %}"
+        class="gota-review-list__empty-cta"
+      >
+        Explorar cafeterías
+      </a>
+
+    </section>
+
+  {% endif %}
+
+
+  <!-- VISTOS RECIENTEMENTE -->
+  <section
+    class="gota-review-list__recent"
+    id="recently-viewed-section"
+    hidden
+  >
+
+    <div class="gota-review-list__recent-heading">
+
+      <div>
+
+        <span class="gota-review-list__recent-kicker">
+          Tu recorrido
+        </span>
+
+        <h2>
+          Cafeterías que viste recientemente
+        </h2>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="recently-viewed-container"
+      class="swiper-container gota-review-list__swiper"
+    >
+
+      <div
+        class="swiper-wrapper"
+        id="recently-viewed-list"
+      ></div>
+
+      <div class="swiper-button-next"></div>
+      <div class="swiper-button-prev"></div>
+
+      <div class="swiper-pagination"></div>
+
+    </div>
+
+  </section>
+
 </div>
 
-<!-- Cafés vistos recientemente -->
-<section class="py-12 bg-orange-50 overflow-x-hidden mt-10">
-  <div class="max-w-6xl mx-auto px-4">
-    <h2 class="text-2xl font-semibold mb-6">👀 Cafés vistos recientemente</h2>
-    <div id="recently-viewed-container" class="swiper-container">
-      <div class="swiper-wrapper" id="recently-viewed-list"></div>
-      <div class="swiper-button-next text-brown-900"></div>
-      <div class="swiper-button-prev text-brown-900"></div>
-      <div class="swiper-pagination"></div>
-    </div>
-  </div>
-</section>
 {% endblock %}
 
+
 {% block scripts %}
+{{ block.super }}
+
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const container = document.getElementById("recently-viewed-list");
-    if (!container) return;
-    const cafes = JSON.parse(localStorage.getItem("recently_viewed_cafes") || "[]");
-    if (!cafes.length) return;
-    cafes.slice().reverse().forEach(cafe => {
-      const card = document.createElement("div");
-      card.className = "swiper-slide w-[300px] bg-white rounded-lg shadow-md p-4 box-border";
-      card.innerHTML = `
-        <div class="flex gap-4 items-start">
-          ${cafe.photo1 ? `<img src="${cafe.photo1}" alt="${cafe.name}" class="w-20 h-20 object-cover rounded-md" loading="lazy">` : ""}
-          <div class="flex flex-col justify-between">
-            <p class="font-semibold leading-snug">
-              <a href="/reviews/cafes/${cafe.id}/" class="text-blue-600 hover:underline">${cafe.name}</a>
-            </p>
-            <p class="text-sm text-gray-700">${cafe.location || ""}</p>
-            <p class="text-xs text-gray-500">${cafe.address || ""}</p>
-          </div>
-        </div>`;
-      container.appendChild(card);
+document.addEventListener("DOMContentLoaded", function () {
+
+  const list = document.getElementById("recently-viewed-list");
+  const section = document.getElementById("recently-viewed-section");
+
+  if (!list || !section) {
+    return;
+  }
+
+  const cafes = JSON.parse(
+    localStorage.getItem("recently_viewed_cafes") || "[]"
+  );
+
+  if (!cafes.length) {
+    return;
+  }
+
+  section.removeAttribute("hidden");
+
+
+  cafes.slice().reverse().forEach(function (cafe) {
+
+    const card = document.createElement("div");
+
+    card.className =
+      "swiper-slide gota-review-list__recent-card";
+
+
+    const imageHtml = cafe.photo1
+      ? `
+        <img
+          src="${cafe.photo1}"
+          alt=""
+          class="gota-review-list__recent-image"
+          loading="lazy"
+        >
+      `
+      : `
+        <div class="gota-review-list__recent-placeholder">
+          <img
+            src="{% static 'images/gota-icon.png' %}"
+            alt=""
+          >
+        </div>
+      `;
+
+
+    card.innerHTML = `
+
+      <a
+        href="/reviews/cafes/${cafe.id}/"
+        class="gota-review-list__recent-link"
+      >
+
+        ${imageHtml}
+
+        <div class="gota-review-list__recent-body">
+
+          <strong>
+            ${cafe.name || ""}
+          </strong>
+
+          ${
+            cafe.location
+              ? `<span>${cafe.location}</span>`
+              : ""
+          }
+
+          ${
+            cafe.address
+              ? `<small>${cafe.address}</small>`
+              : ""
+          }
+
+        </div>
+
+      </a>
+    `;
+
+    list.appendChild(card);
+
+  });
+
+
+  if (window.Swiper) {
+
+    new Swiper("#recently-viewed-container", {
+
+      slidesPerView: "auto",
+
+      spaceBetween: 12,
+
+      navigation: {
+        nextEl: ".gota-review-list__recent .swiper-button-next",
+        prevEl: ".gota-review-list__recent .swiper-button-prev"
+      },
+
+      pagination: {
+        el: ".gota-review-list__recent .swiper-pagination",
+        clickable: true
+      }
+
     });
 
-    if (window.Swiper) {
-      new Swiper('#recently-viewed-container', {
-        slidesPerView: 'auto',
-        spaceBetween: 16,
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev',
-        },
-        pagination: {
-          el: '.swiper-pagination',
-          clickable: true,
-        },
-      });
-    }
-  });
+  }
+
+});
 </script>
+
 {% endblock %}
