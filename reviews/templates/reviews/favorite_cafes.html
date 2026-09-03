@@ -6,27 +6,55 @@
 <div class="max-w-6xl mx-auto px-4 py-8">
 
   <!-- HEADER -->
-  <div class="mb-14">
-    <h1 class="text-3xl font-bold text-[var(--text-1)]">
-      ❤️ Mi mapa cafetero
-    </h1>
+  <header class="gota-my-map-header">
 
-    <p class="text-[var(--text-2)] mt-2">
-      Ya construiste {{ want_to_go_count|add:want_to_return_count|add:visited_count }} paradas en tu recorrido cafetero ☕
-    </p>
-  </div>
+    <div class="gota-my-map-header__icon">
+      <i class="fas fa-heart" aria-hidden="true"></i>
+    </div>
 
-  <!-- PRÓXIMOS -->
-  <section class="mb-16">
+    <div class="gota-my-map-header__content">
 
-    <div class="mb-6">
-      <p class="text-sm uppercase tracking-[0.18em] text-gray-400 mb-2">
-        Próximas paradas
+      <span class="gota-my-map-header__kicker">
+        Tu mapa personal
+      </span>
+
+      <h1 class="gota-my-map-header__title">
+        Mi mapa cafetero
+      </h1>
+
+      <p class="gota-my-map-header__description">
+        Ya guardaste
+        <strong>
+          {{ want_to_go_count|add:want_to_return_count|add:visited_count }}
+        </strong>
+        cafeterías en tu recorrido.
       </p>
 
-      <h2 class="text-2xl font-semibold">
-        ☕ Cafés por descubrir ({{ want_to_go_count }})
-      </h2>
+    </div>
+
+  </header>
+
+  <!-- PRÓXIMOS -->
+  <section class="gota-my-map-section">
+
+    <div class="gota-my-map-section__header">
+
+      <div>
+
+        <span class="gota-my-map-section__kicker">
+          Próximas paradas
+        </span>
+
+        <h2 class="gota-my-map-section__title">
+          Cafés por descubrir
+        </h2>
+
+      </div>
+
+      <span class="gota-my-map-section__count">
+        {{ want_to_go_count }}
+      </span>
+
     </div>
 
     {% if want_to_go %}
@@ -39,8 +67,12 @@
 
     {% else %}
 
-      <div class="surface rounded-2xl p-6 text-gray-500">
-        Todavía no marcaste próximos descubrimientos.
+      <div class="gota-my-map-empty">
+        <i class="far fa-bookmark" aria-hidden="true"></i>
+
+        <span>
+          Todavía no marcaste próximos descubrimientos.
+        </span>
       </div>
 
     {% endif %}
@@ -48,16 +80,26 @@
   </section>
 
   <!-- REGRESOS -->
-  <section class="mb-16">
+  <section class="gota-my-map-section">
 
-    <div class="mb-6">
-      <p class="text-sm uppercase tracking-[0.18em] text-gray-400 mb-2">
-        Lugares que quedaron
-      </p>
+    <div class="gota-my-map-section__header">
 
-      <h2 class="text-2xl font-semibold">
-        ❤️ Cafés para volver ({{ want_to_return_count }})
-      </h2>
+      <div>
+
+        <span class="gota-my-map-section__kicker">
+          Lugares que quedaron
+        </span>
+
+        <h2 class="gota-my-map-section__title">
+          Cafés para volver
+        </h2>
+
+      </div>
+
+      <span class="gota-my-map-section__count">
+        {{ want_to_return_count }}
+      </span>
+
     </div>
 
     {% if want_to_return %}
@@ -70,8 +112,12 @@
 
     {% else %}
 
-      <div class="surface rounded-2xl p-6 text-gray-500">
-        Los lugares que te den ganas de volver aparecerán acá.
+      <div class="gota-my-map-empty">
+        <i class="far fa-heart" aria-hidden="true"></i>
+
+        <span>
+          Los lugares que te den ganas de volver aparecerán acá.
+        </span>
       </div>
 
     {% endif %}
@@ -79,16 +125,26 @@
   </section>
 
   <!-- HISTORIAL -->
-  <section>
+  <section class="gota-my-map-section">
 
-    <div class="mb-6">
-      <p class="text-sm uppercase tracking-[0.18em] text-gray-400 mb-2">
-        Tu recorrido
-      </p>
+    <div class="gota-my-map-section__header">
 
-      <h2 class="text-2xl font-semibold">
-        ✔️ Cafés vividos ({{ visited_count }})
-      </h2>
+      <div>
+
+        <span class="gota-my-map-section__kicker">
+          Tu recorrido
+        </span>
+
+        <h2 class="gota-my-map-section__title">
+          Cafés vividos
+        </h2>
+
+      </div>
+
+      <span class="gota-my-map-section__count">
+        {{ visited_count }}
+      </span>
+
     </div>
 
     {% if visited %}
@@ -101,8 +157,12 @@
 
     {% else %}
 
-      <div class="surface rounded-2xl p-6 text-gray-500">
-        Tu historia cafetera recién empieza.
+      <div class="gota-my-map-empty">
+        <i class="fas fa-route" aria-hidden="true"></i>
+
+        <span>
+          Tu historia cafetera recién empieza.
+        </span>
       </div>
 
     {% endif %}

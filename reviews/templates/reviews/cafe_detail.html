@@ -1172,50 +1172,51 @@
 
   {% if user.is_authenticated %}
 
-  <form method="post"
-        action="{% url 'reviews:save_whisper' cafe.id %}"
-        class="mb-6 space-y-3">
-
-    {% csrf_token %}
-
-    <input
-      type="text"
-      name="text"
-      maxlength="40"
-      placeholder="Ej: Para charlas largas"
-      class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
+    <form
+      method="post"
+      action="{% url 'reviews:save_whisper' cafe.id %}"
+      class="gota-cafe-detail-whispers-form"
     >
 
-    <div class="text-xs text-gray-500">
-      Máximo 40 caracteres · 1 huella por día
-    </div>
+      {% csrf_token %}
 
-    <div class="flex flex-wrap gap-2 text-xs">
+      <div class="gota-cafe-detail-whispers-form__field">
 
-      <span class="px-3 py-1 rounded-full bg-gray-100">
-        Volvería sin pensar
-      </span>
+        <input
+          type="text"
+          name="text"
+          maxlength="40"
+          placeholder="Ej: Para charlas largas"
+          class="gota-cafe-detail-whispers-form__input"
+        >
 
-      <span class="px-3 py-1 rounded-full bg-gray-100">
-        Para hacer una pausa
-      </span>
+        <span class="gota-cafe-detail-whispers-form__hint">
+          Máximo 40 caracteres · 1 huella por día
+        </span>
 
-      <span class="px-3 py-1 rounded-full bg-gray-100">
-        Buen rincón para leer
-      </span>
+      </div>
 
-      <span class="px-3 py-1 rounded-full bg-gray-100">
-        Tiene algo especial
-      </span>
+      <div class="gota-cafe-detail-whispers-form__suggestions">
 
-    </div>
+        <span>Volvería sin pensar</span>
 
-    <button type="submit"
-            class="btn btn-primary rounded-xl">
-      🍃 Dejá cómo se sintió
-    </button>
+        <span>Para hacer una pausa</span>
 
-  </form>
+        <span>Buen rincón para leer</span>
+
+        <span>Tiene algo especial</span>
+
+      </div>
+
+      <button
+        type="submit"
+        class="gota-cafe-detail-whispers-form__submit"
+      >
+        <i class="fas fa-leaf" aria-hidden="true"></i>
+        <span>Dejá cómo se sintió</span>
+      </button>
+
+    </form>
 
   {% endif %}
 
@@ -1258,9 +1259,13 @@
 
   {% else %}
 
-  <div class="text-sm text-gray-500 italic">
-    Todavía nadie dejó una huella acá.
-  </div>
+    <div class="gota-cafe-detail-whispers__empty">
+      <i class="far fa-comment-dots" aria-hidden="true"></i>
+
+      <span>
+        Todavía nadie dejó una huella acá.
+      </span>
+    </div>
 
   {% endif %}
 
@@ -1339,12 +1344,12 @@
               attribution: '&copy; OpenStreetMap contributors'
             }).addTo(window._cafeMap);
 
-            const iconUrl = "{% static 'images/coffee-cup.svg' %}";
+            const iconUrl = "{% static 'images/gota-icon.png' %}";
             const cupIcon = L.icon({
               iconUrl,
-              iconSize: [32, 38],
-              iconAnchor: [16, 38],
-              popupAnchor: [0, -32],
+              iconSize: [34, 34],
+              iconAnchor: [17, 34],
+              popupAnchor: [0, -30],
               className: 'cup-marker'
             });
 
@@ -1370,22 +1375,61 @@
 </div>
 
 <!-- MODAL QR -->
-<div id="qrModal" class="fixed inset-0 bg-black/60 hidden z-50 items-center justify-center">
-  <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center relative">
+<div
+  id="qrModal"
+  class="gota-qr-modal hidden"
+  aria-hidden="true"
+>
+  <div
+    class="gota-qr-modal__dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="gota-qr-modal-title"
+  >
 
-    <button onclick="closeQRModal()" class="absolute top-2 right-3 text-xl">✖</button>
+    <button
+      type="button"
+      onclick="closeQRModal()"
+      class="gota-qr-modal__close"
+      aria-label="Cerrar"
+    >
+      <i class="fas fa-times" aria-hidden="true"></i>
+    </button>
 
-    <h3 class="text-lg font-bold mb-3">QR para dejar reseña</h3>
-    <p class="text-sm text-gray-500 mb-4">
-      Escaneá y dejá tu opinión en Gota ☕
+    <div class="gota-qr-modal__icon">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+    </div>
+
+    <h3
+      id="gota-qr-modal-title"
+      class="gota-qr-modal__title"
+    >
+      QR para dejar una reseña
+    </h3>
+
+    <p class="gota-qr-modal__description">
+      Escanealo para abrir este café en Gota y contar cómo fue la experiencia.
     </p>
 
-    <img id="qrImage" class="mx-auto rounded-lg shadow mb-4"/>
+    <div class="gota-qr-modal__image-wrap">
+      <img
+        id="qrImage"
+        class="gota-qr-modal__image"
+        alt="Código QR de este café"
+      >
+    </div>
 
-    <a id="downloadQR"
-       class="btn btn-primary w-full mb-2"
-       download="qr-gota.png">
-       Descargar QR
+    <a
+      id="downloadQR"
+      class="gota-qr-modal__download"
+      download="qr-gota.png"
+    >
+      <i class="fas fa-download" aria-hidden="true"></i>
+      <span>Descargar QR</span>
     </a>
 
   </div>

@@ -5415,3 +5415,500 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
     gap: 12px;
   }
 }
+
+/* =========================================================
+   CAFÉ DETAIL · HUELLAS · FORMULARIO
+   ========================================================= */
+
+.gota-cafe-detail-whispers-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  margin-bottom: 22px;
+}
+
+.gota-cafe-detail-whispers-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gota-cafe-detail-whispers-form__input {
+  width: 100%;
+  min-height: 44px;
+
+  padding: 10px 12px;
+
+  background: #FFFFFF !important;
+  border: 1px solid #DBEAFE !important;
+  border-radius: 12px !important;
+
+  color: #334155 !important;
+  font-size: 13px;
+
+  box-shadow: none !important;
+}
+
+.gota-cafe-detail-whispers-form__input::placeholder {
+  color: #94A3B8;
+}
+
+.gota-cafe-detail-whispers-form__input:focus {
+  outline: none !important;
+
+  border-color: #93C5FD !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10) !important;
+}
+
+.gota-cafe-detail-whispers-form__hint {
+  color: #94A3B8;
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+.gota-cafe-detail-whispers-form__suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.gota-cafe-detail-whispers-form__suggestions span {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 6px 9px;
+
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 999px;
+
+  color: #64748B;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.gota-cafe-detail-whispers-form__submit {
+  width: fit-content;
+  min-height: 38px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 8px 12px;
+
+  background: #172C6D !important;
+  border: 1px solid #172C6D !important;
+  border-radius: 11px !important;
+
+  color: #FFFFFF !important;
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-cafe-detail-whispers-form__submit:hover {
+  background: #203983 !important;
+  border-color: #203983 !important;
+}
+
+.gota-cafe-detail-whispers-form__submit i {
+  font-size: 11px;
+}
+
+@media (max-width: 640px) {
+  .gota-cafe-detail-whispers-form__submit {
+    width: 100%;
+  }
+}
+
+/* CAFÉ DETAIL · HUELLAS · ESTADO VACÍO */
+
+.gota-cafe-detail-whispers__empty {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  padding: 14px 16px;
+
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+
+  color: #94A3B8;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.gota-cafe-detail-whispers__empty i {
+  color: #172C6D;
+  font-size: 13px;
+}
+
+/* =========================================================
+   CAFÉ DETAIL · MODAL QR
+   ========================================================= */
+
+.gota-qr-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2147485000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(4px);
+}
+
+.gota-qr-modal.hidden {
+  display: none;
+}
+
+.gota-qr-modal__dialog {
+  position: relative;
+
+  width: 100%;
+  max-width: 380px;
+
+  padding: 26px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+
+  text-align: center;
+}
+
+.gota-qr-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+
+  width: 34px;
+  height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+
+  color: #64748B;
+  cursor: pointer;
+}
+
+.gota-qr-modal__close:hover {
+  background: #EFF6FF;
+  color: #172C6D;
+}
+
+.gota-qr-modal__icon {
+  width: 46px;
+  height: 46px;
+
+  margin: 0 auto 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 14px;
+}
+
+.gota-qr-modal__icon img {
+  width: 26px;
+  height: 26px;
+}
+
+.gota-qr-modal__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 19px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.gota-qr-modal__description {
+  margin: 8px auto 18px;
+
+  max-width: 300px;
+
+  color: #64748B;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.gota-qr-modal__image-wrap {
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+
+  margin-bottom: 18px;
+}
+
+.gota-qr-modal__image {
+  width: 220px;
+  max-width: 100%;
+  height: auto;
+
+  padding: 10px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.gota-qr-modal__download {
+  width: 100%;
+  min-height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 9px 12px;
+
+  background: #172C6D !important;
+  border: 1px solid #172C6D;
+  border-radius: 12px;
+
+  color: #FFFFFF !important;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.gota-qr-modal__download:hover {
+  background: #203983 !important;
+  color: #FFFFFF !important;
+}
+
+@media (max-width: 640px) {
+  .gota-qr-modal {
+    padding: 14px;
+  }
+
+  .gota-qr-modal__dialog {
+    padding: 22px 18px;
+    border-radius: 17px;
+  }
+
+  .gota-qr-modal__image {
+    width: 200px;
+  }
+}
+
+/* =========================================================
+   MI MAPA CAFETERO · HEADER
+   ========================================================= */
+
+.gota-my-map-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+
+  margin-bottom: 46px;
+}
+
+.gota-my-map-header__icon {
+  width: 44px;
+  height: 44px;
+
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 14px;
+
+  color: #172C6D;
+}
+
+.gota-my-map-header__icon i {
+  font-size: 17px;
+}
+
+.gota-my-map-header__content {
+  min-width: 0;
+}
+
+.gota-my-map-header__kicker {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #64748B;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.gota-my-map-header__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: clamp(28px, 3vw, 36px);
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.gota-my-map-header__description {
+  margin: 9px 0 0;
+
+  color: #64748B;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.gota-my-map-header__description strong {
+  color: #172C6D;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .gota-my-map-header {
+    gap: 12px;
+    margin-bottom: 34px;
+  }
+
+  .gota-my-map-header__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .gota-my-map-header__title {
+    font-size: 27px;
+  }
+
+  .gota-my-map-header__description {
+    font-size: 13px;
+  }
+}
+
+/* =========================================================
+   MI MAPA CAFETERO · SECCIONES
+   ========================================================= */
+
+.gota-my-map-section {
+  margin-bottom: 56px;
+}
+
+.gota-my-map-section__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 22px;
+}
+
+.gota-my-map-section__kicker {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #94A3B8;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.gota-my-map-section__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 750;
+}
+
+.gota-my-map-section__count {
+  min-width: 34px;
+  height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 10px;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 999px;
+
+  color: #172C6D;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 640px) {
+  .gota-my-map-section {
+    margin-bottom: 42px;
+  }
+
+  .gota-my-map-section__header {
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .gota-my-map-section__title {
+    font-size: 20px;
+  }
+
+  .gota-my-map-section__count {
+    min-width: 32px;
+    height: 32px;
+  }
+}
+
+/* =========================================================
+   MI MAPA CAFETERO · ESTADOS VACÍOS
+   ========================================================= */
+
+.gota-my-map-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  min-height: 58px;
+
+  padding: 14px 16px;
+
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+
+  color: #64748B;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.gota-my-map-empty i {
+  flex: 0 0 auto;
+
+  color: #172C6D;
+  font-size: 14px;
+}
