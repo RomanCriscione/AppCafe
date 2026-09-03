@@ -8446,3 +8446,185 @@ select.gota-create-field__input {
 
 }
 
+/* =========================================================
+   EDITAR CAFETERÍA
+   ========================================================= */
+
+/* MENSAJES */
+
+.gota-edit-cafe-messages {
+  margin-bottom: 18px;
+}
+
+.gota-edit-cafe-message {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+
+  color: #475569;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.gota-edit-cafe-message--error {
+  background: #FEF2F2;
+  border-color: #FECACA;
+  color: #B91C1C;
+}
+
+.gota-edit-cafe-message--success {
+  background: #F0FDF4;
+  border-color: #BBF7D0;
+  color: #15803D;
+}
+
+
+/* FOTOS */
+
+.gota-edit-photos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.gota-edit-photo {
+  min-width: 0;
+}
+
+.gota-edit-photo__preview {
+  position: relative;
+
+  width: 100%;
+  aspect-ratio: 4 / 3;
+
+  overflow: hidden;
+
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 13px;
+}
+
+.gota-edit-photo__preview img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+}
+
+.gota-edit-photo__empty {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  color: #94A3B8;
+}
+
+.gota-edit-photo__empty i {
+  color: #BFDBFE;
+  font-size: 24px;
+}
+
+.gota-edit-photo__empty span {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.gota-edit-photo__hidden-preview {
+  display: none !important;
+}
+
+
+/* ELIMINAR */
+
+.gota-edit-photo__delete {
+  min-height: 30px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  margin-top: 8px;
+  padding: 5px 9px;
+
+  background: #FEF2F2 !important;
+  border: 1px solid #FECACA !important;
+  border-radius: 8px !important;
+
+  color: #B91C1C !important;
+  font-size: 9.5px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-edit-photo__delete:hover {
+  background: #FEE2E2 !important;
+}
+
+
+/* CAMBIAR FOTO */
+
+.gota-edit-photo__change {
+  display: block;
+
+  margin: 11px 0 5px;
+
+  color: #64748B;
+  font-size: 9.5px;
+  font-weight: 700;
+}
+
+.gota-edit-photo__input {
+  width: 100%;
+
+  padding: 7px;
+
+  background: #F8FAFC !important;
+  border: 1px solid #DBEAFE !important;
+  border-radius: 10px !important;
+
+  color: #64748B;
+  font-size: 9.5px;
+}
+
+.gota-edit-photo__input::file-selector-button {
+  margin-right: 8px;
+  padding: 6px 8px;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 7px;
+
+  color: #172C6D;
+  font-size: 9.5px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 800px) {
+
+  .gota-edit-photos {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .gota-edit-photo__preview {
+    aspect-ratio: 16 / 9;
+  }
+
+}

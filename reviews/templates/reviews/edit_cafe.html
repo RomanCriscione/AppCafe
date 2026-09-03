@@ -3,298 +3,909 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto p-4">
-  <h1 class="text-3xl font-bold mb-6 text-blue-700 flex items-center gap-2">
-    <i class="fas fa-edit"></i> Editar cafetería: {{ cafe.name }}
-  </h1>
 
+<div class="gota-create-cafe">
+
+  <!-- HEADER -->
+  <header class="gota-create-cafe__header">
+
+    <div class="gota-create-cafe__header-icon">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+    </div>
+
+    <div class="gota-create-cafe__header-content">
+
+      <span class="gota-create-cafe__kicker">
+        Administrá tu cafetería
+      </span>
+
+      <h1 class="gota-create-cafe__title">
+        Editar cafetería
+      </h1>
+
+      <p class="gota-create-cafe__description">
+        Actualizá la información de {{ cafe.name }} para mantener sus datos al día.
+      </p>
+
+    </div>
+
+  </header>
+
+
+  <!-- MENSAJES -->
   {% if messages %}
-    <ul class="mb-4 space-y-2">
+    <div class="gota-edit-cafe-messages">
       {% for message in messages %}
-        <li class="px-4 py-2 rounded-md 
-                   {% if message.tags == 'error' %}bg-red-100 text-red-700
-                   {% elif message.tags == 'success' %}bg-green-100 text-green-700
-                   {% else %}bg-gray-100 text-gray-700{% endif %}">
+        <div class="
+          gota-edit-cafe-message
+          {% if message.tags == 'error' %}
+            gota-edit-cafe-message--error
+          {% elif message.tags == 'success' %}
+            gota-edit-cafe-message--success
+          {% endif %}
+        ">
           {{ message }}
-        </li>
+        </div>
       {% endfor %}
-    </ul>
+    </div>
   {% endif %}
 
-  <form class="space-y-10" enctype="multipart/form-data" method="post" onsubmit="return validarDireccionAntesDeEnviar();">
+
+  <form
+    enctype="multipart/form-data"
+    method="post"
+    onsubmit="return validarDireccionAntesDeEnviar();"
+  >
     {% csrf_token %}
 
-    <!-- Datos principales -->
-    <div class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-6">
-      <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
-        <i class="fas fa-info-circle"></i> Información principal
-      </h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">{{ form.name.label }}</label>
-          {{ form.name|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
+
+    <!-- =====================================================
+         INFORMACIÓN PRINCIPAL
+         ===================================================== -->
+
+    <section class="gota-create-section">
+
+      <div class="gota-create-section__header">
+
+        <div class="gota-create-section__icon">
+          <i class="fas fa-info" aria-hidden="true"></i>
         </div>
+
         <div>
-          <label class="block font-semibold text-gray-700 mb-1">{{ form.address.label }}</label>
-          {{ form.address|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-          <p class="text-xs text-gray-500 mt-1">Si cambiás la dirección, verificá el formato Google Maps.</p>
-          {% if form.address.errors %}
-            <p class="text-red-600 text-sm mt-1">{{ form.address.errors.0 }}</p>
+          <h2 class="gota-create-section__title">
+            Información principal
+          </h2>
+
+          <p class="gota-create-section__description">
+            Los datos básicos para identificar y encontrar la cafetería.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="gota-create-fields">
+
+        <!-- NOMBRE -->
+        <div class="gota-create-field">
+
+          <label class="gota-create-field__label">
+            {{ form.name.label }}
+          </label>
+
+          {{ form.name|add_class:"gota-create-field__input" }}
+
+          {% if form.name.errors %}
+            <p class="gota-create-field__error">
+              {{ form.name.errors.0 }}
+            </p>
           {% endif %}
+
         </div>
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">{{ form.location.label }}</label>
-          {{ form.location|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
+
+
+        <!-- DIRECCIÓN -->
+        <div class="gota-create-field">
+
+          <label class="gota-create-field__label">
+            {{ form.address.label }}
+          </label>
+
+          {{ form.address|add_class:"gota-create-field__input" }}
+
+          <p class="gota-create-field__help">
+            Si cambiás la dirección, verificá que coincida con Google Maps.
+          </p>
+
+          {% if form.address.errors %}
+            <p class="gota-create-field__error">
+              {{ form.address.errors.0 }}
+            </p>
+          {% endif %}
+
         </div>
-        <div class="md:col-span-2">
-          <label class="block font-semibold text-gray-700 mb-1">{{ form.description.label }}</label>
-          {{ form.description|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
+
+
+        <!-- LOCALIDAD -->
+        <div class="gota-create-field">
+
+          <label class="gota-create-field__label">
+            {{ form.location.label }}
+          </label>
+
+          {{ form.location|add_class:"gota-create-field__input" }}
+
+          {% if form.location.errors %}
+            <p class="gota-create-field__error">
+              {{ form.location.errors.0 }}
+            </p>
+          {% endif %}
+
         </div>
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">{{ form.phone.label }}</label>
-          {{ form.phone|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
+
+
+        <!-- PROVINCIA -->
+        {% if form.province %}
+          <div class="gota-create-field">
+
+            <label class="gota-create-field__label">
+              {{ form.province.label }}
+            </label>
+
+            {{ form.province|add_class:"gota-create-field__input" }}
+
+            {% if form.province.errors %}
+              <p class="gota-create-field__error">
+                {{ form.province.errors.0 }}
+              </p>
+            {% endif %}
+
+          </div>
+        {% endif %}
+
+
+        <!-- DESCRIPCIÓN -->
+        <div class="gota-create-field gota-create-field--full">
+
+          <label class="gota-create-field__label">
+            {{ form.description.label }}
+          </label>
+
+          {{ form.description|add_class:"gota-create-field__input gota-create-field__textarea" }}
+
+          <p class="gota-create-field__help">
+            Contá brevemente qué hace especial a esta cafetería.
+          </p>
+
+          {% if form.description.errors %}
+            <p class="gota-create-field__error">
+              {{ form.description.errors.0 }}
+            </p>
+          {% endif %}
+
         </div>
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">{{ form.google_maps_url.label }}</label>
-          {{ form.google_maps_url|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
+
+
+        <!-- TELÉFONO -->
+        <div class="gota-create-field">
+
+          <label class="gota-create-field__label">
+            {{ form.phone.label }}
+          </label>
+
+          {{ form.phone|add_class:"gota-create-field__input" }}
+
+          {% if form.phone.errors %}
+            <p class="gota-create-field__error">
+              {{ form.phone.errors.0 }}
+            </p>
+          {% endif %}
+
         </div>
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">
+
+
+        <!-- GOOGLE MAPS -->
+        <div class="gota-create-field">
+
+          <label class="gota-create-field__label">
+            {{ form.google_maps_url.label }}
+          </label>
+
+          {{ form.google_maps_url|add_class:"gota-create-field__input" }}
+
+          <p class="gota-create-field__help">
+            Pegá el enlace de Google Maps de la cafetería.
+          </p>
+
+          {% if form.google_maps_url.errors %}
+            <p class="gota-create-field__error">
+              {{ form.google_maps_url.errors.0 }}
+            </p>
+          {% endif %}
+
+        </div>
+
+
+        <!-- INSTAGRAM -->
+        <div class="gota-create-field gota-create-field--full">
+
+          <label class="gota-create-field__label">
             {{ form.instagram.label }}
           </label>
 
-          {{ form.instagram|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
+          {{ form.instagram|add_class:"gota-create-field__input" }}
 
-          <p class="text-xs text-gray-500 mt-1">
-            Usuario de Instagram, sin @ (ej: app.gota)
+          <p class="gota-create-field__help">
+            Usuario de Instagram, sin @. Por ejemplo: app.gota
           </p>
 
           {% if form.instagram.errors %}
-            <p class="text-red-600 text-sm mt-1">
+            <p class="gota-create-field__error">
               {{ form.instagram.errors.0 }}
             </p>
           {% endif %}
-          </div>
+
+        </div>
 
       </div>
-    </div>
 
-    <!-- Fotos -->
-    <div class="bg-[var(--surface)] border border-[var(--border)] p-6 rounded-2xl shadow-soft space-y-6">
-      <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
-        <i class="fas fa-camera"></i> Fotos
-      </h3>
-      <p class="text-xs text-gray-600 -mt-2">Formatos: JPG o PNG. Máx 3 MB por foto.</p>
+    </section>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {# FOTO 1 #}
-        <div class="space-y-2">
-          <p class="text-sm font-medium text-gray-700">Foto 1</p>
-          <!-- visor foto -->
-          <img id="preview-photo1"
-              src="{% if cafe.photo1 %}{{ cafe.photo1.url }}{% else %}https://via.placeholder.com/150?text=Sin+foto{% endif %}"
-              class="w-36 h-36 object-cover rounded-xl shadow bg-white border">
 
-          <!-- eliminar -->
+    <!-- =====================================================
+         FOTOS
+         ===================================================== -->
+
+    <section class="gota-create-section">
+
+      <div class="gota-create-section__header">
+
+        <div class="gota-create-section__icon">
+          <i class="fas fa-camera" aria-hidden="true"></i>
+        </div>
+
+        <div>
+          <h2 class="gota-create-section__title">
+            Fotos del café
+          </h2>
+
+          <p class="gota-create-section__description">
+            Conservá, reemplazá o eliminá las fotos actuales de la cafetería.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="gota-edit-photos">
+
+        <!-- FOTO 1 -->
+        <div class="gota-edit-photo">
+
+          <div class="gota-create-photo__heading">
+            <span>Foto principal</span>
+
+            <span class="gota-create-photo__required">
+              Principal
+            </span>
+          </div>
+
+
+          <div class="gota-edit-photo__preview">
+
+            {% if cafe.photo1 %}
+              <img
+                id="preview-photo1"
+                src="{{ cafe.photo1.url }}"
+                alt="Foto principal de {{ cafe.name }}"
+              >
+            {% else %}
+              <div
+                id="placeholder-photo1"
+                class="gota-edit-photo__empty"
+              >
+                <i class="fas fa-image" aria-hidden="true"></i>
+                <span>Sin foto</span>
+              </div>
+
+              <img
+                id="preview-photo1"
+                src=""
+                alt="Vista previa de la foto principal"
+                class="gota-edit-photo__hidden-preview"
+              >
+            {% endif %}
+
+          </div>
+
+
           {% if cafe.photo1 %}
-          <div class="flex flex-col gap-2 mt-1">
-
-            <button type="button"
-                    id="btn-delete-photo1"
-                    class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition w-fit">
-              🗑 Eliminar foto
+            <button
+              type="button"
+              id="btn-delete-photo1"
+              class="gota-edit-photo__delete"
+            >
+              <i class="fas fa-trash-alt" aria-hidden="true"></i>
+              <span>Eliminar foto</span>
             </button>
 
-            <input type="hidden" id="id_photo1-clear" name="photo1-clear" value="">
-
-          </div>
+            <input
+              type="hidden"
+              id="id_photo1-clear"
+              name="photo1-clear"
+              value=""
+            >
+          {% else %}
+            <input
+              type="hidden"
+              id="id_photo1-clear"
+              name="photo1-clear"
+              value=""
+            >
           {% endif %}
 
 
-          <label class="block text-sm text-gray-700">Cambiar:</label>
-          <input type="file" name="{{ form.photo1.html_name }}" id="{{ form.photo1.id_for_label }}"
-                 accept="image/jpeg,image/png"
-                 class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg
-                        file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700
-                        border rounded-lg bg-white/80">
-          {% if form.photo1.errors %}<p class="text-xs text-red-600">{{ form.photo1.errors.0 }}</p>{% endif %}
-          {{ form.photo1_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-        </div>
+          <label class="gota-edit-photo__change">
+            Cambiar foto
+          </label>
 
-        {# FOTO 2 #}
-        <div class="space-y-2">
-          <p class="text-sm font-medium text-gray-700">Foto 2</p>
-          <!-- visor foto -->
-          <img id="preview-photo2"
-              src="{% if cafe.photo2 %}{{ cafe.photo2.url }}{% else %}https://via.placeholder.com/150?text=Sin+foto{% endif %}"
-              class="w-36 h-36 object-cover rounded-xl shadow bg-white border">
+          <input
+            type="file"
+            name="{{ form.photo1.html_name }}"
+            id="{{ form.photo1.id_for_label }}"
+            accept="image/jpeg,image/png"
+            class="gota-edit-photo__input"
+          >
 
-          <!-- eliminar -->
-          {% if cafe.photo2 %}
-          <div class="flex flex-col gap-2 mt-1">
-
-            <button type="button"
-                    id="btn-delete-photo2"
-                    class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition w-fit">
-              🗑 Eliminar foto
-            </button>
-
-            <input type="hidden" id="id_photo2-clear" name="photo2-clear" value="">
-
-          </div>
+          {% if form.photo1.errors %}
+            <p class="gota-create-field__error">
+              {{ form.photo1.errors.0 }}
+            </p>
           {% endif %}
 
 
-          <label class="block text-sm text-gray-700">Cambiar:</label>
-          <input type="file" name="{{ form.photo2.html_name }}" id="{{ form.photo2.id_for_label }}"
-                 accept="image/jpeg,image/png"
-                 class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg
-                        file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700
-                        border rounded-lg bg-white/80">
-          {% if form.photo2.errors %}<p class="text-xs text-red-600">{{ form.photo2.errors.0 }}</p>{% endif %}
-          {{ form.photo2_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-        </div>
-
-        {# FOTO 3 #}
-        <div class="space-y-2">
-          <p class="text-sm font-medium text-gray-700">Foto 3</p>
-          <!-- visor foto -->
-          <img id="preview-photo3"
-              src="{% if cafe.photo3 %}{{ cafe.photo3.url }}{% else %}https://via.placeholder.com/150?text=Sin+foto{% endif %}"
-              class="w-36 h-36 object-cover rounded-xl shadow bg-white border">
-
-          <!-- eliminar -->
-          {% if cafe.photo3 %}
-          <div class="flex flex-col gap-2 mt-1">
-
-            <button type="button"
-                    id="btn-delete-photo3"
-                    class="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition w-fit">
-              🗑 Eliminar foto
-            </button>
-
-            <input type="hidden" id="id_photo3-clear" name="photo3-clear" value="">
-
-          </div>
-          {% endif %}
-
-
-          <label class="block text-sm text-gray-700">Cambiar:</label>
-          <input type="file" name="{{ form.photo3.html_name }}" id="{{ form.photo3.id_for_label }}"
-                 accept="image/jpeg,image/png"
-                 class="block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg
-                        file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700
-                        border rounded-lg bg-white/80">
-          {% if form.photo3.errors %}<p class="text-xs text-red-600">{{ form.photo3.errors.0 }}</p>{% endif %}
-          {{ form.photo3_title|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-        </div>
-      </div>
-    </div>
-
-    <!-- Opciones (todas las booleanas) -->
-    <div class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-4">
-      <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
-        <i class="fas fa-cog"></i> Opciones
-      </h3>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {% for field in form %}
-          {% if field.name|slice:":3" == "is_" or field.name|slice:":4" == "has_" or field.name|slice:":7" == "serves_" or field.name == "accepts_cards" or field.name == "gluten_free_options" or field.name == "has_baby_changing" or field.name == "has_power_outlets" or field.name == "laptop_friendly" or field.name == "quiet_space" or field.name == "specialty_coffee" or field.name == "brunch" or field.name == "accepts_reservations" %}
-            <label class="flex items-center space-x-2">
-              {{ field }} <span>{{ field.label }}</span>
+          <div class="gota-create-photo__title">
+            <label>
+              {{ form.photo1_title.label }}
             </label>
+
+            {{ form.photo1_title|add_class:"gota-create-field__input" }}
+          </div>
+
+        </div>
+
+
+        <!-- FOTO 2 -->
+        <div class="gota-edit-photo">
+
+          <div class="gota-create-photo__heading">
+            <span>Foto secundaria</span>
+
+            <span class="gota-create-photo__optional">
+              Opcional
+            </span>
+          </div>
+
+
+          <div class="gota-edit-photo__preview">
+
+            {% if cafe.photo2 %}
+              <img
+                id="preview-photo2"
+                src="{{ cafe.photo2.url }}"
+                alt="Segunda foto de {{ cafe.name }}"
+              >
+            {% else %}
+              <div
+                id="placeholder-photo2"
+                class="gota-edit-photo__empty"
+              >
+                <i class="fas fa-image" aria-hidden="true"></i>
+                <span>Sin foto</span>
+              </div>
+
+              <img
+                id="preview-photo2"
+                src=""
+                alt="Vista previa de la segunda foto"
+                class="gota-edit-photo__hidden-preview"
+              >
+            {% endif %}
+
+          </div>
+
+
+          {% if cafe.photo2 %}
+            <button
+              type="button"
+              id="btn-delete-photo2"
+              class="gota-edit-photo__delete"
+            >
+              <i class="fas fa-trash-alt" aria-hidden="true"></i>
+              <span>Eliminar foto</span>
+            </button>
+
+            <input
+              type="hidden"
+              id="id_photo2-clear"
+              name="photo2-clear"
+              value=""
+            >
+          {% else %}
+            <input
+              type="hidden"
+              id="id_photo2-clear"
+              name="photo2-clear"
+              value=""
+            >
           {% endif %}
+
+
+          <label class="gota-edit-photo__change">
+            Cambiar foto
+          </label>
+
+          <input
+            type="file"
+            name="{{ form.photo2.html_name }}"
+            id="{{ form.photo2.id_for_label }}"
+            accept="image/jpeg,image/png"
+            class="gota-edit-photo__input"
+          >
+
+          {% if form.photo2.errors %}
+            <p class="gota-create-field__error">
+              {{ form.photo2.errors.0 }}
+            </p>
+          {% endif %}
+
+
+          <div class="gota-create-photo__title">
+            <label>
+              {{ form.photo2_title.label }}
+            </label>
+
+            {{ form.photo2_title|add_class:"gota-create-field__input" }}
+          </div>
+
+        </div>
+
+
+        <!-- FOTO 3 -->
+        <div class="gota-edit-photo">
+
+          <div class="gota-create-photo__heading">
+            <span>Foto secundaria</span>
+
+            <span class="gota-create-photo__optional">
+              Opcional
+            </span>
+          </div>
+
+
+          <div class="gota-edit-photo__preview">
+
+            {% if cafe.photo3 %}
+              <img
+                id="preview-photo3"
+                src="{{ cafe.photo3.url }}"
+                alt="Tercera foto de {{ cafe.name }}"
+              >
+            {% else %}
+              <div
+                id="placeholder-photo3"
+                class="gota-edit-photo__empty"
+              >
+                <i class="fas fa-image" aria-hidden="true"></i>
+                <span>Sin foto</span>
+              </div>
+
+              <img
+                id="preview-photo3"
+                src=""
+                alt="Vista previa de la tercera foto"
+                class="gota-edit-photo__hidden-preview"
+              >
+            {% endif %}
+
+          </div>
+
+
+          {% if cafe.photo3 %}
+            <button
+              type="button"
+              id="btn-delete-photo3"
+              class="gota-edit-photo__delete"
+            >
+              <i class="fas fa-trash-alt" aria-hidden="true"></i>
+              <span>Eliminar foto</span>
+            </button>
+
+            <input
+              type="hidden"
+              id="id_photo3-clear"
+              name="photo3-clear"
+              value=""
+            >
+          {% else %}
+            <input
+              type="hidden"
+              id="id_photo3-clear"
+              name="photo3-clear"
+              value=""
+            >
+          {% endif %}
+
+
+          <label class="gota-edit-photo__change">
+            Cambiar foto
+          </label>
+
+          <input
+            type="file"
+            name="{{ form.photo3.html_name }}"
+            id="{{ form.photo3.id_for_label }}"
+            accept="image/jpeg,image/png"
+            class="gota-edit-photo__input"
+          >
+
+          {% if form.photo3.errors %}
+            <p class="gota-create-field__error">
+              {{ form.photo3.errors.0 }}
+            </p>
+          {% endif %}
+
+
+          <div class="gota-create-photo__title">
+            <label>
+              {{ form.photo3_title.label }}
+            </label>
+
+            {{ form.photo3_title|add_class:"gota-create-field__input" }}
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CARACTERÍSTICAS
+         ===================================================== -->
+
+    <section class="gota-create-section">
+
+      <div class="gota-create-section__header">
+
+        <div class="gota-create-section__icon">
+          <i class="fas fa-sliders-h" aria-hidden="true"></i>
+        </div>
+
+        <div>
+          <h2 class="gota-create-section__title">
+            Características
+          </h2>
+
+          <p class="gota-create-section__description">
+            Marcá todo lo que las personas pueden encontrar en esta cafetería.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="gota-create-features">
+
+        {% for field in form %}
+
+          {% if field.name|slice:":3" == "is_" or field.name|slice:":4" == "has_" or field.name|slice:":7" == "serves_" or field.name == "accepts_cards" or field.name == "gluten_free_options" or field.name == "has_baby_changing" or field.name == "has_power_outlets" or field.name == "laptop_friendly" or field.name == "quiet_space" or field.name == "specialty_coffee" or field.name == "brunch" or field.name == "accepts_reservations" %}
+
+            <label class="gota-create-feature">
+
+              {{ field }}
+
+              <span class="gota-create-feature__check">
+                <i class="fas fa-check" aria-hidden="true"></i>
+              </span>
+
+              <span class="gota-create-feature__label">
+                {{ field.label }}
+              </span>
+
+            </label>
+
+          {% endif %}
+
         {% endfor %}
+
       </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         UBICACIÓN
+         ===================================================== -->
+
+    <section class="gota-create-section">
+
+      <div class="gota-create-section__header">
+
+        <div class="gota-create-section__icon">
+          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+        </div>
+
+        <div>
+          <h2 class="gota-create-section__title">
+            Ubicación
+          </h2>
+
+          <p class="gota-create-section__description">
+            Confirmá la ubicación exacta de la cafetería en el mapa.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="gota-create-location-note">
+
+        <i class="fas fa-info-circle" aria-hidden="true"></i>
+
+        <span>
+          Si cambiás la dirección, revisá que el punto del mapa siga siendo correcto.
+        </span>
+
+      </div>
+
+
+      <div class="gota-create-fields">
+
+        <div class="gota-create-field">
+
+          <label class="gota-create-field__label">
+            {{ form.latitude.label }}
+          </label>
+
+          {{ form.latitude|add_class:"gota-create-field__input" }}
+
+          {% if form.latitude.errors %}
+            <p class="gota-create-field__error">
+              {{ form.latitude.errors.0 }}
+            </p>
+          {% endif %}
+
+        </div>
+
+
+        <div class="gota-create-field">
+
+          <label class="gota-create-field__label">
+            {{ form.longitude.label }}
+          </label>
+
+          {{ form.longitude|add_class:"gota-create-field__input" }}
+
+          {% if form.longitude.errors %}
+            <p class="gota-create-field__error">
+              {{ form.longitude.errors.0 }}
+            </p>
+          {% endif %}
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MAPA
+         ===================================================== -->
+
+    <section class="gota-create-map-section">
+
+      <div class="gota-create-map-section__header">
+
+        <div>
+
+          <span class="gota-create-map-section__kicker">
+            Ubicación en el mapa
+          </span>
+
+          <h2 class="gota-create-map-section__title">
+            Revisá que el punto sea correcto
+          </h2>
+
+        </div>
+
+
+        <button
+          type="button"
+          onclick="mostrarMapaMobile()"
+          class="gota-create-map-toggle"
+        >
+          <i class="fas fa-map" aria-hidden="true"></i>
+          <span>Mostrar mapa</span>
+        </button>
+
+      </div>
+
+
+      {% include "reviews/includes/mapa_create_edit_cafe.html" %}
+
+    </section>
+
+
+    <!-- =====================================================
+         GUARDAR
+         ===================================================== -->
+
+    <div class="gota-create-submit">
+
+      <div class="gota-create-submit__text">
+
+        <strong>
+          ¿Terminaste de editar?
+        </strong>
+
+        <span>
+          Revisá los cambios antes de actualizar la cafetería.
+        </span>
+
+      </div>
+
+
+      <button
+        type="submit"
+        class="gota-create-submit__button"
+      >
+
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+
+        <span>
+          Guardar cambios
+        </span>
+
+        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+
+      </button>
+
     </div>
 
-    <!-- Ubicación -->
-    <div class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-4">
-      <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
-        <i class="fas fa-map-marker-alt"></i> Ubicación geográfica
-      </h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block font-semibold text-gray-700">{{ form.latitude.label }}</label>
-          {{ form.latitude|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-        </div>
-        <div>
-          <label class="block font-semibold text-gray-700">{{ form.longitude.label }}</label>
-          {{ form.longitude|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-        </div>
-      </div>
-    </div>
-
-    <!-- Botón mapa -->
-    <button type="button" onclick="mostrarMapaMobile()" 
-            class="block md:hidden bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition mb-4">
-      📍 Mostrar mapa
-    </button>
-
-    {% include "reviews/includes/mapa_create_edit_cafe.html" %}
-
-    <!-- Botón final -->
-    <button type="submit"
-            class="w-full md:w-auto px-6 py-3 rounded-xl shadow 
-                    bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold 
-                    hover:from-blue-600 hover:to-blue-800 transition">
-      Guardar cambios
-    </button>
   </form>
+
 </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function(){
 
-  function setupPhoto(inputId, previewId, clearId, btnId){
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  function setupPhoto(inputId, previewId, clearId, btnId, placeholderId) {
+
     const input = document.getElementById(inputId);
     const preview = document.getElementById(previewId);
     const clear = document.getElementById(clearId);
     const btn = document.getElementById(btnId);
+    const placeholder = document.getElementById(placeholderId);
 
-    if(!preview) return;
+    if (!preview) return;
 
     let deleted = false;
-    let original = preview.src;
+    const original = preview.getAttribute("src");
 
-    // 📸 subir nueva foto
-    if(input){
-      input.addEventListener("change", function(e){
+
+    /* NUEVA FOTO */
+
+    if (input) {
+
+      input.addEventListener("change", function (e) {
+
         const file = e.target.files[0];
-        if(file){
-          preview.src = URL.createObjectURL(file);
-          deleted = false;
-          clear.value = "";
-          if(btn) btn.innerText = "🗑 Eliminar foto";
+
+        if (!file) return;
+
+        preview.src = URL.createObjectURL(file);
+        preview.classList.remove("gota-edit-photo__hidden-preview");
+
+        if (placeholder) {
+          placeholder.style.display = "none";
         }
+
+        deleted = false;
+
+        if (clear) {
+          clear.value = "";
+        }
+
+        if (btn) {
+          btn.innerHTML =
+            '<i class="fas fa-trash-alt" aria-hidden="true"></i><span>Eliminar foto</span>';
+        }
+
       });
+
     }
 
-    // 🗑 botón eliminar toggle
-    if(btn){
-      btn.addEventListener("click", function(){
 
-        if(!deleted){
-          preview.src = "https://via.placeholder.com/150/f3f4f6/9ca3af?text=Sin+foto";
-          clear.value = "on";
+    /* ELIMINAR / DESHACER */
+
+    if (btn) {
+
+      btn.addEventListener("click", function () {
+
+        if (!deleted) {
+
+          preview.style.display = "none";
+
+          if (clear) {
+            clear.value = "on";
+          }
+
           deleted = true;
-          btn.innerText = "↩️ Deshacer";
+
+          btn.innerHTML =
+            '<i class="fas fa-undo" aria-hidden="true"></i><span>Deshacer</span>';
+
         } else {
+
           preview.src = original;
-          clear.value = "";
+          preview.style.display = "";
+          preview.classList.remove("gota-edit-photo__hidden-preview");
+
+          if (clear) {
+            clear.value = "";
+          }
+
           deleted = false;
-          btn.innerText = "🗑 Eliminar foto";
+
+          btn.innerHTML =
+            '<i class="fas fa-trash-alt" aria-hidden="true"></i><span>Eliminar foto</span>';
+
         }
 
       });
+
     }
+
   }
 
-  setupPhoto("id_photo1","preview-photo1","id_photo1-clear","btn-delete-photo1");
-  setupPhoto("id_photo2","preview-photo2","id_photo2-clear","btn-delete-photo2");
-  setupPhoto("id_photo3","preview-photo3","id_photo3-clear","btn-delete-photo3");
+
+  setupPhoto(
+    "id_photo1",
+    "preview-photo1",
+    "id_photo1-clear",
+    "btn-delete-photo1",
+    "placeholder-photo1"
+  );
+
+  setupPhoto(
+    "id_photo2",
+    "preview-photo2",
+    "id_photo2-clear",
+    "btn-delete-photo2",
+    "placeholder-photo2"
+  );
+
+  setupPhoto(
+    "id_photo3",
+    "preview-photo3",
+    "id_photo3-clear",
+    "btn-delete-photo3",
+    "placeholder-photo3"
+  );
 
 });
 </script>
-
 
 {% endblock %}
