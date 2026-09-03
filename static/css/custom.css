@@ -14714,3 +14714,347 @@ select.gota-create-field__input {
   }
 
 }
+
+/* =========================================================
+   CAFÉ DETAIL — MI MAPA / COLECCIÓN / NOTA
+   Ajuste visual final
+   ========================================================= */
+
+/* CONTENEDORES */
+
+.gota-cafe-detail-map-state,
+.gota-cafe-detail-collection,
+.gota-cafe-detail-note {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+
+/* ACERCAMOS VISUALMENTE LOS 3 BLOQUES */
+
+.gota-cafe-detail-map-state {
+  margin-top: 28px;
+}
+
+.gota-cafe-detail-collection,
+.gota-cafe-detail-note {
+  margin-top: 14px;
+}
+
+
+/* =========================================================
+   ESTADO EN MI MAPA
+   ========================================================= */
+
+.gota-cafe-detail-map-state {
+  padding: 18px 20px;
+}
+
+.gota-cafe-detail-map-state__header {
+  margin-bottom: 16px;
+}
+
+.gota-cafe-detail-map-state__icon {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+}
+
+.gota-cafe-detail-map-state__title {
+  color: #172C6D;
+}
+
+.gota-cafe-detail-map-state__description {
+  color: #64748B;
+}
+
+
+/* 3 OPCIONES */
+
+.gota-cafe-detail-map-state__options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.gota-cafe-detail-map-state__options form {
+  margin: 0;
+}
+
+.gota-cafe-detail-map-option {
+  width: 100%;
+  min-height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 10px 12px !important;
+
+  background: #FFFFFF !important;
+  border: 1px solid #BFDBFE !important;
+  border-radius: 11px !important;
+
+  color: #172C6D !important;
+
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+
+  box-shadow: none !important;
+
+  transition:
+    background-color .18s ease,
+    border-color .18s ease,
+    transform .18s ease;
+}
+
+.gota-cafe-detail-map-option:hover {
+  background: #EFF6FF !important;
+  border-color: #93C5FD !important;
+
+  transform: translateY(-1px);
+}
+
+
+/* ÍCONOS */
+
+.gota-cafe-detail-map-option__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 18px;
+  height: 18px;
+
+  color: #172C6D;
+}
+
+.gota-cafe-detail-map-option__icon img {
+  width: 15px;
+  height: 15px;
+
+  object-fit: contain;
+}
+
+
+/* ESTADO ACTIVO */
+
+.gota-cafe-detail-map-option--active {
+  background: #172C6D !important;
+  border-color: #172C6D !important;
+
+  color: #FFFFFF !important;
+}
+
+.gota-cafe-detail-map-option--active:hover {
+  background: #203983 !important;
+  border-color: #203983 !important;
+}
+
+.gota-cafe-detail-map-option--active
+.gota-cafe-detail-map-option__icon {
+  color: #FFFFFF;
+}
+
+.gota-cafe-detail-map-option--active
+.gota-cafe-detail-map-option__icon img {
+  filter: brightness(0) invert(1);
+}
+
+
+/* =========================================================
+   TU COLECCIÓN
+   ========================================================= */
+
+.gota-cafe-detail-collection {
+  padding: 18px 20px;
+}
+
+.gota-cafe-detail-collection__header {
+  margin-bottom: 13px;
+}
+
+.gota-cafe-detail-collection__title {
+  color: #172C6D;
+}
+
+.gota-cafe-detail-collection__description {
+  color: #64748B;
+}
+
+
+/* CHIPS */
+
+.gota-cafe-detail-collection__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gota-cafe-detail-collection__options form {
+  margin: 0;
+}
+
+.gota-cafe-detail-collection-option {
+  min-height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 7px 11px !important;
+
+  background: #FFFFFF !important;
+  border: 1px solid #BFDBFE !important;
+  border-radius: 999px !important;
+
+  color: #172C6D !important;
+
+  font-size: 8.5px !important;
+  font-weight: 700 !important;
+
+  box-shadow: none !important;
+
+  transition:
+    background-color .18s ease,
+    border-color .18s ease,
+    transform .18s ease;
+}
+
+.gota-cafe-detail-collection-option:hover {
+  background: #EFF6FF !important;
+  border-color: #93C5FD !important;
+
+  transform: translateY(-1px);
+}
+
+.gota-cafe-detail-collection-option i {
+  color: #172C6D;
+  font-size: 9px;
+}
+
+
+/* CUANDO YA ESTÁ GUARDADO */
+
+.gota-cafe-detail-collection__saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 10px;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 9px;
+
+  color: #172C6D;
+  font-size: 8.5px;
+  font-weight: 700;
+}
+
+.gota-cafe-detail-collection__saved i {
+  color: #172C6D;
+}
+
+
+/* =========================================================
+   NOTA PERSONAL
+   ========================================================= */
+
+.gota-cafe-detail-note {
+  padding: 18px 20px;
+}
+
+.gota-cafe-detail-note__title {
+  color: #172C6D;
+}
+
+.gota-cafe-detail-note__description {
+  color: #64748B;
+}
+
+.gota-cafe-detail-note__private {
+  background: #F8FAFC;
+  border: 1px solid #DBEAFE;
+
+  color: #172C6D;
+}
+
+
+/* TEXTAREA */
+
+.gota-cafe-detail-note__textarea {
+  background: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+
+  color: #334155 !important;
+
+  box-shadow: none !important;
+}
+
+.gota-cafe-detail-note__textarea:focus {
+  border-color: #93C5FD !important;
+
+  box-shadow:
+    0 0 0 3px rgba(191, 219, 254, .35) !important;
+}
+
+
+/* GUARDAR */
+
+.gota-cafe-detail-note__save {
+  background: #172C6D !important;
+  border-color: #172C6D !important;
+
+  color: #FFFFFF !important;
+}
+
+.gota-cafe-detail-note__save:hover {
+  background: #203983 !important;
+  border-color: #203983 !important;
+}
+
+
+/* NOTA YA GUARDADA */
+
+.gota-cafe-detail-note__saved {
+  background: #F8FAFC;
+  border-color: #E2E8F0;
+}
+
+.gota-cafe-detail-note__edit {
+  color: #172C6D !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 680px) {
+
+  .gota-cafe-detail-map-state,
+  .gota-cafe-detail-collection,
+  .gota-cafe-detail-note {
+    padding: 16px;
+  }
+
+  .gota-cafe-detail-map-state__options {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .gota-cafe-detail-map-option {
+    justify-content: flex-start;
+
+    min-height: 42px;
+  }
+
+  .gota-cafe-detail-collection__options {
+    gap: 7px;
+  }
+
+}
