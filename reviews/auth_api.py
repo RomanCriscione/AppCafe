@@ -5,7 +5,6 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 
 import jwt
-import requests
 
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -200,7 +199,7 @@ class MobileAppleLoginAPIView(APIView):
                 apple_id_token,
                 signing_key.key,
                 algorithms=["RS256"],
-                audience="ar.gogota.app",
+                audience=settings.APPLE_MOBILE_CLIENT_ID,
                 issuer="https://appleid.apple.com",
             )
 

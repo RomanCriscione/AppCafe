@@ -135,6 +135,11 @@ GOOGLE_MOBILE_CLIENT_ID = config(
     default="",
 )
 
+APPLE_MOBILE_CLIENT_ID = config(
+    "APPLE_MOBILE_CLIENT_ID",
+    default="ar.gogota.app",
+)
+
 # ======================================================
 # EMAIL (GMAIL)
 # ======================================================
