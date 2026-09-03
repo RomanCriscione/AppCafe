@@ -56,7 +56,7 @@
   <!-- PWA / Icons -->
   <link rel="manifest" href="{% static 'site.webmanifest' %}">
   <meta name="color-scheme" content="light">
-  <meta name="theme-color" content="#553A2F">
+  <meta name="theme-color" content="#172C6D">
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32.png' %}">
   <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16.png' %}">
   <link rel="apple-touch-icon" href="{% static 'images/gota-icon.png' %}">
@@ -94,8 +94,8 @@
   <div class="min-h-screen flex flex-col">
 
     <!-- NAVBAR -->
-    <header class="site-nav bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-30">
-      <div class="max-w-7xl mx-auto px-4 py-2 sm:py-3 flex items-center justify-between">
+    <header class="site-nav gota-site-header">
+      <div class="gota-site-header__inner">
         <!-- Marca + Volver (Volver solo >= md) -->
         <div class="flex items-center gap-2 sm:gap-4">
           <a href="{% url 'home' %}" class="gota-nav-brand">
@@ -110,55 +110,136 @@
             <span>Gota</span>
           </a>
 
-          <a id="back-link"
-             href="{% url 'reviews:cafe_list' %}"
-             data-fallback="{% url 'reviews:cafe_list' %}"
-             class="btn btn-ghost rounded-xl text-sm hidden md:inline-flex">
-            ← Volver
+          <a
+            id="back-link"
+            href="{% url 'reviews:cafe_list' %}"
+            data-fallback="{% url 'reviews:cafe_list' %}"
+            class="gota-nav-back hidden md:inline-flex"
+          >
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+            <span>Volver</span>
           </a>
         </div>
 
         <!-- Botón menú (mobile) -->
-        <button id="menu-toggle"
-                class="lg:hidden p-2 rounded-xl text-slate-700"
-                aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-panel">
-          <i class="fas fa-bars text-xl" aria-hidden="true"></i>
+        <button
+          id="menu-toggle"
+          class="gota-site-header__menu lg:hidden"
+          aria-label="Abrir menú"
+          aria-expanded="false"
+          aria-controls="mobile-panel"
+        >
+          <i class="fas fa-bars" aria-hidden="true"></i>
         </button>
 
         <!-- Navegación desktop -->
-        <nav class="hidden lg:flex items-center gap-2">
-          <a href="{% url 'home' %}" class="nav-link">Inicio</a>
-          <a href="{% url 'reviews:cafe_list' %}" class="nav-link">Cafés</a>
-          <a href="{% url 'reviews:mapa_cafes' %}" class="nav-link">📍 Mapa</a>
-          <a href="{% url 'about' %}" class="nav-link">Acerca de</a>
-          <a href="{% url 'contact' %}" class="nav-link">Contacto</a>
-          {% if user.is_authenticated %}
-            <a href="{% url 'reviews:favorite_cafes' %}" class="nav-link">❤️ Mi mapa</a>
+        <nav class="gota-nav-desktop hidden lg:flex">
 
-            <!-- ⚙️ Cuenta -->
-            <a href="{% url 'my_account' %}" class="nav-link">⚙️ Cuenta</a>
+          <div class="gota-nav-desktop__main">
+            <a href="{% url 'home' %}" class="gota-nav-link">
+              Inicio
+            </a>
 
-            {% if user.is_owner %}
-              <a href="{% url 'reviews:create_cafe' %}" class="btn btn-ghost">➕ Agregar Café</a>
-              <a href="{% url 'reviews:owner_dashboard' %}" class="btn btn-ghost">Mis Cafés</a>
-            {% else %}
-              <a href="{% url 'register_owner' %}" class="btn btn-success">
-                <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
+            <a href="{% url 'reviews:cafe_list' %}" class="gota-nav-link">
+              Cafés
+            </a>
+
+            <a href="{% url 'reviews:mapa_cafes' %}" class="gota-nav-link">
+              <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+              <span>Mapa</span>
+            </a>
+
+            <a href="{% url 'about' %}" class="gota-nav-link">
+              Acerca de
+            </a>
+
+            <a href="{% url 'contact' %}" class="gota-nav-link">
+              Contacto
+            </a>
+          </div>
+
+          <div class="gota-nav-desktop__account">
+
+            {% if user.is_authenticated %}
+
+              <a
+                href="{% url 'reviews:favorite_cafes' %}"
+                class="gota-nav-link gota-nav-link--map"
+              >
+                <i class="far fa-heart" aria-hidden="true"></i>
+                <span>Mi mapa</span>
               </a>
+
+              <a
+                href="{% url 'my_account' %}"
+                class="gota-nav-link"
+              >
+                <i class="far fa-user" aria-hidden="true"></i>
+                <span>Cuenta</span>
+              </a>
+
+              {% if user.is_owner %}
+
+                <a
+                  href="{% url 'reviews:owner_dashboard' %}"
+                  class="gota-nav-link"
+                >
+                  Mis cafés
+                </a>
+
+                <a
+                  href="{% url 'reviews:create_cafe' %}"
+                  class="gota-nav-action gota-nav-action--secondary"
+                >
+                  <i class="fas fa-plus" aria-hidden="true"></i>
+                  <span>Agregar café</span>
+                </a>
+
+              {% else %}
+
+                <a
+                  href="{% url 'register_owner' %}"
+                  class="gota-nav-action gota-nav-action--secondary"
+                >
+                  Registrar tu café
+                </a>
+
+              {% endif %}
+
+              <a
+                href="{% url 'account_logout' %}"
+                class="gota-nav-link gota-nav-link--muted"
+              >
+                Cerrar sesión
+              </a>
+
+            {% else %}
+
+              <a
+                href="{% url 'account_login' %}"
+                class="gota-nav-link"
+              >
+                Iniciar sesión
+              </a>
+
+              <a
+                href="{% url 'account_signup' %}"
+                class="gota-nav-action gota-nav-action--primary"
+              >
+                Registrarse
+              </a>
+
+              <a
+                href="{% url 'register_owner' %}"
+                class="gota-nav-action gota-nav-action--secondary"
+              >
+                Registrar tu café
+              </a>
+
             {% endif %}
 
-            <a href="{% url 'account_logout' %}" class="btn btn-danger btn-sm">
-              Cerrar sesión
-            </a>
+          </div>
 
-          {% else %}
-
-            <a href="{% url 'account_login' %}" class="btn btn-ghost">Iniciar sesión</a>
-            <a href="{% url 'account_signup' %}" class="btn btn-primary">Registrarse</a>
-            <a href="{% url 'register_owner' %}" class="btn btn-success">
-              <i class="fas fa-coffee text-sm" aria-hidden="true"></i> Registrar tu café
-            </a>
-          {% endif %}
         </nav>
       </div>
     </header>
@@ -166,43 +247,165 @@
     <!-- OVERLAY + PANEL MÓVIL (fuera del header) -->
     <div id="mobile-overlay" class="hidden fixed inset-0 bg-[rgba(0,0,0,0.55)] backdrop-blur-sm z-40"></div>
 
-    <nav id="mobile-panel"
-         class="hidden fixed inset-0 z-50 bg-white overflow-y-auto lg:hidden"
-         aria-hidden="true">
-      <div class="px-5 py-4 flex items-center justify-between border-b">
-        <span class="font-semibold">Menú</span>
-        <button id="menu-close" class="p-2 rounded-xl" aria-label="Cerrar menú">
-          <i class="fas fa-times text-lg"></i>
+    <nav
+      id="mobile-panel"
+      class="gota-mobile-menu hidden fixed inset-0 z-50 lg:hidden"
+      aria-hidden="true"
+    >
+
+      <div class="gota-mobile-menu__header">
+
+        <a href="{% url 'home' %}" class="gota-mobile-menu__brand">
+          <img
+            src="{% static 'images/gota-icon.png' %}"
+            alt=""
+            aria-hidden="true"
+          >
+          <span>Gota</span>
+        </a>
+
+        <button
+          id="menu-close"
+          class="gota-mobile-menu__close"
+          aria-label="Cerrar menú"
+        >
+          <i class="fas fa-times" aria-hidden="true"></i>
         </button>
+
       </div>
-      <div class="p-5 grid gap-3 text-lg">
-        <a href="{% url 'home' %}" class="block py-2">Inicio</a>
-        <a href="{% url 'reviews:cafe_list' %}" class="block py-2">Cafés</a>
-        <a href="{% url 'reviews:mapa_cafes' %}" class="block py-2">📍 Mapa</a>
-        <a href="{% url 'about' %}" class="block py-2">Acerca de</a>
-        <a href="{% url 'contact' %}" class="block py-2">Contacto</a>
-        <hr class="my-2">
+
+
+      <div class="gota-mobile-menu__body">
+
+        <div class="gota-mobile-menu__section">
+
+          <a href="{% url 'home' %}" class="gota-mobile-menu__link">
+            <i class="fas fa-home" aria-hidden="true"></i>
+            <span>Inicio</span>
+          </a>
+
+          <a href="{% url 'reviews:cafe_list' %}" class="gota-mobile-menu__link">
+            <i class="fas fa-mug-hot" aria-hidden="true"></i>
+            <span>Cafés</span>
+          </a>
+
+          <a href="{% url 'reviews:mapa_cafes' %}" class="gota-mobile-menu__link">
+            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+            <span>Mapa</span>
+          </a>
+
+          <a href="{% url 'about' %}" class="gota-mobile-menu__link">
+            <i class="far fa-circle-question" aria-hidden="true"></i>
+            <span>Acerca de</span>
+          </a>
+
+          <a href="{% url 'contact' %}" class="gota-mobile-menu__link">
+            <i class="far fa-envelope" aria-hidden="true"></i>
+            <span>Contacto</span>
+          </a>
+
+        </div>
+
+
         {% if user.is_authenticated %}
-          <a href="{% url 'reviews:favorite_cafes' %}" class="block py-2">❤️ Mi mapa</a>
 
-          <!-- ⚙️ Cuenta -->
-          <a href="{% url 'my_account' %}" class="nav-link">⚙️ Cuenta</a>
+          <div class="gota-mobile-menu__divider"></div>
 
-          {% if user.is_owner %}
-            <a href="{% url 'reviews:create_cafe' %}" class="block py-2">➕ Agregar Café</a>
-            <a href="{% url 'reviews:owner_dashboard' %}" class="block py-2">Mis Cafés</a>
-          {% else %}
-            <a href="{% url 'register_owner' %}" class="block py-2">☕ Registrar tu café</a>
-          {% endif %}
+          <div class="gota-mobile-menu__section">
 
-          <a href="{% url 'account_logout' %}" class="block py-2">Cerrar sesión</a>
+            <a
+              href="{% url 'reviews:favorite_cafes' %}"
+              class="gota-mobile-menu__link"
+            >
+              <i class="far fa-heart" aria-hidden="true"></i>
+              <span>Mi mapa</span>
+            </a>
+
+            <a
+              href="{% url 'my_account' %}"
+              class="gota-mobile-menu__link"
+            >
+              <i class="far fa-user" aria-hidden="true"></i>
+              <span>Cuenta</span>
+            </a>
+
+            {% if user.is_owner %}
+
+              <a
+                href="{% url 'reviews:owner_dashboard' %}"
+                class="gota-mobile-menu__link"
+              >
+                <i class="fas fa-store" aria-hidden="true"></i>
+                <span>Mis cafés</span>
+              </a>
+
+              <a
+                href="{% url 'reviews:create_cafe' %}"
+                class="gota-mobile-menu__action"
+              >
+                <i class="fas fa-plus" aria-hidden="true"></i>
+                <span>Agregar café</span>
+              </a>
+
+            {% else %}
+
+              <a
+                href="{% url 'register_owner' %}"
+                class="gota-mobile-menu__action"
+              >
+                <span>Registrar tu café</span>
+              </a>
+
+            {% endif %}
+
+          </div>
+
+
+          <div class="gota-mobile-menu__footer">
+
+            <a
+              href="{% url 'account_logout' %}"
+              class="gota-mobile-menu__logout"
+            >
+              Cerrar sesión
+            </a>
+
+          </div>
+
         {% else %}
 
-          <a href="{% url 'account_login' %}" class="block py-2">Iniciar sesión</a>
-          <a href="{% url 'account_signup' %}" class="block py-2">Registrarse</a>
-          <a href="{% url 'register_owner' %}" class="block py-2">☕ Registrar tu café</a>
+          <div class="gota-mobile-menu__divider"></div>
+
+          <div class="gota-mobile-menu__section">
+
+            <a
+              href="{% url 'account_login' %}"
+              class="gota-mobile-menu__link"
+            >
+              <i class="far fa-user" aria-hidden="true"></i>
+              <span>Iniciar sesión</span>
+            </a>
+
+            <a
+              href="{% url 'account_signup' %}"
+              class="gota-mobile-menu__action gota-mobile-menu__action--primary"
+            >
+              Registrarse
+            </a>
+
+            <a
+              href="{% url 'register_owner' %}"
+              class="gota-mobile-menu__action"
+            >
+              Registrar tu café
+            </a>
+
+          </div>
+
         {% endif %}
+
       </div>
+
     </nav>
 
     <!-- JS: menú mobile + Volver -->
