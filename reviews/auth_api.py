@@ -79,6 +79,25 @@ def exchange_apple_authorization_code(authorization_code):
 
     return refresh_token
 
+def revoke_apple_refresh_token(refresh_token):
+    client_secret = generate_apple_client_secret()
+
+    response = requests.post(
+        "https://appleid.apple.com/auth/revoke",
+        data={
+            "client_id": settings.APPLE_MOBILE_CLIENT_ID,
+            "client_secret": client_secret,
+            "token": refresh_token,
+            "token_type_hint": "refresh_token",
+        },
+        timeout=15,
+    )
+
+    if response.status_code != 200:
+        raise ValueError(
+            "Apple no pudo revocar el refresh_token."
+        )
+
 class MobileLoginAPIView(APIView):
     authentication_classes = []
     permission_classes = []
@@ -96,19 +115,7 @@ class MobileLoginAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        try:
-            apple_refresh_token = exchange_apple_authorization_code(
-                authorization_code
-            )
-        except Exception:
-            return Response(
-                {
-                    "success": False,
-                    "message": "No pudimos completar el acceso con Apple.",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
+        
         user = authenticate(
             request,
             username=email,
@@ -307,6 +314,19 @@ class MobileAppleLoginAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        try:
+            apple_refresh_token = exchange_apple_authorization_code(
+                authorization_code
+            )
+        except Exception:
+            return Response(
+                {
+                    "success": False,
+                    "message": "No pudimos completar el acceso con Apple.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         apple_sub = (
             payload.get("sub", "")
             .strip()
@@ -318,7 +338,15 @@ class MobileAppleLoginAPIView(APIView):
             .lower()
         )
 
-        if not apple_sub or not email:
+        email_verified = payload.get(
+            "email_verified",
+            False,
+        )
+
+        if isinstance(email_verified, str):
+            email_verified = email_verified.lower() == "true"
+
+        if not apple_sub or not email or not email_verified:
             return Response(
                 {
                     "success": False,
@@ -335,6 +363,19 @@ class MobileAppleLoginAPIView(APIView):
             user = User.objects.filter(
                 email__iexact=email,
             ).first()
+
+            if (
+                user is not None
+                and user.apple_sub
+                and user.apple_sub != apple_sub
+            ):
+                return Response(
+                    {
+                        "success": False,
+                        "message": "Esta cuenta ya está vinculada a otra identidad de Apple.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         if user is None:
             user = User.objects.create_user(
@@ -607,6 +648,23 @@ class MobileDeleteAccountAPIView(APIView):
 
     def delete(self, request):
         user = request.user
+
+        if user.apple_refresh_token:
+            try:
+                revoke_apple_refresh_token(
+                    user.apple_refresh_token
+                )
+            except Exception:
+                return Response(
+                    {
+                        "success": False,
+                        "message": (
+                            "No pudimos desvincular tu cuenta de Apple. "
+                            "Intentá nuevamente en unos minutos."
+                        ),
+                    },
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
 
         # Liberar las cafeterías asociadas a esta cuenta
         user.cafes.update(
