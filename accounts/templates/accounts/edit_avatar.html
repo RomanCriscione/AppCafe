@@ -2,23 +2,73 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-md mx-auto mt-10 bg-white shadow-md rounded-lg p-6">
-<h2 class="text-xl font-semibold mb-6 text-center">👤 Cambiar avatar</h2>
-<form class="space-y-4" enctype="multipart/form-data" method="post">
-    {% csrf_token %}
-    <div class="space-y-2">
-      {{ form.as_p }}
+
+<div class="gota-avatar-page">
+
+  <header class="gota-avatar-header">
+
+    <div class="gota-avatar-header__icon">
+      <i class="fas fa-user-circle" aria-hidden="true"></i>
     </div>
-<button class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition" type="submit">
-      Guardar cambios
-    </button>
-</form>
+
+    <div>
+      <span class="gota-avatar-header__kicker">
+        Tu perfil en Gota
+      </span>
+
+      <h1 class="gota-avatar-header__title">
+        Cambiar avatar
+      </h1>
+
+      <p class="gota-avatar-header__description">
+        Elegí la imagen que querés mostrar en tu perfil.
+      </p>
+    </div>
+
+  </header>
 
   {% if user.avatar %}
-    <div class="mt-6 text-center">
-<h3 class="text-lg font-medium mb-2">Avatar actual:</h3>
-<img alt="Avatar" class="w-32 h-32 rounded-full object-cover mx-auto shadow" loading="lazy" src="{{ user.avatar.url }}"/>
-</div>
+    <section class="gota-avatar-current">
+
+      <span class="gota-avatar-current__label">
+        Avatar actual
+      </span>
+
+      <img
+        src="{{ user.avatar.url }}"
+        alt="Avatar actual de {{ user.username }}"
+        class="gota-avatar-current__image"
+        loading="lazy"
+      >
+
+    </section>
   {% endif %}
+
+  <section class="gota-avatar-card">
+
+    <form
+      method="post"
+      enctype="multipart/form-data"
+      class="gota-avatar-form"
+    >
+      {% csrf_token %}
+
+      <div class="gota-avatar-form__fields">
+        {{ form.as_p }}
+      </div>
+
+      <button
+        type="submit"
+        class="gota-avatar-form__submit"
+      >
+        <i class="fas fa-check" aria-hidden="true"></i>
+        <span>Guardar cambios</span>
+      </button>
+
+    </form>
+
+  </section>
+
 </div>
+
 {% endblock %}

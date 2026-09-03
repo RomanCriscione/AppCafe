@@ -6976,3 +6976,1473 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
 .gota-map-popup__cta i {
   font-size: 9px;
 }
+
+/* =========================================================
+   MI CUENTA
+   ========================================================= */
+
+.gota-account {
+  width: min(100% - 32px, 620px);
+  margin: 54px auto 70px;
+}
+
+.gota-account__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 28px;
+}
+
+.gota-account__header-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 14px;
+  color: #172C6D;
+}
+
+.gota-account__kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: #64748B;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.gota-account__title {
+  margin: 0;
+  color: #172C6D;
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.gota-account__description {
+  margin: 7px 0 0;
+  color: #64748B;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.gota-account-card {
+  padding: 18px;
+  margin-bottom: 14px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, .04);
+}
+
+.gota-account-card__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gota-account-card__label {
+  color: #64748B;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.gota-account-card__value {
+  margin: 9px 0 0;
+  color: #172C6D;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.gota-account-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.gota-account-status--verified {
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  color: #15803D;
+}
+
+.gota-account-status--pending {
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  color: #A16207;
+}
+
+.gota-account-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 11px;
+  color: #172C6D !important;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .gota-account {
+    width: min(100% - 28px, 620px);
+    margin-top: 36px;
+  }
+
+  .gota-account__title {
+    font-size: 27px;
+  }
+}
+
+/* =========================================================
+   MI CUENTA · FORM
+   ========================================================= */
+
+.gota-account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.gota-account-form__input {
+  width: 100%;
+  min-height: 44px;
+
+  padding: 10px 12px;
+
+  background: #FFFFFF !important;
+  border: 1px solid #DBEAFE !important;
+  border-radius: 12px !important;
+
+  color: #334155 !important;
+  font-size: 13px;
+
+  box-shadow: none !important;
+}
+
+.gota-account-form__input:focus {
+  outline: none !important;
+
+  border-color: #93C5FD !important;
+
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, .10) !important;
+}
+
+.gota-account-form__submit {
+  min-height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 9px 12px;
+
+  background: #172C6D !important;
+  border: 1px solid #172C6D !important;
+  border-radius: 11px !important;
+
+  color: #FFFFFF !important;
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-account-form__submit:hover {
+  background: #203983 !important;
+  border-color: #203983 !important;
+}
+
+/* =========================================================
+   MI CUENTA · ACCIONES
+   ========================================================= */
+
+.gota-account-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+
+  margin-top: 20px;
+}
+
+.gota-account-action {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  padding: 13px 14px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+
+  color: #172C6D !important;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease;
+}
+
+.gota-account-action:hover {
+  background: #F8FAFC;
+  border-color: #BFDBFE;
+}
+
+.gota-account-action__icon {
+  width: 34px;
+  height: 34px;
+
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #EFF6FF;
+  border-radius: 10px;
+
+  color: #172C6D;
+  font-size: 11px;
+}
+
+.gota-account-action__content {
+  min-width: 0;
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gota-account-action__content strong {
+  color: #172C6D;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.gota-account-action__content span {
+  color: #94A3B8;
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+.gota-account-action__arrow {
+  flex: 0 0 auto;
+
+  color: #94A3B8;
+  font-size: 9px;
+}
+
+.gota-account-action--logout .gota-account-action__icon {
+  background: #FEF2F2;
+  color: #B91C1C;
+}
+
+.gota-account-action--logout:hover {
+  background: #FFF7F7;
+  border-color: #FECACA;
+}
+
+/* =========================================================
+   CAMBIAR AVATAR
+   ========================================================= */
+
+.gota-avatar-page {
+  width: min(100% - 32px, 560px);
+  margin: 54px auto 70px;
+}
+
+.gota-avatar-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 26px;
+}
+
+.gota-avatar-header__icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 14px;
+
+  color: #172C6D;
+}
+
+.gota-avatar-header__icon i {
+  font-size: 17px;
+}
+
+.gota-avatar-header__kicker {
+  display: block;
+  margin-bottom: 4px;
+
+  color: #64748B;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.gota-avatar-header__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.gota-avatar-header__description {
+  margin: 7px 0 0;
+
+  color: #64748B;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* AVATAR ACTUAL */
+
+.gota-avatar-current {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  padding: 20px;
+  margin-bottom: 14px;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 16px;
+}
+
+.gota-avatar-current__label {
+  color: #64748B;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.gota-avatar-current__image {
+  width: 112px;
+  height: 112px;
+
+  display: block;
+  object-fit: cover;
+
+  background: #FFFFFF;
+  border: 4px solid #FFFFFF;
+  border-radius: 50%;
+
+  box-shadow: 0 4px 14px rgba(15, 23, 42, .10);
+}
+
+/* FORMULARIO */
+
+.gota-avatar-card {
+  padding: 18px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+
+  box-shadow: 0 2px 10px rgba(15, 23, 42, .04);
+}
+
+.gota-avatar-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gota-avatar-form__fields p {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  margin: 0 0 12px;
+}
+
+.gota-avatar-form__fields p:last-child {
+  margin-bottom: 0;
+}
+
+.gota-avatar-form__fields label {
+  color: #64748B;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.gota-avatar-form__fields input[type="file"] {
+  width: 100%;
+
+  padding: 9px;
+
+  background: #F8FAFC;
+  border: 1px solid #DBEAFE;
+  border-radius: 11px;
+
+  color: #64748B;
+  font-size: 11px;
+}
+
+.gota-avatar-form__fields input[type="file"]::file-selector-button {
+  margin-right: 10px;
+  padding: 7px 10px;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 8px;
+
+  color: #172C6D;
+  font-size: 10.5px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-avatar-form__fields a {
+  color: #172C6D !important;
+  font-size: 11px;
+}
+
+.gota-avatar-form__submit {
+  width: 100%;
+  min-height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 9px 12px;
+
+  background: #172C6D !important;
+  border: 1px solid #172C6D !important;
+  border-radius: 11px !important;
+
+  color: #FFFFFF !important;
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-avatar-form__submit:hover {
+  background: #203983 !important;
+  border-color: #203983 !important;
+}
+
+@media (max-width: 640px) {
+  .gota-avatar-page {
+    width: min(100% - 28px, 560px);
+    margin-top: 36px;
+  }
+
+  .gota-avatar-header {
+    gap: 12px;
+  }
+
+  .gota-avatar-header__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .gota-avatar-header__title {
+    font-size: 27px;
+  }
+
+  .gota-avatar-current__image {
+    width: 96px;
+    height: 96px;
+  }
+}
+
+/* =========================================================
+   PERFIL
+   ========================================================= */
+
+.gota-profile-page {
+  width: min(100% - 32px, 620px);
+  margin: 54px auto 70px;
+}
+
+/* HEADER */
+
+.gota-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+
+  margin-bottom: 24px;
+}
+
+.gota-profile-header__avatar,
+.gota-profile-header__avatar-placeholder {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 auto;
+
+  border-radius: 50%;
+}
+
+.gota-profile-header__avatar {
+  display: block;
+  object-fit: cover;
+
+  background: #FFFFFF;
+  border: 3px solid #FFFFFF;
+
+  box-shadow:
+    0 0 0 1px #BFDBFE,
+    0 4px 14px rgba(15, 23, 42, .08);
+}
+
+.gota-profile-header__avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+
+  color: #172C6D;
+  font-size: 22px;
+}
+
+.gota-profile-header__content {
+  min-width: 0;
+}
+
+.gota-profile-header__kicker {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #64748B;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.gota-profile-header__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 800;
+
+  overflow-wrap: anywhere;
+}
+
+.gota-profile-header__description {
+  margin: 6px 0 0;
+
+  color: #64748B;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* DATOS */
+
+.gota-profile-card {
+  overflow: hidden;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+
+  box-shadow: 0 2px 10px rgba(15, 23, 42, .04);
+}
+
+.gota-profile-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 15px 17px;
+
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.gota-profile-field:last-child {
+  border-bottom: 0;
+}
+
+.gota-profile-field__icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #EFF6FF;
+  border-radius: 10px;
+
+  color: #172C6D;
+  font-size: 11px;
+}
+
+.gota-profile-field > div:last-child {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gota-profile-field__label {
+  color: #94A3B8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.gota-profile-field__value {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 640px) {
+
+  .gota-profile-page {
+    width: min(100% - 28px, 620px);
+    margin-top: 36px;
+  }
+
+  .gota-profile-header {
+    gap: 14px;
+  }
+
+  .gota-profile-header__avatar,
+  .gota-profile-header__avatar-placeholder {
+    width: 62px;
+    height: 62px;
+  }
+
+  .gota-profile-header__title {
+    font-size: 25px;
+  }
+
+}
+
+/* =========================================================
+   AGREGAR CAFETERÍA
+   ========================================================= */
+
+.gota-create-cafe {
+  width: min(100% - 32px, 1080px);
+  margin: 54px auto 72px;
+}
+
+.gota-create-cafe__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+
+  max-width: 720px;
+  margin-bottom: 30px;
+}
+
+.gota-create-cafe__header-icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 14px;
+}
+
+.gota-create-cafe__header-icon img {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+}
+
+.gota-create-cafe__header-content {
+  min-width: 0;
+}
+
+.gota-create-cafe__kicker {
+  display: block;
+  margin-bottom: 4px;
+
+  color: #64748B;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.gota-create-cafe__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 32px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.gota-create-cafe__description {
+  max-width: 580px;
+  margin: 7px 0 0;
+
+  color: #64748B;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+
+  .gota-create-cafe {
+    width: min(100% - 28px, 1080px);
+    margin-top: 36px;
+  }
+
+  .gota-create-cafe__header {
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .gota-create-cafe__header-icon {
+    width: 41px;
+    height: 41px;
+    border-radius: 12px;
+  }
+
+  .gota-create-cafe__header-icon img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .gota-create-cafe__title {
+    font-size: 27px;
+  }
+
+}
+
+/* =========================================================
+   AGREGAR CAFETERÍA · SECCIONES Y CAMPOS
+   ========================================================= */
+
+.gota-create-section {
+  padding: 22px;
+  margin-bottom: 18px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 18px;
+
+  box-shadow: 0 2px 10px rgba(15, 23, 42, .035);
+}
+
+.gota-create-section__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+
+  padding-bottom: 17px;
+  margin-bottom: 19px;
+
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.gota-create-section__icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #EFF6FF;
+  border-radius: 10px;
+
+  color: #172C6D;
+  font-size: 11px;
+}
+
+.gota-create-section__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 800;
+}
+
+.gota-create-section__description {
+  margin: 3px 0 0;
+
+  color: #94A3B8;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+
+/* GRID */
+
+.gota-create-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+}
+
+.gota-create-field {
+  min-width: 0;
+}
+
+.gota-create-field--full {
+  grid-column: 1 / -1;
+}
+
+
+/* LABELS */
+
+.gota-create-field__label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+/* INPUTS */
+
+.gota-create-field__input {
+  width: 100% !important;
+  min-height: 44px;
+
+  padding: 10px 12px !important;
+
+  background: #FFFFFF !important;
+  border: 1px solid #DBEAFE !important;
+  border-radius: 11px !important;
+
+  color: #334155 !important;
+  font-size: 12px !important;
+
+  box-shadow: none !important;
+}
+
+.gota-create-field__input:focus {
+  outline: none !important;
+
+  border-color: #93C5FD !important;
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, .10) !important;
+}
+
+.gota-create-field__input::placeholder {
+  color: #CBD5E1;
+}
+
+
+/* TEXTAREA */
+
+textarea.gota-create-field__textarea {
+  min-height: 105px;
+
+  resize: vertical;
+}
+
+
+/* SELECT */
+
+select.gota-create-field__input {
+  cursor: pointer;
+}
+
+
+/* AYUDAS */
+
+.gota-create-field__help {
+  margin: 5px 0 0;
+
+  color: #94A3B8;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+
+/* ERRORES */
+
+.gota-create-field__error {
+  margin: 5px 0 0;
+
+  color: #B91C1C;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+  .gota-create-section {
+    padding: 17px;
+    border-radius: 16px;
+  }
+
+  .gota-create-fields {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .gota-create-field--full {
+    grid-column: auto;
+  }
+
+}
+
+/* =========================================================
+   AGREGAR CAFETERÍA · FOTOS
+   ========================================================= */
+
+.gota-create-photo-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 12px;
+  margin-bottom: 16px;
+
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 10px;
+
+  color: #B91C1C;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.gota-create-photos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.gota-create-photo {
+  min-width: 0;
+}
+
+.gota-create-photo__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  margin-bottom: 7px;
+
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.gota-create-photo__required,
+.gota-create-photo__optional {
+  padding: 4px 7px;
+
+  border-radius: 999px;
+
+  font-size: 8.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.gota-create-photo__required {
+  background: #EFF6FF;
+  color: #172C6D;
+}
+
+.gota-create-photo__optional {
+  background: #F8FAFC;
+  color: #94A3B8;
+}
+
+
+/* ÁREA DE CARGA */
+
+.gota-create-photo__upload {
+  position: relative;
+
+  width: 100%;
+  aspect-ratio: 4 / 3;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background: #F8FAFC;
+  border: 1.5px dashed #BFDBFE;
+  border-radius: 13px;
+
+  cursor: pointer;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease;
+}
+
+.gota-create-photo__upload:hover {
+  background: #EFF6FF;
+  border-color: #93C5FD;
+}
+
+.gota-create-photo__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 16px;
+
+  text-align: center;
+}
+
+.gota-create-photo__upload-icon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 8px;
+
+  background: #EFF6FF;
+  border-radius: 10px;
+
+  color: #172C6D;
+  font-size: 13px;
+}
+
+.gota-create-photo__placeholder strong {
+  color: #172C6D;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.gota-create-photo__placeholder > span {
+  max-width: 180px;
+  margin-top: 4px;
+
+  color: #94A3B8;
+  font-size: 9.5px;
+  line-height: 1.4;
+}
+
+
+/* PREVIEW */
+
+.gota-create-photo__preview {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+/* TÍTULO DE FOTO */
+
+.gota-create-photo__title {
+  margin-top: 9px;
+}
+
+.gota-create-photo__title label {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #64748B;
+  font-size: 9.5px;
+  font-weight: 700;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 800px) {
+
+  .gota-create-photos {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .gota-create-photo__upload {
+    aspect-ratio: 16 / 9;
+  }
+
+}
+
+/* =========================================================
+   AGREGAR CAFETERÍA · CARACTERÍSTICAS
+   ========================================================= */
+
+.gota-create-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gota-create-feature {
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  min-height: 36px;
+  padding: 7px 11px;
+
+  background: #FFFFFF;
+  border: 1px solid #DBEAFE;
+  border-radius: 999px;
+
+  color: #475569;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    color .15s ease;
+}
+
+.gota-create-feature:hover {
+  background: #F8FAFC;
+  border-color: #BFDBFE;
+}
+
+.gota-create-feature input[type="checkbox"] {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gota-create-feature__check {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  border-radius: 50%;
+
+  color: transparent;
+  font-size: 7px;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    color .15s ease;
+}
+
+.gota-create-feature__label {
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+
+/* SELECCIONADO */
+
+.gota-create-feature:has(input:checked) {
+  background: #EFF6FF;
+  border-color: #93C5FD;
+
+  color: #172C6D;
+}
+
+.gota-create-feature:has(input:checked)
+.gota-create-feature__check {
+  background: #172C6D;
+  border-color: #172C6D;
+
+  color: #FFFFFF;
+}
+
+
+/* ACCESIBILIDAD */
+
+.gota-create-feature:has(input:focus-visible) {
+  outline: 3px solid rgba(59, 130, 246, .12);
+  outline-offset: 2px;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 640px) {
+
+  .gota-create-features {
+    gap: 7px;
+  }
+
+  .gota-create-feature {
+    min-height: 34px;
+    padding: 6px 10px;
+  }
+
+}
+
+/* =========================================================
+   AGREGAR CAFETERÍA · UBICACIÓN Y GUARDAR
+   ========================================================= */
+
+.gota-create-location-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  padding: 10px 12px;
+  margin-bottom: 17px;
+
+  background: #EFF6FF;
+  border: 1px solid #DBEAFE;
+  border-radius: 10px;
+
+  color: #64748B;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.gota-create-location-note i {
+  margin-top: 2px;
+  color: #172C6D;
+}
+
+
+/* MAPA */
+
+.gota-create-map-section {
+  overflow: hidden;
+
+  margin-bottom: 18px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 18px;
+
+  box-shadow: 0 2px 10px rgba(15, 23, 42, .035);
+}
+
+.gota-create-map-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 17px 20px;
+
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.gota-create-map-section__kicker {
+  display: block;
+  margin-bottom: 3px;
+
+  color: #94A3B8;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.gota-create-map-section__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+
+/* BOTÓN MOSTRAR MAPA */
+
+.gota-create-map-toggle {
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 36px;
+  padding: 7px 11px;
+
+  background: #EFF6FF !important;
+  border: 1px solid #BFDBFE !important;
+  border-radius: 10px !important;
+
+  color: #172C6D !important;
+  font-size: 10.5px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+
+/* CTA FINAL */
+
+.gota-create-submit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  padding: 18px 20px;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 16px;
+}
+
+.gota-create-submit__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gota-create-submit__text strong {
+  color: #172C6D;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.gota-create-submit__text span {
+  color: #64748B;
+  font-size: 10.5px;
+}
+
+
+/* BOTÓN GUARDAR */
+
+.gota-create-submit__button {
+  min-height: 43px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 9px 15px;
+
+  background: #172C6D !important;
+  border: 1px solid #172C6D !important;
+  border-radius: 11px !important;
+
+  color: #FFFFFF !important;
+  font-size: 11.5px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-create-submit__button:hover {
+  background: #203983 !important;
+  border-color: #203983 !important;
+}
+
+.gota-create-submit__button img {
+  width: 20px;
+  height: 20px;
+
+  object-fit: contain;
+
+  /* El asset es oscuro y el botón también: lo llevamos a blanco */
+  filter: brightness(0) invert(1);
+}
+
+.gota-create-submit__button > i {
+  font-size: 9px;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 767px) {
+
+  .gota-create-map-section {
+    border-radius: 16px;
+  }
+
+  .gota-create-map-section__header {
+    align-items: flex-start;
+    padding: 15px 16px;
+  }
+
+  .gota-create-map-toggle {
+    display: inline-flex;
+    flex: 0 0 auto;
+  }
+
+  .gota-create-submit {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 13px;
+
+    padding: 16px;
+  }
+
+  .gota-create-submit__button {
+    width: 100%;
+  }
+
+}
+

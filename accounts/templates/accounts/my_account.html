@@ -1,81 +1,141 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-lg mx-auto mt-12 bg-white rounded-2xl shadow-lg p-6 space-y-6">
+<div class="gota-account">
 
-  <h1 class="text-2xl font-bold text-center flex items-center justify-center gap-2">
-    ⚙️ Mi cuenta
-  </h1>
+  <header class="gota-account__header">
 
-  <!-- Email -->
-  <div class="border rounded-xl p-4 space-y-1">
-    <p class="text-sm text-gray-500">Email</p>
-    <p class="font-medium">{{ request.user.email }}</p>
+    <div class="gota-account__header-icon">
+      <i class="fas fa-user" aria-hidden="true"></i>
+    </div>
 
-    {% if request.user.emailaddress_set.first and request.user.emailaddress_set.first.verified %}
-      <p class="text-sm text-green-600 flex items-center gap-1">
-        ✅ Email verificado
+    <div>
+      <span class="gota-account__kicker">
+        Tu perfil en Gota
+      </span>
+
+      <h1 class="gota-account__title">
+        Mi cuenta
+      </h1>
+
+      <p class="gota-account__description">
+        Administrá tus datos y las opciones de acceso a tu cuenta.
       </p>
-    {% else %}
-      <p class="text-sm text-amber-600 flex items-center gap-1">
-        ⚠️ Email sin verificar
-      </p>
+    </div>
 
+  </header>
+
+  <!-- EMAIL -->
+  <section class="gota-account-card">
+
+    <div class="gota-account-card__heading">
+      <span class="gota-account-card__label">
+        Email
+      </span>
+
+      {% if request.user.emailaddress_set.first and request.user.emailaddress_set.first.verified %}
+        <span class="gota-account-status gota-account-status--verified">
+          <i class="fas fa-check" aria-hidden="true"></i>
+          Verificado
+        </span>
+      {% else %}
+        <span class="gota-account-status gota-account-status--pending">
+          <i class="fas fa-exclamation" aria-hidden="true"></i>
+          Sin verificar
+        </span>
+      {% endif %}
+    </div>
+
+    <p class="gota-account-card__value">
+      {{ request.user.email }}
+    </p>
+
+    {% if not request.user.emailaddress_set.first or not request.user.emailaddress_set.first.verified %}
       <a
         href="{% url 'account_email' %}"
-        class="inline-block mt-2 text-sm text-brand-700 underline hover:text-brand-900"
+        class="gota-account-card__link"
       >
         Reenviar verificación
+        <i class="fas fa-arrow-right" aria-hidden="true"></i>
       </a>
     {% endif %}
-  </div>
 
-  <div class="border rounded-xl p-4 space-y-3">
+  </section>
 
-  <p class="text-sm text-gray-500">
-    Nombre visible
-  </p>
+  <section class="gota-account-card">
 
-  <form method="post" class="space-y-3">
-    {% csrf_token %}
+    <div class="gota-account-card__heading">
+      <span class="gota-account-card__label">
+        Nombre visible
+      </span>
+    </div>
 
-    <input
-      type="text"
-      name="username"
-      value="{{ request.user.username }}"
-      class="w-full rounded-lg border border-[var(--border)] px-4 py-2
-             focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
+    <form
+      method="post"
+      class="gota-account-form"
     >
+      {% csrf_token %}
 
-    <button
-      type="submit"
-      class="w-full bg-[var(--brand)] text-white py-2 rounded-lg font-semibold hover:opacity-90 transition"
-    >
-      Guardar cambios
-    </button>
+      <input
+        type="text"
+        name="username"
+        value="{{ request.user.username }}"
+        class="gota-account-form__input"
+      >
 
-  </form>
+      <button
+        type="submit"
+        class="gota-account-form__submit"
+      >
+        Guardar cambios
+      </button>
 
-</div>
+    </form>
 
-  <!-- Acciones -->
-  <div class="space-y-3">
+  </section>
+
+  <!-- ACCIONES -->
+  <section class="gota-account-actions">
+
     <a
       href="{% url 'account_change_password' %}"
-      class="block w-full text-center bg-[var(--surface)] border border-[var(--border)]
-            text-[var(--text-1)] py-2 rounded-lg font-semibold
-            hover:bg-[var(--surface-2)] transition"
+      class="gota-account-action"
     >
-      🔒 Cambiar contraseña
+      <div class="gota-account-action__icon">
+        <i class="fas fa-lock" aria-hidden="true"></i>
+      </div>
+
+      <div class="gota-account-action__content">
+        <strong>Cambiar contraseña</strong>
+        <span>Actualizá tu contraseña de acceso.</span>
+      </div>
+
+      <i
+        class="fas fa-chevron-right gota-account-action__arrow"
+        aria-hidden="true"
+      ></i>
     </a>
 
     <a
       href="{% url 'account_logout' %}"
-      class="block w-full text-center text-red-600 border border-red-200 py-2 rounded-lg hover:bg-red-50 transition"
+      class="gota-account-action gota-account-action--logout"
     >
-      🚪 Cerrar sesión
+      <div class="gota-account-action__icon">
+        <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+      </div>
+
+      <div class="gota-account-action__content">
+        <strong>Cerrar sesión</strong>
+        <span>Salir de tu cuenta en este dispositivo.</span>
+      </div>
+
+      <i
+        class="fas fa-chevron-right gota-account-action__arrow"
+        aria-hidden="true"
+      ></i>
     </a>
-  </div>
+
+  </section>
 
 </div>
 {% endblock %}

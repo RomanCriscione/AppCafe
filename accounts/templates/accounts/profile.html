@@ -1,14 +1,98 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="max-w-md mx-auto mt-12 bg-white p-6 rounded-lg shadow-lg">
-    <h2 class="text-2xl font-bold mb-4 text-center">👤 Perfil de Usuario</h2>
-    <p class="text-lg text-gray-800"><strong>Usuario:</strong> {{ user.username }}</p>
-    <p class="text-lg text-gray-800"><strong>Email:</strong> {{ user.email }}</p>
-    <p class="text-lg text-gray-800"><strong>Edad:</strong> {{ user.age }}</p>
+
+<div class="gota-profile-page">
+
+  <header class="gota-profile-header">
+
     {% if user.avatar %}
-        <div class="mt-4">
-            <img src="{{ user.avatar.url }}" alt="Avatar" class="w-32 h-32 rounded-full mx-auto border">
-        </div>
+      <img
+        src="{{ user.avatar.url }}"
+        alt="Avatar de {{ user.username }}"
+        class="gota-profile-header__avatar"
+      >
+    {% else %}
+      <div class="gota-profile-header__avatar-placeholder">
+        <i class="fas fa-user" aria-hidden="true"></i>
+      </div>
     {% endif %}
+
+    <div class="gota-profile-header__content">
+
+      <span class="gota-profile-header__kicker">
+        Perfil en Gota
+      </span>
+
+      <h1 class="gota-profile-header__title">
+        {{ user.username }}
+      </h1>
+
+      <p class="gota-profile-header__description">
+        Tu información personal en Gota.
+      </p>
+
+    </div>
+
+  </header>
+
+
+  <section class="gota-profile-card">
+
+    <div class="gota-profile-field">
+      <div class="gota-profile-field__icon">
+        <i class="fas fa-user" aria-hidden="true"></i>
+      </div>
+
+      <div>
+        <span class="gota-profile-field__label">
+          Nombre visible
+        </span>
+
+        <strong class="gota-profile-field__value">
+          {{ user.username }}
+        </strong>
+      </div>
+    </div>
+
+
+    <div class="gota-profile-field">
+      <div class="gota-profile-field__icon">
+        <i class="fas fa-envelope" aria-hidden="true"></i>
+      </div>
+
+      <div>
+        <span class="gota-profile-field__label">
+          Email
+        </span>
+
+        <strong class="gota-profile-field__value">
+          {{ user.email }}
+        </strong>
+      </div>
+    </div>
+
+
+    {% if user.age %}
+      <div class="gota-profile-field">
+        <div class="gota-profile-field__icon">
+          <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+        </div>
+
+        <div>
+          <span class="gota-profile-field__label">
+            Edad
+          </span>
+
+          <strong class="gota-profile-field__value">
+            {{ user.age }}
+          </strong>
+        </div>
+      </div>
+    {% endif %}
+
+  </section>
+
 </div>
+
 {% endblock %}

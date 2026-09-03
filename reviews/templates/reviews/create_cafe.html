@@ -3,10 +3,35 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto p-4">
-  <h1 class="text-3xl font-bold mb-6 text-blue-700 flex items-center gap-2">
-    <i class="fas fa-plus-circle"></i> Agregar nueva cafetería
-  </h1>
+<div class="gota-create-cafe">
+
+  <header class="gota-create-cafe__header">
+
+    <div class="gota-create-cafe__header-icon">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+    </div>
+
+    <div class="gota-create-cafe__header-content">
+
+      <span class="gota-create-cafe__kicker">
+        Sumá un lugar a Gota
+      </span>
+
+      <h1 class="gota-create-cafe__title">
+        Agregar cafetería
+      </h1>
+
+      <p class="gota-create-cafe__description">
+        Completá la información del lugar para que otras personas puedan descubrirlo.
+      </p>
+
+    </div>
+
+  </header>
 
   {% if messages %}
     <ul class="mb-4 space-y-2">
@@ -24,218 +49,502 @@
   <form class="space-y-10" enctype="multipart/form-data" method="post" onsubmit="return validarDireccionAntesDeEnviar();">
     {% csrf_token %}
 
-    <!-- Datos principales -->
-    <div class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-6">
-      <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
-        <i class="fas fa-info-circle"></i> Información principal
-      </h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">{{ form.name.label }}</label>
-          {{ form.name|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-          <p class="text-xs text-gray-500 mt-1">Usá un nombre corto y fácil de recordar.</p>
-        </div>
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">{{ form.address.label }}</label>
-          {{ form.address|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-          <p class="text-xs text-gray-500 mt-1">Usá la dirección exacta tal como aparece en Google Maps.</p>
-          {% if form.address.errors %}
-            <p class="text-red-600 text-sm mt-1">{{ form.address.errors.0 }}</p>
+        <!-- Datos principales -->
+        <section class="gota-create-section">
+
+          <div class="gota-create-section__header">
+
+            <div class="gota-create-section__icon">
+              <i class="fas fa-info" aria-hidden="true"></i>
+            </div>
+
+            <div>
+              <h2 class="gota-create-section__title">
+                Información principal
+              </h2>
+
+              <p class="gota-create-section__description">
+                Los datos básicos para identificar y encontrar la cafetería.
+              </p>
+            </div>
+
+          </div>
+
+          <div class="gota-create-fields">
+
+            <div class="gota-create-field">
+              <label class="gota-create-field__label">
+                {{ form.name.label }}
+              </label>
+
+              {{ form.name|add_class:"gota-create-field__input" }}
+
+              <p class="gota-create-field__help">
+                Usá el nombre con el que se conoce la cafetería.
+              </p>
+
+              {% if form.name.errors %}
+                <p class="gota-create-field__error">
+                  {{ form.name.errors.0 }}
+                </p>
+              {% endif %}
+            </div>
+
+
+            <div class="gota-create-field">
+              <label class="gota-create-field__label">
+                {{ form.address.label }}
+              </label>
+
+              {{ form.address|add_class:"gota-create-field__input" }}
+
+              <p class="gota-create-field__help">
+                Usá la dirección exacta tal como aparece en Google Maps.
+              </p>
+
+              {% if form.address.errors %}
+                <p class="gota-create-field__error">
+                  {{ form.address.errors.0 }}
+                </p>
+              {% endif %}
+            </div>
+
+
+            <div class="gota-create-field">
+              <label class="gota-create-field__label">
+                {{ form.location.label }}
+              </label>
+
+              {{ form.location|add_class:"gota-create-field__input" }}
+
+              {% if form.location.errors %}
+                <p class="gota-create-field__error">
+                  {{ form.location.errors.0 }}
+                </p>
+              {% endif %}
+            </div>
+
+
+            <div class="gota-create-field">
+              <label class="gota-create-field__label">
+                {{ form.province.label }}
+              </label>
+
+              {{ form.province|add_class:"gota-create-field__input" }}
+
+              {% if form.province.errors %}
+                <p class="gota-create-field__error">
+                  {{ form.province.errors.0 }}
+                </p>
+              {% endif %}
+            </div>
+
+
+            <div class="gota-create-field gota-create-field--full">
+              <label class="gota-create-field__label">
+                {{ form.description.label }}
+              </label>
+
+              {{ form.description|add_class:"gota-create-field__input gota-create-field__textarea" }}
+
+              <p class="gota-create-field__help">
+                Contá brevemente qué hace especial a esta cafetería.
+              </p>
+
+              {% if form.description.errors %}
+                <p class="gota-create-field__error">
+                  {{ form.description.errors.0 }}
+                </p>
+              {% endif %}
+            </div>
+
+
+            <div class="gota-create-field">
+              <label class="gota-create-field__label">
+                {{ form.phone.label }}
+              </label>
+
+              {{ form.phone|add_class:"gota-create-field__input" }}
+
+              <p class="gota-create-field__help">
+                Agregá el número con código de área.
+              </p>
+
+              {% if form.phone.errors %}
+                <p class="gota-create-field__error">
+                  {{ form.phone.errors.0 }}
+                </p>
+              {% endif %}
+            </div>
+
+
+            <div class="gota-create-field">
+              <label class="gota-create-field__label">
+                {{ form.google_maps_url.label }}
+              </label>
+
+              {{ form.google_maps_url|add_class:"gota-create-field__input" }}
+
+              <p class="gota-create-field__help">
+                Pegá el enlace de Google Maps de la cafetería.
+              </p>
+
+              {% if form.google_maps_url.errors %}
+                <p class="gota-create-field__error">
+                  {{ form.google_maps_url.errors.0 }}
+                </p>
+              {% endif %}
+            </div>
+
+
+            <div class="gota-create-field gota-create-field--full">
+              <label class="gota-create-field__label">
+                {{ form.instagram.label }}
+              </label>
+
+              {{ form.instagram|add_class:"gota-create-field__input" }}
+
+              <p class="gota-create-field__help">
+                Usuario de Instagram, sin @. Por ejemplo: app.gota
+              </p>
+
+              {% if form.instagram.errors %}
+                <p class="gota-create-field__error">
+                  {{ form.instagram.errors.0 }}
+                </p>
+              {% endif %}
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- Fotos -->
+        <section class="gota-create-section">
+
+          <div class="gota-create-section__header">
+
+            <div class="gota-create-section__icon">
+              <i class="fas fa-camera" aria-hidden="true"></i>
+            </div>
+
+            <div>
+              <h2 class="gota-create-section__title">
+                Fotos del café
+              </h2>
+
+              <p class="gota-create-section__description">
+                Subí hasta 3 fotos. La primera es obligatoria y será la imagen principal.
+              </p>
+            </div>
+
+          </div>
+
+          {% if form.photo1.errors %}
+            <div class="gota-create-photo-error">
+              <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+              <span>{{ form.photo1.errors.0 }}</span>
+            </div>
           {% endif %}
-        </div>
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">
-            {{ form.location.label }}
-          </label>
 
-          {{ form.location|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-        </div>
+          <div class="gota-create-photos">
 
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">
-            {{ form.province.label }}
-          </label>
+            <!-- FOTO 1 -->
+            <div class="gota-create-photo">
 
-          {{ form.province|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-        </div>
-        <div class="md:col-span-2">
-          <label class="block font-semibold text-gray-700 mb-1">{{ form.description.label }}</label>
-          {{ form.description|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-          <p class="text-xs text-gray-500 mt-1">Contá brevemente qué hace especial a tu cafetería.</p>
-        </div>
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">{{ form.phone.label }}</label>
-          {{ form.phone|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-          <p class="text-xs text-gray-500 mt-1">Agregá un número con código de área, sin espacios.</p>
-          {% if form.phone.errors %}
-            <p class="text-red-600 text-sm mt-1">{{ form.phone.errors.0 }}</p>
-          {% endif %}
-        </div>
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">{{ form.google_maps_url.label }}</label>
-          {{ form.google_maps_url|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-          <p class="text-xs text-gray-500 mt-1">Pegá el link de Google Maps de tu cafetería.</p>
-        </div>
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">
-            {{ form.instagram.label }}
-          </label>
+              <div class="gota-create-photo__heading">
+                <span>Foto principal</span>
+                <span class="gota-create-photo__required">Obligatoria</span>
+              </div>
 
-          {{ form.instagram|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
+              <label
+                class="gota-create-photo__upload"
+                data-preview-container
+              >
 
-          <p class="text-xs text-gray-500 mt-1">
-            Usuario de Instagram, sin @ (ej: app.gota)
-          </p>
+                <div class="gota-create-photo__placeholder" data-label-text>
+                  <div class="gota-create-photo__upload-icon">
+                    <i class="fas fa-image" aria-hidden="true"></i>
+                  </div>
 
-          {% if form.instagram.errors %}
-            <p class="text-red-600 text-sm mt-1">
-              {{ form.instagram.errors.0 }}
-            </p>
-          {% endif %}
-        </div>
+                  <strong>Elegir foto</strong>
+                  <span>Las imágenes horizontales se ven mejor.</span>
+                </div>
 
-      </div>
-    </div>
+                <img
+                  class="gota-create-photo__preview hidden"
+                  data-preview-img
+                  alt="Vista previa de la foto principal"
+                >
 
-    <!-- Fotos -->
-    <div class="bg-white p-6 rounded-xl shadow-sm space-y-6 border">
-      <h3 class="text-xl font-semibold text-brand-700 flex items-center gap-2">
-        <i class="fas fa-camera"></i> Fotos del café
-      </h3>
+                {{ form.photo1|add_class:"hidden" }}
 
-      <p class="text-sm text-gray-500">
-        Subí al menos <strong>1 foto obligatoria</strong>. Máximo 3. Las horizontales se ven mejor.
-      </p>
+              </label>
 
-      {% if form.photo1.errors %}
-        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-          {{ form.photo1.errors.0 }}
-        </div>
-      {% endif %}
+              <div class="gota-create-photo__title">
+                <label>
+                  {{ form.photo1_title.label }}
+                </label>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {{ form.photo1_title|add_class:"gota-create-field__input" }}
+              </div>
 
-        <!-- FOTO 1 -->
-        <div class="space-y-2">
-          <label class="block font-semibold text-gray-700">Foto principal *</label>
+            </div>
 
-          <label class="relative flex flex-col items-center justify-center w-full px-4 py-3 
-                        border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition
-                        text-center"
-                data-preview-container>
-            
-            <span class="text-sm text-gray-600" data-label-text>
-              📷 Subir foto
+
+            <!-- FOTO 2 -->
+            <div class="gota-create-photo">
+
+              <div class="gota-create-photo__heading">
+                <span>Foto secundaria</span>
+                <span class="gota-create-photo__optional">Opcional</span>
+              </div>
+
+              <label
+                class="gota-create-photo__upload"
+                data-preview-container
+              >
+
+                <div class="gota-create-photo__placeholder" data-label-text>
+                  <div class="gota-create-photo__upload-icon">
+                    <i class="fas fa-image" aria-hidden="true"></i>
+                  </div>
+
+                  <strong>Elegir foto</strong>
+                  <span>Sumá otra mirada del lugar.</span>
+                </div>
+
+                <img
+                  class="gota-create-photo__preview hidden"
+                  data-preview-img
+                  alt="Vista previa de la segunda foto"
+                >
+
+                {{ form.photo2|add_class:"hidden" }}
+
+              </label>
+
+              <div class="gota-create-photo__title">
+                <label>
+                  {{ form.photo2_title.label }}
+                </label>
+
+                {{ form.photo2_title|add_class:"gota-create-field__input" }}
+              </div>
+
+            </div>
+
+
+            <!-- FOTO 3 -->
+            <div class="gota-create-photo">
+
+              <div class="gota-create-photo__heading">
+                <span>Foto secundaria</span>
+                <span class="gota-create-photo__optional">Opcional</span>
+              </div>
+
+              <label
+                class="gota-create-photo__upload"
+                data-preview-container
+              >
+
+                <div class="gota-create-photo__placeholder" data-label-text>
+                  <div class="gota-create-photo__upload-icon">
+                    <i class="fas fa-image" aria-hidden="true"></i>
+                  </div>
+
+                  <strong>Elegir foto</strong>
+                  <span>Podés agregar una tercera imagen.</span>
+                </div>
+
+                <img
+                  class="gota-create-photo__preview hidden"
+                  data-preview-img
+                  alt="Vista previa de la tercera foto"
+                >
+
+                {{ form.photo3|add_class:"hidden" }}
+
+              </label>
+
+              <div class="gota-create-photo__title">
+                <label>
+                  {{ form.photo3_title.label }}
+                </label>
+
+                {{ form.photo3_title|add_class:"gota-create-field__input" }}
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- Características -->
+        <section class="gota-create-section">
+
+          <div class="gota-create-section__header">
+
+            <div class="gota-create-section__icon">
+              <i class="fas fa-sliders-h" aria-hidden="true"></i>
+            </div>
+
+            <div>
+              <h2 class="gota-create-section__title">
+                Características
+              </h2>
+
+              <p class="gota-create-section__description">
+                Seleccioná todo lo que las personas pueden encontrar en esta cafetería.
+              </p>
+            </div>
+
+          </div>
+
+          <div class="gota-create-features">
+
+            {% for field in form %}
+              {% if field.name|slice:":3" == "is_" or field.name|slice:":4" == "has_" or field.name|slice:":7" == "serves_" %}
+
+                <label class="gota-create-feature">
+                  {{ field }}
+
+                  <span class="gota-create-feature__check">
+                    <i class="fas fa-check" aria-hidden="true"></i>
+                  </span>
+
+                  <span class="gota-create-feature__label">
+                    {{ field.label }}
+                  </span>
+                </label>
+
+              {% endif %}
+            {% endfor %}
+
+          </div>
+
+        </section>
+
+        <!-- Ubicación -->
+        <section class="gota-create-section">
+
+          <div class="gota-create-section__header">
+
+            <div class="gota-create-section__icon">
+              <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+            </div>
+
+            <div>
+              <h2 class="gota-create-section__title">
+                Ubicación
+              </h2>
+
+              <p class="gota-create-section__description">
+                Confirmá la ubicación exacta de la cafetería en el mapa.
+              </p>
+            </div>
+
+          </div>
+
+          <div class="gota-create-location-note">
+            <i class="fas fa-info-circle" aria-hidden="true"></i>
+
+            <span>
+              Si ya ingresaste la dirección exacta, las coordenadas se completan automáticamente.
             </span>
+          </div>
 
-            <img class="hidden mt-2 w-24 h-24 object-cover rounded-lg shadow"
-                data-preview-img />
+          <div class="gota-create-fields">
 
-            {{ form.photo1|add_class:"hidden" }}
-          </label>
+            <div class="gota-create-field">
+              <label class="gota-create-field__label">
+                {{ form.latitude.label }}
+              </label>
 
-          {{ form.photo1_title|add_class:"w-full rounded-lg border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
+              {{ form.latitude|add_class:"gota-create-field__input" }}
+
+              {% if form.latitude.errors %}
+                <p class="gota-create-field__error">
+                  {{ form.latitude.errors.0 }}
+                </p>
+              {% endif %}
+            </div>
+
+            <div class="gota-create-field">
+              <label class="gota-create-field__label">
+                {{ form.longitude.label }}
+              </label>
+
+              {{ form.longitude|add_class:"gota-create-field__input" }}
+
+              {% if form.longitude.errors %}
+                <p class="gota-create-field__error">
+                  {{ form.longitude.errors.0 }}
+                </p>
+              {% endif %}
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- Mapa -->
+        <section class="gota-create-map-section">
+
+          <div class="gota-create-map-section__header">
+
+            <div>
+              <span class="gota-create-map-section__kicker">
+                Ubicación en el mapa
+              </span>
+
+              <h2 class="gota-create-map-section__title">
+                Revisá que el punto sea correcto
+              </h2>
+            </div>
+
+            <button
+              type="button"
+              onclick="mostrarMapaMobile()"
+              class="gota-create-map-toggle"
+            >
+              <i class="fas fa-map" aria-hidden="true"></i>
+              <span>Mostrar mapa</span>
+            </button>
+
+          </div>
+
+          {% include "reviews/includes/mapa_create_edit_cafe.html" %}
+
+        </section>
+
+
+        <!-- Guardar -->
+        <div class="gota-create-submit">
+
+          <div class="gota-create-submit__text">
+            <strong>¿Está todo listo?</strong>
+            <span>Revisá los datos antes de guardar la cafetería.</span>
+          </div>
+
+          <button
+            type="submit"
+            class="gota-create-submit__button"
+          >
+            <img
+              src="{% static 'images/gota-icon.png' %}"
+              alt=""
+              aria-hidden="true"
+            >
+
+            <span>Guardar cafetería</span>
+
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+          </button>
+
         </div>
-
-        <!-- FOTO 2 -->
-        <div class="space-y-2">
-          <label class="block font-semibold text-gray-700">Foto secundaria</label>
-
-          <label class="relative flex flex-col items-center justify-center w-full px-4 py-3 
-                        border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition
-                        text-center"
-                data-preview-container>
-            
-            <span class="text-sm text-gray-600" data-label-text>
-              📷 Subir foto
-            </span>
-
-            <img class="hidden mt-2 w-24 h-24 object-cover rounded-lg shadow"
-                data-preview-img />
-
-            {{ form.photo2|add_class:"hidden" }}
-          </label>
-
-          {{ form.photo2_title|add_class:"w-full rounded-lg border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-        </div>
-
-        <!-- FOTO 3 -->
-        <div class="space-y-2">
-          <label class="block font-semibold text-gray-700">Foto secundaria</label>
-
-          <label class="relative flex flex-col items-center justify-center w-full px-4 py-3 
-                        border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition
-                        text-center"
-                data-preview-container>
-            
-            <span class="text-sm text-gray-600" data-label-text>
-              📷 Subir foto
-            </span>
-
-            <img class="hidden mt-2 w-24 h-24 object-cover rounded-lg shadow"
-                data-preview-img />
-
-            {{ form.photo3|add_class:"hidden" }}
-          </label>
-
-          {{ form.photo3_title|add_class:"w-full rounded-lg border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- Opciones (todas las booleanas) -->
-    <div class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-4">
-      <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
-        <i class="fas fa-cog"></i> Opciones
-      </h3>
-      <p class="text-xs text-gray-500">Seleccioná las características que tiene tu cafetería.</p>
-
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {% for field in form %}
-          {% if field.name|slice:":3" == "is_" or field.name|slice:":4" == "has_" or field.name|slice:":7" == "serves_" %}
-            <label class="flex items-center space-x-2">
-              {{ field }} <span>{{ field.label }}</span>
-            </label>
-          {% endif %}
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Ubicación -->
-    <div class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-4">
-      <h3 class="text-xl font-semibold text-blue-700 flex items-center gap-2">
-        <i class="fas fa-map-marker-alt"></i> Ubicación geográfica
-      </h3>
-      <p class="text-xs text-gray-500">Si ya elegiste la dirección exacta, la latitud/longitud se completan solas.</p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block font-semibold text-gray-700">{{ form.latitude.label }}</label>
-          {{ form.latitude|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-        </div>
-        <div>
-          <label class="block font-semibold text-gray-700">{{ form.longitude.label }}</label>
-          {{ form.longitude|add_class:"w-full rounded-xl border-gray-300 focus:ring-accent focus:border-accent shadow-sm" }}
-        </div>
-      </div>
-    </div>
-
-    <!-- Botón mapa -->
-    <button type="button" onclick="mostrarMapaMobile()" 
-            class="block md:hidden bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition mb-4">
-      📍 Mostrar mapa
-    </button>
-
-    {% include "reviews/includes/mapa_create_edit_cafe.html" %}
-
-    <!-- Botón final -->
-    <button type="submit"
-            class="w-full md:w-auto px-6 py-3 rounded-xl shadow 
-                    bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold 
-                    hover:from-blue-600 hover:to-blue-800 transition">
-      Guardar Cafetería
-    </button>
   </form>
 </div>
 
@@ -261,7 +570,7 @@
       if (!file) return;
 
       // feedback visual
-      labelText.textContent = '✅ Foto cargada';
+      labelText.classList.add('hidden');
       container.classList.remove('border-dashed');
       container.classList.add('border-green-400', 'bg-green-50');
 
