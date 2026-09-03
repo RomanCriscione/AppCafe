@@ -15058,3 +15058,102 @@ select.gota-create-field__input {
   }
 
 }
+
+/* =========================================================
+   CAFÉ DETAIL — MI MAPA
+   Más jerarquía visual
+   ========================================================= */
+
+.gota-cafe-detail-map-state {
+  padding: 22px 24px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #F8FBFF 0%,
+      #EFF6FF 100%
+    );
+
+  border-color: #BFDBFE;
+
+  box-shadow:
+    0 8px 24px rgba(23, 44, 109, .05);
+}
+
+.gota-cafe-detail-map-state__header {
+  margin-bottom: 20px;
+}
+
+.gota-cafe-detail-map-state__icon {
+  width: 46px;
+  height: 46px;
+
+  border-radius: 13px;
+}
+
+.gota-cafe-detail-map-state__icon img {
+  width: 24px;
+  height: 24px;
+}
+
+.gota-cafe-detail-map-state__title {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.gota-cafe-detail-map-state__description {
+  margin-top: 4px;
+
+  font-size: 10.5px;
+  line-height: 1.55;
+}
+
+.gota-cafe-detail-map-state__options {
+  gap: 11px;
+}
+
+.gota-cafe-detail-map-option {
+  min-height: 54px;
+
+  background: rgba(255, 255, 255, .88) !important;
+
+  border-color: #BFDBFE !important;
+
+  font-size: 10px !important;
+
+  box-shadow:
+    0 3px 10px rgba(23, 44, 109, .035) !important;
+}
+
+.gota-cafe-detail-map-option:hover {
+  background: #FFFFFF !important;
+
+  border-color: #60A5FA !important;
+
+  box-shadow:
+    0 6px 14px rgba(23, 44, 109, .07) !important;
+}
+
+.gota-cafe-detail-map-option--active {
+  background: #172C6D !important;
+  border-color: #172C6D !important;
+
+  box-shadow:
+    0 6px 14px rgba(23, 44, 109, .15) !important;
+}
+
+@media (max-width: 680px) {
+
+  .gota-cafe-detail-map-state {
+    padding: 18px;
+  }
+
+  .gota-cafe-detail-map-state__title {
+    font-size: 17px;
+  }
+
+  .gota-cafe-detail-map-option {
+    min-height: 46px;
+  }
+
+}
