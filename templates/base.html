@@ -468,37 +468,74 @@
       {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-white border-t py-4 text-center text-sm text-slate-500">
-      <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+    <footer class="gota-footer">
 
-        <span>
-          © 2026 Gota – Una app de Roma
-          <img
-            src="{% static 'images/gota-icon.png' %}"
-            class="inline w-4 h-4 ml-1"
-            alt=""
-          >
-        </span>
+      <div class="gota-footer__inner">
 
-        <span aria-hidden="true">·</span>
+        <div class="gota-footer__brand">
 
-        <a
-          href="{% url 'privacy_policy' %}"
-          class="hover:text-slate-700 hover:underline"
-        >
-          Política de privacidad
-        </a>
+          <a href="{% url 'home' %}" class="gota-footer__logo">
+            <span class="gota-footer__logo-icon">
+              <img
+                src="{% static 'images/gota-icon.png' %}"
+                alt=""
+                aria-hidden="true"
+              >
+            </span>
 
-        <span aria-hidden="true">·</span>
+            <span>Gota</span>
+          </a>
 
-        <a
-          href="{% url 'delete_account_request' %}"
-          class="hover:text-slate-700 hover:underline"
-        >
-          Eliminar cuenta
-        </a>
+          <p class="gota-footer__tagline">
+            Descubrí tu próximo café.
+          </p>
+
+        </div>
+
+
+        <nav class="gota-footer__links" aria-label="Enlaces del pie">
+
+          <a href="{% url 'reviews:cafe_list' %}">
+            Cafés
+          </a>
+
+          <a href="{% url 'reviews:mapa_cafes' %}">
+            Mapa
+          </a>
+
+          <a href="{% url 'about' %}">
+            Acerca de
+          </a>
+
+          <a href="{% url 'contact' %}">
+            Contacto
+          </a>
+
+        </nav>
 
       </div>
+
+
+      <div class="gota-footer__bottom">
+
+        <span>
+          © 2026 Gota
+        </span>
+
+        <div class="gota-footer__legal">
+
+          <a href="{% url 'privacy_policy' %}">
+            Política de privacidad
+          </a>
+
+          <a href="{% url 'delete_account_request' %}">
+            Eliminar cuenta
+          </a>
+
+        </div>
+
+      </div>
+
     </footer>
   </div>
 
