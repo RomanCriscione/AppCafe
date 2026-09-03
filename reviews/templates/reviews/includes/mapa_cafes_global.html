@@ -1,54 +1,234 @@
-<div class="max-w-7xl mx-auto px-4">
-  <h1 class="text-2xl font-bold mb-4">🗺️ Cafés en el mapa</h1>
+<div class="gota-map-page">
 
-  <!-- Búsqueda -->
-  <form id="form-direccion" class="max-w-md mb-4 flex gap-2">
-    <input type="text" id="direccion" name="direccion" placeholder="Buscar cafés cerca de una dirección"
-           class="flex-1 px-3 py-2 border rounded w-full text-sm" required>
-    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition">
+  <header class="gota-map-header">
+
+    <div class="gota-map-header__icon">
+      <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+    </div>
+
+    <div class="gota-map-header__content">
+
+      <span class="gota-map-header__kicker">
+        Explorá por ubicación
+      </span>
+
+      <h1 class="gota-map-header__title">
+        Cafés en el mapa
+      </h1>
+
+      <p class="gota-map-header__description">
+        Buscá una zona, usá tu ubicación o explorá cafeterías directamente en el mapa.
+      </p>
+
+    </div>
+
+  </header>
+
+  <!-- CONTROLES -->
+<section class="gota-map-controls">
+
+  <form
+    id="form-direccion"
+    class="gota-map-search"
+  >
+
+    <div class="gota-map-search__field">
+      <i class="fas fa-search" aria-hidden="true"></i>
+
+      <input
+        type="text"
+        id="direccion"
+        name="direccion"
+        placeholder="Buscar cafés cerca de una dirección"
+        required
+      >
+    </div>
+
+    <button
+      type="submit"
+      class="gota-map-search__submit"
+    >
       Buscar
     </button>
+
   </form>
-  <div id="error-direccion" class="text-red-600 text-sm mb-4 hidden">❗ Dirección no encontrada</div>
 
-  <!-- Botones -->
-  <div class="flex flex-wrap gap-4 mb-4">
-    <button id="btn-cerca-mio" class="px-4 py-2 bg-primary text-white rounded hover:bg-secondary transition">
-      📍 Ver cafés cerca mío (3km)
+  <div
+    id="error-direccion"
+    class="gota-map-search__error hidden"
+  >
+    <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+    <span>Dirección no encontrada</span>
+  </div>
+
+  <div class="gota-map-actions">
+
+    <button
+      id="btn-cerca-mio"
+      type="button"
+      class="gota-map-action gota-map-action--primary"
+    >
+      <i class="fas fa-location-arrow" aria-hidden="true"></i>
+      <span>Cafés cerca mío</span>
+      <small>3 km</small>
     </button>
-    <button id="btn-todos" class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition">
-      🔄 Ver todos los cafés
+
+    <button
+      id="btn-todos"
+      type="button"
+      class="gota-map-action gota-map-action--secondary"
+    >
+      <i class="fas fa-globe-americas" aria-hidden="true"></i>
+      <span>Ver todos</span>
     </button>
+
   </div>
 
-  <!-- Filtros -->
-  <div class="mb-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-sm">
-    <label><input type="checkbox" class="filtro-mapa" value="is_pet_friendly"> 🐶 Pet Friendly</label>
-    <label><input type="checkbox" class="filtro-mapa" value="has_wifi"> 📶 Wi-Fi</label>
-    <label><input type="checkbox" class="filtro-mapa" value="has_outdoor_seating"> 🪑 Mesas afuera</label>
-    <label><input type="checkbox" class="filtro-mapa" value="is_vegan_friendly"> 🌱 Vegano</label>
-    <label><input type="checkbox" class="filtro-mapa" value="has_parking"> 🅿️ Estacionamiento</label>
-    <label><input type="checkbox" class="filtro-mapa" value="is_accessible"> ♿ Accesible</label>
-    <label><input type="checkbox" class="filtro-mapa" value="has_vegetarian_options"> 🥗 Opción vegetariana</label>
-    <label><input type="checkbox" class="filtro-mapa" value="serves_breakfast"> 🍳 Desayuno</label>
-    <label><input type="checkbox" class="filtro-mapa" value="serves_alcohol"> 🍷 Alcohol</label>
-    <label><input type="checkbox" class="filtro-mapa" value="has_books_or_games"> 📚 Juegos o libros</label>
-    <label><input type="checkbox" class="filtro-mapa" value="has_air_conditioning"> ❄️ Aire acondicionado</label>
-    <!-- ✅ NUEVOS -->
-    <label><input type="checkbox" class="filtro-mapa" value="has_gluten_free"> 🥖🚫 Sin TACC</label>
-    <label><input type="checkbox" class="filtro-mapa" value="has_specialty_coffee"> ☕ Café de especialidad</label>
-    <label><input type="checkbox" class="filtro-mapa" value="has_artisanal_pastries"> 🍪 Pastelería artesanal</label>
-  </div>
+</section>
 
-  <!-- Vista dividida -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    <!-- Lista de cafés -->
-    <div id="lista-cafes" class="space-y-4 overflow-y-auto max-h-[600px] p-2 border rounded"></div>
+  <!-- FILTROS -->
+  <section class="gota-map-filters">
 
-    <!-- Mapa -->
-    <div id="map" class="w-full h-[600px] rounded shadow-lg"></div>
-  </div>
-</div>
+    <div class="gota-map-filters__header">
+      <div>
+        <span class="gota-map-filters__kicker">
+          Afiná la búsqueda
+        </span>
+
+        <h2 class="gota-map-filters__title">
+          Filtros
+        </h2>
+      </div>
+    </div>
+
+    <div class="gota-map-filters__list">
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="is_pet_friendly">
+        <i class="fas fa-paw" aria-hidden="true"></i>
+        <span>Pet friendly</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="has_wifi">
+        <i class="fas fa-wifi" aria-hidden="true"></i>
+        <span>Wi-Fi</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="has_outdoor_seating">
+        <i class="fas fa-chair" aria-hidden="true"></i>
+        <span>Mesas afuera</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="is_vegan_friendly">
+        <i class="fas fa-leaf" aria-hidden="true"></i>
+        <span>Vegano</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="has_parking">
+        <i class="fas fa-parking" aria-hidden="true"></i>
+        <span>Estacionamiento</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="is_accessible">
+        <i class="fas fa-wheelchair" aria-hidden="true"></i>
+        <span>Accesible</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="has_vegetarian_options">
+        <i class="fas fa-seedling" aria-hidden="true"></i>
+        <span>Opción vegetariana</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="serves_breakfast">
+        <i class="fas fa-sun" aria-hidden="true"></i>
+        <span>Desayuno</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="serves_alcohol">
+        <i class="fas fa-glass-martini-alt" aria-hidden="true"></i>
+        <span>Alcohol</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="has_books_or_games">
+        <i class="fas fa-book-open" aria-hidden="true"></i>
+        <span>Juegos o libros</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="has_air_conditioning">
+        <i class="fas fa-snowflake" aria-hidden="true"></i>
+        <span>Aire acondicionado</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="has_gluten_free">
+        <i class="fas fa-wheat-awn-circle-exclamation" aria-hidden="true"></i>
+        <span>Sin TACC</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="has_specialty_coffee">
+        <img
+          src="{% static 'images/gota-icon.png' %}"
+          alt=""
+          aria-hidden="true"
+        >
+        <span>Café de especialidad</span>
+      </label>
+
+      <label class="gota-map-filter">
+        <input type="checkbox" class="filtro-mapa" value="has_artisanal_pastries">
+        <i class="fas fa-cookie-bite" aria-hidden="true"></i>
+        <span>Pastelería artesanal</span>
+      </label>
+
+    </div>
+
+  </section>
+
+  <!-- RESULTADOS + MAPA -->
+  <section class="gota-map-explorer">
+
+    <div class="gota-map-results-panel">
+
+      <div class="gota-map-results-panel__header">
+        <div>
+          <span class="gota-map-results-panel__kicker">
+            Resultados
+          </span>
+
+          <h2 class="gota-map-results-panel__title">
+            Cafeterías encontradas
+          </h2>
+        </div>
+      </div>
+
+      <div
+        id="lista-cafes"
+        class="gota-map-results-panel__list"
+      ></div>
+
+    </div>
+
+    <div class="gota-map-canvas">
+
+      <div
+        id="map"
+        class="gota-map-canvas__map"
+      ></div>
+
+    </div>
+
+  </section>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
@@ -72,17 +252,95 @@
 
       filtrados.forEach(cafe => {
         if (cafe.latitude != null && cafe.longitude != null) {
-          const popup = `<strong>${cafe.name}</strong><br>${cafe.address ?? ''}<br>
-                         <a href="${cafe.url}" class="text-blue-500 underline">Ver más</a>`;
-          const marker = L.marker([cafe.latitude, cafe.longitude]).bindPopup(popup).addTo(map);
+          const popup = `
+            <div class="gota-map-popup">
+
+              <div class="gota-map-popup__heading">
+                <img
+                  src="{% static 'images/gota-icon.png' %}"
+                  alt=""
+                  aria-hidden="true"
+                >
+
+                <strong>
+                  ${cafe.name}
+                </strong>
+              </div>
+
+              ${cafe.address ? `
+                <p class="gota-map-popup__address">
+                  <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                  <span>${cafe.address}</span>
+                </p>
+              ` : ''}
+
+              <a
+                href="${cafe.url}"
+                class="gota-map-popup__cta"
+              >
+                <span>Ver cafetería</span>
+                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+              </a>
+
+            </div>`;
+          const gotaMapIcon = L.icon({
+            iconUrl: "{% static 'images/gota-icon.png' %}",
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -28],
+            className: "gota-map-marker"
+          });
+
+          const marker = L.marker(
+            [cafe.latitude, cafe.longitude],
+            { icon: gotaMapIcon }
+          )
+            .bindPopup(popup)
+            .addTo(map);
+
           markers.push(marker);
 
           const card = `
-            <div class="card p-3">
-              <h3 class="text-lg font-semibold mb-1">${cafe.name}</h3>
-              <p class="text-sm text-gray-600 mb-1">${cafe.address ?? ''}</p>
-              <a href="${cafe.url}" class="btn btn-outline btn-sm rounded-xl">Ver más</a>
-            </div>`;
+            <article class="gota-map-result-card">
+
+              <div class="gota-map-result-card__content">
+
+                <div class="gota-map-result-card__heading">
+
+                  <div>
+                    <h3 class="gota-map-result-card__title">
+                      ${cafe.name}
+                    </h3>
+
+                    ${cafe.address ? `
+                      <p class="gota-map-result-card__address">
+                        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        <span>${cafe.address}</span>
+                      </p>
+                    ` : ''}
+
+                  </div>
+
+                  <img
+                    src="{% static 'images/gota-icon.png' %}"
+                    alt=""
+                    aria-hidden="true"
+                    class="gota-map-result-card__icon"
+                  >
+
+                </div>
+
+                <a
+                  href="${cafe.url}"
+                  class="gota-map-result-card__cta"
+                >
+                  <span>Ver cafetería</span>
+                  <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+
+              </div>
+
+            </article>`;
           listaDIV.insertAdjacentHTML('beforeend', card);
         }
       });
@@ -103,9 +361,11 @@
       if (circle) map.removeLayer(circle);
       circle = L.circle([lat, lon], {
         radius: 3000,
-        color: "#2a9d8f",
-        fillColor: "#a8dadc",
-        fillOpacity: 0.3
+        color: "#172C6D",
+        weight: 2,
+        opacity: 0.8,
+        fillColor: "#BFDBFE",
+        fillOpacity: 0.22
       }).addTo(map);
 
       const cercanos = cafes.filter(c => {

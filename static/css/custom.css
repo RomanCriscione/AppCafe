@@ -6229,3 +6229,750 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
 .gota-my-map-card__cta i {
   font-size: 10px;
 }
+
+/* =========================================================
+   MAPA DE CAFÉS · LAYOUT + HEADER
+   ========================================================= */
+
+.gota-map-page {
+  width: 100%;
+  max-width: 1280px;
+
+  margin: 0 auto;
+  padding: 34px 20px 48px;
+}
+
+.gota-map-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+
+  margin-bottom: 30px;
+}
+
+.gota-map-header__icon {
+  width: 44px;
+  height: 44px;
+
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 14px;
+
+  color: #172C6D;
+}
+
+.gota-map-header__icon i {
+  font-size: 17px;
+}
+
+.gota-map-header__content {
+  min-width: 0;
+}
+
+.gota-map-header__kicker {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #64748B;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.gota-map-header__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: clamp(28px, 3vw, 36px);
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.gota-map-header__description {
+  max-width: 620px;
+
+  margin: 9px 0 0;
+
+  color: #64748B;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .gota-map-page {
+    padding: 28px 18px 40px;
+  }
+
+  .gota-map-header {
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .gota-map-header__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .gota-map-header__title {
+    font-size: 27px;
+  }
+
+  .gota-map-header__description {
+    font-size: 13px;
+  }
+}
+
+/* =========================================================
+   MAPA DE CAFÉS · CONTROLES
+   ========================================================= */
+
+.gota-map-controls {
+  margin-bottom: 26px;
+}
+
+.gota-map-search {
+  max-width: 680px;
+
+  display: flex;
+  align-items: stretch;
+  gap: 9px;
+}
+
+.gota-map-search__field {
+  position: relative;
+
+  flex: 1;
+  min-width: 0;
+}
+
+.gota-map-search__field i {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+
+  transform: translateY(-50%);
+
+  color: #94A3B8;
+  font-size: 12px;
+
+  pointer-events: none;
+}
+
+.gota-map-search__field input {
+  width: 100%;
+  min-height: 44px;
+
+  padding: 10px 12px 10px 36px !important;
+
+  background: #FFFFFF !important;
+  border: 1px solid #DBEAFE !important;
+  border-radius: 12px !important;
+
+  color: #334155 !important;
+  font-size: 12.5px;
+
+  box-shadow: none !important;
+}
+
+.gota-map-search__field input::placeholder {
+  color: #94A3B8;
+}
+
+.gota-map-search__field input:focus {
+  outline: none !important;
+
+  border-color: #93C5FD !important;
+
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10) !important;
+}
+
+.gota-map-search__submit {
+  min-width: 92px;
+  min-height: 44px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 10px 16px;
+
+  background: #172C6D !important;
+  border: 1px solid #172C6D !important;
+  border-radius: 12px !important;
+
+  color: #FFFFFF !important;
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-map-search__submit:hover {
+  background: #203983 !important;
+  border-color: #203983 !important;
+}
+
+.gota-map-search__error {
+  width: fit-content;
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  margin-top: 9px;
+
+  color: #B91C1C;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.gota-map-search__error.hidden {
+  display: none;
+}
+
+.gota-map-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+
+  margin-top: 14px;
+}
+
+.gota-map-action {
+  min-height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 8px 12px;
+
+  border-radius: 11px;
+
+  font-size: 11.5px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gota-map-action i {
+  font-size: 11px;
+}
+
+.gota-map-action small {
+  color: inherit;
+  opacity: .65;
+  font-size: 9.5px;
+  font-weight: 700;
+}
+
+.gota-map-action--primary {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+
+  color: #172C6D;
+}
+
+.gota-map-action--primary:hover {
+  background: #DBEAFE;
+}
+
+.gota-map-action--secondary {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+
+  color: #64748B;
+}
+
+.gota-map-action--secondary:hover {
+  background: #F8FAFC;
+  color: #172C6D;
+}
+
+@media (max-width: 640px) {
+  .gota-map-search {
+    flex-direction: column;
+  }
+
+  .gota-map-search__submit {
+    width: 100%;
+  }
+
+  .gota-map-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .gota-map-action {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   MAPA DE CAFÉS · FILTROS
+   ========================================================= */
+
+.gota-map-filters {
+  margin-bottom: 26px;
+}
+
+.gota-map-filters__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 12px;
+}
+
+.gota-map-filters__kicker {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #94A3B8;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.gota-map-filters__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 750;
+}
+
+.gota-map-filters__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gota-map-filter {
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  min-height: 34px;
+
+  padding: 7px 10px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 999px;
+
+  color: #64748B;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    color .15s ease;
+}
+
+.gota-map-filter:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+  color: #172C6D;
+}
+
+.gota-map-filter input {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gota-map-filter i {
+  color: #94A3B8;
+  font-size: 10px;
+}
+
+.gota-map-filter img {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+}
+
+.gota-map-filter:has(input:checked) {
+  background: #EFF6FF;
+  border-color: #93C5FD;
+  color: #172C6D;
+}
+
+.gota-map-filter:has(input:checked) i {
+  color: #172C6D;
+}
+
+@media (max-width: 640px) {
+  .gota-map-filters {
+    margin-bottom: 22px;
+  }
+
+  .gota-map-filters__title {
+    font-size: 17px;
+  }
+
+  .gota-map-filters__list {
+    gap: 7px;
+  }
+
+  .gota-map-filter {
+    min-height: 32px;
+    padding: 6px 9px;
+    font-size: 10.5px;
+  }
+}
+
+/* =========================================================
+   MAPA DE CAFÉS · EXPLORADOR
+   ========================================================= */
+
+.gota-map-explorer {
+  display: grid;
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.gota-map-results-panel,
+.gota-map-canvas {
+  min-width: 0;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 18px;
+
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+.gota-map-results-panel {
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+.gota-map-results-panel__header {
+  padding: 16px 16px 13px;
+
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.gota-map-results-panel__kicker {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #94A3B8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.gota-map-results-panel__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 17px;
+  line-height: 1.25;
+  font-weight: 750;
+}
+
+.gota-map-results-panel__list {
+  height: 600px;
+
+  overflow-y: auto;
+
+  padding: 10px;
+}
+
+.gota-map-results-panel__list::-webkit-scrollbar {
+  width: 7px;
+}
+
+.gota-map-results-panel__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gota-map-results-panel__list::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 999px;
+}
+
+.gota-map-canvas {
+  overflow: hidden;
+}
+
+.gota-map-canvas__map {
+  width: 100%;
+  height: 100%;
+  min-height: 654px;
+}
+
+@media (max-width: 1024px) {
+  .gota-map-explorer {
+    grid-template-columns: 1fr;
+  }
+
+  .gota-map-canvas {
+    order: -1;
+  }
+
+  .gota-map-canvas__map {
+    min-height: 500px;
+  }
+
+  .gota-map-results-panel__list {
+    height: auto;
+    max-height: 520px;
+  }
+}
+
+@media (max-width: 640px) {
+  .gota-map-explorer {
+    gap: 14px;
+  }
+
+  .gota-map-results-panel,
+  .gota-map-canvas {
+    border-radius: 15px;
+  }
+
+  .gota-map-results-panel__header {
+    padding: 14px;
+  }
+
+  .gota-map-results-panel__list {
+    padding: 8px;
+    max-height: 460px;
+  }
+
+  .gota-map-canvas__map {
+    min-height: 420px;
+  }
+}
+
+/* =========================================================
+   MAPA DE CAFÉS · CARD DE RESULTADO
+   ========================================================= */
+
+.gota-map-result-card {
+  margin-bottom: 8px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+
+  transition:
+    border-color .15s ease,
+    background .15s ease;
+}
+
+.gota-map-result-card:last-child {
+  margin-bottom: 0;
+}
+
+.gota-map-result-card:hover {
+  background: #F8FAFC;
+  border-color: #BFDBFE;
+}
+
+.gota-map-result-card__content {
+  padding: 12px;
+}
+
+.gota-map-result-card__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gota-map-result-card__title {
+  margin: 0;
+
+  color: #172C6D;
+  font-size: 14px;
+  line-height: 1.3;
+  font-weight: 750;
+}
+
+.gota-map-result-card__address {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+
+  margin: 5px 0 0;
+
+  color: #64748B;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.gota-map-result-card__address i {
+  flex: 0 0 auto;
+
+  margin-top: 2px;
+
+  color: #94A3B8;
+  font-size: 9px;
+}
+
+.gota-map-result-card__icon {
+  width: 23px;
+  height: 23px;
+
+  flex: 0 0 auto;
+
+  object-fit: contain;
+}
+
+.gota-map-result-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-top: 11px;
+
+  color: #172C6D !important;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.gota-map-result-card__cta i {
+  font-size: 9px;
+
+  transition: transform .15s ease;
+}
+
+.gota-map-result-card__cta:hover {
+  color: #203983 !important;
+}
+
+.gota-map-result-card__cta:hover i {
+  transform: translateX(2px);
+}
+
+/* =========================================================
+   MAPA DE CAFÉS · MARCADORES
+   ========================================================= */
+
+.gota-map-marker {
+  background: #FFFFFF;
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.20);
+}
+
+/* =========================================================
+   MAPA DE CAFÉS · POPUP
+   ========================================================= */
+
+.gota-map-canvas .leaflet-popup-content-wrapper {
+  padding: 0;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+}
+
+.gota-map-canvas .leaflet-popup-content {
+  width: 220px !important;
+
+  margin: 0 !important;
+}
+
+.gota-map-canvas .leaflet-popup-tip {
+  background: #FFFFFF;
+}
+
+.gota-map-popup {
+  padding: 13px;
+}
+
+.gota-map-popup__heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gota-map-popup__heading img {
+  width: 22px;
+  height: 22px;
+
+  flex: 0 0 auto;
+
+  object-fit: contain;
+}
+
+.gota-map-popup__heading strong {
+  color: #172C6D;
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 750;
+}
+
+.gota-map-popup__address {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+
+  margin: 8px 0 0;
+
+  color: #64748B;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.gota-map-popup__address i {
+  flex: 0 0 auto;
+
+  margin-top: 2px;
+
+  color: #94A3B8;
+  font-size: 9px;
+}
+
+.gota-map-popup__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-top: 11px;
+
+  color: #172C6D !important;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.gota-map-popup__cta i {
+  font-size: 9px;
+}
