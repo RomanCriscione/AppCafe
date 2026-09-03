@@ -212,30 +212,41 @@ class MobileAppleLoginAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        apple_sub = (
+            payload.get("sub", "")
+            .strip()
+        )
+
         email = (
             payload.get("email", "")
             .strip()
             .lower()
         )
 
-        if not email:
+        if not apple_sub or not email:
             return Response(
                 {
                     "success": False,
-                    "message": "Apple no confirmó un email válido.",
+                    "message": "Apple no confirmó una identidad válida.",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         user = User.objects.filter(
-            email__iexact=email,
+            apple_sub=apple_sub,
         ).first()
+
+        if user is None:
+            user = User.objects.filter(
+                email__iexact=email,
+            ).first()
 
         if user is None:
             user = User.objects.create_user(
                 username=email,
                 email=email,
                 first_name=name or email.split("@")[0],
+                apple_sub=apple_sub,
             )
 
             user.set_unusable_password()
@@ -243,11 +254,21 @@ class MobileAppleLoginAPIView(APIView):
                 update_fields=["password"],
             )
 
-        elif name and not user.first_name:
-            user.first_name = name
-            user.save(
-                update_fields=["first_name"],
-            )
+        else:
+            fields_to_update = []
+
+            if not user.apple_sub:
+                user.apple_sub = apple_sub
+                fields_to_update.append("apple_sub")
+
+            if name and not user.first_name:
+                user.first_name = name
+                fields_to_update.append("first_name")
+
+            if fields_to_update:
+                user.save(
+                    update_fields=fields_to_update,
+                )
 
         token, _ = Token.objects.get_or_create(
             user=user,
