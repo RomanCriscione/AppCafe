@@ -1,141 +1,170 @@
 {% load static %}
 
-<article class="bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all">
+<article class="gota-my-map-card">
 
   <!-- FOTO -->
-  <a href="{% url 'reviews:cafe_detail' cafe.id %}" class="block relative">
+  <a
+    href="{% url 'reviews:cafe_detail' cafe.id %}"
+    class="gota-my-map-card__media"
+  >
 
-    <div class="w-full h-40 overflow-hidden">
+    {% if cafe.photo1 and cafe.photo1.url %}
+      <img
+        src="{{ cafe.photo1.url }}"
+        alt="{{ cafe.name }}"
+        class="gota-my-map-card__image"
+        loading="lazy"
+      >
+    {% else %}
+      <img
+        src="{% static 'images/coffee-hero.jpg' %}"
+        alt="{{ cafe.name }}"
+        class="gota-my-map-card__image"
+        loading="lazy"
+      >
+    {% endif %}
 
-      {% if cafe.photo1 and cafe.photo1.url %}
-        <img
-          src="{{ cafe.photo1.url }}"
-          alt="{{ cafe.name }}"
-          class="w-full h-full object-cover"
-          loading="lazy"
-        >
-      {% else %}
-        <img
-          src="{% static 'images/coffee-hero.jpg' %}"
-          alt="{{ cafe.name }}"
-          class="w-full h-full object-cover"
-          loading="lazy"
-        >
-      {% endif %}
+    <div class="gota-my-map-card__rating">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
 
+      <strong>
+        {% if cafe.avg_rating %}
+          {{ cafe.avg_rating|floatformat:1 }}
+        {% else %}
+          –
+        {% endif %}
+      </strong>
+
+      <span>/ 5</span>
     </div>
 
-    <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-semibold shadow">
-      ☕
-      {% if cafe.avg_rating %}
-        {{ cafe.avg_rating|floatformat:1 }}
-      {% else %}
-        –
-      {% endif %}
-      / 5
-    </div>
-
-    <div class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs shadow">
+    <div class="gota-my-map-card__time">
       {{ cafe.relationship_date|timesince }}
     </div>
 
   </a>
 
-  <div class="p-4 space-y-4">
+    <div class="gota-my-map-card__body">
 
-    <div>
-      <h3 class="text-xl font-bold text-[var(--text-1)]">
-        {{ cafe.name }}
-      </h3>
+      <div class="gota-my-map-card__heading">
 
-      <p class="text-sm text-gray-500">
-        {{ cafe.location }}
-      </p>
-    </div>
+        <div>
+          <h3 class="gota-my-map-card__title">
+            {{ cafe.name }}
+          </h3>
 
-    <!-- ESTADO -->
-    <div>
+          {% if cafe.location %}
+            <p class="gota-my-map-card__location">
+              <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+              <span>{{ cafe.location }}</span>
+            </p>
+          {% endif %}
+        </div>
 
-      {% if cafe.user_status == "want_to_go" %}
-        <span class="inline-flex items-center gap-1 text-sm bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full">
-          ☕ Quiero ir
-        </span>
+        {% if cafe.user_status == "want_to_go" %}
 
-      {% elif cafe.user_status == "want_to_return" %}
-        <span class="inline-flex items-center gap-1 text-sm bg-rose-50 text-rose-700 border border-rose-200 px-3 py-1 rounded-full">
-          ❤️ Quiero volver
-        </span>
+          <span class="gota-my-map-card__status">
+            <img
+              src="{% static 'images/gota-icon.png' %}"
+              alt=""
+              aria-hidden="true"
+            >
+            Quiero ir
+          </span>
 
-      {% elif cafe.user_status == "visited" %}
-        <span class="inline-flex items-center gap-1 text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full">
-          ✔️ Ya fui
-        </span>
-      {% endif %}
+        {% elif cafe.user_status == "want_to_return" %}
 
-    </div>
+          <span class="gota-my-map-card__status">
+            <i class="fas fa-heart" aria-hidden="true"></i>
+            Quiero volver
+          </span>
 
-    <!-- NOTA -->
-    {% if cafe.private_note %}
+        {% elif cafe.user_status == "visited" %}
 
-      <div class="rounded-2xl bg-gray-50 px-4 py-3">
+          <span class="gota-my-map-card__status">
+            <i class="fas fa-check" aria-hidden="true"></i>
+            Ya fui
+          </span>
 
-        <p class="text-sm italic text-gray-700 leading-relaxed">
-          “{{ cafe.private_note|truncatechars:90 }}”
-        </p>
+        {% endif %}
 
       </div>
 
-      {% if cafe.collection %}
-        <div class="text-sm text-gray-500 italic">
+      <!-- NOTA -->
+      {% if cafe.private_note %}
 
-          {% if cafe.collection == "read" %}
-            📚 Para leer
+        <div class="gota-my-map-card__note">
+          <i class="fas fa-quote-left" aria-hidden="true"></i>
 
-          {% elif cafe.collection == "work" %}
-            💻 Para trabajar
-
-          {% elif cafe.collection == "slow" %}
-            🌿 Para bajar un cambio
-
-          {% elif cafe.collection == "rain" %}
-            ☁️ Para días grises
-
-          {% elif cafe.collection == "talk" %}
-            🫶 Para charlas largas
-          {% endif %}
-
+          <p>
+            {{ cafe.private_note|truncatechars:90 }}
+          </p>
         </div>
+
+        {% if cafe.collection %}
+
+          <div class="gota-my-map-card__collection">
+
+            {% if cafe.collection == "read" %}
+              <i class="fas fa-book-open" aria-hidden="true"></i>
+              <span>Para leer</span>
+
+            {% elif cafe.collection == "work" %}
+              <i class="fas fa-laptop" aria-hidden="true"></i>
+              <span>Para trabajar</span>
+
+            {% elif cafe.collection == "slow" %}
+              <i class="fas fa-leaf" aria-hidden="true"></i>
+              <span>Para bajar un cambio</span>
+
+            {% elif cafe.collection == "rain" %}
+              <i class="fas fa-cloud" aria-hidden="true"></i>
+              <span>Para días grises</span>
+
+            {% elif cafe.collection == "talk" %}
+              <i class="far fa-comments" aria-hidden="true"></i>
+              <span>Para charlas largas</span>
+            {% endif %}
+
+          </div>
+
+        {% endif %}
+
       {% endif %}
 
-    {% endif %}
-
     <!-- SEGUNDA IMPRESIÓN -->
-    {% if cafe.second_impression == "better" %}
+    {% if cafe.second_impression %}
 
-      <p class="text-sm text-emerald-700 italic">
-        ✨ Te sorprendió
-      </p>
+      <div class="gota-my-map-card__impression">
 
-    {% elif cafe.second_impression == "as_expected" %}
+        {% if cafe.second_impression == "better" %}
+          <i class="fas fa-sparkles" aria-hidden="true"></i>
+          <span>Te sorprendió</span>
 
-      <p class="text-sm text-amber-700 italic">
-        ☕ Fue como lo imaginabas
-      </p>
+        {% elif cafe.second_impression == "as_expected" %}
+          <i class="fas fa-check-circle" aria-hidden="true"></i>
+          <span>Fue como lo imaginabas</span>
 
-    {% elif cafe.second_impression == "didnt_connect" %}
+        {% elif cafe.second_impression == "didnt_connect" %}
+          <i class="far fa-circle" aria-hidden="true"></i>
+          <span>No terminó de conectar</span>
+        {% endif %}
 
-      <p class="text-sm text-gray-500 italic">
-        🤍 No terminó de conectar
-      </p>
+      </div>
 
     {% endif %}
 
     <!-- CTA -->
-    <a href="{% url 'reviews:cafe_detail' cafe.id %}"
-        class="inline-flex items-center justify-center rounded-xl bg-[var(--brand)] text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition">
-
-      Volver al café
-
+    <a
+      href="{% url 'reviews:cafe_detail' cafe.id %}"
+      class="gota-my-map-card__cta"
+    >
+      <span>Ver cafetería</span>
+      <i class="fas fa-arrow-right" aria-hidden="true"></i>
     </a>
 
   </div>
