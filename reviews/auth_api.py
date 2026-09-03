@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 
 import jwt
+import hashlib
 
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -177,11 +178,16 @@ class MobileAppleLoginAPIView(APIView):
             "",
         ).strip()
 
-        if not apple_id_token:
+        raw_nonce = request.data.get(
+            "nonce",
+            "",
+        ).strip()
+
+        if not apple_id_token or not raw_nonce:
             return Response(
                 {
                     "success": False,
-                    "message": "Falta el token de Apple.",
+                    "message": "Faltan datos para validar el acceso con Apple.",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -202,6 +208,20 @@ class MobileAppleLoginAPIView(APIView):
                 audience=settings.APPLE_MOBILE_CLIENT_ID,
                 issuer="https://appleid.apple.com",
             )
+
+            expected_nonce = hashlib.sha256(
+                raw_nonce.encode("utf-8"),
+            ).hexdigest()
+
+            token_nonce = payload.get(
+                "nonce",
+                "",
+            )
+
+            if token_nonce != expected_nonce:
+                raise jwt.InvalidTokenError(
+                    "Nonce de Apple inválido."
+                )
 
         except Exception:
             return Response(
