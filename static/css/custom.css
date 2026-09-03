@@ -5144,3 +5144,125 @@ main, .page-cafe-list, #grid-cafes, .cafe-card, .swiper-slide, .swiper-container
 .gota-mobile-menu__logout:hover {
   color: #64748B !important;
 }
+
+/* =========================================================
+   NAVBAR · HEADER GENERAL
+   ========================================================= */
+
+.gota-site-header {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  backdrop-filter: blur(12px);
+  box-shadow: none;
+}
+
+.gota-site-header__inner {
+  width: 100%;
+  max-width: 1280px;
+  min-height: 64px;
+
+  margin: 0 auto;
+  padding: 0 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.gota-site-header__menu {
+  flex: 0 0 auto;
+
+  width: 40px;
+  height: 40px;
+  padding: 0;
+
+  align-items: center;
+  justify-content: center;
+
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 11px;
+
+  color: #172C6D;
+
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.gota-site-header__menu:hover {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+}
+
+.gota-site-header__menu i {
+  font-size: 17px;
+}
+
+
+/* Marca */
+
+.gota-nav-brand {
+  flex: 0 0 auto;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  color: #172C6D !important;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.gota-nav-brand__logo {
+  width: 36px;
+  height: 36px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 11px;
+}
+
+.gota-nav-brand__logo img {
+  width: 22px;
+  height: 22px;
+}
+
+
+/* Desktop */
+
+@media (min-width: 1024px) {
+  .gota-site-header__inner {
+    min-height: 68px;
+  }
+}
+
+
+/* Mobile */
+
+@media (max-width: 1023px) {
+  .gota-site-header__inner {
+    min-height: 60px;
+    padding: 0 14px;
+  }
+
+  .gota-nav-brand {
+    font-size: 19px;
+  }
+
+  .gota-nav-brand__logo {
+    width: 34px;
+    height: 34px;
+  }
+
+  .gota-site-header__menu {
+    display: inline-flex;
+  }
+}
