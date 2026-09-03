@@ -140,6 +140,21 @@ APPLE_MOBILE_CLIENT_ID = config(
     default="ar.gogota.app",
 )
 
+APPLE_TEAM_ID = config(
+    "APPLE_TEAM_ID",
+    default="",
+)
+
+APPLE_KEY_ID = config(
+    "APPLE_KEY_ID",
+    default="",
+)
+
+APPLE_PRIVATE_KEY = config(
+    "APPLE_PRIVATE_KEY",
+    default="",
+)
+
 # ======================================================
 # EMAIL (GMAIL)
 # ======================================================

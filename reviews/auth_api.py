@@ -6,6 +6,8 @@ from django.contrib.auth import get_user_model
 
 import jwt
 import hashlib
+import time
+import requests
 
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -21,6 +23,61 @@ from allauth.account.forms import ResetPasswordForm
 
 User = get_user_model()
 
+def generate_apple_client_secret():
+    now = int(time.time())
+
+    private_key = settings.APPLE_PRIVATE_KEY.replace(
+        "\\n",
+        "\n",
+    )
+
+    return jwt.encode(
+        {
+            "iss": settings.APPLE_TEAM_ID,
+            "iat": now,
+            "exp": now + 300,
+            "aud": "https://appleid.apple.com",
+            "sub": settings.APPLE_MOBILE_CLIENT_ID,
+        },
+        private_key,
+        algorithm="ES256",
+        headers={
+            "kid": settings.APPLE_KEY_ID,
+        },
+    )
+
+def exchange_apple_authorization_code(authorization_code):
+    client_secret = generate_apple_client_secret()
+
+    response = requests.post(
+        "https://appleid.apple.com/auth/token",
+        data={
+            "client_id": settings.APPLE_MOBILE_CLIENT_ID,
+            "client_secret": client_secret,
+            "code": authorization_code,
+            "grant_type": "authorization_code",
+        },
+        timeout=15,
+    )
+
+    if response.status_code != 200:
+        raise ValueError(
+            "Apple no pudo validar el authorization_code."
+        )
+
+    data = response.json()
+
+    refresh_token = data.get(
+        "refresh_token",
+        "",
+    )
+
+    if not refresh_token:
+        raise ValueError(
+            "Apple no devolvió un refresh_token."
+        )
+
+    return refresh_token
 
 class MobileLoginAPIView(APIView):
     authentication_classes = []
@@ -35,6 +92,19 @@ class MobileLoginAPIView(APIView):
                 {
                     "success": False,
                     "message": "Email y contraseña son obligatorios.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            apple_refresh_token = exchange_apple_authorization_code(
+                authorization_code
+            )
+        except Exception:
+            return Response(
+                {
+                    "success": False,
+                    "message": "No pudimos completar el acceso con Apple.",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -173,6 +243,11 @@ class MobileAppleLoginAPIView(APIView):
             "",
         ).strip()
 
+        authorization_code = request.data.get(
+            "authorization_code",
+            "",
+        ).strip()
+
         name = request.data.get(
             "name",
             "",
@@ -183,7 +258,7 @@ class MobileAppleLoginAPIView(APIView):
             "",
         ).strip()
 
-        if not apple_id_token or not raw_nonce:
+        if not apple_id_token or not authorization_code or not raw_nonce:
             return Response(
                 {
                     "success": False,
@@ -267,6 +342,7 @@ class MobileAppleLoginAPIView(APIView):
                 email=email,
                 first_name=name or email.split("@")[0],
                 apple_sub=apple_sub,
+                apple_refresh_token=apple_refresh_token,
             )
 
             user.set_unusable_password()
@@ -276,6 +352,10 @@ class MobileAppleLoginAPIView(APIView):
 
         else:
             fields_to_update = []
+
+            if user.apple_refresh_token != apple_refresh_token:
+                user.apple_refresh_token = apple_refresh_token
+                fields_to_update.append("apple_refresh_token")
 
             if not user.apple_sub:
                 user.apple_sub = apple_sub

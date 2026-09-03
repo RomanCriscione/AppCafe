@@ -18,6 +18,10 @@ class CustomUser(AbstractUser):
         unique=True,
         null=True,
         blank=True,
+    )
+    apple_refresh_token = models.TextField(
+        null=True,
+        blank=True,
     )     
 
     def __str__(self):
