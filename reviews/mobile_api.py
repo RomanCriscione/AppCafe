@@ -305,6 +305,22 @@ class CreateCafeAPIView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
+class MyCafesAPIView(generics.ListAPIView):
+    """
+    GET /api/mobile/cafes/mine/
+
+    Devuelve las cafeterías del usuario autenticado.
+    """
+
+    serializer_class = CafeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return (
+            Cafe.objects
+            .filter(owner=self.request.user)
+            .order_by("name")
+        )
 
 class ReviewTagsAPIView(APIView):
     """
