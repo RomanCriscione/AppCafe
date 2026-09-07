@@ -8,6 +8,7 @@ from django.core.files.base import ContentFile
 import os
 from reviews.utils.images import resize_and_compress
 from .claims import ClaimStatus
+import secrets
 
 User = get_user_model()
 
@@ -526,3 +527,466 @@ class CafeWhisper(models.Model):
 
     def __str__(self):
         return f"{self.user} → {self.cafe}: {self.text}"
+
+class RewardActionRule(models.Model):
+
+    class Action(models.TextChoices):
+        WANT_TO_GO = "want_to_go", "Quiero ir"
+        RELATIONSHIP_PROGRESS = "relationship_progress", "Ya fui / Quiero volver"
+        CHECK_IN = "check_in", "Estoy acá"
+        REVIEW = "review", "Dejar reseña"
+        PHOTO = "photo", "Agregar foto"
+        WHISPER = "whisper", "Dejar huella"
+
+    action = models.CharField(
+        max_length=30,
+        choices=Action.choices,
+        unique=True,
+        verbose_name="Acción",
+    )
+
+    points = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Gotas",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Activa",
+    )
+
+    max_rewards_per_window = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Máximo de recompensas por ventana",
+        help_text=(
+            "Dejar vacío si esta acción no tiene límite por ventana."
+        ),
+    )
+
+    window_hours = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Duración de la ventana (horas)",
+        help_text=(
+            "Ejemplo: 24 para limitar recompensas dentro de una ventana de 24 horas."
+        ),
+    )
+
+    repeat_after_days = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Puede volver a sumar después de (días)",
+        help_text=(
+            "Dejar vacío si la recompensa sólo puede obtenerse una vez por cafetería."
+        ),
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        verbose_name = "Regla de Gotas"
+        verbose_name_plural = "Reglas de Gotas"
+        ordering = ["action"]
+
+    def __str__(self):
+        return f"{self.get_action_display()} (+{self.points} Gotas)"
+
+class UserPointTransaction(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="gota_transactions",
+        verbose_name="Usuario",
+    )
+
+    cafe = models.ForeignKey(
+        "Cafe",
+        on_delete=models.CASCADE,
+        related_name="gota_transactions",
+        null=True,
+        blank=True,
+        verbose_name="Cafetería",
+    )
+
+    action = models.CharField(
+        max_length=30,
+        choices=RewardActionRule.Action.choices,
+        verbose_name="Acción",
+    )
+
+    points = models.IntegerField(
+        verbose_name="Gotas",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = "Movimiento de Gotas"
+        verbose_name_plural = "Movimientos de Gotas"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "action", "created_at"]),
+            models.Index(fields=["user", "cafe", "action"]),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.user} · {self.get_action_display()} "
+            f"· {self.points:+d} Gotas"
+        )
+
+class CafeCheckIn(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="cafe_checkins",
+        verbose_name="Usuario",
+    )
+
+    cafe = models.ForeignKey(
+        "Cafe",
+        on_delete=models.CASCADE,
+        related_name="checkins",
+        verbose_name="Cafetería",
+    )
+
+    latitude = models.FloatField(
+        verbose_name="Latitud detectada",
+    )
+
+    longitude = models.FloatField(
+        verbose_name="Longitud detectada",
+    )
+
+    distance_meters = models.FloatField(
+        verbose_name="Distancia a la cafetería (m)",
+    )
+
+    is_valid = models.BooleanField(
+        default=False,
+        verbose_name="Visita validada",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = "Visita validada"
+        verbose_name_plural = "Visitas validadas"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "cafe", "created_at"]),
+            models.Index(fields=["user", "is_valid"]),
+        ]
+
+    def __str__(self):
+        estado = "válida" if self.is_valid else "no válida"
+        return (
+            f"{self.user} · {self.cafe} "
+            f"· {estado} · {self.distance_meters:.0f} m"
+        )
+
+class RewardSettings(models.Model):
+
+    check_in_radius_meters = models.PositiveIntegerField(
+        default=150,
+        verbose_name="Radio máximo para Estoy acá (metros)",
+        help_text=(
+            "Distancia máxima entre el usuario y la cafetería "
+            "para validar una visita."
+        ),
+    )
+
+    check_in_valid_hours = models.PositiveIntegerField(
+        default=24,
+        verbose_name="Vigencia del Estoy acá (horas)",
+        help_text=(
+            "Durante cuántas horas una visita validada puede "
+            "habilitar recompensas como una reseña."
+        ),
+    )
+
+    welcome_reward_radius_km = models.FloatField(
+        default=3.0,
+        verbose_name="Radio para beneficio inicial (km)",
+        help_text=(
+            "Si la cafetería elegida no tiene beneficio, "
+            "buscar uno cercano dentro de este radio."
+        ),
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        verbose_name = "Configuración de recompensas"
+        verbose_name_plural = "Configuración de recompensas"
+
+    def __str__(self):
+        return "Configuración de recompensas"
+
+class CafeReward(models.Model):
+
+    class RewardType(models.TextChoices):
+        PERCENTAGE = "percentage", "Descuento porcentual"
+        FIXED_AMOUNT = "fixed_amount", "Descuento fijo"
+        FREE_PRODUCT = "free_product", "Producto gratis"
+        TWO_FOR_ONE = "two_for_one", "2x1"
+        SPECIAL_PRICE = "special_price", "Precio especial"
+        CUSTOM = "custom", "Beneficio personalizado"
+
+    class UnlockType(models.TextChoices):
+        POINTS = "points", "Por Gotas"
+        AUTOMATIC = "automatic", "Automático"
+
+    cafe = models.ForeignKey(
+        "Cafe",
+        on_delete=models.CASCADE,
+        related_name="rewards",
+        verbose_name="Cafetería",
+    )
+
+    name = models.CharField(
+        max_length=120,
+        verbose_name="Nombre interno",
+    )
+
+    reward_type = models.CharField(
+        max_length=30,
+        choices=RewardType.choices,
+        verbose_name="Tipo de beneficio",
+    )
+
+    unlock_type = models.CharField(
+        max_length=20,
+        choices=UnlockType.choices,
+        default=UnlockType.POINTS,
+        verbose_name="Forma de desbloqueo",
+    )
+
+    points_required = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Gotas necesarias",
+        help_text=(
+            "Dejar vacío si el beneficio se desbloquea automáticamente."
+        ),
+    )
+
+    percentage_value = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Porcentaje de descuento",
+    )
+
+    fixed_amount_value = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Monto de descuento",
+    )
+
+    user_text = models.CharField(
+        max_length=200,
+        verbose_name="Texto para mostrar al usuario",
+        help_text=(
+            "Ejemplo: 20% de descuento en tu consumo."
+        ),
+    )
+
+    terms = models.TextField(
+        blank=True,
+        verbose_name="Condiciones",
+    )
+
+    is_welcome_reward = models.BooleanField(
+        default=False,
+        verbose_name="Puede usarse como primer beneficio",
+    )
+
+    priority = models.PositiveIntegerField(
+        default=100,
+        verbose_name="Prioridad",
+        help_text=(
+            "Menor número = mayor prioridad cuando haya varios beneficios posibles."
+        ),
+    )
+
+    stock = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Cantidad disponible",
+        help_text="Dejar vacío para stock ilimitado.",
+    )
+
+    valid_from = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Válido desde",
+    )
+
+    valid_until = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Válido hasta",
+    )
+
+    coupon_valid_days = models.PositiveIntegerField(
+        default=7,
+        verbose_name="Vencimiento del cupón (días)",
+        help_text=(
+            "Cantidad de días que tendrá el usuario para usarlo "
+            "desde que lo recibe."
+        ),
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Activo",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        verbose_name = "Beneficio de cafetería"
+        verbose_name_plural = "Beneficios de cafeterías"
+        ordering = ["priority", "cafe__name", "name"]
+        indexes = [
+            models.Index(fields=["cafe", "is_active"]),
+            models.Index(fields=["is_welcome_reward", "is_active"]),
+        ]
+
+    def __str__(self):
+        return f"{self.cafe} · {self.name}"
+
+class UserCoupon(models.Model):
+
+    class Status(models.TextChoices):
+        AVAILABLE = "available", "Disponible"
+        USED = "used", "Usado"
+        EXPIRED = "expired", "Vencido"
+        CANCELLED = "cancelled", "Cancelado"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="coupons",
+        verbose_name="Usuario",
+    )
+
+    cafe = models.ForeignKey(
+        "Cafe",
+        on_delete=models.CASCADE,
+        related_name="user_coupons",
+        verbose_name="Cafetería",
+    )
+
+    reward = models.ForeignKey(
+        "CafeReward",
+        on_delete=models.PROTECT,
+        related_name="user_coupons",
+        verbose_name="Beneficio original",
+    )
+
+    code = models.CharField(
+        max_length=20,
+        unique=True,
+        editable=False,
+        verbose_name="Código",
+    )
+
+    qr_token = models.CharField(
+        max_length=64,
+        unique=True,
+        editable=False,
+        verbose_name="Token QR",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.AVAILABLE,
+        verbose_name="Estado",
+    )
+
+    reward_text_snapshot = models.CharField(
+        max_length=200,
+        verbose_name="Beneficio otorgado",
+    )
+
+    terms_snapshot = models.TextField(
+        blank=True,
+        verbose_name="Condiciones al momento de otorgarlo",
+    )
+
+    obtained_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Obtenido",
+    )
+
+    expires_at = models.DateTimeField(
+        verbose_name="Vence",
+    )
+
+    used_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Usado",
+    )
+
+    used_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="validated_coupons",
+        verbose_name="Validado por",
+    )
+
+    class Meta:
+        verbose_name = "Cupón de usuario"
+        verbose_name_plural = "Cupones de usuarios"
+        ordering = ["-obtained_at"]
+        indexes = [
+            models.Index(fields=["user", "status"]),
+            models.Index(fields=["cafe", "status"]),
+            models.Index(fields=["qr_token"]),
+            models.Index(fields=["expires_at"]),
+        ]
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = self._generate_unique_code()
+
+        if not self.qr_token:
+            self.qr_token = secrets.token_urlsafe(32)
+
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def _generate_unique_code(cls):
+        while True:
+            code = f"GOTA-{secrets.token_hex(3).upper()}"
+
+            if not cls.objects.filter(code=code).exists():
+                return code
+
+    def __str__(self):
+        return (
+            f"{self.code} · {self.user} · "
+            f"{self.cafe} · {self.get_status_display()}"
+        )

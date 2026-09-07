@@ -1,7 +1,29 @@
 # reviews/admin.py
+# reviews/admin.py
 from django.contrib import admin
-from .models import Cafe, Review, CafeStat, ReviewLike, ReviewReport, CafeWhisper
-from .claims import ClaimRequest, ClaimEvidence, ClaimStatus, ClaimMethod
+
+from .models import (
+    Cafe,
+    Review,
+    CafeStat,
+    ReviewLike,
+    ReviewReport,
+    CafeWhisper,
+    RewardActionRule,
+    RewardSettings,
+    CafeReward,
+    UserCoupon,
+    UserPointTransaction,
+    CafeCheckIn,
+)
+
+from .claims import (
+    ClaimRequest,
+    ClaimEvidence,
+    ClaimStatus,
+    ClaimMethod,
+)
+
 from import_export.admin import ImportExportModelAdmin
 
 
@@ -202,3 +224,156 @@ class CafeWhisperAdmin(admin.ModelAdmin):
     @admin.action(description="Mostrar huellas seleccionadas")
     def show_whispers(self, request, queryset):
         queryset.update(is_hidden=False)
+
+@admin.register(RewardActionRule)
+class RewardActionRuleAdmin(admin.ModelAdmin):
+    list_display = (
+        "action",
+        "points",
+        "is_active",
+        "max_rewards_per_window",
+        "window_hours",
+        "repeat_after_days",
+    )
+
+    list_filter = (
+        "is_active",
+    )
+
+
+@admin.register(RewardSettings)
+class RewardSettingsAdmin(admin.ModelAdmin):
+    list_display = (
+        "check_in_radius_meters",
+        "check_in_valid_hours",
+        "welcome_reward_radius_km",
+        "updated_at",
+    )
+
+
+@admin.register(CafeReward)
+class CafeRewardAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "cafe",
+        "reward_type",
+        "unlock_type",
+        "points_required",
+        "is_welcome_reward",
+        "priority",
+        "stock",
+        "is_active",
+    )
+
+    list_filter = (
+        "reward_type",
+        "unlock_type",
+        "is_welcome_reward",
+        "is_active",
+    )
+
+    search_fields = (
+        "name",
+        "cafe__name",
+        "user_text",
+    )
+
+    raw_id_fields = (
+        "cafe",
+    )
+
+
+@admin.register(UserCoupon)
+class UserCouponAdmin(admin.ModelAdmin):
+    list_display = (
+        "code",
+        "user",
+        "cafe",
+        "reward",
+        "status",
+        "obtained_at",
+        "expires_at",
+        "used_at",
+    )
+
+    list_filter = (
+        "status",
+        "cafe",
+        "obtained_at",
+    )
+
+    search_fields = (
+        "code",
+        "user__email",
+        "cafe__name",
+    )
+
+    raw_id_fields = (
+        "user",
+        "cafe",
+        "reward",
+        "used_by",
+    )
+
+    readonly_fields = (
+        "code",
+        "qr_token",
+        "obtained_at",
+        "used_at",
+    )
+
+
+@admin.register(UserPointTransaction)
+class UserPointTransactionAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "cafe",
+        "action",
+        "points",
+        "created_at",
+    )
+
+    list_filter = (
+        "action",
+        "created_at",
+    )
+
+    search_fields = (
+        "user__email",
+        "cafe__name",
+    )
+
+    raw_id_fields = (
+        "user",
+        "cafe",
+    )
+
+    date_hierarchy = "created_at"
+
+
+@admin.register(CafeCheckIn)
+class CafeCheckInAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "cafe",
+        "distance_meters",
+        "is_valid",
+        "created_at",
+    )
+
+    list_filter = (
+        "is_valid",
+        "created_at",
+    )
+
+    search_fields = (
+        "user__email",
+        "cafe__name",
+    )
+
+    raw_id_fields = (
+        "user",
+        "cafe",
+    )
+
+    date_hierarchy = "created_at"
