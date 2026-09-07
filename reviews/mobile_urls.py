@@ -8,6 +8,7 @@ from .mobile_api import (
     SetCafeCollectionAPIView,
     CreateCafeAPIView,
     MyCafesAPIView,
+    UpdateCafeAPIView,
     BecomeOwnerAPIView,
     CreateReviewAPIView,
     ReviewTagsAPIView,
@@ -98,6 +99,12 @@ urlpatterns = [
         "cafes/create/",
         CreateCafeAPIView.as_view(),
         name="mobile-create-cafe",
+    ),
+
+    path(
+        "cafes/<int:cafe_id>/update/",
+        UpdateCafeAPIView.as_view(),
+        name="mobile-update-cafe",
     ),
 
     path(

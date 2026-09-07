@@ -322,6 +322,155 @@ class MyCafesAPIView(generics.ListAPIView):
             .order_by("name")
         )
 
+
+class UpdateCafeAPIView(APIView):
+    """
+    PATCH /api/mobile/cafes/<cafe_id>/update/
+
+    Actualiza una cafetería del usuario autenticado.
+    """
+
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def patch(self, request, cafe_id):
+        cafe = get_object_or_404(
+            Cafe,
+            id=cafe_id,
+            owner=request.user,
+        )
+
+        campos_texto = {
+            "name": "name",
+            "address": "address",
+            "location": "location",
+            "province": "province",
+            "description": "description",
+            "phone": "phone",
+            "email": "email",
+            "google_maps_url": "google_maps_url",
+            "instagram": "instagram",
+            "latitude": "latitude",
+            "longitude": "longitude",
+        }
+
+        for campo_api, campo_modelo in campos_texto.items():
+            if campo_api in request.data:
+                valor = request.data.get(campo_api)
+
+                if campo_api == "instagram":
+                    valor = str(valor or "").strip()
+                    valor = valor.replace("@", "")
+                    valor = valor.replace(
+                        "https://instagram.com/",
+                        "",
+                    )
+                    valor = valor.replace(
+                        "https://www.instagram.com/",
+                        "",
+                    )
+                    valor = valor.strip("/")
+
+                if campo_api in ["latitude", "longitude"]:
+                    valor = valor or None
+
+                setattr(
+                    cafe,
+                    campo_modelo,
+                    valor,
+                )
+
+        campos_booleanos = [
+            "has_wifi",
+            "has_air_conditioning",
+            "has_power_outlets",
+            "has_outdoor_seating",
+            "has_parking",
+            "is_accessible",
+            "has_baby_changing",
+            "is_pet_friendly",
+            "is_kids_friendly",
+            "has_specialty_coffee",
+            "serves_brunch",
+            "serves_breakfast",
+            "serves_alcohol",
+            "has_artisanal_pastries",
+            "is_vegan_friendly",
+            "has_vegetarian_options",
+            "has_gluten_free_options",
+            "has_healthy_options",
+            "has_sugar_free_options",
+            "has_plant_based_milk",
+            "has_garden",
+            "has_water_view",
+            "has_mountain_view",
+            "surrounded_by_nature",
+            "has_rooftop",
+            "has_large_windows",
+            "is_old_house",
+            "is_historic_building",
+            "inside_bookstore",
+            "inside_cultural_space",
+            "laptop_friendly",
+            "quiet_space",
+            "has_books_or_games",
+        ]
+
+        for campo in campos_booleanos:
+            if campo in request.data:
+                setattr(
+                    cafe,
+                    campo,
+                    request.data.get(campo) == "true",
+                )
+
+        max_size = 4 * 1024 * 1024
+
+        for campo_foto in [
+            "photo1",
+            "photo2",
+            "photo3",
+        ]:
+            nueva_foto = request.FILES.get(
+                campo_foto
+            )
+
+            if nueva_foto is None:
+                continue
+
+            if nueva_foto.size > max_size:
+                return Response(
+                    {
+                        "success": False,
+                        "error": "photo_too_large",
+                        "message": (
+                            "Cada imagen puede pesar "
+                            "como máximo 4 MB."
+                        ),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            setattr(
+                cafe,
+                campo_foto,
+                nueva_foto,
+            )
+
+        cafe.save()
+
+        return Response(
+            {
+                "success": True,
+                "message": (
+                    "Cafetería actualizada correctamente."
+                ),
+                "cafe_id": cafe.id,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
 class ReviewTagsAPIView(APIView):
     """
     GET /api/mobile/review-tags/
