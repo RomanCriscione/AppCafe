@@ -12,7 +12,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class CafeSerializer(serializers.ModelSerializer):
-    average_rating = serializers.FloatField(read_only=True)
+    average_rating = serializers.SerializerMethodField()
 
     tags = TagSerializer(many=True, read_only=True)
 
@@ -21,6 +21,15 @@ class CafeSerializer(serializers.ModelSerializer):
     photo3_url = serializers.SerializerMethodField()
 
     top_tags = serializers.SerializerMethodField()
+
+    def get_average_rating(self, obj):
+        from django.db.models import Avg
+
+        return (
+            obj.reviews.aggregate(
+                average=Avg("rating")
+            )["average"]
+        )
 
     def build_image_url(self, image_field):
         if image_field:
