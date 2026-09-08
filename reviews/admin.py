@@ -253,6 +253,10 @@ class RewardSettingsAdmin(admin.ModelAdmin):
         "updated_at",
     )
 
+    list_display_links = (
+        "check_in_radius_meters",
+    )
+
     def has_add_permission(self, request):
         if RewardSettings.objects.exists():
             return False
