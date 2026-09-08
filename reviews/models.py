@@ -696,6 +696,35 @@ class CafeCheckIn(models.Model):
 
 class RewardSettings(models.Model):
 
+    rewards_enabled = models.BooleanField(
+        default=False,
+        verbose_name="Programa de Gotas activo",
+        help_text=(
+            "Interruptor maestro. Mientras esté desactivado, "
+            "ninguna acción otorga Gotas ni beneficios."
+        ),
+    )
+
+    program_starts_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Inicio oficial del programa",
+        help_text=(
+            "Las acciones anteriores a esta fecha no forman parte "
+            "de la economía oficial de Gotas."
+        ),
+    )
+
+    welcome_reward_enabled = models.BooleanField(
+        default=False,
+        verbose_name="Beneficio de bienvenida activo",
+        help_text=(
+            "Permite entregar el beneficio inicial en la primera "
+            "acción elegible realizada desde el inicio del programa."
+        ),
+    )
+
+
     check_in_radius_meters = models.PositiveIntegerField(
         default=150,
         verbose_name="Radio máximo para Estoy acá (metros)",

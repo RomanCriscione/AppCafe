@@ -244,11 +244,19 @@ class RewardActionRuleAdmin(admin.ModelAdmin):
 @admin.register(RewardSettings)
 class RewardSettingsAdmin(admin.ModelAdmin):
     list_display = (
+        "rewards_enabled",
+        "program_starts_at",
+        "welcome_reward_enabled",
         "check_in_radius_meters",
         "check_in_valid_hours",
         "welcome_reward_radius_km",
         "updated_at",
     )
+
+    def has_add_permission(self, request):
+        if RewardSettings.objects.exists():
+            return False
+        return super().has_add_permission(request)
 
 
 @admin.register(CafeReward)

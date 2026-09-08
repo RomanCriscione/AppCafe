@@ -14,8 +14,12 @@ from reviews.models import (
     CafeWhisper,
     Review,
     ReviewReport,
+    RewardActionRule,
     Tag,
 )
+
+from reviews.rewards import award_points
+
 from reviews.serializers import (
     CafeSerializer,
     CafeRelationshipSerializer,
@@ -1451,15 +1455,38 @@ class SetCafeStatusAPIView(APIView):
             else selected_status
         )
 
+        reward_result = None
+
+        if not removed:
+            if selected_status == CafeRelationship.WANT_TO_GO:
+                reward_result = award_points(
+                    user=request.user,
+                    cafe=cafe,
+                    action=RewardActionRule.Action.WANT_TO_GO,
+                )
+
+            elif selected_status in [
+                CafeRelationship.WANT_TO_RETURN,
+                CafeRelationship.VISITED,
+            ]:
+                reward_result = award_points(
+                    user=request.user,
+                    cafe=cafe,
+                    action=RewardActionRule.Action.RELATIONSHIP_PROGRESS,
+                )
+
         return Response(
             {
                 "success": True,
                 "cafe_id": cafe.id,
                 "status": active_status,
                 "removed": removed,
+                "reward": reward_result,
             },
             status=status.HTTP_200_OK,
         )
+
+
     
 class SetCafeCollectionAPIView(APIView):
     """
