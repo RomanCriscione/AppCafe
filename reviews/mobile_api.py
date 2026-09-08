@@ -1,3 +1,5 @@
+from math import atan2, cos, radians, sin, sqrt
+
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 
@@ -10,11 +12,13 @@ from django.utils import timezone
 
 from reviews.models import (
     Cafe,
+    CafeCheckIn,
     CafeRelationship,
     CafeWhisper,
     Review,
     ReviewReport,
     RewardActionRule,
+    RewardSettings,
     Tag,
 )
 
@@ -25,6 +29,28 @@ from reviews.serializers import (
     CafeRelationshipSerializer,
     MobileUserSerializer,
 )
+
+def calculate_distance_meters(lat1, lon1, lat2, lon2):
+    earth_radius_meters = 6371000
+
+    lat1_rad = radians(lat1)
+    lat2_rad = radians(lat2)
+    delta_lat = radians(lat2 - lat1)
+    delta_lon = radians(lon2 - lon1)
+
+    a = (
+        sin(delta_lat / 2) ** 2
+        + cos(lat1_rad)
+        * cos(lat2_rad)
+        * sin(delta_lon / 2) ** 2
+    )
+
+    c = 2 * atan2(
+        sqrt(a),
+        sqrt(1 - a),
+    )
+
+    return earth_radius_meters * c
 
 class CreateCafeAPIView(APIView):
     """
@@ -1486,6 +1512,98 @@ class SetCafeStatusAPIView(APIView):
             status=status.HTTP_200_OK,
         )
 
+class CafeCheckInAPIView(APIView):
+    """
+    POST /api/mobile/cafes/<cafe_id>/check-in/
+
+    Valida si el usuario está físicamente cerca de la cafetería.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, cafe_id):
+        cafe = get_object_or_404(
+            Cafe,
+            id=cafe_id,
+        )
+
+        try:
+            detected_latitude = float(
+                request.data.get("latitude")
+            )
+            detected_longitude = float(
+                request.data.get("longitude")
+            )
+        except (TypeError, ValueError):
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_coordinates",
+                    "message": "No pudimos validar tu ubicación.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if cafe.latitude is None or cafe.longitude is None:
+            return Response(
+                {
+                    "success": False,
+                    "error": "cafe_without_coordinates",
+                    "message": "Esta cafetería todavía no tiene una ubicación precisa cargada.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        settings = RewardSettings.objects.first()
+
+        radius_meters = (
+            settings.check_in_radius_meters
+            if settings is not None
+            else 150
+        )
+
+        distance_meters = calculate_distance_meters(
+            detected_latitude,
+            detected_longitude,
+            float(cafe.latitude),
+            float(cafe.longitude),
+        )
+
+        is_valid = distance_meters <= radius_meters
+
+        check_in = CafeCheckIn.objects.create(
+            user=request.user,
+            cafe=cafe,
+            latitude=detected_latitude,
+            longitude=detected_longitude,
+            distance_meters=distance_meters,
+            is_valid=is_valid,
+        )
+
+        reward_result = None
+
+        if is_valid:
+            reward_result = award_points(
+                user=request.user,
+                cafe=cafe,
+                action=RewardActionRule.Action.CHECK_IN,
+            )
+
+        return Response(
+            {
+                "success": True,
+                "cafe_id": cafe.id,
+                "is_valid": is_valid,
+                "distance_meters": round(
+                    distance_meters,
+                    1,
+                ),
+                "allowed_radius_meters": radius_meters,
+                "reward": reward_result,
+                "check_in_id": check_in.id,
+            },
+            status=status.HTTP_200_OK,
+        )
 
     
 class SetCafeCollectionAPIView(APIView):

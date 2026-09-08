@@ -5,6 +5,7 @@ from .mobile_api import (
     MeAPIView,
     MyMapAPIView,
     SetCafeStatusAPIView,
+    CafeCheckInAPIView,
     SetCafeCollectionAPIView,
     CreateCafeAPIView,
     MyCafesAPIView,
@@ -159,6 +160,11 @@ urlpatterns = [
         "cafes/<int:cafe_id>/set-status/",
         SetCafeStatusAPIView.as_view(),
         name="mobile-set-cafe-status",
+    ),
+    path(
+        "cafes/<int:cafe_id>/check-in/",
+        CafeCheckInAPIView.as_view(),
+        name="mobile-cafe-check-in",
     ),
     path(
         "cafes/<int:cafe_id>/set-collection/",
