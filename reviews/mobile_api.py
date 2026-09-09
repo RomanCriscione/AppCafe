@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.utils import timezone
+from datetime import timedelta
 
 from reviews.models import (
     Cafe,
@@ -831,6 +832,41 @@ class CreateReviewAPIView(APIView):
             precio_capuccino=precio_capuccino,
         )
 
+        settings = RewardSettings.objects.first()
+
+        valid_hours = (
+            settings.check_in_valid_hours
+            if settings is not None
+            else 72
+        )
+
+        check_in_cutoff = timezone.now() - timedelta(
+            hours=valid_hours
+        )
+
+        if (
+            settings is not None
+            and settings.program_starts_at is not None
+            and settings.program_starts_at > check_in_cutoff
+        ):
+            check_in_cutoff = settings.program_starts_at
+
+        has_recent_valid_check_in = CafeCheckIn.objects.filter(
+            user=request.user,
+            cafe=cafe,
+            is_valid=True,
+            created_at__gte=check_in_cutoff,
+        ).exists()
+
+        review_reward = None
+
+        if has_recent_valid_check_in:
+            review_reward = award_points(
+                user=request.user,
+                cafe=cafe,
+                action=RewardActionRule.Action.REVIEW,
+            )
+
         tag_ids = request.data.get("tags", [])
 
         if not isinstance(tag_ids, list):
@@ -842,6 +878,8 @@ class CreateReviewAPIView(APIView):
             if str(tag_id).strip()
         ]
 
+        review_tag_bonus_reward = None
+
         if tag_ids:
             tags = Tag.objects.filter(
                 id__in=tag_ids,
@@ -849,10 +887,29 @@ class CreateReviewAPIView(APIView):
 
             review.tags.set(tags)
 
+            if (
+                has_recent_valid_check_in
+                and tags.exists()
+            ):
+                review_tag_bonus_reward = award_points(
+                    user=request.user,
+                    cafe=cafe,
+                    action=RewardActionRule.Action.REVIEW_TAG_BONUS,
+                )
+
         return Response(
             {
                 "success": True,
                 "message": "Reseña publicada correctamente.",
+                "reward": {
+                    "base": review_reward,
+                    "tag_bonus": review_tag_bonus_reward,
+                    "total_points": (
+                        (review_reward or {}).get("points", 0)
+                        + (review_tag_bonus_reward or {}).get("points", 0)
+                    ),
+                },
+                "review_reward_eligible": has_recent_valid_check_in,
                 "review": {
                     "id": review.id,
                     "rating": review.rating,
