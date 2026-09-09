@@ -22,6 +22,7 @@ from reviews.models import (
     RewardActionRule,
     RewardSettings,
     UserPointTransaction,
+    UserCoupon,
     Tag,
 )
 
@@ -1655,12 +1656,45 @@ class MyGotasAPIView(APIView):
             None,
         )
 
+        available_coupons = []
+
+        coupons = (
+            UserCoupon.objects
+            .filter(
+                user=request.user,
+                status=UserCoupon.Status.AVAILABLE,
+            )
+            .select_related(
+                "cafe",
+                "reward",
+            )
+            .order_by("-obtained_at")
+        )
+
+        for coupon in coupons:
+            available_coupons.append(
+                {
+                    "id": coupon.id,
+                    "code": coupon.code,
+                    "reward_text": coupon.reward_text_snapshot,
+                    "terms": coupon.terms_snapshot,
+                    "obtained_at": coupon.obtained_at,
+                    "expires_at": coupon.expires_at,
+                    "cafe": {
+                        "id": coupon.cafe.id,
+                        "name": coupon.cafe.name,
+                    },
+                }
+            )
+        
+        
         return Response(
             {
                 "balance": balance,
                 "recent_transactions": recent_transactions,
                 "milestones": milestones,
                 "next_milestone": next_milestone,
+                "available_coupons": available_coupons,
             },
             status=status.HTTP_200_OK,
         )
