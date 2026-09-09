@@ -1,6 +1,7 @@
 from math import atan2, cos, radians, sin, sqrt
 
 from django.shortcuts import get_object_or_404
+from django.db import transaction
 from django.db.models import Avg, Sum
 
 from rest_framework import generics, status
@@ -1699,6 +1700,142 @@ class MyGotasAPIView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class RedeemCouponAPIView(APIView):
+    """
+    POST /api/mobile/coupons/redeem/
+
+    Valida y canjea un beneficio desde una cuenta
+    dueña de la cafetería correspondiente.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def post(self, request):
+        if not getattr(request.user, "is_owner", False):
+            return Response(
+                {
+                    "success": False,
+                    "error": "not_owner",
+                    "message": (
+                        "Solo una cuenta de cafetería "
+                        "puede canjear beneficios."
+                    ),
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        qr_token = str(
+            request.data.get("qr_token", "")
+        ).strip()
+
+        if not qr_token:
+            return Response(
+                {
+                    "success": False,
+                    "error": "qr_token_required",
+                    "message": "El código QR no es válido.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        coupon = (
+            UserCoupon.objects
+            .select_for_update()
+            .select_related(
+                "user",
+                "cafe",
+                "reward",
+            )
+            .filter(qr_token=qr_token)
+            .first()
+        )
+
+        if coupon is None:
+            return Response(
+                {
+                    "success": False,
+                    "error": "coupon_not_found",
+                    "message": "No encontramos este beneficio.",
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if coupon.cafe.owner_id != request.user.id:
+            return Response(
+                {
+                    "success": False,
+                    "error": "wrong_cafe",
+                    "message": (
+                        "Este beneficio pertenece a otra cafetería."
+                    ),
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if coupon.status != UserCoupon.Status.AVAILABLE:
+            return Response(
+                {
+                    "success": False,
+                    "error": "coupon_not_available",
+                    "message": (
+                        "Este beneficio ya no está disponible."
+                    ),
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        now = timezone.now()
+
+        if coupon.expires_at <= now:
+            coupon.status = UserCoupon.Status.EXPIRED
+            coupon.save(
+                update_fields=["status"],
+            )
+
+            return Response(
+                {
+                    "success": False,
+                    "error": "coupon_expired",
+                    "message": "Este beneficio está vencido.",
+                },
+                status=status.HTTP_410_GONE,
+            )
+
+        coupon.status = UserCoupon.Status.USED
+        coupon.used_at = now
+        coupon.used_by = request.user
+
+        coupon.save(
+            update_fields=[
+                "status",
+                "used_at",
+                "used_by",
+            ],
+        )
+
+        return Response(
+            {
+                "success": True,
+                "message": "Beneficio canjeado correctamente.",
+                "coupon": {
+                    "id": coupon.id,
+                    "code": coupon.code,
+                    "reward_text":
+                        coupon.reward_text_snapshot,
+                    "cafe": {
+                        "id": coupon.cafe.id,
+                        "name": coupon.cafe.name,
+                    },
+                    "status": coupon.status,
+                    "used_at": coupon.used_at,
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
+
 
 class CafeCheckInAPIView(APIView):
     """
