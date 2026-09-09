@@ -1,7 +1,7 @@
 from math import atan2, cos, radians, sin, sqrt
 
 from django.shortcuts import get_object_or_404
-from django.db.models import Avg
+from django.db.models import Avg, Sum
 
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -20,6 +20,7 @@ from reviews.models import (
     ReviewReport,
     RewardActionRule,
     RewardSettings,
+    UserPointTransaction,
     Tag,
 )
 
@@ -1572,6 +1573,49 @@ class SetCafeStatusAPIView(APIView):
                 "status": active_status,
                 "removed": removed,
                 "reward": reward_result,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+class MyGotasAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        transactions = UserPointTransaction.objects.filter(
+            user=request.user,
+        ).select_related(
+            "cafe",
+        )
+
+        balance = transactions.aggregate(
+            total=Sum("points"),
+        )["total"] or 0
+
+        recent_transactions = []
+
+        for transaction in transactions[:10]:
+            recent_transactions.append(
+                {
+                    "id": transaction.id,
+                    "action": transaction.action,
+                    "action_label": transaction.get_action_display(),
+                    "points": transaction.points,
+                    "created_at": transaction.created_at,
+                    "cafe": (
+                        {
+                            "id": transaction.cafe.id,
+                            "name": transaction.cafe.name,
+                        }
+                        if transaction.cafe
+                        else None
+                    ),
+                }
+            )
+
+        return Response(
+            {
+                "balance": balance,
+                "recent_transactions": recent_transactions,
             },
             status=status.HTTP_200_OK,
         )

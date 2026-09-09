@@ -4,6 +4,7 @@ from .mobile_api import (
     RelatedCafesAPIView,
     MeAPIView,
     MyMapAPIView,
+    MyGotasAPIView,
     SetCafeStatusAPIView,
     CafeCheckInAPIView,
     SetCafeCollectionAPIView,
@@ -35,6 +36,12 @@ urlpatterns = [
         "my-map/",
         MyMapAPIView.as_view(),
         name="mobile-my-map",
+    ),
+
+    path(
+        "my-gotas/",
+        MyGotasAPIView.as_view(),
+        name="mobile-my-gotas",
     ),
 
     path(
