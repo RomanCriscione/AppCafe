@@ -991,6 +991,12 @@ class UserCoupon(models.Model):
         verbose_name = "Cupón de usuario"
         verbose_name_plural = "Cupones de usuarios"
         ordering = ["-obtained_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "reward"],
+                name="unique_user_reward_coupon",
+            ),
+        ]
         indexes = [
             models.Index(fields=["user", "status"]),
             models.Index(fields=["cafe", "status"]),
