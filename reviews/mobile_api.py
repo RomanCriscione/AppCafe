@@ -676,12 +676,19 @@ class CafeWhispersAPIView(APIView):
             text=text[:40],
         )
 
+        reward_result = award_points(
+            user=request.user,
+            cafe=cafe,
+            action=RewardActionRule.Action.WHISPER,
+        )
+
         return Response(
             {
                 "success": True,
                 "message": (
                     "Esa sensación ya forma parte de este café ✨"
                 ),
+                "reward": reward_result,
                 "whisper": {
                     "id": whisper.id,
                     "text": whisper.text,
