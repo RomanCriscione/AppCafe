@@ -1676,6 +1676,7 @@ class MyGotasAPIView(APIView):
                 {
                     "id": coupon.id,
                     "code": coupon.code,
+                    "qr_token": coupon.qr_token,
                     "reward_text": coupon.reward_text_snapshot,
                     "terms": coupon.terms_snapshot,
                     "obtained_at": coupon.obtained_at,
