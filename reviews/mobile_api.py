@@ -16,6 +16,7 @@ from reviews.models import (
     CafeCheckIn,
     CafeRelationship,
     CafeWhisper,
+    CafeReward,
     Review,
     ReviewReport,
     RewardActionRule,
@@ -1581,11 +1582,25 @@ class MyGotasAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        reward_settings = RewardSettings.objects.first()
+        program_starts_at = (
+            reward_settings.program_starts_at
+            if reward_settings
+            else None
+        )
+
         transactions = UserPointTransaction.objects.filter(
             user=request.user,
         ).select_related(
             "cafe",
         )
+
+        if program_starts_at:
+            transactions = transactions.filter(
+                created_at__gte=program_starts_at,
+            )
+        else:
+            transactions = transactions.none()
 
         balance = transactions.aggregate(
             total=Sum("points"),
@@ -1612,10 +1627,40 @@ class MyGotasAPIView(APIView):
                 }
             )
 
+        milestone_points = (
+            CafeReward.objects.filter(
+                is_active=True,
+                unlock_type=CafeReward.UnlockType.POINTS,
+                points_required__isnull=False,
+            )
+            .values_list("points_required", flat=True)
+            .distinct()
+            .order_by("points_required")
+        )
+
+        milestones = [
+            {
+                "points_required": points,
+                "reached": balance >= points,
+            }
+            for points in milestone_points
+        ]
+
+        next_milestone = next(
+            (
+                milestone
+                for milestone in milestones
+                if not milestone["reached"]
+            ),
+            None,
+        )
+
         return Response(
             {
                 "balance": balance,
                 "recent_transactions": recent_transactions,
+                "milestones": milestones,
+                "next_milestone": next_milestone,
             },
             status=status.HTTP_200_OK,
         )
