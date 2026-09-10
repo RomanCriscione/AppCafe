@@ -5,6 +5,7 @@ from .mobile_api import (
     MeAPIView,
     MyMapAPIView,
     MyGotasAPIView,
+    RedeemCouponAPIView,
     SetCafeStatusAPIView,
     CafeCheckInAPIView,
     SetCafeCollectionAPIView,
@@ -42,6 +43,12 @@ urlpatterns = [
         "my-gotas/",
         MyGotasAPIView.as_view(),
         name="mobile-my-gotas",
+    ),
+
+    path(
+        "coupons/redeem/",
+        RedeemCouponAPIView.as_view(),
+        name="mobile-redeem-coupon",
     ),
 
     path(
