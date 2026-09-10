@@ -1731,27 +1731,38 @@ class RedeemCouponAPIView(APIView):
             request.data.get("qr_token", "")
         ).strip()
 
-        if not qr_token:
+        code = str(
+            request.data.get("code", "")
+        ).strip().upper()
+
+        if not qr_token and not code:
             return Response(
                 {
                     "success": False,
-                    "error": "qr_token_required",
-                    "message": "El código QR no es válido.",
+                    "error": "coupon_identifier_required",
+                    "message": "Ingresá un QR o código de beneficio válido.",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        coupon = (
-            UserCoupon.objects
-            .select_for_update()
-            .select_related(
-                "user",
-                "cafe",
-                "reward",
+            coupon_query = (
+                UserCoupon.objects
+                .select_for_update()
+                .select_related(
+                    "user",
+                    "cafe",
+                    "reward",
+                )
             )
-            .filter(qr_token=qr_token)
-            .first()
-        )
+
+            if qr_token:
+                coupon = coupon_query.filter(
+                    qr_token=qr_token,
+                ).first()
+            else:
+                coupon = coupon_query.filter(
+                    code=code,
+                ).first()
 
         if coupon is None:
             return Response(
