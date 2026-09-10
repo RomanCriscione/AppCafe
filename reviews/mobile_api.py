@@ -1740,29 +1740,31 @@ class RedeemCouponAPIView(APIView):
                 {
                     "success": False,
                     "error": "coupon_identifier_required",
-                    "message": "Ingresá un QR o código de beneficio válido.",
+                    "message": (
+                        "Ingresá un QR o código de beneficio válido."
+                    ),
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-            coupon_query = (
-                UserCoupon.objects
-                .select_for_update()
-                .select_related(
-                    "user",
-                    "cafe",
-                    "reward",
-                )
+        coupon_query = (
+            UserCoupon.objects
+            .select_for_update()
+            .select_related(
+                "user",
+                "cafe",
+                "reward",
             )
+        )
 
-            if qr_token:
-                coupon = coupon_query.filter(
-                    qr_token=qr_token,
-                ).first()
-            else:
-                coupon = coupon_query.filter(
-                    code=code,
-                ).first()
+        if qr_token:
+            coupon = coupon_query.filter(
+                qr_token=qr_token,
+            ).first()
+        else:
+            coupon = coupon_query.filter(
+                code=code,
+            ).first()
 
         if coupon is None:
             return Response(
