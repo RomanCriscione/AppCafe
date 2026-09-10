@@ -90,15 +90,20 @@ def _unlock_point_rewards(
 
     now = timezone.now()
 
-    rewards = CafeReward.objects.filter(
-        is_active=True,
-        unlock_type=CafeReward.UnlockType.POINTS,
-        points_required__isnull=False,
-        points_required__lte=balance,
-    ).order_by(
-        "points_required",
-        "priority",
-        "id",
+    rewards = (
+        CafeReward.objects
+        .select_for_update()
+        .filter(
+            is_active=True,
+            unlock_type=CafeReward.UnlockType.POINTS,
+            points_required__isnull=False,
+            points_required__lte=balance,
+        )
+        .order_by(
+            "points_required",
+            "priority",
+            "id",
+        )
     )
 
     unlocked_coupons = []

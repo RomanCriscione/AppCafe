@@ -29,6 +29,35 @@ from reviews.models import (
 
 from reviews.rewards import award_points
 
+SENSORY_REVIEW_TAG_GROUPS = {
+    "conexion": [
+        "Podés ir solo sin sentirte solo",
+        "Ideal para charla de sobremesa",
+        "Ideal para una primera cita sin presión",
+    ],
+    "refugio": [
+        "Buen lugar para esperar sin ansiedad",
+        "Te dan ganas de desconectarte",
+        "Te vas y te dan ganas de volver",
+        "Pedirías otra taza solo para quedarte",
+    ],
+    "ritual": [
+        "Huele a café recién molido",
+        "Pan casero y café en taza pesada",
+        "Ventanales con luz todo el día",
+    ],
+    "inspiracion": [
+        "Ideal para escribir o leer un cuento",
+        "Paredes con historias",
+    ],
+}
+
+SENSORY_REVIEW_TAG_NAMES = {
+    name
+    for names in SENSORY_REVIEW_TAG_GROUPS.values()
+    for name in names
+}
+
 from reviews.serializers import (
     CafeSerializer,
     CafeRelationshipSerializer,
@@ -517,29 +546,7 @@ class ReviewTagsAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        manual_tag_groups = {
-            "conexion": [
-                "Podés ir solo sin sentirte solo",
-                "Ideal para charla de sobremesa",
-                "Ideal para una primera cita sin presión",
-            ],
-            "refugio": [
-                "Buen lugar para esperar sin ansiedad",
-                "Te dan ganas de desconectarte",
-                "Te vas y te dan ganas de volver",
-                "Pedirías otra taza solo para quedarte",
-            ],
-            "ritual": [
-                "Huele a café recién molido",
-                "Pan casero y café en taza pesada",
-                "Ventanales con luz todo el día",
-            ],
-            "inspiracion": [
-                "Ideal para escribir o leer un cuento",
-                "Paredes con historias",
-            ],
-        }
-
+        manual_tag_groups = SENSORY_REVIEW_TAG_GROUPS
         nombres = [
             nombre
             for grupo in manual_tag_groups.values()
@@ -891,22 +898,22 @@ class CreateReviewAPIView(APIView):
 
         review_tag_bonus_reward = None
 
-        if tag_ids:
-            tags = Tag.objects.filter(
-                id__in=tag_ids,
+        tags = Tag.objects.filter(
+            id__in=tag_ids,
+            name__in=SENSORY_REVIEW_TAG_NAMES,
+        )
+
+        review.tags.set(tags)
+
+        if (
+            has_recent_valid_check_in
+            and tags.exists()
+        ):
+            review_tag_bonus_reward = award_points(
+                user=request.user,
+                cafe=cafe,
+                action=RewardActionRule.Action.REVIEW_TAG_BONUS,
             )
-
-            review.tags.set(tags)
-
-            if (
-                has_recent_valid_check_in
-                and tags.exists()
-            ):
-                review_tag_bonus_reward = award_points(
-                    user=request.user,
-                    cafe=cafe,
-                    action=RewardActionRule.Action.REVIEW_TAG_BONUS,
-                )
 
         return Response(
             {
@@ -1075,6 +1082,7 @@ class UpdateReviewAPIView(APIView):
 
         tags = Tag.objects.filter(
             id__in=tag_ids,
+            name__in=SENSORY_REVIEW_TAG_NAMES,
         )
 
         review.tags.set(tags)
