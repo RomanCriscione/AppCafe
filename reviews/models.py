@@ -483,8 +483,41 @@ class ReviewReport(models.Model):
         ]
         ordering = ["-created_at"]
 
+        def __str__(self):
+            return f"🚩 {self.review_id} por {self.user} ({self.reason})"
+
+
+class UserBlock(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="blocked_users",
+    )
+
+    blocked_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="blocked_by_users",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "blocked_user"],
+                name="unique_user_block",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["user", "blocked_user"]),
+        ]
+
     def __str__(self):
-        return f"🚩 {self.review_id} por {self.user} ({self.reason})"
+        return f"{self.user} bloqueó a {self.blocked_user}"
+
 
 class CafeWhisper(models.Model):
 
@@ -527,6 +560,52 @@ class CafeWhisper(models.Model):
 
     def __str__(self):
         return f"{self.user} → {self.cafe}: {self.text}"
+
+
+class CafeWhisperReport(models.Model):
+    class Reason(models.TextChoices):
+        SPAM = "spam", "Spam"
+        OFFENSIVE = "offensive", "Contenido ofensivo"
+        FALSE_INFO = "false_info", "Información falsa"
+        OTHER = "other", "Otro"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="whisper_reports",
+    )
+
+    whisper = models.ForeignKey(
+        "CafeWhisper",
+        on_delete=models.CASCADE,
+        related_name="reports",
+    )
+
+    reason = models.CharField(
+        max_length=20,
+        choices=Reason.choices,
+    )
+
+    message = models.TextField(
+        blank=True,
+        null=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "whisper"],
+                name="unique_whisper_report",
+            ),
+        ]
+
+    def __str__(self):
+        return f"🚩 Huella {self.whisper_id} por {self.user}"
+
 
 class RewardActionRule(models.Model):
 
@@ -594,6 +673,8 @@ class RewardActionRule(models.Model):
 
     def __str__(self):
         return f"{self.get_action_display()} (+{self.points} Gotas)"
+
+
 
 class UserPointTransaction(models.Model):
 

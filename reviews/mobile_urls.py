@@ -18,6 +18,8 @@ from .mobile_api import (
     UpdateReviewAPIView,
     ReportReviewAPIView,
     CafeWhispersAPIView,
+    BlockUserAPIView,
+    ReportWhisperAPIView,
 )
 
 from .auth_api import (
@@ -184,5 +186,15 @@ urlpatterns = [
         "cafes/<int:cafe_id>/set-collection/",
         SetCafeCollectionAPIView.as_view(),
         name="mobile-set-cafe-collection",
+    ),
+    path(
+        "users/<int:user_id>/block/",
+        BlockUserAPIView.as_view(),
+        name="mobile-block-user",
+    ),
+    path(
+        "whispers/<int:whisper_id>/report/",
+        ReportWhisperAPIView.as_view(),
+        name="mobile-report-whisper",
     ),
 ]

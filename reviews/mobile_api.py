@@ -1,6 +1,7 @@
 from math import atan2, cos, radians, sin, sqrt
 
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Avg, Sum
 
@@ -17,9 +18,11 @@ from reviews.models import (
     CafeCheckIn,
     CafeRelationship,
     CafeWhisper,
+    CafeWhisperReport,
     CafeReward,
     Review,
     ReviewReport,
+    UserBlock,
     RewardActionRule,
     RewardSettings,
     UserPointTransaction,
@@ -609,12 +612,27 @@ class CafeWhispersAPIView(APIView):
                 cafe=cafe,
                 is_hidden=False,
             )
-            .order_by("-created_at")[:12]
+            .order_by("-created_at")
         )
+
+        if request.user.is_authenticated:
+            blocked_user_ids = UserBlock.objects.filter(
+                user=request.user,
+            ).values_list(
+                "blocked_user_id",
+                flat=True,
+            )
+
+            whispers = whispers.exclude(
+                user_id__in=blocked_user_ids,
+            )
+
+        whispers = whispers[:12]
 
         data = [
             {
                 "id": whisper.id,
+                "user_id": whisper.user_id,
                 "text": whisper.text,
                 "created_at": whisper.created_at.strftime(
                     "%d/%m/%Y"
@@ -1196,6 +1214,143 @@ class ReportReviewAPIView(APIView):
             status=status.HTTP_201_CREATED,
         )
 
+class ReportWhisperAPIView(APIView):
+    """
+    POST /api/mobile/whispers/<whisper_id>/report/
+
+    Permite reportar una Huella.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, whisper_id):
+        whisper = get_object_or_404(
+            CafeWhisper,
+            id=whisper_id,
+        )
+
+        if whisper.user_id == request.user.id:
+            return Response(
+                {
+                    "success": False,
+                    "error": "cannot_report_own_whisper",
+                    "message": "No podés reportar tu propia Huella.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        reason = request.data.get("reason")
+        message = request.data.get("message", "")
+
+        valid_reasons = {
+            value
+            for value, _ in CafeWhisperReport.Reason.choices
+        }
+
+        if reason not in valid_reasons:
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_reason",
+                    "message": "El motivo del reporte no es válido.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        report, created = CafeWhisperReport.objects.get_or_create(
+            user=request.user,
+            whisper=whisper,
+            defaults={
+                "reason": reason,
+                "message": message,
+            },
+        )
+
+        if not created:
+            return Response(
+                {
+                    "success": False,
+                    "error": "already_reported",
+                    "message": "Ya reportaste esta Huella.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        whisper.reports_count += 1
+        whisper.save(
+            update_fields=["reports_count"],
+        )
+
+        return Response(
+            {
+                "success": True,
+                "message": "Gracias. Recibimos tu reporte.",
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+class BlockUserAPIView(APIView):
+    """
+    POST /api/mobile/users/<user_id>/block/
+    DELETE /api/mobile/users/<user_id>/block/
+
+    Permite bloquear o desbloquear a otro usuario.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        User = get_user_model()
+
+        blocked_user = get_object_or_404(
+            User,
+            id=user_id,
+        )
+
+        if blocked_user.id == request.user.id:
+            return Response(
+                {
+                    "success": False,
+                    "error": "cannot_block_self",
+                    "message": "No podés bloquearte a vos mismo.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        block, created = UserBlock.objects.get_or_create(
+            user=request.user,
+            blocked_user=blocked_user,
+        )
+
+        return Response(
+            {
+                "success": True,
+                "blocked": True,
+                "created": created,
+                "blocked_user_id": blocked_user.id,
+                "message": "Usuario bloqueado correctamente.",
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def delete(self, request, user_id):
+        deleted_count, _ = UserBlock.objects.filter(
+            user=request.user,
+            blocked_user_id=user_id,
+        ).delete()
+
+        return Response(
+            {
+                "success": True,
+                "blocked": False,
+                "removed": deleted_count > 0,
+                "blocked_user_id": user_id,
+                "message": "Usuario desbloqueado correctamente.",
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
 class CafeDetailAPIView(APIView):
     """
     GET /api/mobile/cafes/<cafe_id>/
@@ -1269,8 +1424,22 @@ class CafeDetailAPIView(APIView):
         reviews = (
             cafe.reviews
             .select_related("user")
-            .order_by("-created_at")[:5]
+            .order_by("-created_at")
         )
+
+        if request.user.is_authenticated:
+            blocked_user_ids = UserBlock.objects.filter(
+                user=request.user,
+            ).values_list(
+                "blocked_user_id",
+                flat=True,
+            )
+
+            reviews = reviews.exclude(
+                user_id__in=blocked_user_ids,
+            )
+
+        reviews = reviews[:5]
 
         reviews_data = []
 
@@ -1299,6 +1468,7 @@ class CafeDetailAPIView(APIView):
             reviews_data.append(
                 {
                     "id": review.id,
+                    "user_id": review.user_id,
                     "user": user_name,
                     "avatar": avatar_url,
                     "rating": review.rating,
