@@ -35,6 +35,7 @@ from .models import (
     CafeWhisper,
     CafeReward,
     RewardSettings,
+    RewardActionRule,
     UserPointTransaction,
     UserCoupon,
 )
@@ -52,6 +53,7 @@ from django.contrib.postgres.search import (
     SearchRank,
     TrigramSimilarity
 )
+from .rewards import award_points
 
 
 # Helper para invalidar el fragment cache de la lista de reseñas
@@ -1375,6 +1377,27 @@ def set_cafe_status(request, cafe_id):
             relationship.status = status
             relationship.save()
 
+    reward_result = None
+
+    if not removed:
+
+        if status == CafeRelationship.WANT_TO_GO:
+            reward_result = award_points(
+                user=request.user,
+                cafe=cafe,
+                action=RewardActionRule.Action.WANT_TO_GO,
+            )
+
+        elif status in [
+            CafeRelationship.WANT_TO_RETURN,
+            CafeRelationship.VISITED,
+        ]:
+            reward_result = award_points(
+                user=request.user,
+                cafe=cafe,
+                action=RewardActionRule.Action.RELATIONSHIP_PROGRESS,
+            )
+
     status_labels = {
         CafeRelationship.WANT_TO_GO: "☕ Quiero ir",
         CafeRelationship.WANT_TO_RETURN: "❤️ Quiero volver",
@@ -1400,7 +1423,8 @@ def set_cafe_status(request, cafe_id):
         return JsonResponse({
             "ok": True,
             "status": active_status,
-            "removed": removed
+            "removed": removed,
+            "reward": reward_result,
         })
 
     return redirect("reviews:cafe_detail",cafe_id=cafe.id)
