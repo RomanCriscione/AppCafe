@@ -1316,6 +1316,20 @@ def save_whisper(request, cafe_id):
         text=text[:40],
     )
 
+    reward_result = award_points(
+        user=request.user,
+        cafe=cafe,
+        action=RewardActionRule.Action.WHISPER,
+    )
+
+    if (
+        reward_result
+        and reward_result.get("unlocked_rewards")
+    ):
+        request.session["reward_celebration"] = (
+            reward_result["unlocked_rewards"]
+        )
+
     messages.success(
         request,
         "Esa sensación ya forma parte de este café ✨"
