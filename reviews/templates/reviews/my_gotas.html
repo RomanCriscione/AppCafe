@@ -46,13 +46,28 @@
     <div class="relative mt-6 h-24">
 
         <div
-        class="absolute left-[22px] right-[22px] top-[38px] h-[3px] rounded-full bg-gray-300">
-        </div>
+            class="absolute"
+            style="
+                left: 22px;
+                right: 22px;
+                top: 38px;
+                height: 3px;
+                background: #D1D5DB;
+                border-radius: 999px;
+            ">
+            </div>
 
-        <div
-        class="absolute left-[22px] top-[38px] h-[3px] rounded-full bg-[#172C6D]"
-        style="width: calc((100% - 44px) * {{ progress_percent }} / 100);">
-        </div>
+            <div
+            class="absolute"
+            style="
+                left: 22px;
+                top: 38px;
+                width: calc((100% - 44px) * {{ progress_percent }} / 100);
+                height: 3px;
+                background: #172C6D;
+                border-radius: 999px;
+            ">
+            </div>
 
         <div
         class="absolute top-[20px] -translate-x-1/2"
