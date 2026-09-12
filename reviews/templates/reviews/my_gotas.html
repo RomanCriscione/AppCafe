@@ -223,8 +223,9 @@
 
                 {% for coupon in available_coupons %}
 
-                    <div
-                    class="rounded-2xl border border-gray-200 bg-white p-5"
+                    <a
+                        href="{% url 'reviews:coupon_detail' coupon.id %}"
+                        class="block rounded-2xl border border-gray-200 bg-white p-5 transition hover:border-[#172C6D] hover:shadow-sm"
                     >
 
                     <div class="flex items-start gap-4">
@@ -259,7 +260,7 @@
 
                     </div>
 
-                    </div>
+                    </a>
 
                 {% endfor %}
 

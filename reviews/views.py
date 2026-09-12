@@ -2299,3 +2299,31 @@ def my_gotas(request):
             "gotas_to_next": gotas_to_next,
         },
     )
+
+@login_required
+def coupon_detail(request, coupon_id):
+    coupon = get_object_or_404(
+        UserCoupon.objects.select_related("cafe", "reward"),
+        id=coupon_id,
+        user=request.user,
+        status=UserCoupon.Status.AVAILABLE,
+    )
+
+    if coupon.expires_at and coupon.expires_at <= timezone.now():
+        coupon.status = UserCoupon.Status.EXPIRED
+        coupon.save(update_fields=["status"])
+
+        messages.info(
+            request,
+            "Este beneficio ya venció.",
+        )
+
+        return redirect("reviews:my_gotas")
+
+    return render(
+        request,
+        "reviews/coupon_detail.html",
+        {
+            "coupon": coupon,
+        },
+    )

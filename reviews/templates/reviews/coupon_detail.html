@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<section class="max-w-xl mx-auto">
+
+  <a
+    href="{% url 'reviews:my_gotas' %}"
+    class="inline-flex items-center gap-2 text-sm font-semibold text-[#172C6D] hover:underline"
+  >
+    <i class="fas fa-arrow-left" aria-hidden="true"></i>
+    Volver a Mis Gotas
+  </a>
+
+  <div class="mt-6 rounded-[24px] border border-[#E7E2D9] bg-[#F8F6F1] p-6">
+
+    <div
+      class="flex h-12 w-12 items-center justify-center rounded-full bg-white"
+    >
+      <i
+        class="fas fa-gift text-xl text-[#172C6D]"
+        aria-hidden="true"
+      ></i>
+    </div>
+
+    <p class="mt-6 text-xs font-extrabold tracking-[0.14em] text-[#172C6D]">
+      TU BENEFICIO
+    </p>
+
+    <h1 class="mt-2 text-2xl font-bold text-gray-900">
+      {{ coupon.reward_text_snapshot }}
+    </h1>
+
+    <p class="mt-2 text-base text-gray-600">
+      {{ coupon.cafe.name }}
+    </p>
+
+    {% if coupon.expires_at %}
+      <p class="mt-4 text-sm text-gray-600">
+        Disponible hasta el
+        <strong>{{ coupon.expires_at|date:"d/m/Y" }}</strong>
+      </p>
+    {% endif %}
+
+    <div class="mt-6 rounded-2xl bg-white p-5 text-center">
+
+      <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Mostrá este QR en la cafetería
+      </p>
+
+      <img
+        id="couponQrImage"
+        alt="Código QR del beneficio"
+        class="mx-auto mt-4 h-48 w-48 rounded-xl"
+      >
+
+      <p class="mt-5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+        Código
+      </p>
+
+      <p class="mt-2 text-2xl font-extrabold tracking-[0.12em] text-[#172C6D]">
+        {{ coupon.code }}
+      </p>
+
+    </div>
+
+    {% if coupon.terms_snapshot %}
+      <div class="mt-6">
+
+        <h2 class="text-sm font-bold text-gray-900">
+          Condiciones
+        </h2>
+
+        <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-gray-600">
+          {{ coupon.terms_snapshot }}
+        </p>
+
+      </div>
+    {% endif %}
+
+  </div>
+
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const qrImage = document.getElementById("couponQrImage");
+  if (!qrImage) return;
+
+  const qrToken = "{{ coupon.qr_token|escapejs }}";
+
+  qrImage.src =
+    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
+    encodeURIComponent(qrToken);
+});
+</script>
+
+{% endblock %}
