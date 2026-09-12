@@ -1516,7 +1516,7 @@
       ¡Desbloqueaste un beneficio!
     </h2>
 
-    {% with reward=reward_celebration.0 %}
+    {% for reward in reward_celebration %}
 
       <div
         class="mt-6 rounded-2xl border border-[#E7E2D9] bg-[#F8F6F1] p-5"
@@ -1530,7 +1530,7 @@
         </p>
       </div>
 
-    {% endwith %}
+    {% endfor %}
 
     <p class="mt-5 text-sm text-gray-600">
       Tus Gotas te llevaron hasta acá.
@@ -2060,7 +2060,11 @@ function showRewardCelebration(reward) {
       </p>
 
       <h2 class="text-2xl font-bold text-gray-900">
-        ¡Desbloqueaste un beneficio!
+        {% if reward_celebration|length == 1 %}
+          ¡Desbloqueaste un beneficio!
+        {% else %}
+          ¡Desbloqueaste nuevos beneficios!
+        {% endif %}
       </h2>
 
       <div
@@ -2189,7 +2193,9 @@ document.addEventListener("DOMContentLoaded", () => {
               data.reward?.unlocked_rewards || [];
 
             if (unlockedRewards.length > 0) {
-              showRewardCelebration(unlockedRewards[0]);
+              unlockedRewards.forEach((reward) => {
+                showRewardCelebration(reward);
+              });
             }
             } else {
             message.textContent =
