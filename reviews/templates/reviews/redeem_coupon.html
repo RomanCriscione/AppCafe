@@ -21,9 +21,40 @@
 
   </div>
 
-  <div class="rounded-[24px] border border-[#E7E2D9] bg-[#F8F6F1] p-6">
+    <div class="rounded-[24px] border border-[#E7E2D9] bg-[#F8F6F1] p-6">
 
-    <form id="redeemCouponForm">
+        <div class="mb-6">
+
+        <button
+            type="button"
+            id="startQrScanner"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#172C6D] bg-white px-5 py-3 font-bold text-[#172C6D] transition hover:bg-[#F8F6F1]"
+        >
+            <i class="fas fa-qrcode" aria-hidden="true"></i>
+            Escanear QR
+        </button>
+
+        <div
+            id="qrReader"
+            class="mt-4 hidden overflow-hidden rounded-2xl bg-white"
+        ></div>
+
+        <p
+            id="qrScannerMessage"
+            class="mt-3 hidden text-sm text-gray-600"
+        ></p>
+
+        </div>
+
+        <div class="mb-6 flex items-center gap-3">
+        <div class="h-px flex-1 bg-gray-300"></div>
+        <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            o ingresá el código
+        </span>
+        <div class="h-px flex-1 bg-gray-300"></div>
+        </div>
+
+        <form id="redeemCouponForm">
 
       {% csrf_token %}
 
@@ -67,12 +98,114 @@
 {% block scripts %}
 {{ block.super }}
 
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("redeemCouponForm");
   const message = document.getElementById("redeemCouponMessage");
 
   if (!form || !message) return;
+
+    const startQrScanner = document.getElementById("startQrScanner");
+        const qrReader = document.getElementById("qrReader");
+        const qrScannerMessage = document.getElementById("qrScannerMessage");
+
+        let html5QrCode = null;
+
+        async function redeemQrToken(qrToken) {
+            const formData = new FormData();
+            formData.append("qr_token", qrToken);
+
+            const csrfToken = form.querySelector(
+            'input[name="csrfmiddlewaretoken"]'
+            )?.value;
+
+            const response = await fetch(
+            "{% url 'reviews:redeem_coupon' %}",
+            {
+                method: "POST",
+                body: formData,
+                credentials: "same-origin",
+                headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": csrfToken,
+                },
+            }
+            );
+
+            return response.json();
+        }
+
+        if (startQrScanner && qrReader) {
+            startQrScanner.addEventListener("click", async () => {
+            qrReader.classList.remove("hidden");
+
+            qrScannerMessage.classList.remove("hidden");
+            qrScannerMessage.textContent =
+                "Permití el acceso a la cámara para escanear el beneficio.";
+
+            try {
+                html5QrCode = new Html5Qrcode("qrReader");
+
+                await html5QrCode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: {
+                    width: 240,
+                    height: 240,
+                    },
+                },
+                async (decodedText) => {
+                    await html5QrCode.stop();
+
+                    qrReader.classList.add("hidden");
+
+                    qrScannerMessage.textContent =
+                    "Validando beneficio...";
+
+                    const data = await redeemQrToken(decodedText);
+
+                    message.classList.remove("hidden");
+
+                    if (data.success) {
+                    message.className =
+                        "mt-5 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-800";
+
+                    message.innerHTML =
+                        "<strong>Beneficio canjeado.</strong><br>" +
+                        data.coupon.reward_text +
+                        "<br>" +
+                        data.coupon.cafe_name;
+
+                    qrScannerMessage.textContent =
+                        "QR validado correctamente.";
+
+                    return;
+                    }
+
+                    message.className =
+                    "mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800";
+
+                    message.textContent =
+                    data.message ||
+                    "No pudimos canjear este beneficio.";
+
+                    qrScannerMessage.textContent =
+                    "No se pudo validar el QR.";
+                },
+                () => {
+                    // Ignoramos lecturas fallidas mientras busca un QR.
+                }
+                );
+
+            } catch (error) {
+                qrScannerMessage.textContent =
+                "No pudimos acceder a la cámara.";
+            }
+            });
+        }
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
