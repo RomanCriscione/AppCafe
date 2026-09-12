@@ -171,6 +171,14 @@
               </a>
 
               <a
+                href="{% url 'reviews:my_gotas' %}"
+                class="gota-nav-link"
+              >
+                <i class="fas fa-droplet" aria-hidden="true"></i>
+                <span>Mis Gotas</span>
+              </a>
+
+              <a
                 href="{% url 'my_account' %}"
                 class="gota-nav-link"
               >
@@ -319,6 +327,14 @@
             >
               <i class="far fa-heart" aria-hidden="true"></i>
               <span>Mi mapa</span>
+            </a>
+
+            <a
+              href="{% url 'reviews:my_gotas' %}"
+              class="gota-mobile-menu__link"
+            >
+              <i class="fas fa-droplet" aria-hidden="true"></i>
+              <span>Mis Gotas</span>
             </a>
 
             <a

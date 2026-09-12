@@ -32,6 +32,9 @@ urlpatterns = [
     # Favoritos
     path('favoritos/', views.favorite_cafes, name='favorite_cafes'),
 
+    # Gotas y beneficios
+    path('mis-gotas/', views.my_gotas, name='my_gotas'),
+
     # Panel del dueño
     path('perfil/', views.owner_dashboard, name='owner_dashboard'),
     path('mis-resenas/', views.owner_reviews, name='owner_reviews'),

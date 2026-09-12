@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<section class="max-w-4xl mx-auto">
+
+  <div class="mb-8">
+    <p class="text-sm font-semibold uppercase tracking-wide text-gray-500">
+      Tu recorrido en Gota
+    </p>
+
+    <h1 class="text-3xl font-bold mt-2">
+      Mis Gotas
+    </h1>
+
+    <p class="text-gray-600 mt-2">
+      Sumá Gotas mientras descubrís cafeterías y desbloqueá beneficios.
+    </p>
+  </div>
+
+  <div class="rounded-[22px] border border-[#E7E2D9] bg-[#F8F6F1] p-5">
+
+    <p class="text-xs font-extrabold tracking-[0.14em] text-[#172C6D]">
+        TUS GOTAS
+    </p>
+
+    <p class="mt-2 text-3xl font-extrabold text-[#172C6D]">
+        {{ balance }} Gotas
+    </p>
+
+    <p class="mt-1 text-sm leading-relaxed text-gray-600">
+        {% if balance == 0 %}
+        Tu recorrido empieza acá.
+        {% elif next_milestone %}
+        {% if gotas_to_next == 1 %}
+            Te falta 1 Gota para tu próximo beneficio.
+        {% else %}
+            Te faltan {{ gotas_to_next }} Gotas para tu próximo beneficio.
+        {% endif %}
+        {% else %}
+        Ya alcanzaste todos los beneficios disponibles.
+        {% endif %}
+    </p>
+
+    <div class="relative mt-6 h-24">
+
+        <div
+        class="absolute left-[22px] right-[22px] top-[38px] h-[3px] rounded-full bg-gray-300">
+        </div>
+
+        <div
+        class="absolute left-[22px] top-[38px] h-[3px] rounded-full bg-[#172C6D]"
+        style="width: calc((100% - 44px) * {{ progress_percent }} / 100);">
+        </div>
+
+        <div
+        class="absolute top-[20px] -translate-x-1/2"
+        style="left: calc(22px + (100% - 44px) * {{ progress_percent }} / 100);">
+
+        <div
+            class="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#172C6D] bg-white">
+
+            <img
+            src="{% static 'images/gota-icon.png' %}"
+            alt=""
+            class="h-5 w-5 object-contain"
+            >
+
+        </div>
+
+        <p class="mt-1 text-center text-xs font-extrabold text-[#172C6D]">
+            {{ balance }}
+        </p>
+
+        </div>
+
+        {% for point in upcoming_points %}
+        <div
+            class="absolute top-[16px] -translate-x-1/2"
+            style="
+            left:
+            {% if upcoming_points|length == 1 %}
+                calc(100% - 22px)
+            {% elif forloop.first %}
+                55%
+            {% else %}
+                calc(100% - 22px)
+            {% endif %};
+            ">
+
+            <div
+            class="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white">
+
+            <span class="text-xs font-bold text-gray-500">
+                {{ point }}
+            </span>
+
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

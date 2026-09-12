@@ -24,7 +24,20 @@ from core.mixins import EmailVerifiedRequiredMixin
 from allauth.account.models import EmailAddress
 from core.rate_limit import rate_limit
 from reviews.utils.ranking import calcular_score_cafe
-from .models import Review, Cafe, ReviewLike, ReviewReport, Tag, CafeStat, CafeRelationship, CafeWhisper
+from .models import (
+    Review,
+    Cafe,
+    ReviewLike,
+    ReviewReport,
+    Tag,
+    CafeStat,
+    CafeRelationship,
+    CafeWhisper,
+    CafeReward,
+    RewardSettings,
+    UserPointTransaction,
+    UserCoupon,
+)
 from .forms import ReviewForm, CafeForm, ReviewReportForm
 from reviews.utils.geo import haversine_distance
 from core.messages import MESSAGES
@@ -1905,3 +1918,134 @@ def descargar_todos_qr(request):
 
     zip_buffer.close()
     return response
+
+@login_required
+def my_gotas(request):
+    reward_settings = RewardSettings.objects.first()
+
+    program_starts_at = (
+        reward_settings.program_starts_at
+        if reward_settings
+        else None
+    )
+
+    transactions = (
+        UserPointTransaction.objects
+        .filter(user=request.user)
+        .select_related("cafe")
+    )
+
+    if program_starts_at:
+        transactions = transactions.filter(
+            created_at__gte=program_starts_at
+        )
+    else:
+        transactions = transactions.none()
+
+    balance = transactions.aggregate(
+        total=Sum("points")
+    )["total"] or 0
+
+    recent_transactions = transactions[:10]
+
+    milestone_points = (
+        CafeReward.objects
+        .filter(
+            is_active=True,
+            unlock_type=CafeReward.UnlockType.POINTS,
+            points_required__isnull=False,
+        )
+        .values_list("points_required", flat=True)
+        .distinct()
+        .order_by("points_required")
+    )
+
+    milestones = [
+        {
+            "points_required": points,
+            "reached": balance >= points,
+        }
+        for points in milestone_points
+    ]
+
+    next_milestone = next(
+        (
+            milestone
+            for milestone in milestones
+            if not milestone["reached"]
+        ),
+        None,
+    )
+
+    milestone_values = [
+        milestone["points_required"]
+        for milestone in milestones
+    ]
+
+    previous_values = [
+        points
+        for points in milestone_values
+        if points <= balance
+    ]
+
+    previous_point = (
+        previous_values[-1]
+        if previous_values
+        else 0
+    )
+
+    upcoming_points = [
+        points
+        for points in milestone_values
+        if points > balance
+    ][:2]
+
+    if upcoming_points:
+        end_point = upcoming_points[-1]
+    else:
+        end_point = balance
+
+    progress_range = end_point - previous_point
+
+    if progress_range > 0:
+        progress = (balance - previous_point) / progress_range
+    else:
+        progress = 0 if balance == 0 else 1
+
+    progress_percent = max(
+        0,
+        min(100, progress * 100),
+    )
+
+    if next_milestone:
+        gotas_to_next = (
+            next_milestone["points_required"] - balance
+        )
+    else:
+        gotas_to_next = 0
+
+    available_coupons = (
+        UserCoupon.objects
+        .filter(
+            user=request.user,
+            status=UserCoupon.Status.AVAILABLE,
+        )
+        .select_related("cafe", "reward")
+        .order_by("-obtained_at")
+    )
+
+    return render(
+        request,
+        "reviews/my_gotas.html",
+        {
+            "balance": balance,
+            "recent_transactions": recent_transactions,
+            "milestones": milestones,
+            "next_milestone": next_milestone,
+            "available_coupons": available_coupons,
+            "previous_point": previous_point,
+            "upcoming_points": upcoming_points,
+            "progress_percent": progress_percent,
+            "gotas_to_next": gotas_to_next,
+        },
+    )
