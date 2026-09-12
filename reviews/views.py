@@ -784,10 +784,81 @@ def create_review(request, cafe_id):
                     Tag.objects.filter(id__in=selected_tag_ids)
                 )
 
+            reward_settings = RewardSettings.objects.first()
+
+            valid_hours = (
+                reward_settings.check_in_valid_hours
+                if reward_settings is not None
+                else 72
+            )
+
+            check_in_cutoff = timezone.now() - timedelta(
+                hours=valid_hours
+            )
+
+            if (
+                reward_settings is not None
+                and reward_settings.program_starts_at is not None
+                and reward_settings.program_starts_at > check_in_cutoff
+            ):
+                check_in_cutoff = reward_settings.program_starts_at
+
+            has_recent_valid_check_in = CafeCheckIn.objects.filter(
+                user=request.user,
+                cafe=cafe,
+                is_valid=True,
+                created_at__gte=check_in_cutoff,
+            ).exists()
+
+            review_reward = None
+
+            if has_recent_valid_check_in:
+                review_reward = award_points(
+                    user=request.user,
+                    cafe=cafe,
+                    action=RewardActionRule.Action.REVIEW,
+                )
+
+            review_tag_bonus_reward = None
+
+            sensory_tags = review.tags.filter(
+                name__in=SENSORY_REVIEW_TAG_NAMES
+            )
+
+            if (
+                has_recent_valid_check_in
+                and sensory_tags.exists()
+            ):
+                review_tag_bonus_reward = award_points(
+                    user=request.user,
+                    cafe=cafe,
+                    action=RewardActionRule.Action.REVIEW_TAG_BONUS,
+                )
+
             try:
                 _invalidate_reviews_cache(cafe.id, user_id=request.user.id)
             except Exception:
                 pass
+
+            unlocked_rewards = []
+
+            if review_reward:
+                unlocked_rewards.extend(
+                    review_reward.get("unlocked_rewards", [])
+                )
+
+            if review_tag_bonus_reward:
+                unlocked_rewards.extend(
+                    review_tag_bonus_reward.get(
+                        "unlocked_rewards",
+                        [],
+                    )
+                )
+
+            if unlocked_rewards:
+                request.session["reward_celebration"] = (
+                    unlocked_rewards
+                )
 
             messages.success(
                 request,
