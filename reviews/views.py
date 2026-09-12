@@ -1982,47 +1982,40 @@ def my_gotas(request):
         for milestone in milestones
     ]
 
-    previous_values = [
-        points
-        for points in milestone_values
-        if points <= balance
-    ]
-
-    previous_point = (
-        previous_values[-1]
-        if previous_values
-        else 0
-    )
-
-    upcoming_points = [
-        points
-        for points in milestone_values
-        if points > balance
-    ][:2]
-
-    if upcoming_points:
-        end_point = upcoming_points[-1]
-    else:
-        end_point = balance
-
-    progress_range = end_point - previous_point
-
-    if progress_range > 0:
-        progress = (balance - previous_point) / progress_range
-    else:
-        progress = 0 if balance == 0 else 1
-
-    progress_percent = max(
-        0,
-        min(100, progress * 100),
-    )
-
     if next_milestone:
         gotas_to_next = (
             next_milestone["points_required"] - balance
         )
     else:
         gotas_to_next = 0
+
+
+    # Escala visual de la línea de progreso.
+    # La línea mantiene siempre el mismo ancho:
+    # los hitos se redistribuyen proporcionalmente.
+    scale_max = max(
+        milestone_values[-1] if milestone_values else 0,
+        balance,
+        1,
+    )
+
+
+    display_milestones = [
+        {
+            "points_required": milestone["points_required"],
+            "reached": milestone["reached"],
+            "position_percent": (
+                milestone["points_required"] / scale_max
+            ) * 100,
+        }
+        for milestone in milestones
+    ]
+
+
+    current_position_percent = min(
+        100,
+        (balance / scale_max) * 100,
+    )
 
     available_coupons = (
         UserCoupon.objects
@@ -2043,9 +2036,8 @@ def my_gotas(request):
             "milestones": milestones,
             "next_milestone": next_milestone,
             "available_coupons": available_coupons,
-            "previous_point": previous_point,
-            "upcoming_points": upcoming_points,
-            "progress_percent": progress_percent,
+            "display_milestones": display_milestones,
+            "current_position_percent": current_position_percent,
             "gotas_to_next": gotas_to_next,
         },
     )

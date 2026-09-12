@@ -45,78 +45,157 @@
 
     <div class="relative mt-6 h-24">
 
+        <!-- Línea base -->
         <div
             class="absolute"
             style="
-                left: 22px;
-                right: 22px;
-                top: 38px;
-                height: 3px;
-                background: #D1D5DB;
-                border-radius: 999px;
+            left: 22px;
+            right: 22px;
+            top: 38px;
+            height: 3px;
+            background: #D1D5DB;
+            border-radius: 999px;
             ">
-            </div>
+        </div>
+
+        <!-- Parte recorrida -->
+        <div
+            class="absolute"
+            style="
+            left: 22px;
+            top: 38px;
+            width: calc(
+                (100% - 44px) * {{ current_position_percent }} / 100
+            );
+            height: 3px;
+            background: #172C6D;
+            border-radius: 999px;
+            ">
+        </div>
+
+
+        <!-- Posición actual del usuario -->
+        <div
+            class="absolute"
+            style="
+            top: 20px;
+            left: calc(
+                22px +
+                (100% - 44px) * {{ current_position_percent }} / 100
+            );
+            transform: translateX(-50%);
+            z-index: 2;
+            ">
 
             <div
-            class="absolute"
             style="
-                left: 22px;
-                top: 38px;
-                width: calc((100% - 44px) * {{ progress_percent }} / 100);
-                height: 3px;
-                background: #172C6D;
-                border-radius: 999px;
+                width: 36px;
+                height: 36px;
+                padding: 7px;
+                background: white;
+                border: 2px solid #172C6D;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             ">
-            </div>
-
-        <div
-        class="absolute top-[20px] -translate-x-1/2"
-        style="left: calc(22px + (100% - 44px) * {{ progress_percent }} / 100);">
-
-        <div
-            class="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#172C6D] bg-white">
 
             <img
-            src="{% static 'images/gota-icon.png' %}"
-            alt=""
-            class="h-5 w-5 object-contain"
+                src="{% static 'images/gota-icon.png' %}"
+                alt=""
+                style="
+                width: 20px;
+                height: 20px;
+                object-fit: contain;
+                "
             >
-
-        </div>
-
-        <p class="mt-1 text-center text-xs font-extrabold text-[#172C6D]">
-            {{ balance }}
-        </p>
-
-        </div>
-
-        {% for point in upcoming_points %}
-        <div
-            class="absolute top-[16px] -translate-x-1/2"
-            style="
-            left:
-            {% if upcoming_points|length == 1 %}
-                calc(100% - 22px)
-            {% elif forloop.first %}
-                55%
-            {% else %}
-                calc(100% - 22px)
-            {% endif %};
-            ">
-
-            <div
-            class="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white">
-
-            <span class="text-xs font-bold text-gray-500">
-                {{ point }}
-            </span>
 
             </div>
 
+            <div
+            style="
+                margin-top: 4px;
+                text-align: center;
+                font-size: 12px;
+                font-weight: 800;
+                color: #172C6D;
+            ">
+            {{ balance }}
+            </div>
+
         </div>
+
+
+        <!-- Premios -->
+        {% for milestone in display_milestones %}
+
+            <div
+            class="absolute"
+            style="
+                top: 18px;
+                left: calc(
+                22px +
+                (100% - 44px) *
+                {{ milestone.position_percent }} / 100
+                );
+                transform: translateX(-50%);
+                z-index: 1;
+            ">
+
+            <div
+                style="
+                width: 40px;
+                height: 40px;
+                background: white;
+                border:
+                    {% if milestone.reached %}
+                    2px solid #172C6D
+                    {% else %}
+                    1px solid #D1D5DB
+                    {% endif %};
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                ">
+
+                <i
+                class="fas fa-gift"
+                aria-hidden="true"
+                style="
+                    font-size: 17px;
+                    color:
+                    {% if milestone.reached %}
+                        #172C6D
+                    {% else %}
+                        #6B7280
+                    {% endif %};
+                ">
+                </i>
+
+            </div>
+
+            <div
+                style="
+                margin-top: 4px;
+                text-align: center;
+                font-size: 12px;
+                font-weight: 700;
+                color:
+                    {% if milestone.reached %}
+                    #172C6D
+                    {% else %}
+                    #6B7280
+                    {% endif %};
+                ">
+                {{ milestone.points_required }}
+            </div>
+
+            </div>
+
         {% endfor %}
 
-    </div>
+        </div>
 
     </div>
 
