@@ -18,6 +18,7 @@ urlpatterns = [
 
     # ✅ endpoint usado por los botones .fav-btn
     path('cafes/<int:cafe_id>/set-status/',views.set_cafe_status,name='set_cafe_status'),
+    path("cafes/<int:cafe_id>/check-in/",views.check_in_cafe,name="check_in_cafe"),
     path('cafes/<int:cafe_id>/update-note/',views.update_cafe_note,name='update_cafe_note'),
     path('cafes/<int:cafe_id>/set-second-impression/',views.set_second_impression,name='set_second_impression'),
     path('cafes/<int:cafe_id>/set-collection/',views.set_collection,name='set_collection'),

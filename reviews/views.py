@@ -12,7 +12,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.core.serializers.json import DjangoJSONEncoder
 from django.templatetags.static import static
 from django.utils import timezone
-from datetime import timedelta
+from math import radians, sin, cos, sqrt, atan2
 from django.views.decorators.http import require_POST
 from django.conf import settings
 from allauth.account.utils import send_email_confirmation
@@ -27,6 +27,7 @@ from reviews.utils.ranking import calcular_score_cafe
 from .models import (
     Review,
     Cafe,
+    CafeCheckIn,
     ReviewLike,
     ReviewReport,
     Tag,
@@ -54,6 +55,28 @@ from django.contrib.postgres.search import (
     TrigramSimilarity
 )
 from .rewards import award_points
+
+def calculate_distance_meters(lat1, lon1, lat2, lon2):
+    earth_radius_meters = 6371000
+
+    lat1_rad = radians(lat1)
+    lat2_rad = radians(lat2)
+    delta_lat = radians(lat2 - lat1)
+    delta_lon = radians(lon2 - lon1)
+
+    a = (
+        sin(delta_lat / 2) ** 2
+        + cos(lat1_rad)
+        * cos(lat2_rad)
+        * sin(delta_lon / 2) ** 2
+    )
+
+    c = 2 * atan2(
+        sqrt(a),
+        sqrt(1 - a),
+    )
+
+    return earth_radius_meters * c
 
 
 # Helper para invalidar el fragment cache de la lista de reseñas
@@ -1444,6 +1467,91 @@ def set_cafe_status(request, cafe_id):
 
     return redirect("reviews:cafe_detail",cafe_id=cafe.id)
 
+@login_required
+@require_POST
+def check_in_cafe(request, cafe_id):
+
+    cafe = get_object_or_404(Cafe, id=cafe_id)
+
+    try:
+        detected_latitude = float(
+            request.POST.get("latitude")
+        )
+        detected_longitude = float(
+            request.POST.get("longitude")
+        )
+    except (TypeError, ValueError):
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "invalid_coordinates",
+                "message": "No pudimos validar tu ubicación.",
+            },
+            status=400,
+        )
+
+    if cafe.latitude is None or cafe.longitude is None:
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "cafe_without_coordinates",
+                "message": (
+                    "Esta cafetería todavía no tiene "
+                    "una ubicación precisa cargada."
+                ),
+            },
+            status=400,
+        )
+
+    reward_settings = RewardSettings.objects.first()
+
+    radius_meters = (
+        reward_settings.check_in_radius_meters
+        if reward_settings is not None
+        else 150
+    )
+
+    distance_meters = calculate_distance_meters(
+        detected_latitude,
+        detected_longitude,
+        float(cafe.latitude),
+        float(cafe.longitude),
+    )
+
+    is_valid = distance_meters <= radius_meters
+
+    check_in = CafeCheckIn.objects.create(
+        user=request.user,
+        cafe=cafe,
+        latitude=detected_latitude,
+        longitude=detected_longitude,
+        distance_meters=distance_meters,
+        is_valid=is_valid,
+    )
+
+    reward_result = None
+
+    if is_valid:
+        reward_result = award_points(
+            user=request.user,
+            cafe=cafe,
+            action=RewardActionRule.Action.CHECK_IN,
+        )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "cafe_id": cafe.id,
+            "is_valid": is_valid,
+            "distance_meters": round(
+                distance_meters,
+                1,
+            ),
+            "allowed_radius_meters": radius_meters,
+            "reward": reward_result,
+            "check_in_id": check_in.id,
+        }
+    )
 
 @login_required
 def edit_owner_reply(request, review_id):
