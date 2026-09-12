@@ -856,9 +856,17 @@ def create_review(request, cafe_id):
                 )
 
             if unlocked_rewards:
-                request.session["reward_celebration"] = (
-                    unlocked_rewards
-                )
+                request.session["reward_celebration"] = [
+                    {
+                        **reward,
+                        "expires_at": (
+                            reward["expires_at"].isoformat()
+                            if reward.get("expires_at")
+                            else None
+                        ),
+                    }
+                    for reward in unlocked_rewards
+                ]
 
             messages.success(
                 request,
@@ -1326,9 +1334,17 @@ def save_whisper(request, cafe_id):
         reward_result
         and reward_result.get("unlocked_rewards")
     ):
-        request.session["reward_celebration"] = (
-            reward_result["unlocked_rewards"]
-        )
+        request.session["reward_celebration"] = [
+            {
+                **reward,
+                "expires_at": (
+                    reward["expires_at"].isoformat()
+                    if reward.get("expires_at")
+                    else None
+                ),
+            }
+            for reward in reward_result["unlocked_rewards"]
+        ]
 
     messages.success(
         request,
@@ -1517,9 +1533,17 @@ def set_cafe_status(request, cafe_id):
             and reward_result.get("unlocked_rewards")
             and request.headers.get("x-requested-with") != "XMLHttpRequest"
         ):
-            request.session["reward_celebration"] = (
-                reward_result["unlocked_rewards"]
-            )
+            request.session["reward_celebration"] = [
+                {
+                    **reward,
+                    "expires_at": (
+                        reward["expires_at"].isoformat()
+                        if reward.get("expires_at")
+                        else None
+                    ),
+                }
+                for reward in reward_result["unlocked_rewards"]
+            ]
 
     status_labels = {
         CafeRelationship.WANT_TO_GO: "☕ Quiero ir",
