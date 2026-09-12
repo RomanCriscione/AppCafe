@@ -205,6 +205,99 @@
 
         </div>
 
+        <div class="mt-10">
+
+            <div class="mb-4">
+                <h2 class="text-xl font-bold text-gray-900">
+                Tus beneficios
+                </h2>
+
+                <p class="mt-1 text-sm text-gray-600">
+                Los beneficios que desbloqueaste con tus Gotas.
+                </p>
+            </div>
+
+            {% if available_coupons %}
+
+                <div class="grid gap-4 md:grid-cols-2">
+
+                {% for coupon in available_coupons %}
+
+                    <div
+                    class="rounded-2xl border border-gray-200 bg-white p-5"
+                    >
+
+                    <div class="flex items-start gap-4">
+
+                        <div
+                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#F8F6F1]"
+                        >
+                        <i
+                            class="fas fa-gift text-[#172C6D]"
+                            aria-hidden="true"
+                        ></i>
+                        </div>
+
+                        <div class="min-w-0">
+
+                        <p class="font-bold text-gray-900">
+                            {{ coupon.reward_text_snapshot }}
+                        </p>
+
+                        <p class="mt-1 text-sm text-gray-600">
+                            {{ coupon.cafe.name }}
+                        </p>
+
+                        {% if coupon.expires_at %}
+                            <p class="mt-2 text-xs text-gray-500">
+                            Disponible hasta el
+                            {{ coupon.expires_at|date:"d/m/Y" }}
+                            </p>
+                        {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    </div>
+
+                {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div
+                class="rounded-2xl border border-gray-200 bg-white p-6"
+                >
+                <div class="flex items-start gap-4">
+
+                    <div
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#F8F6F1]"
+                    >
+                    <i
+                        class="fas fa-gift text-gray-400"
+                        aria-hidden="true"
+                    ></i>
+                    </div>
+
+                    <div>
+                    <p class="font-semibold text-gray-900">
+                        Todavía no tenés beneficios disponibles.
+                    </p>
+
+                    <p class="mt-1 text-sm text-gray-600">
+                        Cuando desbloquees uno, va a aparecer acá.
+                    </p>
+                    </div>
+
+                </div>
+                </div>
+
+            {% endif %}
+
+            </div>
+
 </section>
 
 {% endblock %}
