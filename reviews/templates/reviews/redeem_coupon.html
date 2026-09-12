@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<section class="max-w-xl mx-auto">
+
+  <div class="mb-8">
+
+    <p class="text-sm font-semibold uppercase tracking-wide text-gray-500">
+      Panel de cafetería
+    </p>
+
+    <h1 class="mt-2 text-3xl font-bold text-gray-900">
+      Canjear beneficio
+    </h1>
+
+    <p class="mt-2 text-gray-600">
+      Ingresá el código que muestra la persona en su beneficio.
+    </p>
+
+  </div>
+
+  <div class="rounded-[24px] border border-[#E7E2D9] bg-[#F8F6F1] p-6">
+
+    <form id="redeemCouponForm">
+
+      {% csrf_token %}
+
+      <label
+        for="couponCode"
+        class="block text-sm font-bold text-gray-900"
+      >
+        Código del beneficio
+      </label>
+
+      <input
+        id="couponCode"
+        name="code"
+        type="text"
+        autocomplete="off"
+        placeholder="Ej: ABC123"
+        class="mt-3 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-lg font-bold uppercase tracking-[0.12em] text-[#172C6D] outline-none transition focus:border-[#172C6D]"
+      >
+
+      <button
+        type="submit"
+        class="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-[#172C6D] px-5 py-3 font-bold text-white transition hover:opacity-90"
+      >
+        Validar y canjear
+      </button>
+
+    </form>
+
+    <div
+      id="redeemCouponMessage"
+      class="mt-5 hidden rounded-2xl p-4 text-sm"
+    ></div>
+
+  </div>
+
+</section>
+
+{% endblock %}
+
+
+{% block scripts %}
+{{ block.super }}
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("redeemCouponForm");
+  const message = document.getElementById("redeemCouponMessage");
+
+  if (!form || !message) return;
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(form);
+
+    message.classList.add("hidden");
+    message.textContent = "";
+
+    try {
+      const response = await fetch(
+        "{% url 'reviews:redeem_coupon' %}",
+        {
+          method: "POST",
+          body: formData,
+          credentials: "same-origin",
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      message.classList.remove("hidden");
+
+      if (data.success) {
+        message.className =
+          "mt-5 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-800";
+
+        message.innerHTML =
+          "<strong>Beneficio canjeado.</strong><br>" +
+          data.coupon.reward_text +
+          "<br>" +
+          data.coupon.cafe_name;
+
+        form.reset();
+
+        return;
+      }
+
+      message.className =
+        "mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800";
+
+      message.textContent =
+        data.message || "No pudimos canjear este beneficio.";
+
+    } catch (error) {
+      message.classList.remove("hidden");
+
+      message.className =
+        "mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800";
+
+      message.textContent =
+        "Ocurrió un error al intentar canjear el beneficio.";
+    }
+  });
+});
+</script>
+
+{% endblock %}

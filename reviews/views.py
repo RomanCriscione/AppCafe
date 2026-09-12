@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Avg, Count, F, Q, Sum
 from django.views.generic import ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -2326,4 +2327,133 @@ def coupon_detail(request, coupon_id):
         {
             "coupon": coupon,
         },
+    )
+
+@login_required
+@require_POST
+def redeem_coupon(request):
+    if not request.user.is_owner:
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "not_owner",
+                "message": "Solo los dueños pueden canjear beneficios.",
+            },
+            status=403,
+        )
+
+    qr_token = request.POST.get("qr_token", "").strip()
+    code = request.POST.get("code", "").strip().upper()
+
+    if not qr_token and not code:
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "missing_coupon",
+                "message": "Ingresá un código o escaneá un QR.",
+            },
+            status=400,
+        )
+
+    with transaction.atomic():
+
+        coupons = UserCoupon.objects.select_for_update().select_related(
+            "cafe",
+            "reward",
+        )
+
+        if qr_token:
+            coupon = coupons.filter(
+                qr_token=qr_token,
+            ).first()
+        else:
+            coupon = coupons.filter(
+                code=code,
+            ).first()
+
+        if coupon is None:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "coupon_not_found",
+                    "message": "No encontramos ese beneficio.",
+                },
+                status=404,
+            )
+
+        if coupon.cafe.owner_id != request.user.id:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "wrong_cafe",
+                    "message": (
+                        "Este beneficio pertenece a otra cafetería."
+                    ),
+                },
+                status=403,
+            )
+
+        if coupon.status != UserCoupon.Status.AVAILABLE:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "coupon_not_available",
+                    "message": "Este beneficio ya no está disponible.",
+                },
+                status=409,
+            )
+
+        if (
+            coupon.expires_at
+            and coupon.expires_at <= timezone.now()
+        ):
+            coupon.status = UserCoupon.Status.EXPIRED
+            coupon.save(update_fields=["status"])
+
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "coupon_expired",
+                    "message": "Este beneficio ya venció.",
+                },
+                status=410,
+            )
+
+        coupon.status = UserCoupon.Status.USED
+        coupon.used_at = timezone.now()
+        coupon.used_by = request.user
+
+        coupon.save(
+            update_fields=[
+                "status",
+                "used_at",
+                "used_by",
+            ]
+        )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "coupon": {
+                "id": coupon.id,
+                "code": coupon.code,
+                "reward_text": coupon.reward_text_snapshot,
+                "cafe_name": coupon.cafe.name,
+            },
+            "message": "Beneficio canjeado correctamente.",
+        }
+    )
+
+@login_required
+def redeem_coupon_page(request):
+    if not request.user.is_owner:
+        messages.error(
+            request,
+            "Solo los dueños pueden acceder al canje de beneficios.",
+        )
+        return redirect("home")
+
+    return render(
+        request,
+        "reviews/redeem_coupon.html",
     )
