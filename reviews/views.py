@@ -395,6 +395,11 @@ class CafeListView(ListView):
 def cafe_detail(request, cafe_id):
     cafe = get_object_or_404(Cafe, id=cafe_id)
 
+    reward_celebration = request.session.pop(
+        "reward_celebration",
+        None,
+    )
+
     # ⭐ NUEVO — highlight desde URL (?highlight=ID)
     highlight_id = request.GET.get("highlight")
 
@@ -666,6 +671,7 @@ def cafe_detail(request, cafe_id):
             # ⭐ NUEVOS
             "precio_promedio": precio_promedio,
             "highlight_id": int(highlight_id) if highlight_id and highlight_id.isdigit() else None,
+            "reward_celebration": reward_celebration,
 
                     # ✅ SEO
             "meta_title": f"{cafe.name} en {cafe.location} | Reseñas y experiencias reales – Gota",
@@ -1396,6 +1402,15 @@ def set_cafe_status(request, cafe_id):
                 user=request.user,
                 cafe=cafe,
                 action=RewardActionRule.Action.RELATIONSHIP_PROGRESS,
+            )
+
+        if (
+            reward_result
+            and reward_result.get("unlocked_rewards")
+            and request.headers.get("x-requested-with") != "XMLHttpRequest"
+        ):
+            request.session["reward_celebration"] = (
+                reward_result["unlocked_rewards"]
             )
 
     status_labels = {

@@ -1435,6 +1435,85 @@
   </div>
 </div>
 
+{% if reward_celebration %}
+
+<div
+  id="rewardCelebrationModal"
+  class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/45 px-4"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="reward-celebration-title"
+>
+
+  <div
+    class="relative w-full max-w-md overflow-hidden rounded-3xl bg-white p-7 text-center shadow-2xl"
+  >
+
+    <button
+      type="button"
+      id="rewardCelebrationClose"
+      class="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+      aria-label="Cerrar"
+    >
+      <i class="fas fa-times" aria-hidden="true"></i>
+    </button>
+
+    <div
+      class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#F8F6F1]"
+    >
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+        class="h-11 w-11 object-contain"
+      >
+    </div>
+
+    <p
+      class="mb-2 text-sm font-bold uppercase tracking-[0.16em] text-[#172C6D]"
+    >
+      Nuevo beneficio
+    </p>
+
+    <h2
+      id="reward-celebration-title"
+      class="text-2xl font-bold text-gray-900"
+    >
+      ¡Desbloqueaste un beneficio!
+    </h2>
+
+    {% with reward=reward_celebration.0 %}
+
+      <div
+        class="mt-6 rounded-2xl border border-[#E7E2D9] bg-[#F8F6F1] p-5"
+      >
+        <p class="text-lg font-bold text-gray-900">
+          {{ reward.reward_text }}
+        </p>
+
+        <p class="mt-2 text-sm font-medium text-gray-600">
+          {{ reward.cafe_name }}
+        </p>
+      </div>
+
+    {% endwith %}
+
+    <p class="mt-5 text-sm text-gray-600">
+      Tus Gotas te llevaron hasta acá.
+    </p>
+
+    <a
+      href="{% url 'reviews:my_gotas' %}"
+      class="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-[#172C6D] px-5 py-3 font-bold text-white transition hover:opacity-90"
+    >
+      Ver mi beneficio
+    </a>
+
+  </div>
+</div>
+
+{% endif %}
+
 
 {% endblock %}
 
@@ -1788,6 +1867,125 @@ function toggleCafeDescription() {
 
   toggle.textContent = isCollapsed ? "Leer menos" : "Leer más";
 }
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("rewardCelebrationModal");
+  const closeBtn = document.getElementById("rewardCelebrationClose");
+
+  if (!modal) return;
+
+  const dialog = modal.querySelector('[role="dialog"] > div') || modal.firstElementChild;
+
+  // Entrada suave
+  modal.style.opacity = "0";
+
+  const card = modal.querySelector(".max-w-md");
+
+  if (card) {
+    card.style.opacity = "0";
+    card.style.transform = "translateY(18px) scale(0.96)";
+    card.style.transition =
+      "opacity 300ms ease, transform 350ms cubic-bezier(.2,.8,.2,1)";
+  }
+
+  modal.style.transition = "opacity 250ms ease";
+
+  requestAnimationFrame(() => {
+    modal.style.opacity = "1";
+
+    if (card) {
+      card.style.opacity = "1";
+      card.style.transform = "translateY(0) scale(1)";
+    }
+  });
+
+  // Pequeño festejo
+  const celebrationColors = [
+    "#172C6D",
+    "#2DD4BF",
+    "#8B5E34",
+    "#D6B86A"
+  ];
+
+  for (let i = 0; i < 22; i++) {
+    const particle = document.createElement("span");
+
+    particle.style.position = "fixed";
+    particle.style.left = `${45 + Math.random() * 10}%`;
+    particle.style.top = "43%";
+    particle.style.width = `${5 + Math.random() * 5}px`;
+    particle.style.height = `${5 + Math.random() * 5}px`;
+    particle.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+    particle.style.background =
+      celebrationColors[
+        Math.floor(Math.random() * celebrationColors.length)
+      ];
+    particle.style.pointerEvents = "none";
+    particle.style.zIndex = "10000";
+
+    document.body.appendChild(particle);
+
+    const x = (Math.random() - 0.5) * 360;
+    const y = -80 - Math.random() * 220;
+    const rotation = Math.random() * 500;
+
+    particle.animate(
+      [
+        {
+          transform: "translate(0, 0) rotate(0deg)",
+          opacity: 1
+        },
+        {
+          transform:
+            `translate(${x}px, ${y}px) rotate(${rotation}deg)`,
+          opacity: 0
+        }
+      ],
+      {
+        duration: 900 + Math.random() * 700,
+        easing: "cubic-bezier(.2,.8,.2,1)"
+      }
+    );
+
+    setTimeout(() => {
+      particle.remove();
+    }, 1700);
+  }
+
+  function closeRewardCelebration() {
+    modal.style.opacity = "0";
+
+    if (card) {
+      card.style.transform = "translateY(10px) scale(0.98)";
+      card.style.opacity = "0";
+    }
+
+    setTimeout(() => {
+      modal.remove();
+    }, 300);
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener(
+      "click",
+      closeRewardCelebration
+    );
+  }
+
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      closeRewardCelebration();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeRewardCelebration();
+    }
+  });
+});
 </script>
 
 {% endblock %}
