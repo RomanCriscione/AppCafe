@@ -2004,17 +2004,19 @@ def my_gotas(request):
         {
             "points_required": milestone["points_required"],
             "reached": milestone["reached"],
-            "position_percent": (
-                milestone["points_required"] / scale_max
-            ) * 100,
+            "position_percent": round(
+                (milestone["points_required"] / scale_max) * 100
+            ),
         }
         for milestone in milestones
     ]
 
 
-    current_position_percent = min(
-        100,
-        (balance / scale_max) * 100,
+    current_position_percent = round(
+        min(
+            100,
+            (balance / scale_max) * 100,
+        )
     )
 
     available_coupons = (
