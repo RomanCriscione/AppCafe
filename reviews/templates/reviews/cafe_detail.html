@@ -400,6 +400,35 @@
 
 {% endif %}
 
+<!-- HEADER PRINCIPAL -->
+<section class="surface p-5 rounded-2xl space-y-4 animate-fade-in-up">
+
+  <!-- IDENTIDAD PRINCIPAL DEL CAFÉ -->
+  <div class="gota-cafe-detail-hero">
+
+    <div class="gota-cafe-detail-hero__main">
+
+      <span class="gota-home-section-kicker">
+        Descubrí este lugar
+      </span>
+
+      <h1 class="gota-cafe-detail-hero__title">
+        {{ cafe.name }}
+      </h1>
+
+      {% if cafe.location %}
+        <p class="gota-cafe-detail-hero__location">
+          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+          {{ cafe.location }}
+        </p>
+      {% endif %}
+
+    </div>
+
+    <div class="gota-cafe-detail-hero__stats">
+
+      {% if average_rating %}
+
       <div class="gota-cafe-detail-stat">
         <i class="far fa-comment" aria-hidden="true"></i>
 
