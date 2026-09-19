@@ -776,6 +776,117 @@ class CafeCheckIn(models.Model):
             f"· {estado} · {self.distance_meters:.0f} m"
         )
 
+class RewardClaim(models.Model):
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pendiente"
+        APPROVED = "approved", "Aprobado"
+        REJECTED = "rejected", "Rechazado"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="reward_claims",
+        verbose_name="Usuario",
+    )
+
+    cafe = models.ForeignKey(
+        "Cafe",
+        on_delete=models.CASCADE,
+        related_name="reward_claims",
+        verbose_name="Cafetería",
+    )
+
+    review = models.ForeignKey(
+        "Review",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reward_claims",
+        verbose_name="Reseña relacionada",
+    )
+
+    visited_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha aproximada de visita",
+    )
+
+    explanation = models.TextField(
+        blank=True,
+        verbose_name="Explicación del usuario",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+        verbose_name="Estado",
+    )
+
+    resolution_notes = models.TextField(
+        blank=True,
+        verbose_name="Notas de resolución",
+    )
+
+    resolved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="resolved_reward_claims",
+        verbose_name="Resuelto por",
+    )
+
+    resolved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Fecha de resolución",
+    )
+
+    review_transaction = models.ForeignKey(
+        "UserPointTransaction",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="review_reward_claims",
+        verbose_name="Movimiento por reseña",
+    )
+
+    tag_bonus_transaction = models.ForeignKey(
+        "UserPointTransaction",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="tag_bonus_reward_claims",
+        verbose_name="Movimiento por bonus de etiquetas",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Creado",
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Actualizado",
+    )
+
+    class Meta:
+        verbose_name = "Reclamo de Gotas"
+        verbose_name_plural = "Reclamos de Gotas"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["status", "created_at"]),
+            models.Index(fields=["user", "cafe"]),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.user} · {self.cafe} · "
+            f"{self.get_status_display()}"
+        )
+
 class RewardSettings(models.Model):
 
     rewards_enabled = models.BooleanField(

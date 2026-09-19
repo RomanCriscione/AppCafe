@@ -15,6 +15,7 @@ urlpatterns = [
     path('cafes/<int:cafe_id>/eliminar/', views.delete_cafe, name='delete_cafe'),
     path('cafes/<int:cafe_id>/fotos/', views.upload_photos, name='upload_photos'),
     path('cafes/<int:cafe_id>/review/', views.create_review, name='create_review'),
+    path("reviews/<int:review_id>/reward-claim/",views.create_reward_claim,name="create_reward_claim",),
 
     # ✅ endpoint usado por los botones .fav-btn
     path('cafes/<int:cafe_id>/set-status/',views.set_cafe_status,name='set_cafe_status'),

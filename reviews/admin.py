@@ -1,6 +1,9 @@
 # reviews/admin.py
-# reviews/admin.py
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.utils import timezone
+
+from .rewards import approve_reward_claim
+
 
 from .models import (
     Cafe,
@@ -15,6 +18,7 @@ from .models import (
     UserCoupon,
     UserPointTransaction,
     CafeCheckIn,
+    RewardClaim,
 )
 
 from .claims import (
@@ -389,3 +393,119 @@ class CafeCheckInAdmin(admin.ModelAdmin):
     )
 
     date_hierarchy = "created_at"
+@admin.register(RewardClaim)
+class RewardClaimAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "user",
+        "cafe",
+        "review",
+        "status",
+        "visited_at",
+        "created_at",
+        "resolved_by",
+    )
+
+    list_filter = (
+        "status",
+        "created_at",
+    )
+
+    search_fields = (
+        "user__email",
+        "cafe__name",
+        "explanation",
+    )
+
+    raw_id_fields = (
+        "user",
+        "cafe",
+        "review",
+        "resolved_by",
+    )
+
+    readonly_fields = (
+        "status",
+        "resolved_by",
+        "resolved_at",
+        "review_transaction",
+        "tag_bonus_transaction",
+        "created_at",
+        "updated_at",
+    )
+
+    actions = (
+        "approve_selected_claims",
+        "reject_selected_claims",
+    )
+
+    date_hierarchy = "created_at"
+
+    @admin.action(description="Aprobar reclamos seleccionados")
+    def approve_selected_claims(self, request, queryset):
+        approved_count = 0
+        skipped_count = 0
+        total_points = 0
+
+        for claim in queryset:
+            has_tag_bonus = (
+                claim.review is not None
+                and claim.review.tags.exists()
+            )
+
+            result = approve_reward_claim(
+                claim=claim,
+                resolved_by=request.user,
+                has_tag_bonus=has_tag_bonus,
+            )
+
+            if result["approved"]:
+                approved_count += 1
+                total_points += result["points"]
+            else:
+                skipped_count += 1
+
+        if approved_count:
+            self.message_user(
+                request,
+                (
+                    f"{approved_count} reclamo(s) aprobado(s). "
+                    f"Se acreditaron {total_points} Gotas en total."
+                ),
+                level=messages.SUCCESS,
+            )
+
+        if skipped_count:
+            self.message_user(
+                request,
+                (
+                    f"{skipped_count} reclamo(s) no pudieron "
+                    f"procesarse o ya estaban resueltos."
+                ),
+                level=messages.WARNING,
+            )
+
+    @admin.action(description="Rechazar reclamos seleccionados")
+    def reject_selected_claims(self, request, queryset):
+        pending_claims = queryset.filter(
+            status=RewardClaim.Status.PENDING,
+        )
+
+        rejected_count = pending_claims.update(
+            status=RewardClaim.Status.REJECTED,
+            resolved_by=request.user,
+            resolved_at=timezone.now(),
+        )
+
+        if rejected_count:
+            self.message_user(
+                request,
+                f"{rejected_count} reclamo(s) rechazado(s).",
+                level=messages.SUCCESS,
+            )
+        else:
+            self.message_user(
+                request,
+                "No había reclamos pendientes para rechazar.",
+                level=messages.WARNING,
+            )

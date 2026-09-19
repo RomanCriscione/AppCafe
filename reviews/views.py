@@ -424,6 +424,17 @@ def cafe_detail(request, cafe_id):
         None,
     )
 
+    review_without_checkin = request.session.pop(
+        "review_without_checkin",
+        None,
+    )
+
+    if (
+        review_without_checkin
+        and review_without_checkin.get("cafe_id") != cafe.id
+    ):
+        review_without_checkin = None
+
     # ⭐ NUEVO — highlight desde URL (?highlight=ID)
     highlight_id = request.GET.get("highlight")
 
@@ -869,13 +880,57 @@ def create_review(request, cafe_id):
                     for reward in unlocked_rewards
                 ]
 
-            messages.success(
-                request,
-                "¡Gracias por tu reseña!",
-                extra_tags="review_success"
-            )
+            if has_recent_valid_check_in:
+                if review_reward and review_reward.get("awarded"):
+                    points_earned = review_reward.get("points", 0)
+
+                    if (
+                        review_tag_bonus_reward
+                        and review_tag_bonus_reward.get("awarded")
+                    ):
+                        points_earned += review_tag_bonus_reward.get(
+                            "points",
+                            0,
+                        )
+
+                    if points_earned:
+                        messages.success(
+                            request,
+                            (
+                                f"¡Gracias por tu reseña! "
+                                f"Sumaste {points_earned} "
+                                f"{'Gota' if points_earned == 1 else 'Gotas'}."
+                            ),
+                            extra_tags="review_success",
+                        )
+                    else:
+                        messages.success(
+                            request,
+                            "¡Gracias por tu reseña!",
+                            extra_tags="review_success",
+                        )
+                else:
+                    messages.success(
+                        request,
+                        "¡Gracias por tu reseña!",
+                        extra_tags="review_success",
+                    )
+            else:
+                request.session["review_without_checkin"] = {
+                    "review_id": review.id,
+                    "cafe_id": cafe.id,
+                }
+
+                messages.success(
+                    request,
+                    "¡Gracias por tu reseña!",
+                    extra_tags="review_success",
+                )
+
             return redirect(
-    f"{reverse('reviews:cafe_detail', args=[cafe.id])}?highlight={review.id}#reviews")
+                f"{reverse('reviews:cafe_detail', args=[cafe.id])}"
+                f"?highlight={review.id}#reviews"
+            )
 
 
         else:
@@ -909,6 +964,62 @@ def create_review(request, cafe_id):
         },
     )
 
+
+@login_required
+@require_POST
+def create_reward_claim(request, review_id):
+    review = get_object_or_404(
+        Review,
+        id=review_id,
+        user=request.user,
+    )
+
+    existing_claim = RewardClaim.objects.filter(
+        user=request.user,
+        cafe=review.cafe,
+        review=review,
+    ).first()
+
+    if existing_claim:
+        if existing_claim.status == RewardClaim.Status.PENDING:
+            messages.info(
+                request,
+                "Ya solicitaste la revisión de esta visita.",
+            )
+        elif existing_claim.status == RewardClaim.Status.APPROVED:
+            messages.info(
+                request,
+                "Esta solicitud ya fue aprobada.",
+            )
+        else:
+            messages.info(
+                request,
+                "Esta solicitud ya fue revisada.",
+            )
+
+        return redirect(
+            f"{reverse('reviews:cafe_detail', args=[review.cafe_id])}"
+            f"?highlight={review.id}#reviews"
+        )
+
+    RewardClaim.objects.create(
+        user=request.user,
+        cafe=review.cafe,
+        review=review,
+    )
+
+    messages.success(
+        request,
+        (
+            "Solicitud enviada. Vamos a revisar tu visita "
+            "y te avisaremos cuando esté resuelta."
+        ),
+    )
+
+    return redirect(
+        f"{reverse('reviews:cafe_detail', args=[review.cafe_id])}"
+        f"?highlight={review.id}#reviews"
+    )
 
 @login_required
 def edit_review(request, review_id):

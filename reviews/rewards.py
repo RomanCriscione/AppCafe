@@ -7,6 +7,7 @@ from django.utils import timezone
 from .models import (
     CafeReward,
     RewardActionRule,
+    RewardClaim,
     RewardSettings,
     UserCoupon,
     UserPointTransaction,
@@ -364,4 +365,200 @@ def award_points(
             }
             for coupon in unlocked_coupons
         ],
+    }
+
+@transaction.atomic
+def approve_reward_claim(
+    *,
+    claim,
+    resolved_by,
+    has_tag_bonus=False,
+):
+    """
+    Aprueba un reclamo de Gotas y acredita las recompensas
+    que correspondían a la reseña.
+
+    No crea un CafeCheckIn retroactivo.
+
+    Es idempotente:
+    un mismo reclamo no puede acreditar dos veces
+    los mismos movimientos.
+    """
+
+    claim = (
+        RewardClaim.objects
+        .select_for_update()
+        .select_related(
+            "user",
+            "cafe",
+            "review",
+        )
+        .get(pk=claim.pk)
+    )
+
+    if claim.status != RewardClaim.Status.PENDING:
+        return {
+            "approved": False,
+            "reason": "claim_already_resolved",
+            "points": 0,
+            "unlocked_rewards": [],
+        }
+
+    if claim.review is None:
+        return {
+            "approved": False,
+            "reason": "review_required",
+            "points": 0,
+            "unlocked_rewards": [],
+        }
+
+    if (
+        claim.review.user_id != claim.user_id
+        or claim.review.cafe_id != claim.cafe_id
+    ):
+        return {
+            "approved": False,
+            "reason": "review_mismatch",
+            "points": 0,
+            "unlocked_rewards": [],
+        }
+
+    settings = RewardSettings.objects.first()
+
+    if settings is None or not settings.rewards_enabled:
+        return {
+            "approved": False,
+            "reason": "rewards_disabled",
+            "points": 0,
+            "unlocked_rewards": [],
+        }
+
+    if (
+        settings.program_starts_at is None
+        or timezone.now() < settings.program_starts_at
+    ):
+        return {
+            "approved": False,
+            "reason": "program_not_started",
+            "points": 0,
+            "unlocked_rewards": [],
+        }
+
+    User = get_user_model()
+
+    User.objects.select_for_update().get(
+        pk=claim.user_id,
+    )
+
+    total_points = 0
+    unlocked_rewards = []
+
+    actions = [
+        (
+            RewardActionRule.Action.REVIEW,
+            "review_transaction",
+        ),
+    ]
+
+    if has_tag_bonus:
+        actions.append(
+            (
+                RewardActionRule.Action.REVIEW_TAG_BONUS,
+                "tag_bonus_transaction",
+            )
+        )
+
+    for action, transaction_field in actions:
+
+        if getattr(claim, f"{transaction_field}_id"):
+            continue
+
+        try:
+            rule = RewardActionRule.objects.get(
+                action=action,
+                is_active=True,
+            )
+        except RewardActionRule.DoesNotExist:
+            continue
+
+        # Si la misma acción ya fue premiada para esta cafetería,
+        # no volvemos a acreditarla.
+        already_rewarded = (
+            UserPointTransaction.objects
+            .filter(
+                user=claim.user,
+                cafe=claim.cafe,
+                action=action,
+                created_at__gte=settings.program_starts_at,
+            )
+            .exists()
+        )
+
+        if already_rewarded:
+            continue
+
+        point_transaction = (
+            UserPointTransaction.objects.create(
+                user=claim.user,
+                cafe=claim.cafe,
+                action=action,
+                points=rule.points,
+            )
+        )
+
+        setattr(
+            claim,
+            transaction_field,
+            point_transaction,
+        )
+
+        total_points += rule.points
+
+    current_balance = sum(
+        UserPointTransaction.objects.filter(
+            user=claim.user,
+            created_at__gte=settings.program_starts_at,
+        ).values_list(
+            "points",
+            flat=True,
+        )
+    )
+
+    unlocked_coupons = _unlock_point_rewards(
+        user=claim.user,
+        balance=current_balance,
+    )
+
+    unlocked_rewards = [
+        {
+            "coupon_id": coupon.id,
+            "cafe_id": coupon.cafe_id,
+            "cafe_name": coupon.cafe.name,
+            "reward_text": coupon.reward_text_snapshot,
+            "code": coupon.code,
+            "expires_at": coupon.expires_at,
+        }
+        for coupon in unlocked_coupons
+    ]
+
+    claim.status = RewardClaim.Status.APPROVED
+    claim.resolved_by = resolved_by
+    claim.resolved_at = timezone.now()
+
+    claim.save(
+        update_fields=[
+            "status",
+            "resolved_by",
+            "resolved_at",
+            "review_transaction",
+            "tag_bonus_transaction",
+            "updated_at",
+        ]
+    )
+
+    return {
+        "approved": True,
+        "reason": "approved",
+        "points": total_points,
+        "unlocked_rewards": unlocked_rewards,
     }

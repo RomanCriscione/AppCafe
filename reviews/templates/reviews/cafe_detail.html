@@ -148,6 +148,42 @@
 
 <div class="gota-cafe-detail">
 
+{% if review_without_checkin %}
+  <div class="gota-review-reward-notice">
+    <div class="gota-review-reward-notice__icon">
+      <img
+        src="{% static 'images/gota-icon.png' %}"
+        alt=""
+        aria-hidden="true"
+      >
+    </div>
+
+    <div class="gota-review-reward-notice__content">
+      <strong>Tu reseña fue publicada ✓</strong>
+
+      <p>
+        No sumaste Gotas porque no pudimos validar tu visita.
+        Si estuviste acá y te olvidaste de marcar “Estoy acá”,
+        podés solicitar una revisión.
+      </p>
+
+      <form
+        method="post"
+        action="{% url 'reviews:create_reward_claim' review_without_checkin.review_id %}"
+      >
+        {% csrf_token %}
+
+        <button
+          type="submit"
+          class="gota-review-reward-notice__button"
+        >
+          Solicitar revisión
+        </button>
+      </form>
+    </div>
+  </div>
+{% endif %}
+
 <!-- HEADER PRINCIPAL -->
 <section class="surface p-5 rounded-2xl space-y-4 animate-fade-in-up">
 
