@@ -40,6 +40,7 @@ from .models import (
     RewardActionRule,
     UserPointTransaction,
     UserCoupon,
+    RewardClaim,
 )
 from .forms import ReviewForm, CafeForm, ReviewReportForm
 from reviews.utils.geo import haversine_distance
