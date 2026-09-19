@@ -834,8 +834,14 @@ def create_review(request, cafe_id):
 
             review_tag_bonus_reward = None
 
+            sensory_tag_names = [
+                tag_name
+                for tag_names in MANUAL_TAG_GROUPS.values()
+                for tag_name in tag_names
+            ]
+
             sensory_tags = review.tags.filter(
-                name__in=SENSORY_REVIEW_TAG_NAMES
+                name__in=sensory_tag_names
             )
 
             if (
