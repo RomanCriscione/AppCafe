@@ -14,6 +14,7 @@ from .mobile_api import (
     UpdateCafeAPIView,
     BecomeOwnerAPIView,
     CreateReviewAPIView,
+    CreateRewardClaimAPIView,
     ReviewTagsAPIView,
     UpdateReviewAPIView,
     ReportReviewAPIView,
@@ -140,6 +141,12 @@ urlpatterns = [
         "cafes/<int:cafe_id>/reviews/create/",
         CreateReviewAPIView.as_view(),
         name="mobile-create-review",
+    ),
+
+    path(
+        "reviews/<int:review_id>/reward-claim/",
+        CreateRewardClaimAPIView.as_view(),
+        name="mobile-create-reward-claim",
     ),
 
     path(

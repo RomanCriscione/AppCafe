@@ -22,6 +22,7 @@ from reviews.models import (
     CafeReward,
     Review,
     ReviewReport,
+    RewardClaim,
     UserBlock,
     RewardActionRule,
     RewardSettings,
@@ -954,6 +955,79 @@ class CreateReviewAPIView(APIView):
                     "precio_capuccino":
                         review.precio_capuccino,
                 },
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+class CreateRewardClaimAPIView(APIView):
+    """
+    POST /api/mobile/reviews/<review_id>/reward-claim/
+
+    Permite solicitar la revisión de una visita
+    cuando la reseña no recibió Gotas por falta
+    de un check-in válido.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, review_id):
+        review = get_object_or_404(
+            Review,
+            id=review_id,
+            user=request.user,
+        )
+
+        existing_claim = RewardClaim.objects.filter(
+            user=request.user,
+            cafe=review.cafe,
+            review=review,
+        ).first()
+
+        if existing_claim:
+            if existing_claim.status == RewardClaim.Status.PENDING:
+                message = (
+                    "Ya solicitaste la revisión de esta visita."
+                )
+            elif existing_claim.status == RewardClaim.Status.APPROVED:
+                message = (
+                    "Esta solicitud ya fue aprobada."
+                )
+            else:
+                message = (
+                    "Esta solicitud ya fue revisada."
+                )
+
+            return Response(
+                {
+                    "success": True,
+                    "already_exists": True,
+                    "claim": {
+                        "id": existing_claim.id,
+                        "status": existing_claim.status,
+                    },
+                    "message": message,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        claim = RewardClaim.objects.create(
+            user=request.user,
+            cafe=review.cafe,
+            review=review,
+        )
+
+        return Response(
+            {
+                "success": True,
+                "already_exists": False,
+                "claim": {
+                    "id": claim.id,
+                    "status": claim.status,
+                },
+                "message": (
+                    "Solicitud enviada. Vamos a revisar tu visita "
+                    "y te avisaremos cuando esté resuelta."
+                ),
             },
             status=status.HTTP_201_CREATED,
         )
