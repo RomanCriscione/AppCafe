@@ -149,82 +149,256 @@
 <div class="gota-cafe-detail">
 
 {% if review_without_checkin %}
-  <div class="gota-review-reward-notice">
-    <div class="gota-review-reward-notice__icon">
-      <img
-        src="{% static 'images/gota-icon.png' %}"
-        alt=""
-        aria-hidden="true"
+
+  <div
+    id="review-reward-modal"
+    class="gota-review-reward-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="review-reward-modal-title"
+  >
+
+    <div
+      class="gota-review-reward-modal__backdrop"
+      onclick="closeReviewRewardModal()"
+    ></div>
+
+    <div class="gota-review-reward-modal__card">
+
+      <button
+        type="button"
+        class="gota-review-reward-modal__close"
+        onclick="closeReviewRewardModal()"
+        aria-label="Cerrar"
       >
-    </div>
+        ×
+      </button>
 
-    <div class="gota-review-reward-notice__content">
-      <strong>Tu reseña fue publicada ✓</strong>
+      <div class="gota-review-reward-modal__check" aria-hidden="true">
+        ✓
+      </div>
 
-      <p>
+      <h2
+        id="review-reward-modal-title"
+        class="gota-review-reward-modal__title"
+      >
+        Tu reseña fue publicada
+      </h2>
+
+      <div class="gota-review-reward-modal__notice">
         No sumaste Gotas porque no pudimos validar tu visita.
-        Si estuviste acá y te olvidaste de marcar “Estoy acá”,
-        podés solicitar una revisión.
+      </div>
+
+      <p class="gota-review-reward-modal__text">
+        Si estuviste acá y te olvidaste de marcar
+        <strong>“Estoy acá”</strong>, podés solicitar una revisión.
+        Vamos a revisar tu visita y te avisaremos cuando esté resuelta.
       </p>
 
       <form
         method="post"
         action="{% url 'reviews:create_reward_claim' review_without_checkin.review_id %}"
+        class="gota-review-reward-modal__form"
       >
         {% csrf_token %}
 
         <button
           type="submit"
-          class="gota-review-reward-notice__button"
+          class="gota-review-reward-modal__primary"
         >
           Solicitar revisión
         </button>
       </form>
+
+      <button
+        type="button"
+        class="gota-review-reward-modal__secondary"
+        onclick="closeReviewRewardModal()"
+      >
+        Entendido
+      </button>
+
     </div>
+
   </div>
+
+  <style>
+    .gota-review-reward-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .gota-review-reward-modal__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.58);
+      backdrop-filter: blur(2px);
+    }
+
+    .gota-review-reward-modal__card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 500px;
+      padding: 42px 38px 34px;
+      background: #ffffff;
+      border: 1px solid rgba(30, 58, 138, 0.10);
+      border-radius: 24px;
+      box-shadow:
+        0 24px 70px rgba(17, 24, 39, 0.20),
+        0 4px 14px rgba(17, 24, 39, 0.08);
+      text-align: center;
+    }
+
+    .gota-review-reward-modal__close {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      width: 36px;
+      height: 36px;
+      border: 0;
+      background: transparent;
+      color: #64748b;
+      font-size: 30px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    .gota-review-reward-modal__close:hover {
+      background: #f8fafc;
+      color: #111827;
+    }
+
+    .gota-review-reward-modal__check {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 66px;
+      height: 66px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: #f5eee9;
+      color: #8b5e34;
+      font-size: 34px;
+      font-weight: 800;
+    }
+
+    .gota-review-reward-modal__title {
+      margin: 0;
+      color: #1e3a8a;
+      font-size: 28px;
+      line-height: 1.15;
+      font-weight: 800;
+    }
+
+    .gota-review-reward-modal__notice {
+      margin-top: 22px;
+      padding: 15px 18px;
+      border-radius: 14px;
+      background: #faf6f2;
+      color: #70472f;
+      font-size: 16px;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .gota-review-reward-modal__text {
+      max-width: 410px;
+      margin: 22px auto 26px;
+      color: #475569;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .gota-review-reward-modal__form {
+      margin: 0;
+    }
+
+    .gota-review-reward-modal__primary,
+    .gota-review-reward-modal__secondary {
+      width: 100%;
+      min-height: 50px;
+      border-radius: 13px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease;
+    }
+
+    .gota-review-reward-modal__primary {
+      border: 1px solid #8b5e34;
+      background: #8b5e34;
+      color: #ffffff;
+      box-shadow: 0 8px 20px rgba(139, 94, 52, 0.18);
+    }
+
+    .gota-review-reward-modal__primary:hover {
+      transform: translateY(-1px);
+      background: #754c2d;
+      box-shadow: 0 10px 24px rgba(139, 94, 52, 0.23);
+    }
+
+    .gota-review-reward-modal__secondary {
+      margin-top: 10px;
+      border: 1px solid #d8c5b7;
+      background: #ffffff;
+      color: #70472f;
+    }
+
+    .gota-review-reward-modal__secondary:hover {
+      background: #faf6f2;
+    }
+
+    @media (max-width: 640px) {
+      .gota-review-reward-modal {
+        padding: 16px;
+      }
+
+      .gota-review-reward-modal__card {
+        padding: 38px 22px 24px;
+        border-radius: 20px;
+      }
+
+      .gota-review-reward-modal__title {
+        font-size: 24px;
+      }
+
+      .gota-review-reward-modal__notice {
+        font-size: 15px;
+      }
+
+      .gota-review-reward-modal__text {
+        font-size: 14px;
+      }
+    }
+  </style>
+
+  <script>
+    function closeReviewRewardModal() {
+      const modal = document.getElementById("review-reward-modal");
+
+      if (modal) {
+        modal.remove();
+      }
+    }
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Escape") {
+        closeReviewRewardModal();
+      }
+    });
+  </script>
+
 {% endif %}
-
-<!-- HEADER PRINCIPAL -->
-<section class="surface p-5 rounded-2xl space-y-4 animate-fade-in-up">
-
-  <!-- IDENTIDAD PRINCIPAL DEL CAFÉ -->
-  <div class="gota-cafe-detail-hero">
-
-    <div class="gota-cafe-detail-hero__main">
-
-      <span class="gota-home-section-kicker">
-        Descubrí este lugar
-      </span>
-
-      <h1 class="gota-cafe-detail-hero__title">
-        {{ cafe.name }}
-      </h1>
-
-      {% if cafe.location %}
-        <p class="gota-cafe-detail-hero__location">
-          <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-          {{ cafe.location }}
-        </p>
-      {% endif %}
-
-    </div>
-
-    <div class="gota-cafe-detail-hero__stats">
-
-      {% if average_rating %}
-        <div class="gota-cafe-detail-stat">
-          <img
-            src="{% static 'images/gota-icon.png' %}"
-            alt=""
-            aria-hidden="true"
-          >
-
-          <div>
-            <strong>{{ average_rating|floatformat:1 }}</strong>
-            <span>valoración</span>
-          </div>
-        </div>
-      {% endif %}
 
       <div class="gota-cafe-detail-stat">
         <i class="far fa-comment" aria-hidden="true"></i>
