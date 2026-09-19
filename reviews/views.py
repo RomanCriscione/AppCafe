@@ -47,7 +47,7 @@ from core.messages import MESSAGES
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
 from openpyxl import Workbook
-from datetime import datetime
+from datetime import datetime, timedelta
 import zipfile
 from django.contrib.postgres.search import (
     SearchVector,
