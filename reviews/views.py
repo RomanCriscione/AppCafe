@@ -708,6 +708,7 @@ def cafe_detail(request, cafe_id):
             "precio_promedio": precio_promedio,
             "highlight_id": int(highlight_id) if highlight_id and highlight_id.isdigit() else None,
             "reward_celebration": reward_celebration,
+            "review_without_checkin": review_without_checkin,
 
                     # ✅ SEO
             "meta_title": f"{cafe.name} en {cafe.location} | Reseñas y experiencias reales – Gota",
