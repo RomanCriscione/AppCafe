@@ -935,9 +935,15 @@ def create_review(request, cafe_id):
                     extra_tags="review_success",
                 )
 
+            if has_recent_valid_check_in:
+                return redirect(
+                    f"{reverse('reviews:cafe_detail', args=[cafe.id])}"
+                    f"?highlight={review.id}#reviews"
+                )
+
             return redirect(
                 f"{reverse('reviews:cafe_detail', args=[cafe.id])}"
-                f"?highlight={review.id}#reviews"
+                f"?highlight={review.id}"
             )
 
 
