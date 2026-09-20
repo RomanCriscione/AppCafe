@@ -41,6 +41,7 @@ from .models import (
     UserPointTransaction,
     UserCoupon,
     RewardClaim,
+    UserRewardUnlock,
 )
 from .forms import ReviewForm, CafeForm, ReviewReportForm
 from reviews.utils.geo import haversine_distance
@@ -2411,6 +2412,15 @@ def my_gotas(request):
         .order_by("-obtained_at")
     )
 
+    pending_unlocks = (
+        UserRewardUnlock.objects
+        .filter(
+            user=request.user,
+            status=UserRewardUnlock.Status.PENDING,
+        )
+        .order_by("points_required")
+    )
+
     return render(
         request,
         "reviews/my_gotas.html",
@@ -2420,6 +2430,7 @@ def my_gotas(request):
             "milestones": milestones,
             "next_milestone": next_milestone,
             "available_coupons": available_coupons,
+            "pending_unlocks": pending_unlocks,
             "display_milestones": display_milestones,
             "current_position_percent": current_position_percent,
             "gotas_to_next": gotas_to_next,
