@@ -28,10 +28,17 @@ from reviews.models import (
     RewardSettings,
     UserPointTransaction,
     UserCoupon,
+    UserRewardUnlock,
     Tag,
 )
 
-from reviews.rewards import award_points
+from reviews.rewards import (
+    award_points,
+    claim_reward_from_unlock,
+    get_reward_locations_for_unlock,
+    get_reward_options_for_location,
+    get_reward_options_for_unlock,
+)
 
 SENSORY_REVIEW_TAG_GROUPS = {
     "conexion": [
@@ -1832,6 +1839,242 @@ class SetCafeStatusAPIView(APIView):
             status=status.HTTP_200_OK,
         )
 
+class RewardUnlockOptionsAPIView(APIView):
+    """
+    GET /api/mobile/reward-unlocks/<unlock_id>/options/
+
+    Devuelve los beneficios disponibles para un hito
+    de Gotas pendiente de elección.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, unlock_id):
+        unlock = get_object_or_404(
+            UserRewardUnlock,
+            id=unlock_id,
+            user=request.user,
+            status=UserRewardUnlock.Status.PENDING,
+        )
+
+        result = get_reward_options_for_unlock(
+            unlock=unlock,
+        )
+
+        rewards = []
+
+        for item in result["rewards"]:
+            reward = item["reward"]
+
+            rewards.append({
+                "reward_id": reward.id,
+                "cafe_id": reward.cafe_id,
+                "cafe_name": reward.cafe.name,
+                "reward_text": reward.user_text,
+                "terms": reward.terms,
+                "distance_km": (
+                    round(item["distance_km"], 1)
+                    if item["distance_km"] is not None
+                    else None
+                ),
+            })
+
+        return Response({
+            "unlock_id": unlock.id,
+            "points_required": unlock.points_required,
+            "status": result["status"],
+            "radius_km": result["radius_km"],
+            "rewards": rewards,
+        })
+
+class RewardUnlockLocationsAPIView(APIView):
+    """
+    GET /api/mobile/reward-unlocks/<unlock_id>/locations/
+
+    Devuelve las localidades que tienen beneficios
+    disponibles para este hito de Gotas.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, unlock_id):
+        unlock = get_object_or_404(
+            UserRewardUnlock,
+            id=unlock_id,
+            user=request.user,
+            status=UserRewardUnlock.Status.PENDING,
+        )
+
+        locations = get_reward_locations_for_unlock(
+            unlock=unlock,
+        )
+
+        return Response({
+            "success": True,
+            "unlock_id": unlock.id,
+            "points_required": unlock.points_required,
+            "locations": locations,
+        })
+
+class RewardUnlockLocationOptionsAPIView(APIView):
+    """
+    GET /api/mobile/reward-unlocks/<unlock_id>/options/location/
+        ?location=Quilmes
+
+    Devuelve beneficios para una localidad elegida
+    por el usuario.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, unlock_id):
+        unlock = get_object_or_404(
+            UserRewardUnlock,
+            id=unlock_id,
+            user=request.user,
+            status=UserRewardUnlock.Status.PENDING,
+        )
+
+        location = request.query_params.get(
+            "location",
+            "",
+        ).strip()
+
+        if not location:
+            return Response(
+                {
+                    "success": False,
+                    "error": "location_required",
+                    "message": "Elegí una localidad.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        options = get_reward_options_for_location(
+            unlock=unlock,
+            location=location,
+        )
+
+        rewards = []
+
+        for item in options:
+            reward = item["reward"]
+
+            rewards.append({
+                "reward_id": reward.id,
+                "cafe_id": reward.cafe_id,
+                "cafe_name": reward.cafe.name,
+                "location": reward.cafe.location,
+                "reward_text": reward.user_text,
+                "terms": reward.terms,
+            })
+
+        return Response({
+            "success": True,
+            "unlock_id": unlock.id,
+            "points_required": unlock.points_required,
+            "location": location,
+            "rewards": rewards,
+        })
+
+class ClaimRewardUnlockAPIView(APIView):
+    """
+    POST /api/mobile/reward-unlocks/<unlock_id>/claim/
+
+    Permite elegir un beneficio para un hito
+    de Gotas pendiente.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, unlock_id):
+        reward_id = request.data.get("reward_id")
+        location = request.data.get("location")
+
+        if not reward_id:
+            return Response(
+                {
+                    "success": False,
+                    "error": "reward_required",
+                    "message": "Elegí un beneficio.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            reward_id = int(reward_id)
+        except (TypeError, ValueError):
+            return Response(
+                {
+                    "success": False,
+                    "error": "invalid_reward",
+                    "message": "El beneficio seleccionado no es válido.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        result = claim_reward_from_unlock(
+            user=request.user,
+            unlock_id=unlock_id,
+            reward_id=reward_id,
+            location=location,
+        )
+
+        if not result["ok"]:
+            reason = result["reason"]
+
+            messages = {
+                "unlock_not_found": (
+                    "No encontramos este beneficio desbloqueado."
+                ),
+                "unlock_already_claimed": (
+                    "Ya elegiste un beneficio para este hito."
+                ),
+                "reward_not_available": (
+                    "Este beneficio ya no está disponible."
+                ),
+                "reward_out_of_stock": (
+                    "Este beneficio se quedó sin disponibilidad."
+                ),
+                "reward_not_offered": (
+                    "Este beneficio no está disponible entre las opciones que elegiste."
+                ),
+            }
+
+            return Response(
+                {
+                    "success": False,
+                    "error": reason,
+                    "message": messages.get(
+                        reason,
+                        "No pudimos elegir este beneficio.",
+                    ),
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        coupon = result["coupon"]
+
+        return Response(
+            {
+                "success": True,
+                "message": "¡Beneficio elegido!",
+                "coupon": {
+                    "id": coupon.id,
+                    "code": coupon.code,
+                    "qr_token": coupon.qr_token,
+                    "reward_text": coupon.reward_text_snapshot,
+                    "terms": coupon.terms_snapshot,
+                    "expires_at": coupon.expires_at,
+                    "cafe": {
+                        "id": coupon.cafe_id,
+                        "name": coupon.cafe.name,
+                    },
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
 class MyGotasAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -1940,8 +2183,21 @@ class MyGotasAPIView(APIView):
                     },
                 }
             )
-        
-        
+
+        pending_unlocks = list(
+            UserRewardUnlock.objects
+            .filter(
+                user=request.user,
+                status=UserRewardUnlock.Status.PENDING,
+            )
+            .order_by("points_required")
+            .values(
+                "id",
+                "points_required",
+                "unlocked_at",
+            )
+        )
+
         return Response(
             {
                 "balance": balance,
@@ -1949,6 +2205,7 @@ class MyGotasAPIView(APIView):
                 "milestones": milestones,
                 "next_milestone": next_milestone,
                 "available_coupons": available_coupons,
+                "pending_unlocks": pending_unlocks,
             },
             status=status.HTTP_200_OK,
         )

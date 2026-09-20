@@ -945,6 +945,16 @@ class RewardSettings(models.Model):
         ),
     )
 
+    reward_nearby_radius_km = models.FloatField(
+        default=10.0,
+        verbose_name="Radio cercano para beneficios (km)",
+    )
+
+    reward_extended_radius_km = models.FloatField(
+        default=25.0,
+        verbose_name="Radio ampliado para beneficios (km)",
+    )
+
     updated_at = models.DateTimeField(
         auto_now=True,
     )
@@ -1094,6 +1104,73 @@ class CafeReward(models.Model):
 
     def __str__(self):
         return f"{self.cafe} · {self.name}"
+
+class UserRewardUnlock(models.Model):
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pendiente de elección"
+        CLAIMED = "claimed", "Beneficio elegido"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="reward_unlocks",
+        verbose_name="Usuario",
+    )
+
+    points_required = models.PositiveIntegerField(
+        verbose_name="Hito de Gotas",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+        verbose_name="Estado",
+    )
+
+    coupon = models.OneToOneField(
+        "UserCoupon",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reward_unlock",
+        verbose_name="Cupón elegido",
+    )
+
+    unlocked_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Desbloqueado",
+    )
+
+    claimed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Beneficio elegido",
+    )
+
+    class Meta:
+        verbose_name = "Beneficio desbloqueado"
+        verbose_name_plural = "Beneficios desbloqueados"
+        ordering = ["-unlocked_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "points_required"],
+                name="unique_user_reward_unlock",
+            ),
+        ]
+        indexes = [
+            models.Index(
+                fields=["user", "status"],
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.user} · "
+            f"{self.points_required} Gotas · "
+            f"{self.get_status_display()}"
+        )
 
 class UserCoupon(models.Model):
 

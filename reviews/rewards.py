@@ -1,3 +1,4 @@
+import math
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
@@ -5,12 +6,14 @@ from django.db import transaction
 from django.utils import timezone
 
 from .models import (
+    CafeCheckIn,
     CafeReward,
     RewardActionRule,
     RewardClaim,
     RewardSettings,
     UserCoupon,
     UserPointTransaction,
+    UserRewardUnlock,
 )
 
 def _get_current_window_transactions(
@@ -82,34 +85,81 @@ def _unlock_point_rewards(
     balance,
 ):
     """
-    Crea los cupones correspondientes a beneficios por Gotas
-    que el usuario ya alcanzó.
+    Registra los hitos de Gotas alcanzados por el usuario.
 
-    Es idempotente: un mismo beneficio sólo puede generar
-    un cupón por usuario.
+    Alcanzar un hito NO genera todavía un cupón.
+    El usuario elegirá posteriormente entre los beneficios
+    disponibles para ese nivel de Gotas.
     """
 
-    now = timezone.now()
-
-    rewards = (
+    available_thresholds = (
         CafeReward.objects
-        .select_for_update()
         .filter(
             is_active=True,
             unlock_type=CafeReward.UnlockType.POINTS,
             points_required__isnull=False,
             points_required__lte=balance,
         )
-        .order_by(
+        .values_list(
             "points_required",
+            flat=True,
+        )
+        .distinct()
+        .order_by("points_required")
+    )
+
+    unlocked_rewards = []
+
+    for points_required in available_thresholds:
+        unlock, created = (
+            UserRewardUnlock.objects.get_or_create(
+                user=user,
+                points_required=points_required,
+            )
+        )
+
+        if created:
+            unlocked_rewards.append(unlock)
+
+    return unlocked_rewards
+
+def get_available_rewards_for_unlock(
+    *,
+    unlock,
+):
+    """
+    Devuelve los beneficios que el usuario puede elegir
+    para un hito de Gotas.
+
+    Valida disponibilidad y, cuando existe una ubicación
+    de referencia, calcula la distancia a cada cafetería.
+    """
+
+    now = timezone.now()
+
+    reference_location = get_user_reward_reference_location(
+        user=unlock.user,
+    )
+
+    rewards = (
+        CafeReward.objects
+        .filter(
+            is_active=True,
+            unlock_type=CafeReward.UnlockType.POINTS,
+            points_required=unlock.points_required,
+        )
+        .select_related("cafe")
+        .order_by(
             "priority",
+            "cafe__name",
             "id",
         )
     )
 
-    unlocked_coupons = []
+    available_rewards = []
 
     for reward in rewards:
+
         if (
             reward.valid_from is not None
             and now < reward.valid_from
@@ -122,36 +172,471 @@ def _unlock_point_rewards(
         ):
             continue
 
+        if UserCoupon.objects.filter(
+            user=unlock.user,
+            reward=reward,
+        ).exists():
+            continue
+
         if reward.stock is not None:
-            delivered_count = UserCoupon.objects.filter(
-                reward=reward,
-            ).exclude(
-                status=UserCoupon.Status.CANCELLED,
-            ).count()
+            delivered_count = (
+                UserCoupon.objects
+                .filter(
+                    reward=reward,
+                )
+                .exclude(
+                    status=UserCoupon.Status.CANCELLED,
+                )
+                .count()
+            )
 
             if delivered_count >= reward.stock:
                 continue
 
-        coupon, created = UserCoupon.objects.get_or_create(
+        distance_km = None
+
+        if (
+            reference_location is not None
+            and reward.cafe.latitude is not None
+            and reward.cafe.longitude is not None
+        ):
+            distance_km = calculate_distance_km(
+                latitude_1=reference_location["latitude"],
+                longitude_1=reference_location["longitude"],
+                latitude_2=reward.cafe.latitude,
+                longitude_2=reward.cafe.longitude,
+            )
+
+        available_rewards.append({
+            "reward": reward,
+            "distance_km": distance_km,
+        })
+
+    available_rewards.sort(
+        key=lambda item: (
+            item["distance_km"] is None,
+            (
+                item["distance_km"]
+                if item["distance_km"] is not None
+                else float("inf")
+            ),
+            item["reward"].priority,
+            item["reward"].id,
+        )
+    )
+
+    return available_rewards
+
+def get_reward_options_for_unlock(
+    *,
+    unlock,
+):
+    """
+    Determina qué beneficios mostrar para un hito desbloqueado.
+
+    Prioridad:
+    1. Beneficios dentro del radio cercano.
+    2. Si no hay, beneficios dentro del radio ampliado.
+    3. Si tampoco hay, informa que no existen opciones cercanas.
+    """
+
+    settings_obj = RewardSettings.objects.first()
+
+    nearby_radius_km = (
+        settings_obj.reward_nearby_radius_km
+        if settings_obj
+        else 10.0
+    )
+
+    extended_radius_km = (
+        settings_obj.reward_extended_radius_km
+        if settings_obj
+        else 25.0
+    )
+
+    available_rewards = get_available_rewards_for_unlock(
+        unlock=unlock,
+    )
+
+    reference_location = get_user_reward_reference_location(
+        user=unlock.user,
+    )
+
+    if reference_location is None:
+        return {
+            "status": "location_required",
+            "radius_km": None,
+            "rewards": [],
+        }
+
+    rewards_with_distance = [
+        item
+        for item in available_rewards
+        if item["distance_km"] is not None
+    ]
+
+    nearby_rewards = [
+        item
+        for item in rewards_with_distance
+        if item["distance_km"] <= nearby_radius_km
+    ]
+
+    if nearby_rewards:
+        return {
+            "status": "nearby",
+            "radius_km": nearby_radius_km,
+            "rewards": nearby_rewards,
+        }
+
+    extended_rewards = [
+        item
+        for item in rewards_with_distance
+        if item["distance_km"] <= extended_radius_km
+    ]
+
+    if extended_rewards:
+        return {
+            "status": "extended",
+            "radius_km": extended_radius_km,
+            "rewards": extended_rewards,
+        }
+
+    return {
+        "status": "no_nearby_rewards",
+        "radius_km": extended_radius_km,
+        "rewards": [],
+    }
+
+def get_reward_options_for_location(
+    *,
+    unlock,
+    location,
+):
+    """
+    Devuelve beneficios disponibles para un hito
+    filtrados por una localidad elegida por el usuario.
+    """
+
+    location = (location or "").strip()
+
+    if not location:
+        return []
+
+    available_rewards = get_available_rewards_for_unlock(
+        unlock=unlock,
+    )
+
+    return [
+        item
+        for item in available_rewards
+        if (
+            item["reward"].cafe.location
+            and item["reward"].cafe.location.strip().casefold()
+            == location.casefold()
+        )
+    ]
+
+def get_reward_locations_for_unlock(
+    *,
+    unlock,
+):
+    """
+    Devuelve las localidades que tienen al menos
+    un beneficio disponible para este hito de Gotas.
+    """
+
+    available_rewards = get_available_rewards_for_unlock(
+        unlock=unlock,
+    )
+
+    locations = {}
+
+    for item in available_rewards:
+        location = (
+            item["reward"].cafe.location
+            or ""
+        ).strip()
+
+        if not location:
+            continue
+
+        key = location.casefold()
+
+        if key not in locations:
+            locations[key] = {
+                "name": location,
+                "rewards_count": 0,
+            }
+
+        locations[key]["rewards_count"] += 1
+
+    return sorted(
+        locations.values(),
+        key=lambda item: item["name"].casefold(),
+    )
+
+@transaction.atomic
+def claim_reward_from_unlock(
+    *,
+    user,
+    unlock_id,
+    reward_id,
+    location=None,
+):
+    """
+    Convierte un hito pendiente en un cupón concreto.
+
+    El beneficio debe pertenecer a las opciones que Gota
+    ofreció al usuario, ya sea por cercanía o por una
+    localidad elegida manualmente.
+    """
+
+    unlock = (
+        UserRewardUnlock.objects
+        .select_for_update()
+        .filter(
+            id=unlock_id,
             user=user,
-            reward=reward,
-            defaults={
-                "cafe": reward.cafe,
-                "reward_text_snapshot": reward.user_text,
-                "terms_snapshot": reward.terms,
-                "expires_at": (
-                    now
-                    + timedelta(
-                        days=reward.coupon_valid_days,
-                    )
-                ),
-            },
+        )
+        .first()
+    )
+
+    if unlock is None:
+        return {
+            "ok": False,
+            "reason": "unlock_not_found",
+        }
+
+    if unlock.status != UserRewardUnlock.Status.PENDING:
+        return {
+            "ok": False,
+            "reason": "unlock_already_claimed",
+        }
+
+    location = (location or "").strip()
+
+    if location:
+        offered_rewards = get_reward_options_for_location(
+            unlock=unlock,
+            location=location,
+        )
+    else:
+        options = get_reward_options_for_unlock(
+            unlock=unlock,
+        )
+        offered_rewards = options["rewards"]
+
+    reward = next(
+        (
+            item["reward"]
+            for item in offered_rewards
+            if item["reward"].id == reward_id
+        ),
+        None,
+    )
+
+    if reward is None:
+        return {
+            "ok": False,
+            "reason": "reward_not_offered",
+        }
+
+    # Bloqueamos el beneficio antes de consumir stock.
+    reward = (
+        CafeReward.objects
+        .select_for_update()
+        .get(id=reward.id)
+    )
+
+    # Revalidamos que siga activo y vigente.
+    now = timezone.now()
+
+    if not reward.is_active:
+        return {
+            "ok": False,
+            "reason": "reward_not_available",
+        }
+
+    if (
+        reward.valid_from is not None
+        and now < reward.valid_from
+    ):
+        return {
+            "ok": False,
+            "reason": "reward_not_available",
+        }
+
+    if (
+        reward.valid_until is not None
+        and now > reward.valid_until
+    ):
+        return {
+            "ok": False,
+            "reason": "reward_not_available",
+        }
+
+    # Revalidamos stock dentro de la transacción.
+    if reward.stock is not None:
+        delivered_count = (
+            UserCoupon.objects
+            .filter(reward=reward)
+            .exclude(
+                status=UserCoupon.Status.CANCELLED,
+            )
+            .count()
         )
 
-        if created:
-            unlocked_coupons.append(coupon)
+        if delivered_count >= reward.stock:
+            return {
+                "ok": False,
+                "reason": "reward_out_of_stock",
+            }
 
-    return unlocked_coupons
+    expires_at = (
+        now
+        + timedelta(days=reward.coupon_valid_days)
+    )
+
+    coupon = UserCoupon.objects.create(
+        user=user,
+        cafe=reward.cafe,
+        reward=reward,
+        reward_text_snapshot=reward.user_text,
+        terms_snapshot=reward.terms,
+        expires_at=expires_at,
+    )
+
+    unlock.status = UserRewardUnlock.Status.CLAIMED
+    unlock.coupon = coupon
+    unlock.claimed_at = now
+
+    unlock.save(
+        update_fields=[
+            "status",
+            "coupon",
+            "claimed_at",
+        ]
+    )
+
+    return {
+        "ok": True,
+        "coupon": coupon,
+        "unlock": unlock,
+    }
+
+def get_user_reward_reference_location(
+    *,
+    user,
+):
+    """
+    Obtiene una ubicación de referencia para ofrecer beneficios.
+
+    Usa hasta las últimas 20 visitas validadas del usuario
+    y toma como zona principal la localidad con mayor actividad.
+
+    En caso de empate, gana la localidad de la visita
+    más reciente.
+
+    No representa el domicilio del usuario ni almacena
+    una nueva ubicación.
+    """
+
+    recent_check_ins = list(
+        CafeCheckIn.objects
+        .filter(
+            user=user,
+            is_valid=True,
+            cafe__latitude__isnull=False,
+            cafe__longitude__isnull=False,
+        )
+        .select_related("cafe")
+        .order_by("-created_at")[:20]
+    )
+
+    if not recent_check_ins:
+        return None
+
+    location_counts = {}
+
+    for check_in in recent_check_ins:
+        location = (
+            check_in.cafe.location
+            or ""
+        ).strip()
+
+        if not location:
+            continue
+
+        key = location.casefold()
+
+        if key not in location_counts:
+            location_counts[key] = {
+                "count": 0,
+                "latest_check_in": check_in,
+            }
+
+        location_counts[key]["count"] += 1
+
+    if not location_counts:
+        return None
+
+    reference_data = max(
+        location_counts.values(),
+        key=lambda item: (
+            item["count"],
+            item["latest_check_in"].created_at,
+        ),
+    )
+
+    reference_check_in = (
+        reference_data["latest_check_in"]
+    )
+
+    return {
+        "latitude": reference_check_in.cafe.latitude,
+        "longitude": reference_check_in.cafe.longitude,
+        "cafe_id": reference_check_in.cafe_id,
+        "location": reference_check_in.cafe.location,
+        "source": "predominant_valid_check_ins",
+        "sample_size": len(recent_check_ins),
+        "location_visits": reference_data["count"],
+    }
+
+def calculate_distance_km(
+    *,
+    latitude_1,
+    longitude_1,
+    latitude_2,
+    longitude_2,
+):
+    """
+    Calcula la distancia aproximada en kilómetros
+    entre dos coordenadas geográficas.
+    """
+
+    earth_radius_km = 6371.0
+
+    lat_1 = math.radians(latitude_1)
+    lon_1 = math.radians(longitude_1)
+    lat_2 = math.radians(latitude_2)
+    lon_2 = math.radians(longitude_2)
+
+    delta_lat = lat_2 - lat_1
+    delta_lon = lon_2 - lon_1
+
+    haversine = (
+        math.sin(delta_lat / 2) ** 2
+        + math.cos(lat_1)
+        * math.cos(lat_2)
+        * math.sin(delta_lon / 2) ** 2
+    )
+
+    central_angle = 2 * math.atan2(
+        math.sqrt(haversine),
+        math.sqrt(1 - haversine),
+    )
+
+    return earth_radius_km * central_angle
 
 @transaction.atomic
 def award_points(
@@ -339,7 +824,7 @@ def award_points(
         )
     )
 
-    unlocked_coupons = _unlock_point_rewards(
+    new_unlocks = _unlock_point_rewards(
         user=user,
         balance=current_balance,
     )
@@ -356,14 +841,11 @@ def award_points(
         ),
         "unlocked_rewards": [
             {
-                "coupon_id": coupon.id,
-                "cafe_id": coupon.cafe_id,
-                "cafe_name": coupon.cafe.name,
-                "reward_text": coupon.reward_text_snapshot,
-                "code": coupon.code,
-                "expires_at": coupon.expires_at,
+                "unlock_id": unlock.id,
+                "points_required": unlock.points_required,
+                "status": unlock.status,
             }
-            for coupon in unlocked_coupons
+            for unlock in new_unlocks
         ],
     }
 
@@ -524,21 +1006,18 @@ def approve_reward_claim(
         )
     )
 
-    unlocked_coupons = _unlock_point_rewards(
+    new_unlocks = _unlock_point_rewards(
         user=claim.user,
         balance=current_balance,
     )
 
     unlocked_rewards = [
         {
-            "coupon_id": coupon.id,
-            "cafe_id": coupon.cafe_id,
-            "cafe_name": coupon.cafe.name,
-            "reward_text": coupon.reward_text_snapshot,
-            "code": coupon.code,
-            "expires_at": coupon.expires_at,
+            "unlock_id": unlock.id,
+            "points_required": unlock.points_required,
+            "status": unlock.status,
         }
-        for coupon in unlocked_coupons
+        for unlock in new_unlocks
     ]
 
     claim.status = RewardClaim.Status.APPROVED

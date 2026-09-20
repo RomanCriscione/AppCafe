@@ -21,6 +21,10 @@ from .mobile_api import (
     CafeWhispersAPIView,
     BlockUserAPIView,
     ReportWhisperAPIView,
+    RewardUnlockOptionsAPIView,
+    ClaimRewardUnlockAPIView,
+    RewardUnlockLocationOptionsAPIView,
+    RewardUnlockLocationsAPIView,
 )
 
 from .auth_api import (
@@ -46,6 +50,30 @@ urlpatterns = [
         "my-gotas/",
         MyGotasAPIView.as_view(),
         name="mobile-my-gotas",
+    ),
+
+    path(
+        "reward-unlocks/<int:unlock_id>/options/",
+        RewardUnlockOptionsAPIView.as_view(),
+        name="mobile-reward-unlock-options",
+    ),
+
+    path(
+        "reward-unlocks/<int:unlock_id>/options/location/",
+        RewardUnlockLocationOptionsAPIView.as_view(),
+        name="mobile-reward-unlock-location-options",
+    ),
+
+    path(
+        "reward-unlocks/<int:unlock_id>/claim/",
+        ClaimRewardUnlockAPIView.as_view(),
+        name="mobile-claim-reward-unlock",
+    ),
+
+    path(
+        "reward-unlocks/<int:unlock_id>/locations/",
+        RewardUnlockLocationsAPIView.as_view(),
+        name="mobile-reward-unlock-locations",
     ),
 
     path(
