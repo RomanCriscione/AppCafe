@@ -166,7 +166,11 @@
 
                                 <button
                                     type="submit"
-                                    class="rounded-xl bg-[#172C6D] px-4 py-2 text-sm font-bold text-white"
+                                    class="rounded-xl px-4 py-2 text-sm font-bold"
+                                    style="
+                                        background-color: #172C6D;
+                                        color: #FFFFFF;
+                                    "
                                 >
                                     Elegir este beneficio
                                 </button>
@@ -190,30 +194,46 @@
         <div class="mt-8 border-t border-gray-200 pt-6">
 
             <h2 class="text-lg font-bold text-gray-900">
-                Elegir otra localidad
+                Explorar otra localidad
             </h2>
 
             <p class="mt-1 text-sm text-gray-600">
-                También podés explorar los beneficios disponibles en otra zona.
+                ¿Viajás o querés usar tu beneficio en otro lugar?
+                Podés ver las opciones disponibles en otra localidad.
             </p>
 
-            <div class="mt-4 flex flex-wrap gap-2">
+            <form method="get" class="mt-4 flex flex-col gap-3 sm:flex-row">
 
-                {% for location in locations %}
+                <select
+                    name="location"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-700 sm:max-w-xs"
+                >
+                    <option value="">
+                        Elegí una localidad
+                    </option>
 
-                    <a
-                        href="?location={{ location.name|urlencode }}"
-                        class="rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-[#172C6D] hover:text-[#172C6D]"
-                    >
-                        {{ location.name }}
-                        <span class="text-gray-400">
-                            ({{ location.rewards_count }})
-                        </span>
-                    </a>
+                    {% for location in locations %}
+                        <option
+                            value="{{ location.name }}"
+                            {% if selected_location == location.name %}selected{% endif %}
+                        >
+                            {{ location.name }} ({{ location.rewards_count }})
+                        </option>
+                    {% endfor %}
+                </select>
 
-                {% endfor %}
+                <button
+                    type="submit"
+                    class="rounded-xl px-4 py-2.5 text-sm font-bold"
+                    style="
+                        background-color: #172C6D;
+                        color: #FFFFFF;
+                    "
+                >
+                    Ver beneficios
+                </button>
 
-            </div>
+            </form>
 
         </div>
 

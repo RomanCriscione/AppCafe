@@ -2461,6 +2461,17 @@ def reward_unlock_options(request, unlock_id):
         unlock=unlock,
     )
 
+    available_location_names = {
+        item["name"]
+        for item in locations
+    }
+
+    if (
+        selected_location
+        and selected_location not in available_location_names
+    ):
+        selected_location = ""
+
     if selected_location:
         reward_options = get_reward_options_for_location(
             unlock=unlock,
