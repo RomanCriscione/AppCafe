@@ -21,14 +21,25 @@
 
   </div>
 
-    <div class="rounded-[24px] border border-[#E7E2D9] bg-[#F8F6F1] p-6">
+    <div
+      class="rounded-[24px] border p-6"
+      style="
+          border-color: #E7E2D9;
+          background-color: #FFFFFF;
+      "
+  >
 
         <div class="mb-6">
 
         <button
             type="button"
             id="startQrScanner"
-            class="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#172C6D] bg-white px-5 py-3 font-bold text-[#172C6D] transition hover:bg-[#F8F6F1]"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-2xl border px-5 py-3 font-bold transition"
+            style="
+                border-color: #172C6D;
+                background-color: #FFFFFF;
+                color: #172C6D;
+            "
         >
             <i class="fas fa-qrcode" aria-hidden="true"></i>
             Escanear QR
@@ -76,7 +87,11 @@
 
       <button
         type="submit"
-        class="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-[#172C6D] px-5 py-3 font-bold text-white transition hover:opacity-90"
+        class="mt-5 inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 font-bold transition hover:opacity-90"
+        style="
+            background-color: #172C6D;
+            color: #FFFFFF;
+        "
       >
         Validar y canjear
       </button>
@@ -171,13 +186,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     if (data.success) {
                     message.className =
-                        "mt-5 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-800";
+                        "mt-5 rounded-2xl border p-5 text-sm";
 
-                    message.innerHTML =
-                        "<strong>Beneficio canjeado.</strong><br>" +
-                        data.coupon.reward_text +
-                        "<br>" +
-                        data.coupon.cafe_name;
+                    message.style.borderColor = "#D9D3C7";
+                    message.style.backgroundColor = "#F8F6F1";
+                    message.style.color = "#111827";
+
+                  message.innerHTML =
+                      '<div style="display:flex; gap:12px; align-items:flex-start;">' +
+                          '<i class="fas fa-check-circle" ' +
+                              'style="color:#172C6D; font-size:20px; margin-top:2px;"></i>' +
+                          '<div>' +
+                              '<strong style="font-size:16px;">Beneficio canjeado</strong>' +
+                              '<div style="margin-top:6px;">' +
+                                  data.coupon.reward_text +
+                              '</div>' +
+                              '<div style="margin-top:2px; color:#6B7280;">' +
+                                  data.coupon.cafe_name +
+                              '</div>' +
+                          '</div>' +
+                      '</div>';
 
                     qrScannerMessage.textContent =
                         "QR validado correctamente.";
@@ -186,7 +214,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
 
                     message.className =
-                    "mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800";
+                      "mt-5 rounded-2xl border p-5 text-sm";
+
+                  message.style.borderColor = "#E7E2D9";
+                  message.style.backgroundColor = "#F8F6F1";
+                  message.style.color = "#111827";
 
                     message.textContent =
                     data.message ||
@@ -248,7 +280,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       message.className =
-        "mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800";
+          "mt-5 rounded-2xl border p-5 text-sm";
+
+      message.style.borderColor = "#E7E2D9";
+      message.style.backgroundColor = "#F8F6F1";
+      message.style.color = "#111827";
 
       message.textContent =
         data.message || "No pudimos canjear este beneficio.";
@@ -257,7 +293,11 @@ document.addEventListener("DOMContentLoaded", () => {
       message.classList.remove("hidden");
 
       message.className =
-        "mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800";
+          "mt-5 rounded-2xl border p-5 text-sm";
+
+      message.style.borderColor = "#E7E2D9";
+      message.style.backgroundColor = "#F8F6F1";
+      message.style.color = "#111827";
 
       message.textContent =
         "Ocurrió un error al intentar canjear el beneficio.";
