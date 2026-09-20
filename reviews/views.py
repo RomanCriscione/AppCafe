@@ -57,7 +57,12 @@ from django.contrib.postgres.search import (
     SearchRank,
     TrigramSimilarity
 )
-from .rewards import award_points
+from .rewards import (
+    award_points,
+    get_reward_locations_for_unlock,
+    get_reward_options_for_location,
+    get_reward_options_for_unlock,
+)
 
 def calculate_distance_meters(lat1, lon1, lat2, lon2):
     earth_radius_meters = 6371000
@@ -2434,6 +2439,55 @@ def my_gotas(request):
             "display_milestones": display_milestones,
             "current_position_percent": current_position_percent,
             "gotas_to_next": gotas_to_next,
+        },
+    )
+
+@login_required
+def reward_unlock_options(request, unlock_id):
+    unlock = get_object_or_404(
+        UserRewardUnlock,
+        id=unlock_id,
+        user=request.user,
+        status=UserRewardUnlock.Status.PENDING,
+    )
+
+    selected_location = (
+        request.GET.get("location", "")
+        .strip()
+    )
+
+    locations = get_reward_locations_for_unlock(
+        unlock=unlock,
+    )
+
+    if selected_location:
+        reward_options = get_reward_options_for_location(
+            unlock=unlock,
+            location=selected_location,
+        )
+
+        options_status = "manual_location"
+        radius_km = None
+
+    else:
+        options = get_reward_options_for_unlock(
+            unlock=unlock,
+        )
+
+        reward_options = options["rewards"]
+        options_status = options["status"]
+        radius_km = options["radius_km"]
+
+    return render(
+        request,
+        "reviews/reward_unlock_options.html",
+        {
+            "unlock": unlock,
+            "reward_options": reward_options,
+            "options_status": options_status,
+            "radius_km": radius_km,
+            "locations": locations,
+            "selected_location": selected_location,
         },
     )
 

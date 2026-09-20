@@ -235,12 +235,12 @@
                             Elegí dónde querés disfrutar tu beneficio.
                         </p>
 
-                        <button
-                            type="button"
-                            class="mt-4 rounded-xl bg-[#172C6D] px-4 py-2 text-sm font-bold text-white"
+                        <a
+                            href="{% url 'reviews:reward_unlock_options' unlock.id %}"
+                            class="inline-block mt-4 rounded-xl bg-[#172C6D] px-4 py-2 text-sm font-bold text-white"
                         >
                             Elegir beneficio
-                        </button>
+                        </a>
 
                     </div>
 

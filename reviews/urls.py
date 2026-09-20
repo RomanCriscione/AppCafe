@@ -37,6 +37,11 @@ urlpatterns = [
     # Gotas y beneficios
     path('mis-gotas/', views.my_gotas, name='my_gotas'),
     path(
+        'mis-gotas/desbloqueos/<int:unlock_id>/',
+        views.reward_unlock_options,
+        name='reward_unlock_options',
+    ),
+    path(
         'mis-gotas/beneficios/<int:coupon_id>/',
         views.coupon_detail,
         name='coupon_detail',
