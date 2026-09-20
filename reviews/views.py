@@ -59,6 +59,7 @@ from django.contrib.postgres.search import (
 )
 from .rewards import (
     award_points,
+    claim_reward_from_unlock,
     get_reward_locations_for_unlock,
     get_reward_options_for_location,
     get_reward_options_for_unlock,
@@ -2489,6 +2490,68 @@ def reward_unlock_options(request, unlock_id):
             "locations": locations,
             "selected_location": selected_location,
         },
+    )
+
+@login_required
+@require_POST
+def claim_reward_unlock(request, unlock_id):
+    reward_id = request.POST.get("reward_id")
+    selected_location = (
+        request.POST.get("location", "")
+        .strip()
+    )
+
+    if not reward_id or not reward_id.isdigit():
+        messages.error(
+            request,
+            "No pudimos identificar el beneficio elegido.",
+        )
+        return redirect(
+            "reviews:reward_unlock_options",
+            unlock_id=unlock_id,
+        )
+
+    result = claim_reward_from_unlock(
+        user=request.user,
+        unlock_id=unlock_id,
+        reward_id=int(reward_id),
+        location=selected_location or None,
+    )
+
+    if result["ok"]:
+        coupon = result["coupon"]
+
+        messages.success(
+            request,
+            "¡Listo! Tu beneficio ya está disponible.",
+        )
+
+        return redirect(
+            "reviews:coupon_detail",
+            coupon_id=coupon.id,
+        )
+
+    reason = result.get("reason")
+
+    error_messages = {
+        "unlock_not_found": "No encontramos este beneficio desbloqueado.",
+        "unlock_already_claimed": "Este beneficio ya fue elegido.",
+        "reward_not_offered": "Este beneficio ya no está disponible para esta elección.",
+        "reward_not_available": "Este beneficio ya no está disponible.",
+        "reward_out_of_stock": "Este beneficio se quedó sin disponibilidad.",
+    }
+
+    messages.error(
+        request,
+        error_messages.get(
+            reason,
+            "No pudimos elegir el beneficio. Probá nuevamente.",
+        ),
+    )
+
+    return redirect(
+        "reviews:reward_unlock_options",
+        unlock_id=unlock_id,
     )
 
 @login_required

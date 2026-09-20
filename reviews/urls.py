@@ -41,6 +41,12 @@ urlpatterns = [
         views.reward_unlock_options,
         name='reward_unlock_options',
     ),
+
+    path(
+        'mis-gotas/desbloqueos/<int:unlock_id>/elegir/',
+        views.claim_reward_unlock,
+        name='claim_reward_unlock',
+    ),
     path(
         'mis-gotas/beneficios/<int:coupon_id>/',
         views.coupon_detail,

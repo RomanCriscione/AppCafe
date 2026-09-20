@@ -143,12 +143,34 @@
                                 </p>
                             {% endif %}
 
-                            <button
-                                type="button"
-                                class="mt-4 rounded-xl bg-[#172C6D] px-4 py-2 text-sm font-bold text-white"
+                            <form
+                                method="post"
+                                action="{% url 'reviews:claim_reward_unlock' unlock.id %}"
+                                class="mt-4"
                             >
-                                Elegir este beneficio
-                            </button>
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="reward_id"
+                                    value="{{ item.reward.id }}"
+                                >
+
+                                {% if selected_location %}
+                                    <input
+                                        type="hidden"
+                                        name="location"
+                                        value="{{ selected_location }}"
+                                    >
+                                {% endif %}
+
+                                <button
+                                    type="submit"
+                                    class="rounded-xl bg-[#172C6D] px-4 py-2 text-sm font-bold text-white"
+                                >
+                                    Elegir este beneficio
+                                </button>
+                            </form>
 
                         </div>
 
