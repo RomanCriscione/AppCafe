@@ -172,12 +172,6 @@ def get_available_rewards_for_unlock(
         ):
             continue
 
-        if UserCoupon.objects.filter(
-            user=unlock.user,
-            reward=reward,
-        ).exists():
-            continue
-
         if reward.stock is not None:
             delivered_count = (
                 UserCoupon.objects
