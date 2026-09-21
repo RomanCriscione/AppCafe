@@ -13,6 +13,11 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.utils import timezone
 from datetime import timedelta
 
+from .sensory_tags import (
+    SENSORY_REVIEW_TAG_GROUPS,
+    SENSORY_REVIEW_TAG_NAMES,
+)
+
 from reviews.models import (
     Cafe,
     CafeCheckIn,
@@ -40,34 +45,6 @@ from reviews.rewards import (
     get_reward_options_for_unlock,
 )
 
-SENSORY_REVIEW_TAG_GROUPS = {
-    "conexion": [
-        "Podés ir solo sin sentirte solo",
-        "Ideal para charla de sobremesa",
-        "Ideal para una primera cita sin presión",
-    ],
-    "refugio": [
-        "Buen lugar para esperar sin ansiedad",
-        "Te dan ganas de desconectarte",
-        "Te vas y te dan ganas de volver",
-        "Pedirías otra taza solo para quedarte",
-    ],
-    "ritual": [
-        "Huele a café recién molido",
-        "Pan casero y café en taza pesada",
-        "Ventanales con luz todo el día",
-    ],
-    "inspiracion": [
-        "Ideal para escribir o leer un cuento",
-        "Paredes con historias",
-    ],
-}
-
-SENSORY_REVIEW_TAG_NAMES = {
-    name
-    for names in SENSORY_REVIEW_TAG_GROUPS.values()
-    for name in names
-}
 
 from reviews.serializers import (
     CafeSerializer,

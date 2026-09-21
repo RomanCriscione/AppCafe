@@ -3,6 +3,7 @@ from django.contrib import admin, messages
 from django.utils import timezone
 
 from .rewards import approve_reward_claim
+from .sensory_tags import SENSORY_REVIEW_TAG_NAMES
 
 
 from .models import (
@@ -450,7 +451,9 @@ class RewardClaimAdmin(admin.ModelAdmin):
         for claim in queryset:
             has_tag_bonus = (
                 claim.review is not None
-                and claim.review.tags.exists()
+                and claim.review.tags.filter(
+                    name__in=SENSORY_REVIEW_TAG_NAMES
+                ).exists()
             )
 
             result = approve_reward_claim(

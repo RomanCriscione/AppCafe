@@ -880,6 +880,12 @@ class RewardClaim(models.Model):
             models.Index(fields=["status", "created_at"]),
             models.Index(fields=["user", "cafe"]),
         ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["review"],
+                name="unique_reward_claim_per_review",
+            ),
+        ]
 
     def __str__(self):
         return (

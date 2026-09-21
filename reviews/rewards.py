@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from .models import (
@@ -79,6 +80,93 @@ def _get_current_window_transactions(
 
     return current_window
 
+def _check_reward_eligibility(
+    *,
+    user,
+    cafe,
+    action,
+    rule,
+    program_starts_at,
+):
+    """
+    Valida si una acción puede recibir Gotas según las reglas
+    de repetición y de ventana.
+
+    No crea movimientos.
+    """
+
+    previous_transactions = (
+        UserPointTransaction.objects.filter(
+            user=user,
+            cafe=cafe,
+            action=action,
+            created_at__gte=program_starts_at,
+        )
+    )
+
+    # Acción que solo puede premiarse una vez por cafetería.
+    if rule.repeat_after_days is None:
+        if previous_transactions.exists():
+            return {
+                "eligible": False,
+                "reason": "already_rewarded",
+                "reached_window_limit": False,
+            }
+
+    # Acción repetible después de X días.
+    else:
+        last_transaction = (
+            previous_transactions
+            .order_by("-created_at")
+            .first()
+        )
+
+        if last_transaction is not None:
+            next_available_at = (
+                last_transaction.created_at
+                + timedelta(days=rule.repeat_after_days)
+            )
+
+            if timezone.now() < next_available_at:
+                return {
+                    "eligible": False,
+                    "reason": "repeat_cooldown",
+                    "reached_window_limit": False,
+                    "next_available_at": next_available_at,
+                }
+
+    reached_window_limit = False
+
+    if (
+        rule.max_rewards_per_window
+        and rule.window_hours
+    ):
+        current_window = _get_current_window_transactions(
+            user=user,
+            action=action,
+            window_hours=rule.window_hours,
+            program_starts_at=program_starts_at,
+        )
+
+        if len(current_window) >= rule.max_rewards_per_window:
+            return {
+                "eligible": False,
+                "reason": "window_limit_reached",
+                "reached_window_limit": True,
+            }
+
+        if (
+            len(current_window) + 1
+            == rule.max_rewards_per_window
+        ):
+            reached_window_limit = True
+
+    return {
+        "eligible": True,
+        "reason": "eligible",
+        "reached_window_limit": reached_window_limit,
+    }
+
 def _unlock_point_rewards(
     *,
     user,
@@ -92,6 +180,7 @@ def _unlock_point_rewards(
     disponibles para ese nivel de Gotas.
     """
 
+    now = timezone.now()
     available_thresholds = (
         CafeReward.objects
         .filter(
@@ -99,6 +188,10 @@ def _unlock_point_rewards(
             unlock_type=CafeReward.UnlockType.POINTS,
             points_required__isnull=False,
             points_required__lte=balance,
+        )
+        .filter(
+            Q(valid_from__isnull=True) | Q(valid_from__lte=now),
+            Q(valid_until__isnull=True) | Q(valid_until__gte=now),
         )
         .values_list(
             "points_required",
@@ -719,85 +812,34 @@ def award_points(
                 "reached_window_limit": False,
             }
 
-    previous_transactions = (
-        UserPointTransaction.objects.filter(
-            user=user,
-            cafe=cafe,
-            action=action,
-            created_at__gte=settings.program_starts_at,
-        )
+    eligibility = _check_reward_eligibility(
+        user=user,
+        cafe=cafe,
+        action=action,
+        rule=rule,
+        program_starts_at=settings.program_starts_at,
     )
 
-    # Acción que sólo puede premiarse una vez
-    # por cafetería.
-    if rule.repeat_after_days is None:
-        if previous_transactions.exists():
-            return {
-                "awarded": False,
-                "points": 0,
-                "reason": "already_rewarded",
-                "reached_window_limit": False,
-            }
+    if not eligibility["eligible"]:
+        result = {
+            "awarded": False,
+            "points": 0,
+            "reason": eligibility["reason"],
+            "reached_window_limit": eligibility[
+                "reached_window_limit"
+            ],
+        }
 
-    # Acción repetible después de X días.
-    else:
-        last_transaction = (
-            previous_transactions
-            .order_by("-created_at")
-            .first()
-        )
+        if "next_available_at" in eligibility:
+            result["next_available_at"] = eligibility[
+                "next_available_at"
+            ]
 
-        if last_transaction is not None:
-            next_available_at = (
-                last_transaction.created_at
-                + timedelta(
-                    days=rule.repeat_after_days,
-                )
-            )
+        return result
 
-            if timezone.now() < next_available_at:
-                return {
-                    "awarded": False,
-                    "points": 0,
-                    "reason": "repeat_cooldown",
-                    "reached_window_limit": False,
-                    "next_available_at": (
-                        next_available_at
-                    ),
-                }
-
-    reached_window_limit = False
-
-    # Límite por ventana.
-    if (
-        rule.max_rewards_per_window
-        and rule.window_hours
-    ):
-        current_window = (
-            _get_current_window_transactions(
-                user=user,
-                action=action,
-                window_hours=rule.window_hours,
-                program_starts_at=settings.program_starts_at,
-            )
-        )
-
-        if (
-            len(current_window)
-            >= rule.max_rewards_per_window
-        ):
-            return {
-                "awarded": False,
-                "points": 0,
-                "reason": "window_limit_reached",
-                "reached_window_limit": True,
-            }
-
-        if (
-            len(current_window) + 1
-            == rule.max_rewards_per_window
-        ):
-            reached_window_limit = True
+    reached_window_limit = eligibility[
+        "reached_window_limit"
+    ]
 
     point_transaction = (
         UserPointTransaction.objects.create(
@@ -957,21 +999,6 @@ def approve_reward_claim(
         except RewardActionRule.DoesNotExist:
             continue
 
-        # Si la misma acción ya fue premiada para esta cafetería,
-        # no volvemos a acreditarla.
-        already_rewarded = (
-            UserPointTransaction.objects
-            .filter(
-                user=claim.user,
-                cafe=claim.cafe,
-                action=action,
-                created_at__gte=settings.program_starts_at,
-            )
-            .exists()
-        )
-
-        if already_rewarded:
-            continue
 
         point_transaction = (
             UserPointTransaction.objects.create(

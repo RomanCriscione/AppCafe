@@ -25,6 +25,7 @@ from core.mixins import EmailVerifiedRequiredMixin
 from allauth.account.models import EmailAddress
 from core.rate_limit import rate_limit
 from reviews.utils.ranking import calcular_score_cafe
+from .sensory_tags import SENSORY_REVIEW_TAG_GROUPS
 from .models import (
     Review,
     Cafe,
@@ -115,37 +116,9 @@ _UI_MSG = {
     "no_reviews": "Todavía no hay reseñas.",
 }
 
-# === TAGS SENSORIALES GOTA V2 ===
-
-MANUAL_TAG_GROUPS = {
-    "conexion": [
-        "Podés ir solo sin sentirte solo",
-        "Ideal para charla de sobremesa",
-        "Ideal para una primera cita sin presión",
-    ],
-
-    "refugio": [
-        "Buen lugar para esperar sin ansiedad",
-        "Te dan ganas de desconectarte",
-        "Te vas y te dan ganas de volver",
-        "Pedirías otra taza solo para quedarte",
-    ],
-
-    "ritual": [
-        "Huele a café recién molido",
-        "Pan casero y café en taza pesada",
-        "Ventanales con luz todo el día",
-    ],
-
-    "inspiracion": [
-        "Ideal para escribir o leer un cuento",
-        "Paredes con historias",
-    ],
-}
-
 def get_manual_tag_choices():
     all_names = []
-    for names in MANUAL_TAG_GROUPS.values():
+    for names in SENSORY_REVIEW_TAG_GROUPS.values():
         all_names.extend(names)
 
     tags_qs = (
@@ -158,7 +131,7 @@ def get_manual_tag_choices():
 
     grouped = {}
 
-    for category, names in MANUAL_TAG_GROUPS.items():
+    for category, names in SENSORY_REVIEW_TAG_GROUPS.items():
         tags = [tags_by_name[n] for n in names if n in tags_by_name]
         grouped[category] = tags
 
@@ -844,7 +817,7 @@ def create_review(request, cafe_id):
 
             sensory_tag_names = [
                 tag_name
-                for tag_names in MANUAL_TAG_GROUPS.values()
+                for tag_names in SENSORY_REVIEW_TAG_GROUPS.values()
                 for tag_name in tag_names
             ]
 
