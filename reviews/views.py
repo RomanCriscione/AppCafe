@@ -738,7 +738,7 @@ def create_review(request, cafe_id):
         .order_by("-created_at", "-id")
         .first()
     )
-    if request.method == "GET" and existing:
+    if existing:
         messages.info(request, MESSAGES["review_already_exists"])
         return redirect("reviews:edit_review", review_id=existing.id)
 

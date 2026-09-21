@@ -855,6 +855,13 @@ class CreateReviewAPIView(APIView):
 
         settings = RewardSettings.objects.first()
 
+        rewards_enabled = bool(
+            settings is not None
+            and settings.rewards_enabled
+            and settings.program_starts_at is not None
+            and settings.program_starts_at <= timezone.now()
+        )
+
         valid_hours = (
             settings.check_in_valid_hours
             if settings is not None
@@ -930,7 +937,10 @@ class CreateReviewAPIView(APIView):
                         + (review_tag_bonus_reward or {}).get("points", 0)
                     ),
                 },
-                "review_reward_eligible": has_recent_valid_check_in,
+                "rewards_enabled": rewards_enabled,
+                "review_reward_eligible": (
+                    rewards_enabled and has_recent_valid_check_in
+                ),
                 "review": {
                     "id": review.id,
                     "rating": review.rating,
