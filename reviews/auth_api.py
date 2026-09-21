@@ -61,6 +61,11 @@ def exchange_apple_authorization_code(authorization_code):
     )
 
     if response.status_code != 200:
+        print(
+            "APPLE TOKEN ERROR:",
+            response.status_code,
+            response.text,
+        )
         raise ValueError(
             "Apple no pudo validar el authorization_code."
         )
