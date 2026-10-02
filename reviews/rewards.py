@@ -167,48 +167,87 @@ def _check_reward_eligibility(
         "reached_window_limit": reached_window_limit,
     }
 
+def get_reward_milestones(
+    *,
+    settings_obj,
+    balance=None,
+    include_next=False,
+):
+    """
+    Devuelve los hitos globales del programa de Gotas.
+
+    Incluye los hitos configurados manualmente y, después del
+    último, genera hitos según reward_repeat_every.
+
+    Si se informa balance, genera los hitos repetitivos alcanzados.
+    Si include_next=True, agrega además el próximo hito pendiente.
+    """
+
+    if not settings_obj:
+        return []
+
+    try:
+        thresholds = sorted({
+            int(value.strip())
+            for value in settings_obj.reward_thresholds.split(",")
+            if value.strip() and int(value.strip()) > 0
+        })
+    except (TypeError, ValueError):
+        return []
+
+    if not thresholds:
+        return []
+
+    if balance is None:
+        return thresholds
+
+    repeat_every = settings_obj.reward_repeat_every
+
+    if not repeat_every:
+        return thresholds
+
+    last_threshold = thresholds[-1]
+    next_threshold = last_threshold + repeat_every
+
+    while next_threshold <= balance:
+        thresholds.append(next_threshold)
+        next_threshold += repeat_every
+
+    if include_next and balance >= last_threshold:
+        thresholds.append(next_threshold)
+
+    return thresholds
+
 def _unlock_point_rewards(
     *,
     user,
     balance,
 ):
     """
-    Registra los hitos de Gotas alcanzados por el usuario.
+    Registra los hitos globales de Gotas alcanzados por el usuario.
 
     Alcanzar un hito NO genera todavía un cupón.
     El usuario elegirá posteriormente entre los beneficios
-    disponibles para ese nivel de Gotas.
+    disponibles.
     """
 
-    now = timezone.now()
-    available_thresholds = (
-        CafeReward.objects
-        .filter(
-            is_active=True,
-            unlock_type=CafeReward.UnlockType.POINTS,
-            points_required__isnull=False,
-            points_required__lte=balance,
-        )
-        .filter(
-            Q(valid_from__isnull=True) | Q(valid_from__lte=now),
-            Q(valid_until__isnull=True) | Q(valid_until__gte=now),
-        )
-        .values_list(
-            "points_required",
-            flat=True,
-        )
-        .distinct()
-        .order_by("points_required")
+    settings_obj = RewardSettings.objects.first()
+
+    available_thresholds = get_reward_milestones(
+        settings_obj=settings_obj,
+        balance=balance,
+        include_next=False,
     )
 
     unlocked_rewards = []
 
     for points_required in available_thresholds:
-        unlock, created = (
-            UserRewardUnlock.objects.get_or_create(
-                user=user,
-                points_required=points_required,
-            )
+        if points_required > balance:
+            continue
+
+        unlock, created = UserRewardUnlock.objects.get_or_create(
+            user=user,
+            points_required=points_required,
         )
 
         if created:
@@ -239,7 +278,6 @@ def get_available_rewards_for_unlock(
         .filter(
             is_active=True,
             unlock_type=CafeReward.UnlockType.POINTS,
-            points_required=unlock.points_required,
         )
         .select_related("cafe")
         .order_by(

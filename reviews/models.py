@@ -923,6 +923,28 @@ class RewardSettings(models.Model):
         ),
     )
 
+    reward_thresholds = models.CharField(
+        max_length=500,
+        default="15,30,50,75,100,125,150,175,200",
+        verbose_name="Hitos de beneficios (Gotas)",
+        help_text=(
+            "Hitos acumulados que desbloquean un beneficio. "
+            "Separar los valores con comas. "
+            "Ejemplo: 15,30,50,75,100,125"
+        ),
+    )
+
+    reward_repeat_every = models.PositiveIntegerField(
+        default=25,
+        verbose_name="Frecuencia de beneficios después del último hito",
+        help_text=(
+            "Después del último hito configurado, se desbloquea "
+            "un nuevo beneficio cada esta cantidad de Gotas. "
+            "Ejemplo: con último hito 200 y valor 25: "
+            "225, 250, 275, 300..."
+        ),
+    )
+
 
     check_in_radius_meters = models.PositiveIntegerField(
         default=150,
@@ -1011,14 +1033,6 @@ class CafeReward(models.Model):
         verbose_name="Forma de desbloqueo",
     )
 
-    points_required = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name="Gotas necesarias",
-        help_text=(
-            "Dejar vacío si el beneficio se desbloquea automáticamente."
-        ),
-    )
 
     percentage_value = models.PositiveIntegerField(
         null=True,

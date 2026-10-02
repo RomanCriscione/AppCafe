@@ -41,6 +41,7 @@ from reviews.rewards import (
     award_points,
     claim_reward_from_unlock,
     get_reward_locations_for_unlock,
+    get_reward_milestones,
     get_reward_options_for_location,
     get_reward_options_for_unlock,
 )
@@ -2111,15 +2112,10 @@ class MyGotasAPIView(APIView):
                 }
             )
 
-        milestone_points = (
-            CafeReward.objects.filter(
-                is_active=True,
-                unlock_type=CafeReward.UnlockType.POINTS,
-                points_required__isnull=False,
-            )
-            .values_list("points_required", flat=True)
-            .distinct()
-            .order_by("points_required")
+        milestone_points = get_reward_milestones(
+            settings_obj=reward_settings,
+            balance=balance,
+            include_next=True,
         )
 
         milestones = [
