@@ -1869,6 +1869,7 @@ class RewardUnlockOptionsAPIView(APIView):
 
         return Response({
             "unlock_id": unlock.id,
+            "unlock_type": unlock.unlock_type,
             "points_required": unlock.points_required,
             "status": result["status"],
             "radius_km": result["radius_km"],
@@ -1900,6 +1901,7 @@ class RewardUnlockLocationsAPIView(APIView):
         return Response({
             "success": True,
             "unlock_id": unlock.id,
+            "unlock_type": unlock.unlock_type,
             "points_required": unlock.points_required,
             "locations": locations,
         })
@@ -1960,6 +1962,7 @@ class RewardUnlockLocationOptionsAPIView(APIView):
         return Response({
             "success": True,
             "unlock_id": unlock.id,
+            "unlock_type": unlock.unlock_type,
             "points_required": unlock.points_required,
             "location": location,
             "rewards": rewards,
@@ -2173,9 +2176,10 @@ class MyGotasAPIView(APIView):
                 user=request.user,
                 status=UserRewardUnlock.Status.PENDING,
             )
-            .order_by("points_required")
+            .order_by("unlocked_at")
             .values(
                 "id",
+                "unlock_type",
                 "points_required",
                 "unlocked_at",
             )

@@ -1127,6 +1127,10 @@ class CafeReward(models.Model):
 
 class UserRewardUnlock(models.Model):
 
+    class UnlockType(models.TextChoices):
+        MILESTONE = "milestone", "Hito de Gotas"
+        WELCOME = "welcome", "Beneficio de bienvenida"
+
     class Status(models.TextChoices):
         PENDING = "pending", "Pendiente de elección"
         CLAIMED = "claimed", "Beneficio elegido"
@@ -1138,7 +1142,16 @@ class UserRewardUnlock(models.Model):
         verbose_name="Usuario",
     )
 
+    unlock_type = models.CharField(
+        max_length=20,
+        choices=UnlockType.choices,
+        default=UnlockType.MILESTONE,
+        verbose_name="Tipo de desbloqueo",
+    )
+
     points_required = models.PositiveIntegerField(
+        null=True,
+        blank=True,
         verbose_name="Hito de Gotas",
     )
 
@@ -1176,9 +1189,34 @@ class UserRewardUnlock(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["user", "points_required"],
-                name="unique_user_reward_unlock",
+                condition=models.Q(
+                    unlock_type="milestone",
+                ),
+                name="unique_user_milestone_unlock",
+            ),
+            models.UniqueConstraint(
+                fields=["user"],
+                condition=models.Q(
+                    unlock_type="welcome",
+                ),
+                name="unique_user_welcome_unlock",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(
+                        unlock_type="milestone",
+                        points_required__isnull=False,
+                    )
+                    | models.Q(
+                        unlock_type="welcome",
+                        points_required__isnull=True,
+                    )
+                ),
+                name="valid_user_reward_unlock_type_points",
             ),
         ]
+
+
         indexes = [
             models.Index(
                 fields=["user", "status"],
@@ -1186,12 +1224,18 @@ class UserRewardUnlock(models.Model):
         ]
 
     def __str__(self):
+        if self.unlock_type == self.UnlockType.WELCOME:
+            return (
+                f"{self.user} · "
+                f"Bienvenida · "
+                f"{self.get_status_display()}"
+            )
+
         return (
             f"{self.user} · "
             f"{self.points_required} Gotas · "
             f"{self.get_status_display()}"
         )
-
 class UserCoupon(models.Model):
 
     class Status(models.TextChoices):

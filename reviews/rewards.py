@@ -247,6 +247,7 @@ def _unlock_point_rewards(
 
         unlock, created = UserRewardUnlock.objects.get_or_create(
             user=user,
+            unlock_type=UserRewardUnlock.UnlockType.MILESTONE,
             points_required=points_required,
         )
 
@@ -254,6 +255,35 @@ def _unlock_point_rewards(
             unlocked_rewards.append(unlock)
 
     return unlocked_rewards
+
+def _unlock_welcome_reward(
+    *,
+    user,
+    settings_obj,
+):
+    """
+    Desbloquea una única vez el beneficio de bienvenida.
+
+    No genera todavía un cupón.
+    El usuario elegirá posteriormente entre los beneficios
+    habilitados como bienvenida.
+    """
+
+    if not settings_obj.welcome_reward_enabled:
+        return None
+
+    unlock, created = UserRewardUnlock.objects.get_or_create(
+        user=user,
+        unlock_type=UserRewardUnlock.UnlockType.WELCOME,
+        defaults={
+            "points_required": None,
+        },
+    )
+
+    if not created:
+        return None
+
+    return unlock
 
 def get_available_rewards_for_unlock(
     *,
@@ -286,6 +316,14 @@ def get_available_rewards_for_unlock(
             "id",
         )
     )
+
+    if (
+        unlock.unlock_type
+        == UserRewardUnlock.UnlockType.WELCOME
+    ):
+        rewards = rewards.filter(
+            is_welcome_reward=True,
+        )
 
     available_rewards = []
 
@@ -367,11 +405,18 @@ def get_reward_options_for_unlock(
 
     settings_obj = RewardSettings.objects.first()
 
-    nearby_radius_km = (
-        settings_obj.reward_nearby_radius_km
-        if settings_obj
-        else 10.0
-    )
+    if (
+        settings_obj
+        and unlock.unlock_type
+        == UserRewardUnlock.UnlockType.WELCOME
+    ):
+        nearby_radius_km = settings_obj.welcome_reward_radius_km
+    else:
+        nearby_radius_km = (
+            settings_obj.reward_nearby_radius_km
+            if settings_obj
+            else 10.0
+        )
 
     extended_radius_km = (
         settings_obj.reward_extended_radius_km
@@ -580,6 +625,16 @@ def claim_reward_from_unlock(
         return {
             "ok": False,
             "reason": "reward_not_available",
+        }
+
+    if (
+        unlock.unlock_type
+        == UserRewardUnlock.UnlockType.WELCOME
+        and not reward.is_welcome_reward
+    ):
+        return {
+            "ok": False,
+            "reason": "reward_not_available_for_welcome",
         }
 
     if (
@@ -903,6 +958,14 @@ def award_points(
         balance=current_balance,
     )
 
+    welcome_unlock = _unlock_welcome_reward(
+        user=user,
+        settings_obj=settings,
+    )
+
+    if welcome_unlock is not None:
+        new_unlocks.append(welcome_unlock)
+
     return {
         "awarded": True,
         "points": rule.points,
@@ -1069,6 +1132,14 @@ def approve_reward_claim(
         user=claim.user,
         balance=current_balance,
     )
+
+    welcome_unlock = _unlock_welcome_reward(
+        user=claim.user,
+        settings_obj=settings,
+    )
+
+    if welcome_unlock is not None:
+        new_unlocks.append(welcome_unlock)
 
     unlocked_rewards = [
         {
