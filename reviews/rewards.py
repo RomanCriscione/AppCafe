@@ -734,7 +734,31 @@ def get_user_reward_reference_location(
     )
 
     if not recent_check_ins:
-        return None
+        recent_activity = (
+            UserPointTransaction.objects
+            .filter(
+                user=user,
+                cafe__isnull=False,
+                cafe__latitude__isnull=False,
+                cafe__longitude__isnull=False,
+            )
+            .select_related("cafe")
+            .order_by("-created_at")
+            .first()
+        )
+
+        if recent_activity is None:
+            return None
+
+        return {
+            "latitude": recent_activity.cafe.latitude,
+            "longitude": recent_activity.cafe.longitude,
+            "cafe_id": recent_activity.cafe_id,
+            "location": recent_activity.cafe.location,
+            "source": "recent_reward_activity",
+            "sample_size": 1,
+            "location_visits": 1,
+        }
 
     location_counts = {}
 
