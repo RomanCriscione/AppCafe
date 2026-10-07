@@ -2,7 +2,10 @@
 from django.contrib import admin, messages
 from django.utils import timezone
 
-from .rewards import approve_reward_claim
+from .rewards import (
+    approve_reward_claim,
+    _unlock_point_rewards,
+)
 from .sensory_tags import SENSORY_REVIEW_TAG_NAMES
 
 
@@ -367,6 +370,31 @@ class UserPointTransactionAdmin(admin.ModelAdmin):
     )
 
     date_hierarchy = "created_at"
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+        if (
+            not change
+            and obj.action == RewardActionRule.Action.MANUAL_ADJUSTMENT
+        ):
+            balance = sum(
+                UserPointTransaction.objects
+                .filter(user=obj.user)
+                .values_list("points", flat=True)
+            )
+
+            _unlock_point_rewards(
+                user=obj.user,
+                balance=balance,
+            )
+
+            self.message_user(
+                request,
+                f"Se acreditaron {obj.points:+d} Gotas a {obj.user}. "
+                f"Saldo actual: {balance} Gotas.",
+                level=messages.SUCCESS,
+            )
 
 
 @admin.register(CafeCheckIn)

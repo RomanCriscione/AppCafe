@@ -617,6 +617,7 @@ class RewardActionRule(models.Model):
         PHOTO = "photo", "Agregar foto"
         WHISPER = "whisper", "Dejar huella"
         REVIEW_TAG_BONUS = "review_tag_bonus", "Bonus reseña con etiquetas"
+        MANUAL_ADJUSTMENT = "manual_adjustment", "Ajuste manual"
 
     action = models.CharField(
         max_length=30,
