@@ -145,6 +145,7 @@ def get_cafe_reward_statistics():
         .order_by("-total_coupons", "cafe__name")
     )
 
+
     results = []
 
     for cafe in cafes:
@@ -472,14 +473,18 @@ class UserRewardUnlockAdmin(admin.ModelAdmin):
 
     change_list_template = "admin/reviews/userrewardunlock/change_list.html"
 
+
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
+
         extra_context["reward_stats"] = get_reward_statistics()
+        extra_context["cafe_reward_stats"] = get_cafe_reward_statistics()
 
         return super().changelist_view(
             request,
             extra_context=extra_context,
         )
+
 
     def has_add_permission(self, request):
         return False
