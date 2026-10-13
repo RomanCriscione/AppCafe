@@ -1,0 +1,105 @@
+
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+<style>
+    .gota-stats {
+        margin-bottom: 24px;
+    }
+
+    .gota-stats h2 {
+        margin-bottom: 16px;
+    }
+
+    .gota-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+    }
+
+    .gota-stat {
+        padding: 20px;
+        border: 1px solid var(--hairline-color, #ddd);
+        border-radius: 10px;
+        background: var(--body-bg, #fff);
+    }
+
+    .gota-stat-label {
+        font-size: 13px;
+        color: var(--body-quiet-color, #666);
+        margin-bottom: 10px;
+    }
+
+    .gota-stat-value {
+        font-size: 30px;
+        font-weight: 700;
+        color: var(--body-fg, #222);
+    }
+
+    .gota-stat-note {
+        font-size: 12px;
+        color: var(--body-quiet-color, #666);
+        margin-top: 8px;
+    }
+</style>
+
+<div class="gota-stats">
+    <h2>Estadísticas de beneficios de Gota</h2>
+
+    <div class="gota-stats-grid">
+        <div class="gota-stat">
+            <div class="gota-stat-label">Beneficios desbloqueados</div>
+            <div class="gota-stat-value">{{ reward_stats.total_unlocks }}</div>
+        </div>
+
+        <div class="gota-stat">
+            <div class="gota-stat-label">Pendientes de elección</div>
+            <div class="gota-stat-value">{{ reward_stats.pending_unlocks }}</div>
+        </div>
+
+        <div class="gota-stat">
+            <div class="gota-stat-label">Beneficios elegidos</div>
+            <div class="gota-stat-value">{{ reward_stats.claimed_unlocks }}</div>
+        </div>
+
+        <div class="gota-stat">
+            <div class="gota-stat-label">Cupones emitidos</div>
+            <div class="gota-stat-value">{{ reward_stats.total_coupons }}</div>
+        </div>
+
+        <div class="gota-stat">
+            <div class="gota-stat-label">Cupones utilizados</div>
+            <div class="gota-stat-value">{{ reward_stats.used_coupons }}</div>
+        </div>
+
+        <div class="gota-stat">
+            <div class="gota-stat-label">Cupones vencidos</div>
+            <div class="gota-stat-value">{{ reward_stats.expired_coupons }}</div>
+        </div>
+
+        <div class="gota-stat">
+            <div class="gota-stat-label">Cupones disponibles</div>
+            <div class="gota-stat-value">{{ reward_stats.available_coupons }}</div>
+        </div>
+
+        <div class="gota-stat">
+            <div class="gota-stat-label">Cupones cancelados</div>
+            <div class="gota-stat-value">{{ reward_stats.cancelled_coupons }}</div>
+        </div>
+
+        <div class="gota-stat">
+            <div class="gota-stat-label">Tasa de elección</div>
+            <div class="gota-stat-value">{{ reward_stats.claim_rate }}%</div>
+            <div class="gota-stat-note">Beneficios elegidos / desbloqueados</div>
+        </div>
+
+        <div class="gota-stat">
+            <div class="gota-stat-label">Tasa de utilización</div>
+            <div class="gota-stat-value">{{ reward_stats.usage_rate }}%</div>
+            <div class="gota-stat-note">Cupones utilizados / emitidos</div>
+        </div>
+    </div>
+</div>
+
+{{ block.super }}
+{% endblock %}

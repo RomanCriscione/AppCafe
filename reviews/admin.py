@@ -1,6 +1,7 @@
 # reviews/admin.py
 from django.contrib import admin, messages
 from django.utils import timezone
+from django.db.models import Count, Q
 
 from .rewards import (
     approve_reward_claim,
@@ -20,6 +21,7 @@ from .models import (
     RewardSettings,
     CafeReward,
     UserCoupon,
+    UserRewardUnlock,
     UserPointTransaction,
     CafeCheckIn,
     RewardClaim,
@@ -34,6 +36,63 @@ from .claims import (
 
 from import_export.admin import ImportExportModelAdmin
 
+def get_reward_statistics():
+    now = timezone.now()
+
+    unlocks = UserRewardUnlock.objects.all()
+    coupons = UserCoupon.objects.all()
+
+    total_unlocks = unlocks.count()
+
+    pending_unlocks = unlocks.filter(
+        status=UserRewardUnlock.Status.PENDING
+    ).count()
+
+    claimed_unlocks = unlocks.filter(
+        status=UserRewardUnlock.Status.CLAIMED
+    ).count()
+
+    total_coupons = coupons.count()
+
+    used_coupons = coupons.filter(
+        status=UserCoupon.Status.USED
+    ).count()
+
+    expired_coupons = coupons.filter(
+        Q(status=UserCoupon.Status.EXPIRED)
+        | Q(
+            status=UserCoupon.Status.AVAILABLE,
+            expires_at__lte=now,
+        )
+    ).count()
+
+    cancelled_coupons = coupons.filter(
+        status=UserCoupon.Status.CANCELLED
+    ).count()
+
+    available_coupons = coupons.filter(
+        status=UserCoupon.Status.AVAILABLE,
+        expires_at__gt=now,
+    ).count()
+
+    return {
+        "total_unlocks": total_unlocks,
+        "pending_unlocks": pending_unlocks,
+        "claimed_unlocks": claimed_unlocks,
+        "total_coupons": total_coupons,
+        "used_coupons": used_coupons,
+        "expired_coupons": expired_coupons,
+        "cancelled_coupons": cancelled_coupons,
+        "available_coupons": available_coupons,
+        "claim_rate": (
+            round(claimed_unlocks / total_unlocks * 100, 1)
+            if total_unlocks else 0
+        ),
+        "usage_rate": (
+            round(used_coupons / total_coupons * 100, 1)
+            if total_coupons else 0
+        ),
+    }
 
 @admin.register(Cafe)
 class CafeAdmin(ImportExportModelAdmin):
@@ -302,6 +361,64 @@ class CafeRewardAdmin(admin.ModelAdmin):
     raw_id_fields = (
         "cafe",
     )
+
+@admin.register(UserRewardUnlock)
+class UserRewardUnlockAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "unlock_type",
+        "points_required",
+        "status",
+        "unlocked_at",
+        "claimed_at",
+        "coupon",
+    )
+
+    list_filter = (
+        "unlock_type",
+        "status",
+        "unlocked_at",
+    )
+
+    search_fields = (
+        "user__email",
+        "user__username",
+        "coupon__code",
+    )
+
+    raw_id_fields = (
+        "user",
+        "coupon",
+    )
+
+    readonly_fields = (
+        "user",
+        "unlock_type",
+        "points_required",
+        "status",
+        "coupon",
+        "unlocked_at",
+        "claimed_at",
+    )
+
+    date_hierarchy = "unlocked_at"
+
+    change_list_template = "admin/reviews/userrewardunlock/change_list.html"
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context["reward_stats"] = get_reward_statistics()
+
+        return super().changelist_view(
+            request,
+            extra_context=extra_context,
+        )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(UserCoupon)
