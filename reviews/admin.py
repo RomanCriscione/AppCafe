@@ -94,6 +94,73 @@ def get_reward_statistics():
         ),
     }
 
+
+def get_cafe_reward_statistics():
+    now = timezone.now()
+
+    cafes = (
+        UserCoupon.objects
+        .values("cafe_id", "cafe__name")
+        .annotate(
+            total_coupons=Count("id"),
+            unique_users=Count("user_id", distinct=True),
+            used_coupons=Count(
+                "id",
+                filter=Q(status=UserCoupon.Status.USED),
+            ),
+            expired_coupons=Count(
+                "id",
+                filter=(
+                    Q(status=UserCoupon.Status.EXPIRED)
+                    | Q(
+                        status=UserCoupon.Status.AVAILABLE,
+                        expires_at__lte=now,
+                    )
+                ),
+            ),
+            available_coupons=Count(
+                "id",
+                filter=Q(
+                    status=UserCoupon.Status.AVAILABLE,
+                    expires_at__gt=now,
+                ),
+            ),
+            welcome_coupons=Count(
+                "id",
+                filter=Q(
+                    reward_unlock__unlock_type=(
+                        UserRewardUnlock.UnlockType.WELCOME
+                    )
+                ),
+            ),
+            milestone_coupons=Count(
+                "id",
+                filter=Q(
+                    reward_unlock__unlock_type=(
+                        UserRewardUnlock.UnlockType.MILESTONE
+                    )
+                ),
+            ),
+        )
+        .order_by("-total_coupons", "cafe__name")
+    )
+
+    results = []
+
+    for cafe in cafes:
+        total = cafe["total_coupons"]
+        used = cafe["used_coupons"]
+
+        cafe["usage_rate"] = (
+            round(used / total * 100, 1)
+            if total else 0
+        )
+
+        results.append(cafe)
+
+    return results
+
+
 @admin.register(Cafe)
 class CafeAdmin(ImportExportModelAdmin):
     list_display = (

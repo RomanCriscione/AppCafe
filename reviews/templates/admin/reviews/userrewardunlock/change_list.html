@@ -101,5 +101,50 @@
     </div>
 </div>
 
+
+<div style="margin: 25px 0;">
+    <h2>Estadísticas de beneficios por cafetería</h2>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>Cafetería</th>
+                    <th>Elegidos</th>
+                    <th>Utilizados</th>
+                    <th>Vencidos</th>
+                    <th>Disponibles</th>
+                    <th>Usuarios únicos</th>
+                    <th>Bienvenida</th>
+                    <th>Por Gotas</th>
+                    <th>% utilización</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cafe in cafe_reward_stats %}
+                <tr>
+                    <td>{{ cafe.cafe__name }}</td>
+                    <td>{{ cafe.total_coupons }}</td>
+                    <td>{{ cafe.used_coupons }}</td>
+                    <td>{{ cafe.expired_coupons }}</td>
+                    <td>{{ cafe.available_coupons }}</td>
+                    <td>{{ cafe.unique_users }}</td>
+                    <td>{{ cafe.welcome_coupons }}</td>
+                    <td>{{ cafe.milestone_coupons }}</td>
+                    <td>{{ cafe.usage_rate }}%</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9">
+                        Todavía no hay cupones elegidos.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
 {{ block.super }}
 {% endblock %}
