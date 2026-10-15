@@ -1,0 +1,152 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+  .gota-download {
+    max-width: 540px;
+    margin: 20px auto 70px;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .gota-download__logo {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    margin: 0 auto 22px;
+    display: block;
+  }
+
+  .gota-download__title {
+    color: #172c6d;
+    font-size: clamp(30px, 6vw, 42px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 18px;
+  }
+
+  .gota-download__description {
+    color: #4b5563;
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 32px;
+  }
+
+  .gota-download__buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .gota-download__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: #172c6d;
+    color: white;
+    padding: 17px 24px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background .2s, transform .2s;
+  }
+
+  .gota-download__button:hover {
+    background: #1e3a8a;
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  .gota-download__button:focus-visible {
+    outline: 3px solid #2dd4bf;
+    outline-offset: 4px;
+  }
+
+  .gota-download__button i {
+    font-size: 24px;
+  }
+
+  .gota-download__note {
+    margin-top: 24px;
+    color: #6b7280;
+    font-size: 13px;
+  }
+
+  @media (max-width: 480px) {
+    .gota-download {
+      margin-top: 10px;
+    }
+
+    .gota-download__description {
+      font-size: 15px;
+    }
+
+    .gota-download__button {
+      padding: 16px 20px;
+    }
+  }
+</style>
+
+<section class="gota-download">
+
+  <!-- LOGO -->
+  <img
+    src="{% static 'images/gota-icon.png' %}"
+    alt="Gota"
+    class="gota-download__logo"
+  >
+
+  <!-- TITULO -->
+  <h1 class="gota-download__title">
+    Descubrí tu próximo café.
+  </h1>
+
+  <!-- DESCRIPCION -->
+  <p class="gota-download__description">
+    Encontrá cafeterías según tus gustos y tus planes.
+    Compartí experiencias, armá tu mapa cafetero
+    y descubrí beneficios para disfrutar.
+  </p>
+
+  <!-- BOTONES DE DESCARGA -->
+  <div class="gota-download__buttons">
+
+    <!-- APP STORE -->
+    <a
+      href="https://apps.apple.com/ar/app/gota/id6809239462"
+      class="gota-download__button"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <i class="fab fa-apple" aria-hidden="true"></i>
+      <span>Descargar para iPhone</span>
+    </a>
+
+    <!-- GOOGLE PLAY -->
+    <a
+      href="https://play.google.com/store/apps/details?id=ar.gogota.app"
+      class="gota-download__button"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <i class="fab fa-google-play" aria-hidden="true"></i>
+      <span>Descargar para Android</span>
+    </a>
+
+  </div>
+
+  <!-- MENSAJE FINAL -->
+  <p class="gota-download__note">
+    Gota es gratis. Disponible para Android y iPhone.
+  </p>
+
+</section>
+
+{% endblock %}

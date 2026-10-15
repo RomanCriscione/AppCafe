@@ -166,6 +166,23 @@ def delete_account_request_view(request):
         },
     )
 
+
+# ✅ Descargas de Gota para Android y iPhone
+def descargas_view(request):
+    return render(
+        request,
+        "core/descargas.html",
+        {
+            "meta_title": "Descargá Gota · Android y iPhone",
+            "meta_description": (
+                "Descargá Gota gratis para Android o iPhone. "
+                "Descubrí cafeterías, compartí experiencias "
+                "y encontrá beneficios."
+            ),
+        },
+    )
+
+
 # ✅ Sitemap dinámico
 def sitemap_xml(request):
     cafes = Cafe.objects.only("id").order_by("id")
