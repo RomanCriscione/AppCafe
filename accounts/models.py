@@ -38,12 +38,18 @@ class CustomUser(AbstractUser):
         if not self.avatar:
             return
 
-        # En producción (Render + storage remoto) puede NO existir .path
-        if not hasattr(self.avatar, "path"):
+        # Procesar avatares solo cuando se carga una imagen nueva.
+        # Evita acceder a rutas físicas en almacenamiento remoto.
+        if not getattr(self.avatar, "_committed", True):
             return
 
         try:
-            img = Image.open(self.avatar.path)
+            avatar_path = self.avatar.path
+        except (NotImplementedError, ValueError):
+            return
+
+        try:
+            img = Image.open(avatar_path)
 
             # Normalizar modo
             if img.mode in ("RGBA", "P"):
