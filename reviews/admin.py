@@ -732,14 +732,13 @@ class RewardClaimAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = (
-        "user",
-        "unlock_type",
-        "points_required",
         "status",
-        "coupon",
-        "unlocked_at",
-        "claimed_at",
-        "reminder_sent_at",
+        "resolved_by",
+        "resolved_at",
+        "review_transaction",
+        "tag_bonus_transaction",
+        "created_at",
+        "updated_at",
     )
 
     actions = (
