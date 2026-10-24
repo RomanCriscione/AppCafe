@@ -22,7 +22,26 @@ class CustomUser(AbstractUser):
     apple_refresh_token = models.TextField(
         null=True,
         blank=True,
-    )     
+    )
+
+    @property
+    def public_name(self):
+        full_name = self.get_full_name().strip()
+
+        if full_name:
+            return full_name
+
+        username = (self.username or "").strip()
+
+        if username:
+            return username.split("@")[0]
+
+        email = (self.email or "").strip()
+
+        if email:
+            return email.split("@")[0]
+
+        return "Usuario de Gota"
 
     def __str__(self):
         return self.username
