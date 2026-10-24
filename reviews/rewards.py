@@ -1,10 +1,15 @@
 import math
+import logging
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
+
+
+from django.conf import settings
+from django.core.mail import send_mail
 
 from .models import (
     CafeCheckIn,
@@ -1010,6 +1015,34 @@ def award_points(
         ],
     }
 
+logger = logging.getLogger(__name__)
+
+
+def send_reward_claim_approved_email(*, email, cafe_name, points):
+    if not email:
+        return
+
+    try:
+        send_mail(
+            subject="¡Tu reclamo de Gotas fue aprobado! ☕",
+            message=(
+                "¡Hola!\n\n"
+                f"Aprobamos tu reclamo de Gotas en {cafe_name}.\n\n"
+                f"Sumaste {points} Gotas a tu recorrido cafetero.\n\n"
+                "Podés consultar tus Gotas y beneficios desde la app.\n\n"
+                "¡Gracias por ser parte de Gota!\n\n"
+                "El equipo de Gota\n"
+                "https://gogota.ar"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=False,
+        )
+    except Exception:
+        logger.exception(
+            "No se pudo enviar el correo de aprobación de Gotas"
+        )
+
 @transaction.atomic
 def approve_reward_claim(
     *,
@@ -1028,9 +1061,10 @@ def approve_reward_claim(
     los mismos movimientos.
     """
 
+
     claim = (
         RewardClaim.objects
-        .select_for_update()
+        .select_for_update(of=("self",))
         .select_related(
             "user",
             "cafe",
@@ -1038,6 +1072,7 @@ def approve_reward_claim(
         )
         .get(pk=claim.pk)
     )
+
 
     if claim.status != RewardClaim.Status.PENDING:
         return {
@@ -1187,6 +1222,18 @@ def approve_reward_claim(
             "tag_bonus_transaction",
             "updated_at",
         ]
+    )
+
+    user_email = claim.user.email
+    cafe_name = claim.cafe.name
+    approved_points = total_points
+
+    transaction.on_commit(
+        lambda: send_reward_claim_approved_email(
+            email=user_email,
+            cafe_name=cafe_name,
+            points=approved_points,
+        )
     )
 
     return {
