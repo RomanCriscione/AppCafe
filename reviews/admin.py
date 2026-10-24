@@ -2,6 +2,8 @@
 from django.contrib import admin, messages
 from django.utils import timezone
 from django.db.models import Count, Q
+from django.conf import settings
+from django.core.mail import send_mail
 
 from .rewards import (
     approve_reward_claim,
@@ -432,6 +434,7 @@ class CafeRewardAdmin(admin.ModelAdmin):
 
 @admin.register(UserRewardUnlock)
 class UserRewardUnlockAdmin(admin.ModelAdmin):
+    actions = ("send_pending_reward_reminders",)
     list_display = (
         "user",
         "unlock_type",
@@ -440,6 +443,7 @@ class UserRewardUnlockAdmin(admin.ModelAdmin):
         "unlocked_at",
         "claimed_at",
         "coupon",
+        "reminder_sent_at",
     )
 
     list_filter = (
@@ -484,6 +488,90 @@ class UserRewardUnlockAdmin(admin.ModelAdmin):
             request,
             extra_context=extra_context,
         )
+
+    @admin.action(description="Enviar recordatorio de beneficio pendiente")
+    def send_pending_reward_reminders(self, request, queryset):
+        pending = (
+            queryset.filter(
+                status=UserRewardUnlock.Status.PENDING,
+                coupon__isnull=True,
+                reminder_sent_at__isnull=True,
+            )
+            .select_related("user")
+            .order_by("user_id", "id")
+        )
+
+        users_sent = set()
+        sent_count = 0
+        skipped_count = 0
+
+        for unlock in pending:
+            user = unlock.user
+
+            if user.pk in users_sent:
+                continue
+
+            email = (user.email or "").strip()
+
+            if not email:
+                skipped_count += 1
+                continue
+
+            subject = "☕ ¡Tenés un beneficio esperando en Gota!"
+
+            message = (
+                "¡Hola!\n\n"
+                "¿Sabías que tenés un beneficio esperando en Gota? ☕🎁\n\n"
+                "Ya desbloqueaste la posibilidad de elegir un beneficio "
+                "en una cafetería, pero todavía no lo aprovechaste.\n\n"
+                "Puede ser un descuento, un 2x1 o alguna sorpresa "
+                "para tu próximo café.\n\n"
+                "Para aprovecharlo:\n\n"
+                "1. Entrá a Gota con tu cuenta.\n"
+                "2. Ingresá a la sección Mis Gotas.\n"
+                "3. Elegí uno de los beneficios disponibles.\n"
+                "4. Obtené tu cupón para usarlo en la cafetería.\n\n"
+                "Entrá a Gota: https://gogota.ar/\n\n"
+                "¡Tu próximo café puede venir con algo extra!\n\n"
+                "Nos vemos en Gota ☕\n\n"
+                "El equipo de Gota"
+            )
+
+            try:
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                    fail_silently=False,
+                )
+            except Exception:
+                skipped_count += 1
+                continue
+
+            UserRewardUnlock.objects.filter(
+                user_id=user.pk,
+                status=UserRewardUnlock.Status.PENDING,
+                coupon__isnull=True,
+                reminder_sent_at__isnull=True,
+            ).update(reminder_sent_at=timezone.now())
+
+            users_sent.add(user.pk)
+            sent_count += 1
+
+        if sent_count:
+            self.message_user(
+                request,
+                f"Se enviaron {sent_count} recordatorio(s).",
+                level=messages.SUCCESS,
+            )
+
+        if skipped_count:
+            self.message_user(
+                request,
+                f"{skipped_count} usuario(s) no recibieron el correo.",
+                level=messages.WARNING,
+            )
 
 
     def has_add_permission(self, request):
@@ -644,13 +732,14 @@ class RewardClaimAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = (
+        "user",
+        "unlock_type",
+        "points_required",
         "status",
-        "resolved_by",
-        "resolved_at",
-        "review_transaction",
-        "tag_bonus_transaction",
-        "created_at",
-        "updated_at",
+        "coupon",
+        "unlocked_at",
+        "claimed_at",
+        "reminder_sent_at",
     )
 
     actions = (

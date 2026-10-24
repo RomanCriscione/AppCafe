@@ -1183,6 +1183,13 @@ class UserRewardUnlock(models.Model):
         verbose_name="Beneficio elegido",
     )
 
+    reminder_sent_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Último recordatorio enviado",
+        help_text="Fecha del último correo de recordatorio enviado al usuario.",
+    )
+
     class Meta:
         verbose_name = "Beneficio desbloqueado"
         verbose_name_plural = "Beneficios desbloqueados"
