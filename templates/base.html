@@ -687,5 +687,132 @@ function copyCafeLink(url, btn){
 }
 </script>
 
+<!-- Banner de descarga de Gota: solo móviles -->
+<div id="gota-app-banner"
+     role="region"
+     aria-label="Descargar la aplicación Gota"
+     style="display:none">
+
+  <span class="gota-app-banner-icon" aria-hidden="true">☕</span>
+
+  <div class="gota-app-banner-copy">
+    <strong>Gota en tu celular</strong>
+    <span>Descubrí cafés y aprovechá beneficios.</span>
+  </div>
+
+  <a id="gota-app-download"
+     href="https://play.google.com/store/apps/details?id=ar.gogota.app"
+     target="_blank"
+     rel="noopener noreferrer">
+    Descargar
+  </a>
+
+  <button id="gota-app-close"
+          type="button"
+          aria-label="Cerrar banner">×</button>
+</div>
+
+<style>
+  @media (max-width: 767px) {
+    #gota-app-banner.gota-app-banner-visible {
+      display: flex !important;
+      position: fixed;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 9999;
+      align-items: center;
+      gap: 9px;
+      padding: 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      background: #ffffff;
+      box-shadow: 0 4px 18px rgba(0,0,0,.12);
+      font-family: inherit;
+    }
+
+    .gota-app-banner-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .gota-app-banner-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-width: 0;
+      color: #172554;
+    }
+
+    .gota-app-banner-copy strong {
+      font-size: 13px;
+    }
+
+    .gota-app-banner-copy span {
+      font-size: 11px;
+      line-height: 1.3;
+      color: #64748b;
+    }
+
+    #gota-app-download {
+      flex-shrink: 0;
+      padding: 9px 11px;
+      border-radius: 9px;
+      background: #1e3a8a;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    #gota-app-close {
+      align-self: flex-start;
+      flex-shrink: 0;
+      border: 0;
+      background: transparent;
+      color: #64748b;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+    }
+  }
+</style>
+
+<script>
+(function () {
+  const banner = document.getElementById('gota-app-banner');
+  const download = document.getElementById('gota-app-download');
+  const close = document.getElementById('gota-app-close');
+
+  if (!banner || !download || !close) return;
+
+  const ua = navigator.userAgent;
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
+  if (!isAndroid && !isIOS) return;
+
+  try {
+    if (localStorage.getItem('gota_app_banner_dismissed') === '1') return;
+  } catch (e) {
+    // El banner puede mostrarse aunque el almacenamiento esté bloqueado.
+  }
+
+  download.href = isIOS
+    ? 'https://apps.apple.com/ar/app/gota/id6809239462'
+    : 'https://play.google.com/store/apps/details?id=ar.gogota.app';
+
+  banner.classList.add('gota-app-banner-visible');
+
+  close.addEventListener('click', function () {
+    banner.classList.remove('gota-app-banner-visible');
+    try {
+      localStorage.setItem('gota_app_banner_dismissed', '1');
+    } catch (e) {}
+  });
+})();
+</script>
+
 </body>
 </html>
