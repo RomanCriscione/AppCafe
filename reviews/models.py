@@ -203,7 +203,7 @@ class Cafe(models.Model):
 
 
     # Relaciones
-    
+
     tags = models.ManyToManyField('Tag', related_name='cafes', blank=True)
 
     # Ubicación
@@ -311,7 +311,7 @@ class Review(models.Model):
 
     def __str__(self):
         return f'Reseña de {self.user} en {self.cafe}'
-    
+
 class CafeRelationship(models.Model):
 
     WANT_TO_GO = "want_to_go"
@@ -408,7 +408,7 @@ class CafeStat(models.Model):
 
     def __str__(self):
         return f'{self.cafe.name} - {self.date}: {self.views} vistas'
-    
+
     # --- Likes de reseñas ---
 class ReviewLike(models.Model):
     user = models.ForeignKey(
@@ -1317,6 +1317,18 @@ class UserCoupon(models.Model):
         null=True,
         blank=True,
         verbose_name="Usado",
+    )
+
+    reminder_sent_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Último recordatorio enviado",
+    )
+
+    reminder_claimed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Reserva de envío del recordatorio",
     )
 
     used_by = models.ForeignKey(

@@ -1,6 +1,7 @@
 # reviews/admin.py
 from django.contrib import admin, messages
 from django.utils import timezone
+from datetime import timedelta
 from django.db.models import Count, Q
 from django.conf import settings
 from django.core.mail import send_mail
@@ -517,24 +518,24 @@ class UserRewardUnlockAdmin(admin.ModelAdmin):
                 skipped_count += 1
                 continue
 
-            subject = "☕ ¡Tenés un beneficio esperando en Gota!"
+            subject = "☕ ¡Tenés un beneficio para elegir en Gota!"
 
             message = (
                 "¡Hola!\n\n"
-                "¿Sabías que tenés un beneficio esperando en Gota? ☕🎁\n\n"
-                "Ya desbloqueaste la posibilidad de elegir un beneficio "
-                "en una cafetería, pero todavía no lo aprovechaste.\n\n"
+                "Te escribo porque desbloqueaste un beneficio en Gota "
+                "y todavía no elegiste cuál aprovechar. ☕\n\n"
                 "Puede ser un descuento, un 2x1 o alguna sorpresa "
-                "para tu próximo café.\n\n"
-                "Para aprovecharlo:\n\n"
+                "para disfrutar en tu próxima cafetería.\n\n"
+                "Para elegirlo:\n\n"
                 "1. Entrá a Gota con tu cuenta.\n"
-                "2. Ingresá a la sección Mis Gotas.\n"
+                "2. Ingresá a Mis Gotas.\n"
                 "3. Elegí uno de los beneficios disponibles.\n"
-                "4. Obtené tu cupón para usarlo en la cafetería.\n\n"
+                "4. Obtené tu cupón y disfrutalo en la cafetería.\n\n"
                 "Entrá a Gota: https://gogota.ar/\n\n"
-                "¡Tu próximo café puede venir con algo extra!\n\n"
-                "Nos vemos en Gota ☕\n\n"
-                "El equipo de Gota"
+                "¡Ojalá descubras un nuevo lugar para tomar café!\n\n"
+                "Un abrazo,\n"
+                "Roma\n"
+                "Creador de Gota"
             )
 
             try:
@@ -583,6 +584,10 @@ class UserRewardUnlockAdmin(admin.ModelAdmin):
 
 @admin.register(UserCoupon)
 class UserCouponAdmin(admin.ModelAdmin):
+    actions = [
+        "send_coupon_expiration_reminders",
+        "release_abandoned_reminder_claims",
+    ]
     list_display = (
         "code",
         "user",
@@ -592,12 +597,16 @@ class UserCouponAdmin(admin.ModelAdmin):
         "obtained_at",
         "expires_at",
         "used_at",
+        "reminder_sent_at",
+        "reminder_claimed_at",
     )
 
     list_filter = (
         "status",
         "cafe",
         "obtained_at",
+        "reminder_sent_at",
+        "reminder_claimed_at",
     )
 
     search_fields = (
@@ -618,8 +627,181 @@ class UserCouponAdmin(admin.ModelAdmin):
         "qr_token",
         "obtained_at",
         "used_at",
+        "reminder_sent_at",
+        "reminder_claimed_at",
     )
 
+    @admin.action(
+        description="Liberar reservas antiguas de recordatorios"
+    )
+    def release_abandoned_reminder_claims(self, request, queryset):
+        cutoff = timezone.now() - timedelta(minutes=30)
+
+        eligible = queryset.filter(
+            reminder_claimed_at__isnull=False,
+            reminder_claimed_at__lte=cutoff,
+            reminder_sent_at__isnull=True,
+        )
+
+        released_count = eligible.update(
+            reminder_claimed_at=None
+        )
+
+        self.message_user(
+            request,
+            f"Se liberaron {released_count} reserva(s) de recordatorios.",
+            level=messages.SUCCESS,
+        )
+
+    @admin.action(description="Enviar recordatorio de cupón por vencer")
+    def send_coupon_expiration_reminders(self, request, queryset):
+        now = timezone.now()
+
+        coupons = (
+            queryset.filter(
+                status=UserCoupon.Status.AVAILABLE,
+                expires_at__gt=now,
+                used_at__isnull=True,
+                reminder_sent_at__isnull=True,
+                reminder_claimed_at__isnull=True,
+            )
+            .select_related("user", "cafe")
+            .order_by("id")
+        )
+
+        sent_count = 0
+        skipped_count = queryset.count() - coupons.count()
+
+        for coupon in coupons:
+            email = (coupon.user.email or "").strip()
+
+            if not email:
+                skipped_count += 1
+                continue
+
+            # Volver a comprobar el estado antes del envío.
+            coupon.refresh_from_db()
+
+            now = timezone.now()
+
+            if (
+                coupon.status != UserCoupon.Status.AVAILABLE
+                or coupon.expires_at <= now
+                or coupon.used_at is not None
+                or coupon.reminder_sent_at is not None
+            ):
+                skipped_count += 1
+                continue
+
+            claimed_at = timezone.now()
+
+            reserved = UserCoupon.objects.filter(
+                pk=coupon.pk,
+                status=UserCoupon.Status.AVAILABLE,
+                expires_at__gt=claimed_at,
+                used_at__isnull=True,
+                reminder_sent_at__isnull=True,
+                reminder_claimed_at__isnull=True,
+            ).update(
+                reminder_claimed_at=claimed_at
+            )
+
+            if reserved != 1:
+                skipped_count += 1
+                continue
+
+            expiration_day = timezone.localdate(coupon.expires_at)
+            today = timezone.localdate(now)
+            days = (expiration_day - today).days
+
+            if days == 0:
+                expiration_message = "¡Tu cupón vence hoy!"
+            elif days == 1:
+                expiration_message = "¡Te queda 1 día para canjear tu cupón!"
+            else:
+                expiration_message = (
+                    f"¡Te quedan {days} días para canjear tu cupón!"
+                )
+
+            expiration_date = timezone.localtime(
+                coupon.expires_at
+            ).strftime("%d/%m/%Y a las %H:%M")
+
+            subject = f"☕ {expiration_message} | Gota"
+
+            message = (
+                "¡Hola!\n\n"
+                "Te escribo porque tenés un cupón en Gota "
+                "que todavía podés aprovechar. ☕\n\n"
+                f"{expiration_message}\n\n"
+                f"📍 Cafetería: {coupon.cafe.name}\n"
+                f"🎁 Tu beneficio: {coupon.reward_text_snapshot}\n"
+                f"📅 Vence: {expiration_date}\n\n"
+                "Para usarlo, entrá a Gota con tu cuenta, "
+                "buscá tu cupón en Mis Gotas y presentalo "
+                "en la cafetería antes de que venza.\n\n"
+                "Entrá a Gota: https://gogota.ar/\n\n"
+                "¡Ojalá disfrutes ese café!\n\n"
+                "Un abrazo,\n"
+                "Roma\n"
+                "Creador de Gota"
+            )
+
+            try:
+                result = send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                    fail_silently=False,
+                )
+            except Exception:
+                UserCoupon.objects.filter(
+                    pk=coupon.pk,
+                    reminder_claimed_at=claimed_at,
+                    reminder_sent_at__isnull=True,
+                ).update(reminder_claimed_at=None)
+
+                skipped_count += 1
+                continue
+
+            if result != 1:
+                UserCoupon.objects.filter(
+                    pk=coupon.pk,
+                    reminder_claimed_at=claimed_at,
+                    reminder_sent_at__isnull=True,
+                ).update(reminder_claimed_at=None)
+
+                skipped_count += 1
+                continue
+
+            updated = UserCoupon.objects.filter(
+                pk=coupon.pk,
+                reminder_claimed_at=claimed_at,
+                reminder_sent_at__isnull=True,
+            ).update(
+                reminder_sent_at=timezone.now(),
+                reminder_claimed_at=None,
+            )
+
+            if updated == 1:
+                sent_count += 1
+            else:
+                skipped_count += 1
+
+        if sent_count:
+            self.message_user(
+                request,
+                f"Se enviaron {sent_count} recordatorio(s) de cupones.",
+                level=messages.SUCCESS,
+            )
+
+        if skipped_count:
+            self.message_user(
+                request,
+                f"Se omitieron {skipped_count} cupón(es).",
+                level=messages.WARNING,
+            )
 
 @admin.register(UserPointTransaction)
 class UserPointTransactionAdmin(admin.ModelAdmin):
